@@ -28,7 +28,7 @@
     box.setAttribute('role', 'group');
     box.setAttribute('aria-label', '外观切换');
     box.innerHTML =
-      '<span class="ts-label">🎨 外观</span>' +
+      '<span class="ts-label">外观</span>' +
       '<button type="button" data-v="light">浅色</button>' +
       '<button type="button" data-v="dark">深色</button>';
     document.body.appendChild(box);
