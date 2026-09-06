@@ -378,6 +378,49 @@ details.explanation-block summary { cursor: pointer; color: var(--green); font-w
 .answer { font-weight: 700; color: var(--green); margin: 8px 0 4px; }
 .expl-body { font-size: .93em; color: var(--ink); }
 
+/* --- 自测练习：可选答 ---
+   li 保留为视觉盒子，其内容整体挪进 button 以获得原生可聚焦 / 键盘可达。 */
+ol.options li.has-btn { padding: 0; }
+.opt-btn {
+  display: block; width: 100%; text-align: left;
+  background: none; border: 0; margin: 0;
+  padding: 6px 10px;
+  font-family: inherit; font-size: inherit; font-weight: inherit;
+  line-height: inherit; font-variant-numeric: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: background .14s ease;
+}
+ol.options li:hover .opt-btn { background: var(--accent-soft); }
+.opt-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+ol.options li.is-picked { border-color: var(--accent); }
+ol.options li.is-answer {
+  background: var(--green-l);
+  border-color: var(--green-line);
+}
+ol.options li.is-answer .opt-num { border-color: var(--green-line); color: var(--green); }
+ol.options li.is-wrong {
+  background: var(--red-l);
+  border-color: var(--red-line);
+}
+ol.options li.is-wrong .opt-num { border-color: var(--red-line); color: var(--red); }
+ol.options li.is-wrong .opt-btn {
+  text-decoration: line-through;
+  text-decoration-color: var(--red-line);
+}
+
+.q-result {
+  margin: 0 0 10px;
+  font-size: .9em; font-weight: 700;
+}
+.q-result.is-right { color: var(--green); }
+.q-result.is-wrong { color: var(--red); }
+.q-result:empty { display: none; }
+
 /* ====================== 学习路径（索引页） ======================
    去卡片：一条朱色顶线 + 透明的纸面区域。                      */
 .path-card {
@@ -575,4 +618,216 @@ footer a:hover { border-bottom-color: var(--accent); }
   .path-flow a, ul.unit-list li a { transition: none; }
   details.mod summary, details.mod summary::after { transition: none; }
   details.mod[open] > ul.unit-list { animation: none; }
+}
+
+/* ====================== 学习进度 ======================
+   勾选框做成「印章」：朱是这个视觉语言里印章 / 朱肉的颜色，
+   「済」是日文盖在办结文件上的完成印，语义正好对上。      */
+
+/* --- 单元页：勾选框 --- */
+.pg-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 12px 3px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: .82em;
+  line-height: 1.5;
+  white-space: nowrap;
+  user-select: none;
+  transition: border-color .15s ease, background .15s ease;
+}
+.pg-check:hover { border-color: var(--accent); }
+
+/* 真 checkbox 保留可聚焦与读屏语义，只做视觉隐藏 */
+.pg-input {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: 0; padding: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.pg-seal {
+  flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 1.4em; height: 1.4em;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  font-size: .8em; font-weight: 700;
+  color: transparent;
+  transition: background .16s ease, border-color .16s ease, color .16s ease;
+}
+.pg-input:checked + .pg-seal {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+.pg-input:focus-visible + .pg-seal {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.pg-text { color: var(--ink); font-weight: 600; }
+.pg-time {
+  color: var(--muted); font-size: .9em;
+  font-variant-numeric: tabular-nums;
+}
+.pg-time:empty { display: none; }
+
+/* 本页进度百分比（挂在「已看过」旁，由模块勾选数推导） */
+.pg-pct {
+  color: var(--muted); font-size: .92em;
+  font-variant-numeric: tabular-nums;
+}
+.pg-pct:empty { display: none; }
+.pg-check.is-done .pg-pct { color: var(--accent); font-weight: 600; }
+
+/* 知识点模块勾选框：放在模块内容末尾、右对齐。
+   放右下而非右上——模块内容长时，读完正好停在底部，不用再滚回顶部去勾。 */
+.pg-check.pg-mod {
+  display: flex;
+  width: -moz-fit-content;
+  width: fit-content;
+  margin: 12px 0 0 auto;
+  padding: 2px 10px 2px 7px;
+  font-size: .76em;
+  background: var(--surface-2);
+}
+.pg-check.pg-mod .pg-seal { width: 1.35em; height: 1.35em; }
+.pg-check.pg-mod.is-done {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: var(--accent-soft);
+}
+
+/* 兜底：页面没有导航条时挂一条到底部 */
+.pg-dock { display: flex; justify-content: center; margin-top: 24px; }
+
+/* --- 索引页：单元卡盖章 --- */
+ul.unit-list li a { position: relative; }
+ul.unit-list li a.is-done { padding-right: 36px; }
+ul.unit-list li a.is-done::after {
+  content: "済";
+  position: absolute;
+  top: 9px; right: 10px;
+  width: 18px; height: 18px;
+  line-height: 18px;
+  text-align: center;
+  font-size: .66rem; font-weight: 700;
+  color: var(--on-accent);
+  background: var(--accent);
+  border-radius: 3px;
+}
+
+/* --- 索引页：进度计数 --- */
+.mod-done {
+  margin-left: auto;
+  font-size: .78rem; font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.mod-done.is-full { color: var(--accent); }
+.level-block .stats span.lv-done { font-variant-numeric: tabular-nums; }
+/* 写全选择器：要压过 .level-block .stats span 的墨阶底色 */
+.level-block .stats span.lv-done.is-full {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* --- 索引页：总进度条 --- */
+.pg-overall {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 22px;
+  padding: 14px 18px;
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--accent);
+}
+.pg-track {
+  flex: 1;
+  min-width: 80px;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--border);
+  overflow: hidden;
+}
+.pg-fill {
+  display: block; height: 100%;
+  background: var(--accent);
+  border-radius: inherit;
+  transition: width .4s ease;
+}
+.pg-num {
+  margin: 0; font-size: .86rem; color: var(--muted);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.pg-num b { color: var(--ink); font-size: 1.1em; }
+.pg-manage {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: var(--radius-pill);
+  padding: 5px 14px;
+  font: inherit; font-size: .84rem; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: background .15s ease, border-color .15s ease;
+}
+.pg-manage:hover { background: var(--accent-soft); border-color: var(--accent); }
+
+/* --- 进度管理面板 --- */
+.pg-dialog {
+  font: inherit;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 26px;
+  max-width: 420px;
+  width: calc(100% - 32px);
+  box-shadow: var(--shadow-hover);
+}
+.pg-dialog::backdrop { background: rgba(16, 21, 26, .5); }
+.pg-dialog h3 { margin: 0 0 10px; font-size: 1.1rem; letter-spacing: -.01em; }
+.pg-dlg-num { margin: 0 0 12px; font-size: .95rem; }
+.pg-dlg-num b { color: var(--accent); font-size: 1.2em; }
+.pg-dlg-note {
+  margin: 0 0 16px; padding-left: 10px;
+  border-left: 2px solid var(--border);
+  font-size: .82rem; color: var(--muted);
+}
+.pg-dlg-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.pg-dlg-actions button,
+.pg-dlg-close {
+  font: inherit; font-size: .86rem; font-weight: 600;
+  padding: 7px 16px; cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink);
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.pg-dlg-actions button:hover,
+.pg-dlg-close:hover { background: var(--accent-soft); border-color: var(--accent); }
+.pg-dlg-actions .danger:hover {
+  background: var(--red-l); border-color: var(--red); color: var(--red);
+}
+.pg-dlg-msg { margin: 0 0 12px; min-height: 1.2em; font-size: .84rem; color: var(--green); }
+.pg-dlg-msg:empty { display: none; }
+.pg-dlg-close { width: 100%; }
+
+@media (max-width: 560px) {
+  .pg-overall { flex-wrap: wrap; gap: 10px; }
+  .pg-track { flex: 1 1 100%; order: 3; }
+  /* 窄屏标题放不下整行文字，只留印章 */
+  .pg-check.pg-mod .pg-text { display: none; }
+  .pg-check.pg-mod { padding: 2px 8px 2px 7px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-fill, .pg-seal, .pg-check, .pg-manage,
+  .pg-dlg-actions button, .pg-dlg-close { transition: none; }
 }
