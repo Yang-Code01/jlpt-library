@@ -56,6 +56,12 @@
   /* ===== 层级 ===== */
   --z-nav: 10;
   --z-switch: 100;
+
+  /* ===== 头部 hero 带（随外观变化） ===== */
+  --top-bg: #f2f4f5;
+  --top-ink: #17202a;
+  --top-muted: #5a6672;
+  --top-line: rgba(20, 35, 55, .12);
 }
 
 /* 深色模式：只覆盖令牌，组件规则不再重复一遍 */
@@ -88,6 +94,12 @@ html[data-theme="dark"] {
 
   --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 26px -18px rgba(0, 0, 0, .7);
   --shadow-hover: 0 2px 4px rgba(0, 0, 0, .5), 0 16px 32px -18px rgba(0, 0, 0, .8);
+
+  /* 头部 hero 带：深色模式 */
+  --top-bg: #181f26;
+  --top-ink: #e2e7ec;
+  --top-muted: #94a1ad;
+  --top-line: rgba(255, 255, 255, .16);
 }
 
 /* 护眼模式：柔绿纸面，降低蓝光大、对比柔和，长时间阅读更舒适 */
@@ -120,6 +132,12 @@ html[data-theme="eye"] {
 
   --shadow: 0 1px 2px rgba(40, 70, 50, .05), 0 8px 24px -16px rgba(40, 70, 50, .16);
   --shadow-hover: 0 2px 4px rgba(40, 70, 50, .06), 0 14px 30px -18px rgba(40, 70, 50, .24);
+
+  /* 头部 hero 带：护眼模式 */
+  --top-bg: #b8dabc;
+  --top-ink: #2c3a30;
+  --top-muted: #56685c;
+  --top-line: rgba(44, 58, 48, .18);
 }
 
 * { box-sizing: border-box; }
@@ -165,8 +183,8 @@ header.top {
   display: grid;
   gap: 24px;
   align-items: end;
-  background: #16202a;
-  color: #f3f7fb;
+  background: var(--top-bg);
+  color: var(--top-ink);
   margin: 0 -18px 22px;
   padding: 40px 40px 32px;
   border-radius: 0;
@@ -180,7 +198,7 @@ header.top:not(:has(.hero-stats)) { padding: 26px 40px 22px; }
   font-size: .78rem;
   letter-spacing: .22em;
   text-transform: uppercase;
-  color: #93a4b4;
+  color: var(--top-muted);
   font-weight: 600;
 }
 header.top h1 {
@@ -193,17 +211,17 @@ header.top h1 {
 header.top p {
   margin: 0;
   font-size: .96rem;
-  color: #b6c4d2;
+  color: var(--top-muted);
   max-width: 48ch;
 }
-/* hero 底色恒为深色，注音需提亮 */
-header.top ruby rt { color: #9fb0c0; }
+/* 注音颜色随头部文字色调整 */
+header.top ruby rt { color: var(--top-muted); }
 
 /* 指标带：hairline 分隔的三栏，替掉原来的三个玻璃盒 */
 .hero-stats {
   display: flex;
   align-self: end;
-  border-top: 1px solid rgba(255, 255, 255, .16);
+  border-top: 1px solid var(--top-line);
   padding-top: 14px;
 }
 .hero-stats .stat {
@@ -212,7 +230,7 @@ header.top ruby rt { color: #9fb0c0; }
   flex-direction: column;
   gap: 0;
   padding: 0 16px;
-  border-left: 1px solid rgba(255, 255, 255, .16);
+  border-left: 1px solid var(--top-line);
 }
 .hero-stats .stat:first-child { border-left: 0; padding-left: 0; }
 .hero-stats .stat b {
@@ -225,7 +243,7 @@ header.top ruby rt { color: #9fb0c0; }
 .hero-stats .stat span {
   font-size: .76rem;
   letter-spacing: .05em;
-  color: #93a4b4;
+  color: var(--top-muted);
 }
 
 /* ====================== 页间导航 / 页内目录 ====================== */

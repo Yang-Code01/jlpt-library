@@ -5,7 +5,7 @@
   var KEY = 'jp-lib-theme';
 
   function getSaved() {
-    try { return localStorage.getItem(KEY) || 'light'; } catch (e) { return 'light'; }
+    try { return localStorage.getItem(KEY) || 'eye'; } catch (e) { return 'eye'; }
   }
   function save(v) {
     try { localStorage.setItem(KEY, v); } catch (e) {}
