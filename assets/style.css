@@ -233,6 +233,36 @@ nav.toc a {
 }
 nav.toc a:hover { background: var(--accent-soft); }
 
+/* ====================== 导航图标 ======================
+   每页重复出现的站点 chrome 图标用 CSS mask 画，不往 HTML 里塞 SVG：
+   颜色跟随 currentColor，主题切换自动跟随；以后换图标只改这里。
+   选择器按 href / 类定位，故 168 个单元页无需任何 class 改动。
+
+   注意：内容语义符号保持原字符，不要当装饰替换——
+   ①②③⓪ 是日语高低アクセント记号、○× 是例句正误、
+   ↔ 是自他动词配对、←→ 是导航方向排版。               */
+nav.pagenav a[href$="index.html"]::before,
+a[href="#quiz"]::before,
+nav.pagenav span.finish::before {
+  content: "";
+  display: inline-block;
+  width: 1em; height: 1em;
+  vertical-align: -.13em;
+  margin-right: .4em;
+  background: currentColor;
+  -webkit-mask: var(--ic) no-repeat center / contain;
+          mask: var(--ic) no-repeat center / contain;
+}
+nav.pagenav a[href$="index.html"] {
+  --ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 10.4 12 3.2l9 7.2'/%3E%3Cpath d='M5.2 9.3V20h13.6V9.3'/%3E%3Cpath d='M9.6 20v-5.8h4.8V20'/%3E%3C/svg%3E");
+}
+a[href="#quiz"] {
+  --ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20h4L20 8a2.1 2.1 0 0 0-3-3L5 17v3z'/%3E%3Cpath d='M15.5 5.5l3 3'/%3E%3C/svg%3E");
+}
+nav.pagenav span.finish {
+  --ic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5.5 21V3.5'/%3E%3Cpath d='M5.5 4h12l-2.2 3.6 2.2 3.6h-12'/%3E%3C/svg%3E");
+}
+
 /* ====================== 内容卡片（单元页） ====================== */
 section.card {
   background: var(--surface);
