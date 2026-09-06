@@ -90,6 +90,38 @@ html[data-theme="dark"] {
   --shadow-hover: 0 2px 4px rgba(0, 0, 0, .5), 0 16px 32px -18px rgba(0, 0, 0, .8);
 }
 
+/* 护眼模式：柔绿纸面，降低蓝光大、对比柔和，长时间阅读更舒适 */
+html[data-theme="eye"] {
+  --paper: #c3e1c8;
+  --surface: #d2ecd6;
+  --surface-2: #b8dabc;
+  --ink: #2c3a30;
+  --muted: #56685c;
+  --border: #a3c7aa;
+  --border-soft: #b3d2b9;
+
+  --accent: #b85f4e;
+  --accent-ink: #8e463a;
+  --accent-soft: #e6efe6;
+  --accent-line: #bfd6c4;
+  --on-accent: #ffffff;
+
+  /* 墨阶在护眼底上沿亮度序，保证 N1 依然最突出 */
+  --sumi-5: #6f8a78;
+  --sumi-4: #577a66;
+  --sumi-3: #416b54;
+  --sumi-2: #315540;
+  --sumi-1: #234031;
+
+  --green: #3f7a5a;  --green-l: #dcecdf;  --green-line: #a8c9b6;
+  --amber: #8a6420;  --amber-l: #f3ecd9;  --amber-line: #dcc08a;
+  --red: #a34747;    --red-l: #f2e3e3;    --red-line: #d9a8a8;
+  --gray: #56685c;
+
+  --shadow: 0 1px 2px rgba(40, 70, 50, .05), 0 8px 24px -16px rgba(40, 70, 50, .16);
+  --shadow-hover: 0 2px 4px rgba(40, 70, 50, .06), 0 14px 30px -18px rgba(40, 70, 50, .24);
+}
+
 * { box-sizing: border-box; }
 
 body {

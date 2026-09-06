@@ -30,6 +30,7 @@
     box.innerHTML =
       '<span class="ts-label">外观</span>' +
       '<button type="button" data-v="light">浅色</button>' +
+      '<button type="button" data-v="eye">护眼</button>' +
       '<button type="button" data-v="dark">深色</button>';
     document.body.appendChild(box);
 
