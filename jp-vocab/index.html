@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课堂单词 · 单元目录</title>
+<style>
+  :root{
+    --bg:#f6f3ee; --ink:#2b2a26; --muted:#8a857a; --line:#e4ddd1;
+    --card:#fffdf9; --accent:#9b6b3f; --accent2:#c98a4b; --ok:#5a7d52;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Sans","Yu Gothic","Noto Sans CJK JP","Microsoft YaHei",system-ui,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:920px;margin:0 auto;padding:40px 20px 90px}
+  nav.pagenav{display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+    margin-bottom:26px;border-bottom:1px solid var(--line);padding-bottom:12px}
+  nav.pagenav a{text-decoration:none;font-size:.88em;padding:4px 14px;border-radius:999px;
+    border:1px solid var(--line);color:var(--accent);background:var(--card);
+    transition:background .15s ease}
+  nav.pagenav a:hover{background:#f0e7d6}
+  nav.pagenav .spacer{flex:1}
+  header h1{margin:0;font-size:2.6rem;font-weight:800;letter-spacing:.02em}
+  header .sub{color:var(--muted);font-size:1.05rem;margin-top:6px}
+  .toolbar{display:flex;gap:10px;align-items:center;margin:20px 0 6px;flex-wrap:wrap}
+  .toolbar .count{color:var(--muted);font-size:.9rem}
+  .toolbar button{font-size:.88rem;background:#f0e7d6;border:1px solid var(--line);
+     color:#5a4a2e;padding:7px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+  .toolbar button:hover{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:18px}
+  a.card{display:block;text-decoration:none;color:inherit;background:var(--card);
+    border:1px solid var(--line);border-radius:14px;padding:20px 20px 18px;
+    box-shadow:0 1px 2px rgba(0,0,0,.03);transition:transform .15s,border-color .15s,box-shadow .15s}
+  a.card:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 6px 18px rgba(120,90,50,.12)}
+  a.card .kana{color:var(--muted);font-size:1rem}
+  a.card .word{font-size:1.9rem;font-weight:800;margin-top:2px;letter-spacing:.02em}
+  a.card .meaning{margin-top:10px;color:#5a4a2e;font-weight:600;font-size:.98rem}
+  a.card .meta{margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .pill{display:inline-block;background:#ece3d2;color:#6b4a27;padding:2px 9px;border-radius:6px;font-size:.78rem}
+  .pill.ok{background:#e7efe2;color:#4a5d3a}
+  .muted{color:var(--muted);font-size:.82rem}
+  .note{color:var(--muted);font-size:.8rem;margin-top:18px;line-height:1.7}
+  @media(max-width:560px){header h1{font-size:2rem}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="pagenav">
+    <a href="../index.html">← 返回门户首页</a>
+    <span class="spacer"></span>
+  </nav>
+
+  <header>
+    <h1>课堂单词</h1>
+    <div class="sub">副词学习包 · 选择单元开始</div>
+  </header>
+
+  <div class="toolbar">
+    <button id="openAll">在新标签全部打开</button>
+    <span class="count" id="unitCount"></span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <p class="note">
+    点击任一卡片即可跳转到对应单元。新增单元时：在子目录建好 <code>index.html</code> 与 <code>data.json</code>，
+    再在本页 <code>UNITS</code> 数组里加一行 <code>{ dir, title, reading, meaning }</code> 即可。
+  </p>
+</div>
+
+<script>
+  // 单元列表。新增单元时在此添加一行；title/reading/meaning 可从该单元的 data.json 复制。
+  // （本地用 file:// 打开时按此内联信息显示；在线时还会尝试 fetch 各 data.json 自动补全词数并核对标题。）
+  const UNITS = [
+    { dir:"teido",                    title:"程度",            reading:"ていど",                meaning:"程度、地步" },
+    { dir:"jikan-to-hindo-no-fukushi", title:"時間・頻度の副詞", reading:"じかん・ひんどのふくし", meaning:"表时间与频率的副词" },
+    { dir:"hitei",                    title:"否定",            reading:"ひてい",                meaning:"否定（与否定表达搭配的副词）" },
+    { dir:"koou",                     title:"呼応",            reading:"こおう",                meaning:"副詞の呼応（与推量・様子・仮定・疑問等固定句末表达呼应的副词）" },
+  ];
+
+  const grid = document.getElementById("grid");
+  const unitCount = document.getElementById("unitCount");
+  unitCount.textContent = `共 ${UNITS.length} 个单元`;
+
+  // 先用内联信息渲染（保证 file:// 下也可用）
+  const cards = UNITS.map(u => {
+    const a = document.createElement("a");
+    a.className = "card";
+    a.href = u.dir + "/index.html";
+    a.innerHTML =
+      `<div class="kana">${u.reading}</div>
+       <div class="word">${u.title}</div>
+       <div class="meaning">${u.meaning}</div>
+       <div class="meta"><span class="pill muted" data-count>— 词</span></div>`;
+    grid.appendChild(a);
+    return a;
+  });
+
+  // 可选增强：尝试读取各单元 data.json，补全词数并核对标题（在线环境有效；本地失败则静默保留内联值）
+  UNITS.forEach((u, i) => {
+    fetch(u.dir + "/data.json")
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if(!d) return;
+        if(d.title) cards[i].querySelector(".word").textContent = d.title;
+        if(d.reading) cards[i].querySelector(".kana").textContent = d.reading;
+        if(d.meaning_cn) cards[i].querySelector(".meaning").textContent = d.meaning_cn;
+        const n = (d.categories||[]).reduce((s,c)=>s + (c.cards?c.cards.length:0), 0);
+        const p = cards[i].querySelector("[data-count]");
+        if(n){ p.textContent = n + " 词"; p.classList.add("ok"); }
+      }).catch(()=>{});
+  });
+
+  // 全部打开（best-effort；浏览器可能拦截多弹窗，若被拦截请逐个点击）
+  document.getElementById("openAll").addEventListener("click", () => {
+    UNITS.forEach(u => window.open(u.dir + "/index.html", "_blank"));
+  });
+</script>
+</body>
+</html>

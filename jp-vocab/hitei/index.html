@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课堂单词</title>
+<link rel="stylesheet" href="../vocab.css">
+</head>
+<body>
+<div class="wrap">
+<nav class="pagenav">
+  <a href="../index.html">← 返回课堂单词</a>
+  <span class="spacer"></span>
+  <a href="../../index.html">门户首页</a>
+</nav>
+
+<header>
+  <h1 id="title">—</h1>
+  <div class="sub" id="sub"></div>
+  <span class="meaning" id="hmeaning"></span>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="browse" class="active">浏览</button>
+  <button data-tab="card">翻转卡</button>
+  <button data-tab="quiz">测验</button>
+  <button data-tab="srs">复习<span id="duepill" class="pill" style="display:none">0</span></button>
+</nav>
+
+<section id="browse"></section>
+<section id="card" style="display:none"></section>
+<section id="quiz" style="display:none"></section>
+<section id="srs" style="display:none"></section>
+</div>
+
+<!-- 数据内联：file:// 下不可 fetch，故以本块为准；与同目录 data.json 内容一致 -->
+<script type="application/json" id="vocab-data">
+{
+  "title": "否定",
+  "reading": "ひてい",
+  "meaning_cn": "否定（与否定表达搭配的副词）",
+  "categories": [
+    {
+      "name": "否定　〜ない／ないだろう",
+      "reading": "ひてい",
+      "cards": [
+        { "id": "1-1", "word": "一切〜ない", "kana": "いっさい", "pos": "副詞", "meaning_cn": "（下接否定）一切、完全（不）", "example_jp": "病気になってから、彼は一切たばこを吸わなくなった。", "example_jp_ruby": "<ruby>病気<rt>びょうき</rt></ruby>になってから、<ruby>彼<rt>かれ</rt></ruby>は<ruby>一切<rt>いっさい</rt></ruby>たばこを<ruby>吸<rt>す</rt></ruby>わなくなった。", "example_cn": "生病以后，他完全不抽烟了。" },
+        { "id": "1-2", "word": "さっぱり〜ない", "kana": "さっぱり", "pos": "副詞", "meaning_cn": "（下接否定）完全（不）、根本（不）", "example_jp": "お酒を飲みすぎて、昨夜のことはさっぱり覚えていない。", "example_jp_ruby": "<ruby>お酒<rt>おさけ</rt></ruby>を<ruby>飲<rt>の</rt></ruby>みすぎて、<ruby>昨夜<rt>ゆうべ</rt></ruby>のことはさっぱり<ruby>覚<rt>おぼ</rt></ruby>えていない。", "example_cn": "酒喝多了，昨晚的事一点儿都记不得了。" },
+        { "id": "1-3", "word": "少しも／ちょっと〜ない", "kana": "すこしも", "pos": "副詞", "meaning_cn": "（下接否定）一点儿也（不）、毫（不）", "example_jp": "靴の汚れがとてもひどくて、洗ってもちょっときれいにならなかった。", "example_jp_ruby": "<ruby>靴<rt>くつ</rt></ruby>の<ruby>汚<rt>よご</rt></ruby>れがとてもひどくて、<ruby>洗<rt>あら</rt></ruby>ってもちょっときれいにならなかった。", "example_cn": "鞋上的污渍实在太厉害，怎么洗也洗不干净。" },
+        { "id": "1-4", "word": "そう〜ない", "kana": "そう", "pos": "副詞", "meaning_cn": "（下接否定）那么（不）、那样（不）", "example_jp": "まだ、そう疲れていないので、もう少し後で休憩をしましょう。", "example_jp_ruby": "まだ、そう<ruby>疲<rt>つか</rt></ruby>れていないので、もう少し<ruby>後<rt>あと</rt></ruby>で<ruby>休憩<rt>きゅうけい</rt></ruby>をしましょう。", "example_cn": "还没那么累，过会儿再休息吧。" },
+        { "id": "1-5", "word": "大して〜ない", "kana": "たいして", "pos": "副詞", "meaning_cn": "（下接否定）并不怎么、没那么", "example_jp": "人気の映画を見に行ったが、大して面白くなかった。", "example_jp_ruby": "<ruby>人気<rt>にんき</rt></ruby>の<ruby>映画<rt>えいが</rt></ruby>を<ruby>見<rt>み</rt></ruby>に行ったが、<ruby>大<rt>たい</rt></ruby>して<ruby>面白<rt>おもしろ</rt></ruby>くなかった。", "example_cn": "去看了那部热门电影，但没那么有趣。" },
+        { "id": "1-6", "word": "別に〜ない", "kana": "べつに", "pos": "副詞", "meaning_cn": "（下接否定）并不特别、没什么", "example_jp": "その問題は、普通の問題で、別に難しい問題じゃないよ。", "example_jp_ruby": "その<ruby>問題<rt>もんだい</rt></ruby>は、<ruby>普通<rt>ふつう</rt></ruby>の<ruby>問題<rt>もんだい</rt></ruby>で、<ruby>別<rt>べつ</rt></ruby>に<ruby>難<rt>むずか</rt></ruby>しい<ruby>問題<rt>もんだい</rt></ruby>じゃないよ。", "example_cn": "那道题是普通题，并不算什么难题哦。" },
+        { "id": "1-7", "word": "とても〜ない／できない／だめだ／無理だ", "kana": "とても", "pos": "副詞", "meaning_cn": "（下接否定/できない）怎么也（不）、根本无法", "example_jp": "こんなに難しい問題は、私にはとても解けません。", "example_jp_ruby": "こんなに<ruby>難<rt>むずか</rt></ruby>しい<ruby>問題<rt>もんだい</rt></ruby>は、<ruby>私<rt>わたし</rt></ruby>にはとても<ruby>解<rt>と</rt></ruby>けません。", "example_cn": "这么难的题，我怎么也解不出来。" },
+        { "id": "1-8", "word": "なかなか〜ない／できない", "kana": "なかなか", "pos": "副詞", "meaning_cn": "（下接否定）怎么也（不）、迟迟（不）", "example_jp": "先週引いた風邪が、薬を飲んでいるのに、なかなか治らない。", "example_jp_ruby": "<ruby>先週<rt>せんしゅう</rt></ruby><ruby>引<rt>ひ</rt></ruby>いた<ruby>風邪<rt>かぜ</rt></ruby>が、<ruby>薬<rt>くすり</rt></ruby>を<ruby>飲<rt>の</rt></ruby>んでいるのに、なかなか<ruby>治<rt>なお</rt></ruby>らない。", "example_cn": "上周得的感冒，虽然在吃药，却迟迟不好。" },
+        { "id": "1-9", "word": "必ずしも〜ない", "kana": "かならずしも", "pos": "副詞", "meaning_cn": "（下接否定）未必、不一定", "example_jp": "先生の言うことが必ずしも正しいわけではない。", "example_jp_ruby": "<ruby>先生<rt>せんせい</rt></ruby>の<ruby>言<rt>い</rt></ruby>うことが<ruby>必<rt>かなら</rt></ruby>ずしも<ruby>正<rt>ただ</rt></ruby>しいわけではない。", "example_cn": "老师说的话未必都正确。" },
+        { "id": "1-10", "word": "まさか〜ないだろう／まい／思わなかった", "kana": "まさか", "pos": "副詞", "meaning_cn": "（下接否定/まい）难道、怎会", "example_jp": "まさか同じクラスの山田さんと川口さんが結婚するとは思わなかった。", "example_jp_ruby": "まさか<ruby>同じ<rt>おなじ</rt></ruby>クラスの<ruby>山田<rt>やまだ</rt></ruby>さんと<ruby>川口<rt>かわぐち</rt></ruby>さんが<ruby>結婚<rt>けっこん</rt></ruby>するとは<ruby>思<rt>おも</rt></ruby>わなかった。", "example_cn": "没想到同班的山田和川口竟然要结婚。" },
+        { "id": "1-11", "word": "めったに〜ない", "kana": "めったに", "pos": "副詞", "meaning_cn": "（下接否定）几乎不、很少", "example_jp": "アルバイトばかりしているらしく、彼はめったに学校に来なかった。", "example_jp_ruby": "アルバイトばかりしているらしく、<ruby>彼<rt>かれ</rt></ruby>はめったに<ruby>学校<rt>がっこう</rt></ruby>に<ruby>来<rt>こ</rt></ruby>なかった。", "example_cn": "他好像一直在打工，很少来学校。" }
+      ]
+    }
+  ]
+}
+</script>
+<script src="../vocab.js"></script>
+</body>
+</html>

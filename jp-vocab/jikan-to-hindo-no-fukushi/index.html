@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课堂单词</title>
+<link rel="stylesheet" href="../vocab.css">
+</head>
+<body>
+<div class="wrap">
+<nav class="pagenav">
+  <a href="../index.html">← 返回课堂单词</a>
+  <span class="spacer"></span>
+  <a href="../../index.html">门户首页</a>
+</nav>
+
+<header>
+  <h1 id="title">—</h1>
+  <div class="sub" id="sub"></div>
+  <span class="meaning" id="hmeaning"></span>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="browse" class="active">浏览</button>
+  <button data-tab="card">翻转卡</button>
+  <button data-tab="quiz">测验</button>
+  <button data-tab="srs">复习<span id="duepill" class="pill" style="display:none">0</span></button>
+</nav>
+
+<section id="browse"></section>
+<section id="card" style="display:none"></section>
+<section id="quiz" style="display:none"></section>
+<section id="srs" style="display:none"></section>
+</div>
+
+<!-- 数据内联：file:// 下不可 fetch，故以本块为准；与同目录 data.json 内容一致 -->
+<script type="application/json" id="vocab-data">
+{
+  "title": "時間・頻度の副詞",
+  "reading": "じかん・ひんどのふくし",
+  "meaning_cn": "表时间与频率的副词",
+  "categories": [
+    {
+      "name": "時間（瞬時）",
+      "reading": "じかん・しゅんじ",
+      "cards": [
+        { "id": "1-1", "word": "直ちに", "kana": "ただちに", "pos": "副詞", "meaning_cn": "立刻、马上", "example_jp": "建物が倒れる危険がありますので、直ちにこの建物より出てください。", "example_jp_ruby": "<ruby>建物<rt>たてもの</rt></ruby>が<ruby>倒<rt>たお</rt></ruby>れる<ruby>危険<rt>きけん</rt></ruby>がありますので、<ruby>直<rt>ただ</rt></ruby>ちにこの<ruby>建物<rt>たてもの</rt></ruby>より<ruby>出<rt>で</rt></ruby>てください。", "example_cn": "建筑有倒塌的危险，请立刻离开这栋建筑。" },
+        { "id": "1-2", "word": "たちまち", "kana": "たちまち", "pos": "副詞", "meaning_cn": "立即、转眼间", "example_jp": "テストが渡されると、彼はたちまち問題を解いてしまった。", "example_jp_ruby": "テストが<ruby>渡<rt>わた</rt></ruby>されると、<ruby>彼<rt>かれ</rt></ruby>はたちまち<ruby>問題<rt>もんだい</rt></ruby>を<ruby>解<rt>と</rt></ruby>いてしまった。", "example_cn": "试卷一发下来，他转眼间就把题做完了。" }
+      ]
+    },
+    {
+      "name": "時間（過去）",
+      "reading": "じかん・かこ",
+      "cards": [
+        { "id": "2-1", "word": "あらかじめ", "kana": "あらかじめ", "pos": "副詞", "meaning_cn": "事先、提前", "example_jp": "うちに来るときは、あらかじめ電話をしてもらえますか。", "example_jp_ruby": "うちに<ruby>来<rt>く</rt></ruby>るときは、あらかじめ<ruby>電話<rt>でんわ</rt></ruby>をしてもらえますか。", "example_cn": "来家里时，能麻烦你提前打个电话吗？" },
+        { "id": "2-2", "word": "いつの間に（か）", "kana": "いつのまにか", "pos": "副詞", "meaning_cn": "不知不觉", "example_jp": "さっきここにあったケーキがいつの間にかなくなっていた。", "example_jp_ruby": "さっきここにあったケーキが<ruby>いつの間<rt>いつのま</rt></ruby>にかなくなっていた。", "example_cn": "刚才还在这里的蛋糕，不知什么时候不见了。" },
+        { "id": "2-3", "word": "もはや", "kana": "もはや", "pos": "副詞", "meaning_cn": "已经、为时已晚", "example_jp": "借金ばかりで、うちの会社ももはや終わりだ。", "example_jp_ruby": "<ruby>借金<rt>しゃっきん</rt></ruby>ばかりで、うちの<ruby>会社<rt>かいしゃ</rt></ruby>ももはや<ruby>終<rt>お</rt></ruby>わりだ。", "example_cn": "净是欠债，我们公司也快完了。" },
+        { "id": "2-4", "word": "従来", "kana": "じゅうらい", "pos": "副詞", "meaning_cn": "以往、从前", "example_jp": "この病気は、従来は手術をしていたが、今は薬で治る。", "example_jp_ruby": "この<ruby>病気<rt>びょうき</rt></ruby>は、<ruby>従来<rt>じゅうらい</rt></ruby>は<ruby>手術<rt>しゅじゅつ</rt></ruby>をしていたが、<ruby>今<rt>いま</rt></ruby>は<ruby>薬<rt>くすり</rt></ruby>で<ruby>治<rt>なお</rt></ruby>る。", "example_cn": "这种病以往要做手术，现在吃药就能治好。" }
+      ]
+    },
+    {
+      "name": "時間（未来）",
+      "reading": "じかん・みらい",
+      "cards": [
+        { "id": "3-1", "word": "いずれ", "kana": "いずれ", "pos": "副詞", "meaning_cn": "迟早、不久", "example_jp": "あんなに仲がいいのだから、二人はいずれ結婚するに違いない。", "example_jp_ruby": "あんなに<ruby>仲<rt>なか</rt></ruby>がいいのだから、<ruby>二人<rt>ふたり</rt></ruby>はいずれ<ruby>結婚<rt>けっこん</rt></ruby>するに<ruby>違<rt>ちが</rt></ruby>いない。", "example_cn": "他们关系那么好，迟早一定会结婚的。" },
+        { "id": "3-2", "word": "今に", "kana": "いまに", "pos": "副詞", "meaning_cn": "马上、不久", "example_jp": "そんな運転の仕方では、今に事故を起こすよ。", "example_jp_ruby": "そんな<ruby>運転<rt>うんてん</rt></ruby>の<ruby>仕方<rt>しかた</rt></ruby>では、<ruby>今<rt>いま</rt></ruby>に<ruby>事故<rt>じこ</rt></ruby>を<ruby>起<rt>お</rt></ruby>こすよ。", "example_cn": "照那样开车，迟早会出事故的。" },
+        { "id": "3-3", "word": "そのうち", "kana": "そのうち", "pos": "副詞", "meaning_cn": "不久、过些时候", "example_jp": "そう怒っていても、そのうち忘れるでしょう。", "example_jp_ruby": "そう<ruby>怒<rt>おこ</rt></ruby>っていても、そのうち<ruby>忘<rt>わす</rt></ruby>れるでしょう。", "example_cn": "就算现在在生气，过阵子也会忘的吧。" },
+        { "id": "3-4", "word": "近々・近く", "kana": "ちかぢか", "pos": "副詞", "meaning_cn": "不久、最近", "example_jp": "日本では近々選挙が行われるそうだ。", "example_jp_ruby": "<ruby>日本<rt>にほん</rt></ruby>では<ruby>近々<rt>ちかぢか</rt></ruby><ruby>選挙<rt>せんきょ</rt></ruby>が<ruby>行<rt>おこな</rt></ruby>われるそうだ。", "example_cn": "听说日本最近要举行选举。" }
+      ]
+    },
+    {
+      "name": "時間（一時）",
+      "reading": "じかん・いちじ",
+      "cards": [
+        { "id": "4-1", "word": "ひとまず", "kana": "ひとまず", "pos": "副詞", "meaning_cn": "暂且、姑且", "example_jp": "血が止まらなかったので、ひとまず近所の医者に行くことにした。", "example_jp_ruby": "<ruby>血<rt>ち</rt></ruby>が<ruby>止<rt>と</rt></ruby>まらなかったので、ひとまず<ruby>近所<rt>きんじょ</rt></ruby>の<ruby>医者<rt>いしゃ</rt></ruby>に<ruby>行<rt>い</rt></ruby>くことにした。", "example_cn": "因为血止不住，所以先去了附近的医生那里。" },
+        { "id": "4-2", "word": "いったん", "kana": "いったん", "pos": "副詞", "meaning_cn": "一旦、暂且", "example_jp": "忘れ物をしたので、いったんうちに戻った。", "example_jp_ruby": "<ruby>忘<rt>わす</rt></ruby>れ<ruby>物<rt>もの</rt></ruby>をしたので、いったんうちに<ruby>戻<rt>もど</rt></ruby>った。", "example_cn": "因为忘了带东西，所以先回了一趟家。" }
+      ]
+    },
+    {
+      "name": "時間（その他）",
+      "reading": "じかん・そのた",
+      "cards": [
+        { "id": "5-1", "word": "依然（として）", "kana": "いぜんとして", "pos": "副詞", "meaning_cn": "依然、仍然", "example_jp": "アジアの国々は好景気だが、日本では依然として不景気が続いている。", "example_jp_ruby": "アジアの<ruby>国々<rt>くにぐに</rt></ruby>は<ruby>好景気<rt>こうけいき</rt></ruby>だが、<ruby>日本<rt>にほん</rt></ruby>では<ruby>依然<rt>いぜん</rt></ruby>として<ruby>不景気<rt>ふけいき</rt></ruby>が<ruby>続<rt>つづ</rt></ruby>いている。", "example_cn": "亚洲各国经济景气，但日本依然不景气。" },
+        { "id": "5-2", "word": "相変わらず", "kana": "あいかわらず", "pos": "副詞", "meaning_cn": "照旧、一如既往", "example_jp": "彼は相変わらずカラオケによく行っている。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>相<rt>あい</rt></ruby><ruby>変<rt>か</rt></ruby>わらずカラオケによく<ruby>行<rt>い</rt></ruby>っている。", "example_cn": "他照旧常去唱卡拉OK。" },
+        { "id": "5-3", "word": "絶えず", "kana": "たえず", "pos": "副詞", "meaning_cn": "不断地", "example_jp": "彼女は周りの人に絶えず愚痴を言っている。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>周<rt>まわ</rt></ruby>りの<ruby>人<rt>ひと</rt></ruby>に<ruby>絶<rt>た</rt></ruby>えず<ruby>愚痴<rt>ぐち</rt></ruby>を<ruby>言<rt>い</rt></ruby>っている。", "example_cn": "她不停地向周围的人抱怨。" },
+        { "id": "5-4", "word": "終始", "kana": "しゅうし", "pos": "副詞", "meaning_cn": "始终、自始至终", "example_jp": "結婚式の間、彼は終始笑顔だった。", "example_jp_ruby": "<ruby>結婚式<rt>けっこんしき</rt></ruby>の<ruby>間<rt>あいだ</rt></ruby>、<ruby>彼<rt>かれ</rt></ruby>は<ruby>終始<rt>しゅうし</rt></ruby><ruby>笑顔<rt>えがお</rt></ruby>だった。", "example_cn": "婚礼期间，他始终面带笑容。" },
+        { "id": "5-5", "word": "当分", "kana": "とうぶん", "pos": "副詞", "meaning_cn": "暂时、近期内", "example_jp": "猛暑はまだ当分続くという。", "example_jp_ruby": "<ruby>猛暑<rt>もうしょ</rt></ruby>はまだ<ruby>当分<rt>とうぶん</rt></ruby><ruby>続<rt>つづ</rt></ruby>くという。", "example_cn": "据说酷暑还会持续一段时间。" },
+        { "id": "5-6", "word": "長年", "kana": "ながねん", "pos": "副詞", "meaning_cn": "多年、长年", "example_jp": "彼女は長年この近所に住んでいる。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>長年<rt>ながねん</rt></ruby>この<ruby>近所<rt>きんじょ</rt></ruby>に<ruby>住<rt>す</rt></ruby>んでいる。", "example_cn": "她在这一带住了多年。" }
+      ]
+    },
+    {
+      "name": "頻度",
+      "reading": "ひんど",
+      "cards": [
+        { "id": "6-1", "word": "時折", "kana": "ときおり", "pos": "副詞", "meaning_cn": "有时、偶尔", "example_jp": "風でドアが時折がたがたと鳴った。", "example_jp_ruby": "<ruby>風<rt>かぜ</rt></ruby>でドアが<ruby>時折<rt>ときおり</rt></ruby>がたがたと<ruby>鳴<rt>な</rt></ruby>った。", "example_cn": "风把门吹得时不时嘎嘎作响。" },
+        { "id": "6-2", "word": "まれに", "kana": "まれに", "pos": "副詞", "meaning_cn": "稀少地、难得", "example_jp": "その植物はまれに花を咲かせることがある。", "example_jp_ruby": "その<ruby>植物<rt>しょくぶつ</rt></ruby>はまれに<ruby>花<rt>はな</rt></ruby>を<ruby>咲<rt>さ</rt></ruby>かせることがある。", "example_cn": "那种植物偶尔也会开花。" },
+        { "id": "6-3", "word": "たびたび", "kana": "たびたび", "pos": "副詞", "meaning_cn": "屡次、多次", "example_jp": "授業中、先生にたびたび注意された。", "example_jp_ruby": "<ruby>授業<rt>じゅぎょう</rt></ruby>中、<ruby>先生<rt>せんせい</rt></ruby>にたびたび<ruby>注意<rt>ちゅうい</rt></ruby>された。", "example_cn": "上课时，多次被老师提醒。" },
+        { "id": "6-4", "word": "しょっちゅう", "kana": "しょっちゅう", "pos": "副詞", "meaning_cn": "经常、动不动", "example_jp": "うちの子はしょっちゅうけがをしている。", "example_jp_ruby": "うちの<ruby>子<rt>こ</rt></ruby>はしょっちゅうけがをしている。", "example_cn": "我家孩子动不动就受伤。" },
+        { "id": "6-5", "word": "しきりに", "kana": "しきりに", "pos": "副詞", "meaning_cn": "频繁地、不断地", "example_jp": "店のものを買ってほしいらしく、店員がしきりに私に話しかけてきた。", "example_jp_ruby": "<ruby>店<rt>みせ</rt></ruby>のものを<ruby>買<rt>か</rt></ruby>ってほしいらしく、<ruby>店員<rt>てんいん</rt></ruby>がしきりに<ruby>私<rt>わたし</rt></ruby>に<ruby>話<rt>はな</rt></ruby>しかけてきた。", "example_cn": "店员好像想让我买店里的东西，不停地跟我搭话。" }
+      ]
+    }
+  ]
+}
+</script>
+<script src="../vocab.js"></script>
+</body>
+</html>
