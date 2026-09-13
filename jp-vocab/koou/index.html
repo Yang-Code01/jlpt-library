@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课堂单词</title>
+<link rel="stylesheet" href="../vocab.css">
+</head>
+<body>
+<div class="wrap">
+<nav class="pagenav">
+  <a href="../index.html">← 返回课堂单词</a>
+  <span class="spacer"></span>
+  <a href="../../index.html">门户首页</a>
+</nav>
+
+<header>
+  <h1 id="title">—</h1>
+  <div class="sub" id="sub"></div>
+  <span class="meaning" id="hmeaning"></span>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="browse" class="active">浏览</button>
+  <button data-tab="card">翻转卡</button>
+  <button data-tab="quiz">测验</button>
+  <button data-tab="srs">复习<span id="duepill" class="pill" style="display:none">0</span></button>
+</nav>
+
+<section id="browse"></section>
+<section id="card" style="display:none"></section>
+<section id="quiz" style="display:none"></section>
+<section id="srs" style="display:none"></section>
+</div>
+
+<!-- 数据内联：file:// 下不可 fetch，故以本块为准；与同目录 data.json 内容一致 -->
+<script type="application/json" id="vocab-data">
+{
+  "title": "呼応",
+  "reading": "こおう",
+  "meaning_cn": "副詞の呼応（与推量・様子・仮定・疑問等固定句末表达呼应的副词）",
+  "categories": [
+    {
+      "name": "推量　〜かもしれない／だろう／らしい",
+      "reading": "すいりょう",
+      "cards": [
+        { "id": "1-1", "word": "ひょっとすると／ひょっとしたら〜かもしれない", "kana": "ひょっとすると", "pos": "副詞", "meaning_cn": "（与〜かもしれない等呼应）也许、说不定", "example_jp": "頑張っていたから、ひょっとすると彼は試験に受かるかもしれないよ。", "example_jp_ruby": "<ruby>頑張<rt>がんば</rt></ruby>っていたから、ひょっとすると<ruby>彼<rt>かれ</rt></ruby>は<ruby>試験<rt>しけん</rt></ruby>に<ruby>受<rt>う</rt></ruby>かるかもしれないよ。", "example_cn": "他一直很努力，说不定能考上呢。" },
+        { "id": "1-2", "word": "もしかすると／もしかしたら〜かもしれない", "kana": "もしかすると", "pos": "副詞", "meaning_cn": "（与〜かもしれない等呼应）也许、万一", "example_jp": "元気だとは言っているけど、もしかしたら彼は病気かもしれない。", "example_jp_ruby": "<ruby>元気<rt>げんき</rt></ruby>だとは<ruby>言<rt>い</rt></ruby>っているけど、もしかしたら<ruby>彼<rt>かれ</rt></ruby>は<ruby>病気<rt>びょうき</rt></ruby>かもしれない。", "example_cn": "虽说精神还行，但说不定他生病了。" },
+        { "id": "1-3", "word": "恐らく〜だろう／と思う／に違いない", "kana": "おそらく", "pos": "副詞", "meaning_cn": "（与〜だろう/と思う/に違いない等呼应）恐怕、大概", "example_jp": "この寒さと空の様子からすると、恐らく夕方から雪になるだろう。", "example_jp_ruby": "この<ruby>寒<rt>さむ</rt></ruby>さと<ruby>空<rt>そら</rt></ruby>の<ruby>様子<rt>ようす</rt></ruby>からすると、<ruby>恐<rt>おそ</rt></ruby>らく<ruby>夕方<rt>ゆうがた</rt></ruby>から<ruby>雪<rt>ゆき</rt></ruby>になるだろう。", "example_cn": "从这寒冷和天空的样子看，恐怕傍晚起就要下雪了。" },
+        { "id": "1-4", "word": "どうも〜らしい／ようだ", "kana": "どうも", "pos": "副詞", "meaning_cn": "（与〜らしい/ようだ等呼应）总觉得、好像", "example_jp": "彼の様子が変だ。どうも私に何か隠しているらしい。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>の<ruby>様子<rt>ようす</rt></ruby>が<ruby>変<rt>へん</rt></ruby>だ。どうも<ruby>私<rt>わたし</rt></ruby>に<ruby>何<rt>なに</rt></ruby>か<ruby>隠<rt>かく</rt></ruby>しているらしい。", "example_cn": "他样子怪怪的。总觉得他在瞒着我什么。" }
+      ]
+    },
+    {
+      "name": "様子　〜そうだ／ようだ",
+      "reading": "ようす",
+      "cards": [
+        { "id": "2-1", "word": "あたかも〜ようだ／ごとし", "kana": "あたかも", "pos": "副詞", "meaning_cn": "（与〜かのように呼应）宛如、恰似", "example_jp": "田中さんは、あたかも自分が見てきたかのように、その事故の話をした。", "example_jp_ruby": "<ruby>田中<rt>たなか</rt></ruby>さんは、あたかも<ruby>自分<rt>じぶん</rt></ruby>が<ruby>見<rt>み</rt></ruby>てきたかのように、その<ruby>事故<rt>じこ</rt></ruby>の<ruby>話<rt>はなし</rt></ruby>をした。", "example_cn": "田中宛如自己亲眼见过一样，讲了那起事故。" },
+        { "id": "2-2", "word": "ちょうど〜ようだ／みたいだ", "kana": "ちょうど", "pos": "副詞", "meaning_cn": "（与〜ようだ/みたいだ呼应）简直、正好像", "example_jp": "そのシャツの模様は、ちょうど着物の模様のような感じで、とてもきれいだった。", "example_jp_ruby": "そのシャツの<ruby>模様<rt>もよう</rt></ruby>は、ちょうど<ruby>着物<rt>きもの</rt></ruby>の<ruby>模様<rt>もよう</rt></ruby>のような<ruby>感<rt>かん</rt></ruby>じで、とてもきれいだった。", "example_cn": "那件衬衫的花纹，简直像和服的花纹一样，非常漂亮。" },
+        { "id": "2-3", "word": "まるで〜ようだ／みたいだ", "kana": "まるで", "pos": "副詞", "meaning_cn": "（与〜ようだ/みたいだ呼应，多接比喻）简直、宛如", "example_jp": "もう十月なのに、まるで真夏のように暑い。", "example_jp_ruby": "もう<ruby>十月<rt>じゅうがつ</rt></ruby>なのに、まるで<ruby>真夏<rt>まなつ</rt></ruby>のように<ruby>暑<rt>あつ</rt></ruby>い。", "example_cn": "都十月了，却热得像盛夏一样。" }
+      ]
+    },
+    {
+      "name": "仮定　〜ば／たら／なら／ても〜",
+      "reading": "かてい",
+      "cards": [
+        { "id": "3-1", "word": "いくら〜ても", "kana": "いくら", "pos": "副詞", "meaning_cn": "（与〜ても呼应）无论怎么…也、即使再…也", "example_jp": "いくら勉強しても、日本語が上手にならないんですが、どうすればいいでしょう。", "example_jp_ruby": "いくら<ruby>勉強<rt>べんきょう</rt></ruby>しても、<ruby>日本語<rt>にほんご</rt></ruby>が<ruby>上手<rt>じょうず</rt></ruby>にならないんですが、どうすればいいでしょう。", "example_cn": "无论怎么学日语都不见提高，该怎么办才好呢？" },
+        { "id": "3-2", "word": "たとえ〜ても", "kana": "たとえ", "pos": "副詞", "meaning_cn": "（与〜ても呼应）即使、哪怕", "example_jp": "たとえ親が反対しても、私は留学がしたいのだ。", "example_jp_ruby": "たとえ<ruby>親<rt>おや</rt></ruby>が<ruby>反対<rt>はんたい</rt></ruby>しても、<ruby>私<rt>わたし</rt></ruby>は<ruby>留学<rt>りゅうがく</rt></ruby>がしたいのだ。", "example_cn": "就算父母反对，我也想留学。" },
+        { "id": "3-3", "word": "万一／万が一〜ば／たら／なら／ても〜", "kana": "まんがいち", "pos": "副詞", "meaning_cn": "（与〜ば/たら/なら/ても等呼应）万一、假如", "example_jp": "万が一事故を起こして、人にけがでもさせたら、大変なことになるよ。", "example_jp_ruby": "<ruby>万<rt>まん</rt></ruby>が<ruby>一<rt>いち</rt></ruby><ruby>事故<rt>じこ</rt></ruby>を<ruby>起<rt>お</rt></ruby>こして、<ruby>人<rt>ひと</rt></ruby>にけがでもさせたら、<ruby>大変<rt>たいへん</rt></ruby>なことになるよ。", "example_cn": "万一出了事故伤到人，可就不得了了。" }
+      ]
+    },
+    {
+      "name": "疑問　〜か／だろう／だろうか",
+      "reading": "ぎもん",
+      "cards": [
+        { "id": "4-1", "word": "一体〜疑問詞（なぜ／誰／どこ……）〜か／ろう", "kana": "いったい", "pos": "副詞", "meaning_cn": "（与疑問詞+か/だろう等呼应）到底、究竟", "example_jp": "来ると言っていたのに、彼はまだ来ない。一体いつになったら、来るんだろうか。", "example_jp_ruby": "<ruby>来<rt>く</rt></ruby>ると<ruby>言<rt>い</rt></ruby>っていたのに、<ruby>彼<rt>かれ</rt></ruby>はまだ<ruby>来<rt>こ</rt></ruby>ない。<ruby>一体<rt>いったい</rt></ruby>いつになったら、<ruby>来<rt>く</rt></ruby>るんだろうか。", "example_cn": "说要来却还没来。到底要到什么时候才来啊？" },
+        { "id": "4-2", "word": "果たして〜か／だろうか", "kana": "はたして", "pos": "副詞", "meaning_cn": "（与〜か/だろうか等呼应）究竟、果真", "example_jp": "彼は大丈夫だと言うが、果たして彼を信じて、お金を貸してもいいのだろうか。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>大丈夫<rt>だいじょうぶ</rt></ruby>だと言うが、<ruby>果<rt>はた</rt></ruby>して<ruby>彼<rt>かれ</rt></ruby>を<ruby>信<rt>しん</rt></ruby>じて、<ruby>お金<rt>おかね</rt></ruby>を<ruby>貸<rt>か</rt></ruby>してもいいのだろうか。", "example_cn": "他说没问题，但到底能不能信他、把钱借给他呢？" }
+      ]
+    }
+  ]
+}
+</script>
+<script src="../vocab.js"></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课堂单词</title>
+<link rel="stylesheet" href="../vocab.css">
+</head>
+<body>
+<div class="wrap">
+<nav class="pagenav">
+  <a href="../index.html">← 返回课堂单词</a>
+  <span class="spacer"></span>
+  <a href="../../index.html">门户首页</a>
+</nav>
+
+<header>
+  <h1 id="title">—</h1>
+  <div class="sub" id="sub"></div>
+  <span class="meaning" id="hmeaning"></span>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="browse" class="active">浏览</button>
+  <button data-tab="card">翻转卡</button>
+  <button data-tab="quiz">测验</button>
+  <button data-tab="srs">复习<span id="duepill" class="pill" style="display:none">0</span></button>
+</nav>
+
+<section id="browse"></section>
+<section id="card" style="display:none"></section>
+<section id="quiz" style="display:none"></section>
+<section id="srs" style="display:none"></section>
+</div>
+
+<!-- 数据内联：file:// 下不可 fetch，故以本块为准；与同目录 data.json 内容一致 -->
+<script type="application/json" id="vocab-data">
+{
+  "title": "程度",
+  "reading": "ていど",
+  "meaning_cn": "程度、地步",
+  "categories": [
+    {
+      "name": "強調",
+      "reading": "きょうちょう",
+      "cards": [
+        { "id": "1-1", "word": "実に", "kana": "じつに", "pos": "副詞", "meaning_cn": "确实、实在", "example_jp": "彼女の発表は実にすばらしかった。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>の<ruby>発表<rt>はっぴょう</rt></ruby>は<ruby>実<rt>じつ</rt></ruby>にすばらしかった。", "example_cn": "她的发表确实非常精彩。" },
+        { "id": "1-2", "word": "極めて", "kana": "きわめて", "pos": "副詞", "meaning_cn": "极其", "example_jp": "その計画には極めて大きな問題がある。", "example_jp_ruby": "その<ruby>計画<rt>けいかく</rt></ruby>には<ruby>極<rt>きわ</rt></ruby>めて<ruby>大<rt>おお</rt></ruby>きな<ruby>問題<rt>もんだい</rt></ruby>がある。", "example_cn": "那个计划存在极大的问题。" },
+        { "id": "1-3", "word": "よほど", "kana": "よほど", "pos": "副詞", "meaning_cn": "相当、差一点就", "example_jp": "彼はよほど怒っていたのか、挨拶もしなかった。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>はよほど<ruby>怒<rt>おこ</rt></ruby>っていたのか、<ruby>挨拶<rt>あいさつ</rt></ruby>もしなかった。", "example_cn": "他大概是相当生气，连招呼都没打。" },
+        { "id": "1-4", "word": "大いに", "kana": "おおいに", "pos": "副詞", "meaning_cn": "大大地、颇", "example_jp": "昨日は部下たちと大いに飲んだ。", "example_jp_ruby": "<ruby>昨日<rt>きのう</rt></ruby>は<ruby>部下<rt>ぶか</rt></ruby>たちと<ruby>大<rt>おお</rt></ruby>いに<ruby>飲<rt>の</rt></ruby>んだ。", "example_cn": "昨天和部下们大大地喝了一顿。" }
+      ]
+    },
+    {
+      "name": "比較",
+      "reading": "ひかく",
+      "cards": [
+        { "id": "2-1", "word": "余計に", "kana": "よけいに", "pos": "副詞", "meaning_cn": "更加、格外", "example_jp": "彼女は人より余計に努力して、選手に選ばれた。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>人<rt>ひと</rt></ruby>より<ruby>余計<rt>よけい</rt></ruby>に<ruby>努力<rt>どりょく</rt></ruby>して、<ruby>選手<rt>せんしゅ</rt></ruby>に<ruby>選<rt>えら</rt></ruby>ばれた。", "example_cn": "她比常人格外努力，被选为了选手。" },
+        { "id": "2-2", "word": "何より", "kana": "なにより", "pos": "副詞", "meaning_cn": "最、比什么都", "example_jp": "幸せに生きていくためには、健康が何より大切だ。", "example_jp_ruby": "<ruby>幸<rt>しあわ</rt></ruby>せに<ruby>生<rt>い</rt></ruby>きていくためには、<ruby>健康<rt>けんこう</rt></ruby>が<ruby>何<rt>なに</rt></ruby>より<ruby>大切<rt>たいせつ</rt></ruby>だ。", "example_cn": "为了幸福地生活下去，健康比什么都重要。" },
+        { "id": "2-3", "word": "はるかに", "kana": "はるかに", "pos": "副詞", "meaning_cn": "远比、远远", "example_jp": "バスより電車のほうがはるかに早く着くよ。", "example_jp_ruby": "バスより<ruby>電車<rt>でんしゃ</rt></ruby>のほうがはるかに<ruby>早<rt>はや</rt></ruby>く<ruby>着<rt>つ</rt></ruby>くよ。", "example_cn": "比起公交，电车要快得多才能到哦。" }
+      ]
+    },
+    {
+      "name": "少なさ",
+      "reading": "すくなさ",
+      "cards": [
+        { "id": "3-1", "word": "若干", "kana": "じゃっかん", "pos": "副詞", "meaning_cn": "稍微", "example_jp": "前に会ったときより、彼女は若干太ったようだった。", "example_jp_ruby": "<ruby>前<rt>まえ</rt></ruby>に<ruby>会<rt>あ</rt></ruby>った<ruby>時<rt>とき</rt></ruby>より、<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>若干<rt>じゃっかん</rt></ruby><ruby>太<rt>ふと</rt></ruby>ったようだった。", "example_cn": "比起上次见面时，她似乎胖了一些。" },
+        { "id": "3-2", "word": "いくらか", "kana": "いくらか", "pos": "副詞", "meaning_cn": "多少、稍微", "example_jp": "今日は昨日よりいくらか暖かかった。", "example_jp_ruby": "<ruby>今日<rt>きょう</rt></ruby>は<ruby>昨日<rt>きのう</rt></ruby>よりいくらか<ruby>暖<rt>あたた</rt></ruby>かかった。", "example_cn": "今天比昨天稍微暖和些。" }
+      ]
+    },
+    {
+      "name": "変化",
+      "reading": "へんか",
+      "cards": [
+        { "id": "4-1", "word": "一層", "kana": "いっそう", "pos": "副詞", "meaning_cn": "更加、越发", "example_jp": "今週は先週より一層寒くなった。", "example_jp_ruby": "<ruby>今週<rt>こんしゅう</rt></ruby>は<ruby>先週<rt>せんしゅう</rt></ruby>より<ruby>一層<rt>いっそう</rt></ruby><ruby>寒<rt>さむ</rt></ruby>くなった。", "example_cn": "这周比上周越发冷了。" },
+        { "id": "4-2", "word": "一段と", "kana": "いちだんと", "pos": "副詞", "meaning_cn": "更加", "example_jp": "彼は留学して、一段と日本語が上手になった。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>留学<rt>りゅうがく</rt></ruby>して、<ruby>一段<rt>いちだん</rt></ruby>と<ruby>日本語<rt>にほんご</rt></ruby>が<ruby>上手<rt>じょうず</rt></ruby>になった。", "example_cn": "他留学之后，日语更加进步了。" },
+        { "id": "4-3", "word": "なお・なおさら", "kana": "なおさら", "pos": "副詞", "meaning_cn": "更加、反而更", "example_jp": "会えないと聞いて、なおさら会いたくなった。", "example_jp_ruby": "<ruby>会<rt>あ</rt></ruby>えないと<ruby>聞<rt>き</rt></ruby>いて、なおさら<ruby>会<rt>あ</rt></ruby>いたくなった。", "example_cn": "听说见不到，反而更加想见了。" },
+        { "id": "4-4", "word": "ぐっと", "kana": "ぐっと", "pos": "副詞", "meaning_cn": "一下子、显著地", "example_jp": "給料が三万円上がれば、生活もぐっと楽になるのだが。", "example_jp_ruby": "<ruby>給料<rt>きゅうりょう</rt></ruby>が<ruby>三<rt>さん</rt></ruby><ruby>万円<rt>まんえん</rt></ruby><ruby>上<rt>あ</rt></ruby>がれば、<ruby>生活<rt>せいかつ</rt></ruby>もぐっと<ruby>楽<rt>らく</rt></ruby>になるのだが。", "example_cn": "要是工资能涨三万日元，生活也会一下子轻松许多啊。" },
+        { "id": "4-5", "word": "めっきり（と）", "kana": "めっきり", "pos": "副詞", "meaning_cn": "显著地、明显地", "example_jp": "最近、お客の数がめっきり減った。", "example_jp_ruby": "<ruby>最近<rt>さいきん</rt></ruby>、お<ruby>客<rt>きゃく</rt></ruby>の<ruby>数<rt>かず</rt></ruby>がめっきり<ruby>減<rt>へ</rt></ruby>った。", "example_cn": "最近，客人的数量明显减少了。" }
+      ]
+    },
+    {
+      "name": "基準以上",
+      "reading": "きじゅんいじょう",
+      "cards": [
+        { "id": "5-1", "word": "割合・割と", "kana": "わりあい", "pos": "副詞", "meaning_cn": "比较、意外地", "example_jp": "今年の冬は割合暖かい。", "example_jp_ruby": "<ruby>今年<rt>ことし</rt></ruby>の<ruby>冬<rt>ふゆ</rt></ruby>は<ruby>割合<rt>わりあい</rt></ruby><ruby>暖<rt>あたた</rt></ruby>かい。", "example_cn": "今年冬天比较暖和。" },
+        { "id": "5-2", "word": "相当", "kana": "そうとう", "pos": "副詞", "meaning_cn": "相当", "example_jp": "彼女のお父さんは相当怖いらしい。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>のお<ruby>父<rt>とう</rt></ruby>さんは<ruby>相当<rt>そうとう</rt></ruby><ruby>怖<rt>こわ</rt></ruby>いらしい。", "example_cn": "听说她父亲相当可怕。" },
+        { "id": "5-3", "word": "なかなか", "kana": "なかなか", "pos": "副詞", "meaning_cn": "相当、挺", "example_jp": "あの映画はなかなか面白かったよ。", "example_jp_ruby": "あの<ruby>映画<rt>えいが</rt></ruby>はなかなか<ruby>面白<rt>おもしろ</rt></ruby>かったよ。", "example_cn": "那部电影挺有趣的哦。" }
+      ]
+    }
+  ]
+}
+</script>
+<script src="../vocab.js"></script>
+</body>
+</html>
