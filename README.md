@@ -58,4 +58,4 @@ JLPT（日本語能力試験）N1～N5 的日语学习站——学习资料、�
 ## 仓库配置
 
 本仓库使用本地 markdown 风格的 issue tracker 配置（详见 [`AGENTS.md`](./AGENTS.md)）。
-仓库内 `.workbuddy/memory/` 与 `.scratch/` 已被 `.gitignore` 排除，不会上传到 GitHub。
+`.scratch/`（issue 与决策记录）已被 `.gitignore` 排除，不会上传到 GitHub。
