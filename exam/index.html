@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>真题练习 · JLPT 系统学习资料库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="exam.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="hero-main">
+      <p class="eyebrow">JLPT 系统学习资料库</p>
+      <h1>真题练习</h1>
+      <p>题型专练 + 整卷仿真。N2 已入库 2023.7 / 2023.12 两卷（各 100 题，含 58 段听力音频）。</p>
+    </div>
+  </header>
+
+  <nav class="crumb" style="font-size:13px;color:var(--muted);margin:4px 0 0">
+    <a href="../index.html">资料库首页</a> ／ 真题练习
+  </nav>
+
+  <div class="tiles" style="margin-top:22px">
+    <a class="tile" href="practice.html">
+      <div class="t-ico">🎯</div>
+      <h3>题型专练</h3>
+      <p>按子题型练：选等级 → 子题型 → 题量档位（10 / 20 / 30），按真题顺序取前 N 题。题池为该等级所有已入库卷的并集。</p>
+      <div class="t-foot">N2 已入库：词汇 6 类 · 文法 2 类 · 读解 6 类 · 听力 4 类</div>
+    </a>
+    <a class="tile" href="exam.html">
+      <div class="t-ico">📄</div>
+      <h3>真实考试</h3>
+      <p>整卷 100 题：选年份月份 → 仿真（155 分钟、听力只播一次）或宽松（不限时、可回放）→ 交卷复盘。</p>
+      <div class="t-foot">N2 已入库：2023.7 · 2023.12</div>
+    </a>
+  </div>
+
+  <div class="records" id="records"></div>
+</div>
+<script src="exam-core.js"></script>
+<script>
+(function () {
+  const r = EXAM.records;
+  const exams = r.examAll();
+  const prac = Object.entries(r.practiceAll());
+  const box = document.getElementById("records");
+  let h = "<h4>最近记录</h4>";
+  if (!exams.length && !prac.length) {
+    h += '<p class="rec-empty">还没有记录。完成一次专练或整卷考试后会显示在这里。</p>';
+  } else {
+    if (exams.length) {
+      h += '<div class="rec-row">' + exams.slice(0, 6).map(e =>
+        `<span class="chip">2023.${String(e.month || e.exam.slice(5)).padStart(2, "0")} N2 · ${e.mode === "sim" ? "仿真" : "宽松"} · <b>${e.score}/${e.countable ?? e.total}</b></span>`).join("") + "</div>";
+    }
+    if (prac.length) {
+      h += '<div class="rec-row" style="margin-top:8px">' + prac.sort((a, b) => b[1].last - a[1].last).slice(0, 8).map(([k, v]) =>
+        `<span class="chip">${k} · 累计 <b>${v.count}</b> 题</span>`).join("") + "</div>";
+    }
+  }
+  box.innerHTML = h;
+})();
+</script>
+</body>
+</html>

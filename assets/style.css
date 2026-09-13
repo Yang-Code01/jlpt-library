@@ -881,3 +881,16 @@ ul.unit-list li a.is-done::after {
   .pg-fill, .pg-seal, .pg-check, .pg-manage,
   .pg-dlg-actions button, .pg-dlg-close { transition: none; }
 }
+
+/* ===== 真题练习入口卡（index.html 门户） ===== */
+.exam-card {
+  display: flex; align-items: center; gap: 18px;
+  background: var(--surface); border: 1px solid var(--border-soft);
+  border-radius: var(--radius); padding: 20px 24px; margin-top: 18px;
+  color: var(--ink); text-decoration: none; transition: box-shadow .15s, transform .15s;
+}
+.exam-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+.exam-card .ec-ico { font-size: 30px; flex: 0 0 auto; }
+.exam-card .ec-body h2 { font-size: 18px; margin-bottom: 4px; }
+.exam-card .ec-body p { font-size: 13px; color: var(--muted); margin: 0; }
+.exam-card .ec-go { margin-left: auto; font-size: 20px; color: var(--accent); flex: 0 0 auto; }
