@@ -51,6 +51,20 @@
 }
 .b-side h4 { font-size: 13px; color: var(--muted); margin: 12px 0 6px; }
 .b-side h4:first-child { margin-top: 0; }
+/* 答题态侧栏折叠条：窄屏默认收起（否则侧栏压在题目上方），桌面常开 */
+.b-fold {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  width: 100%; padding: 0 0 10px; border: 0; background: none;
+  font: inherit; font-size: 13px; font-weight: 600; color: var(--ink);
+  text-align: left; cursor: pointer;
+}
+.b-fold .b-fold-i { color: var(--accent); white-space: nowrap; }
+.b-fold-body[hidden] { display: none; }
+.b-fold-body > h4:first-child { margin-top: 0; }
+@media (min-width: 801px) {
+  .b-fold { display: none; }
+  .b-fold-body[hidden] { display: block; }
+}
 .b-nav-sec { font-size: 12px; color: var(--muted); margin: 12px 0 4px; display: flex; justify-content: space-between; }
 .b-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
 .b-dot {
@@ -183,6 +197,7 @@
 }
 .btn.ghost { background: var(--surface); color: var(--ink); border: 1px solid var(--border); }
 .btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn[hidden] { display: none; }   /* .btn 的 display 会盖掉 hidden 的默认样式 */
 
 /* 门户入口卡（index.html 内） */
 .exam-card {
@@ -201,4 +216,11 @@
   .b-layout { grid-template-columns: 1fr; }
   .b-side { position: static; max-height: none; }
   .tiles { grid-template-columns: 1fr; }
+  /* 确认按钮出现后一行放不下：换行，而不是把页面撑出横向滚动 */
+  .b-actions { flex-wrap: wrap; row-gap: 8px; padding: 10px 12px; }
+  .b-actions .btn { padding: 9px 16px; }
+  /* 逐选项解析：选项原文不收缩会把解析挤到屏幕外，改为解析独占一行 */
+  .opt-note { flex-wrap: wrap; }
+  .opt-note .opt-text { flex: 1 1 auto; min-width: 0; }
+  .opt-note .opt-why { flex: 1 1 100%; }
 }
