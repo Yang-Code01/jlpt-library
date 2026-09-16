@@ -2,12 +2,12 @@
 (function () {
   "use strict";
   const { S, PART_LABEL, PART_ORDER, loadExam, poolOf,
-          records, isCorrect, scoreSet, qHTML,
-          resetSession, fmtTime } = EXAM;
+          records, isCorrect, scoreSet, qHTML, canConfirm, pick,
+          resetSession, fmtTime, isNarrow } = EXAM;
   const EXAMS = ["2023-07", "2023-12"];
   const TIER = [10, 20, 30];
   const LEVELS = ["N5", "N4", "N3", "N2", "N1"];
-  const state = { level: "N2", subType: null, tier: 10, screen: "setup" };
+  const state = { level: "N2", subType: null, tier: 10, screen: "setup", sideOpen: false };
   const side = document.getElementById("side");
   const main = document.getElementById("main");
 
@@ -26,6 +26,21 @@
   });
 
   function setupSide() {
+    if (state.screen === "answer") {
+      const n = poolOf(EXAMS, state.subType).length;
+      side.innerHTML = `<button class="b-fold" id="fold">
+        <span>${state.level} · ${state.subType.replace(/^(听力·|读解·)/, "")} · 题池 ${n} 题</span>
+        <span class="b-fold-i">${state.sideOpen ? "收起 ▴" : "换题型 ▾"}</span></button>
+        <div class="b-fold-body" ${state.sideOpen ? "" : "hidden"}>${sideBody()}</div>`;
+      document.getElementById("fold").onclick = () => { state.sideOpen = !state.sideOpen; setupSide(); };
+    } else side.innerHTML = sideBody();
+    side.querySelectorAll("[data-st]").forEach(el => el.onclick = () => {
+      state.subType = el.dataset.st; state.tier = 10; state.screen = "setup";
+      setupSide(); renderMain();
+    });
+  }
+
+  function sideBody() {
     let h = "<h4>等级</h4><div class=\"pills\">";
     for (const lv of LEVELS) {
       h += `<button class="pill ${state.level === lv ? "on" : ""}" data-lv="${lv}" ${lv !== "N2" ? "disabled" : ""}>${lv}${lv !== "N2" ? " <small>待入库</small>" : ""}</button>`;
@@ -38,11 +53,7 @@
         h += `<div class="st-item ${state.subType === st ? "on" : ""}" data-st="${st}"><span>${st.replace(/^(听力·|读解·)/, "")}</span><small>${n} 题</small></div>`;
       }
     }
-    side.innerHTML = h;
-    side.querySelectorAll("[data-st]").forEach(el => el.onclick = () => {
-      state.subType = el.dataset.st; state.tier = 10; state.screen = "setup";
-      setupSide(); renderMain();
-    });
+    return h;
   }
 
   function renderMain() {
@@ -61,34 +72,35 @@
         resetSession();
         S.mode = "practice";
         state.screen = "answer";
+        state.sideOpen = !isNarrow();
         setupSide(); renderMain(); window.scrollTo(0, 0);
       };
       return;
     }
     // 答题
     const q = S.set[S.idx];
-    const a = S.answers[q.id];
-    const canConfirm = q.options && !S.locked[q.id] && (q.subAnswers
-      ? (a && a.q1 !== undefined && a.q2 !== undefined)
-      : a !== undefined && !q.optionsMissing);
     main.innerHTML = `
       <div class="q-block">${qHTML(q)}</div>
       <div class="b-actions">
         <button class="btn ghost" id="prev" ${S.idx === 0 ? "disabled" : ""}>上一题</button>
         <span class="spacer"></span>
-        ${canConfirm ? `<button class="btn confirm" id="confirm">确认答案</button>` : ""}
+        <button class="btn confirm" id="confirm" ${canConfirm(q) ? "" : "hidden"}>确认答案</button>
         <span style="font-size:13px;color:var(--muted)">${S.idx + 1} / ${S.set.length}</span>
         <button class="btn" id="next">${S.idx < S.set.length - 1 ? "下一题" : "交卷"}</button>
       </div>`;
     bindOptions(main);
-    document.getElementById("prev").onclick = () => { S.idx--; renderMain(); window.scrollTo(0, 0); };
-    const cf = document.getElementById("confirm");
-    if (cf) cf.onclick = () => { S.locked[q.id] = true; renderMain(); window.scrollTo(0, 0); };
+    document.getElementById("prev").onclick = () => { S.idx--; collapseSide(); renderMain(); window.scrollTo(0, 0); };
+    // 确认后判定与解析就长在选项下方，滚到顶部反而把它藏起来
+    document.getElementById("confirm").onclick = () => { S.locked[q.id] = true; renderMain(); };
     document.getElementById("next").onclick = () => {
-      if (S.idx < S.set.length - 1) { S.idx++; renderMain(); window.scrollTo(0, 0); }
+      if (S.idx < S.set.length - 1) { S.idx++; collapseSide(); renderMain(); window.scrollTo(0, 0); }
       else finish();
     };
-    window.scrollTo(0, 0);
+  }
+
+  // 切题会滚到窗口顶部：窄屏下先收起侧栏，顶部才是题目而不是选题列表
+  function collapseSide() {
+    if (isNarrow() && state.sideOpen) { state.sideOpen = false; setupSide(); }
   }
 
   function bindOptions(root) {
@@ -97,12 +109,8 @@
       if (box.dataset.locked) return; // 已确认，锁定
       const q = S.set.find(x => x.id === qid);
       box.querySelectorAll(".opt").forEach(el => el.onclick = () => {
-        if (q.subAnswers) {
-          const cur = S.answers[qid] || {};
-          if (cur.q1 === undefined) cur.q1 = +el.dataset.idx; else cur.q2 = +el.dataset.idx;
-          S.answers[qid] = cur;
-        } else S.answers[qid] = +el.dataset.idx;
-        renderMain();
+        pick(q, box, +el.dataset.idx);
+        document.getElementById("confirm").hidden = !canConfirm(q);
       });
     });
     root.querySelectorAll("audio[data-once]").forEach(a =>
@@ -126,7 +134,9 @@
     document.getElementById("again").onclick = () => {
       const n = poolOf(EXAMS, state.subType).length;
       S.set = poolOf(EXAMS, state.subType).slice(0, Math.min(state.tier, n));
-      resetSession(); state.screen = "answer"; renderMain(); window.scrollTo(0, 0);
+      resetSession(); state.screen = "answer";
+      state.sideOpen = !isNarrow();
+      setupSide(); renderMain(); window.scrollTo(0, 0);
     };
     window.scrollTo(0, 0);
   }

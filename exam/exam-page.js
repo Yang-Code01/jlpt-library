@@ -2,10 +2,11 @@
 (function () {
   "use strict";
   const { S, PART_LABEL, PART_ORDER, loadExam, examSet, records, isCorrect,
-          scoreSet, qHTML, resetSession, startTimer, stopTimer, fmtTime } = EXAM;
+          scoreSet, qHTML, canConfirm, pick, resetSession, startTimer, stopTimer, fmtTime,
+          isNarrow } = EXAM;
   const EXAMS = ["2023-07", "2023-12"];
   const dataCache = {};
-  const state = { screen: "setup", exam: null, month: null, mode: null };
+  const state = { screen: "setup", exam: null, month: null, mode: null, sideOpen: false };
   const side = document.getElementById("side");
   const main = document.getElementById("main");
 
@@ -61,6 +62,7 @@
       S.mode = "exam";
       S.examMode = state.mode;
       state.screen = "answer";
+      state.sideOpen = !isNarrow();
       if (state.mode === "sim") startTimer(155 * 60, () => finish(true));
       renderAnswer();
       window.scrollTo(0, 0);
@@ -68,8 +70,10 @@
   }
 
   // ---------- 答题 ----------
-  function renderAnswer() {
+  function renderSide() {
     const d = dataCache[state.exam];
+    const q = S.set[S.idx];
+    const answered = S.set.filter(x => S.answers[x.id] !== undefined).length;
     // 侧栏题号网格
     let nav = "";
     for (const part of PART_ORDER) {
@@ -78,37 +82,47 @@
       nav += `<div class="b-nav-sec"><span>${sec.label}</span><span>${sec.minutes} 分</span></div>
         <div class="b-grid">${qs.map(x => {
           const i = S.set.indexOf(x);
-          const cls = ["b-dot", S.answers[x.id] !== undefined ? "answered" : "", x.id === S.set[S.idx].id ? "cur" : ""].join(" ");
+          const cls = ["b-dot", S.answers[x.id] !== undefined ? "answered" : "", x.id === q.id ? "cur" : ""].join(" ");
           return `<div class="${cls}" data-goto="${i}" title="第${x.qNo}题">${x.qNo}</div>`;
         }).join("")}</div>`;
     }
-    side.innerHTML = nav + (state.mode === "sim" ? `<h4>剩余时间</h4><div class="b-timer t-timer">${fmtTime(S.remain)}</div>` : `<h4>模式</h4><div class="q-meta" style="font-size:12px">宽松 · 不限时</div>`);
-    side.querySelectorAll("[data-goto]").forEach(el => el.onclick = () => { S.idx = +el.dataset.goto; renderAnswer(); window.scrollTo(0, 0); });
+    const tail = state.mode === "sim"
+      ? `<h4>剩余时间</h4><div class="b-timer t-timer">${fmtTime(S.remain)}</div>`
+      : `<h4>模式</h4><div class="q-meta" style="font-size:12px">宽松 · 不限时</div>`;
+    side.innerHTML = `<button class="b-fold" id="fold">
+      <span>第 ${S.idx + 1}/${S.set.length} 题 · ${PART_LABEL[q.part]} · 已答 ${answered}</span>
+      <span class="b-fold-i">${state.sideOpen ? "收起 ▴" : "题号 ▾"}</span></button>
+      <div class="b-fold-body" ${state.sideOpen ? "" : "hidden"}>${nav}${tail}</div>`;
+    document.getElementById("fold").onclick = () => { state.sideOpen = !state.sideOpen; renderSide(); };
+    side.querySelectorAll("[data-goto]").forEach(el => el.onclick = () => {
+      S.idx = +el.dataset.goto;
+      if (isNarrow()) state.sideOpen = false; // 跳题后滚顶，顶部应直接是题目
+      renderAnswer(); window.scrollTo(0, 0);
+    });
+  }
+
+  function renderAnswer() {
+    renderSide();
 
     const q = S.set[S.idx];
-    const a = S.answers[q.id];
-    const canConfirm = q.options && !S.locked[q.id] && (q.subAnswers
-      ? (a && a.q1 !== undefined && a.q2 !== undefined)
-      : a !== undefined && !q.optionsMissing);
     main.innerHTML = `
       <div class="q-block">${qHTML(q, { audioOnce: state.mode === "sim" })}</div>
       <div class="b-actions">
         <button class="btn ghost" id="prev" ${S.idx === 0 ? "disabled" : ""}>上一题</button>
         <span class="spacer"></span>
-        ${canConfirm ? `<button class="btn confirm" id="confirm">确认答案</button>` : ""}
+        <button class="btn confirm" id="confirm" ${canConfirm(q) ? "" : "hidden"}>确认答案</button>
         <span style="font-size:13px;color:var(--muted)">${S.idx + 1} / ${S.set.length}</span>
         ${state.mode === "sim" ? `<span class="b-timer t-timer">${fmtTime(S.remain)}</span>` : ""}
         <button class="btn" id="next">${S.idx < S.set.length - 1 ? "下一题" : "交卷"}</button>
       </div>`;
     bindOptions(main);
-    document.getElementById("prev").onclick = () => { S.idx--; renderAnswer(); window.scrollTo(0, 0); };
-    const cf = document.getElementById("confirm");
-    if (cf) cf.onclick = () => { S.locked[q.id] = true; renderAnswer(); window.scrollTo(0, 0); };
+    document.getElementById("prev").onclick = () => { S.idx--; if (isNarrow()) state.sideOpen = false; renderAnswer(); window.scrollTo(0, 0); };
+    // 确认后判定与解析就长在选项下方，滚到顶部反而把它藏起来
+    document.getElementById("confirm").onclick = () => { S.locked[q.id] = true; renderAnswer(); };
     document.getElementById("next").onclick = () => {
-      if (S.idx < S.set.length - 1) { S.idx++; renderAnswer(); window.scrollTo(0, 0); }
+      if (S.idx < S.set.length - 1) { S.idx++; if (isNarrow()) state.sideOpen = false; renderAnswer(); window.scrollTo(0, 0); }
       else finish(false);
     };
-    window.scrollTo(0, 0);
   }
 
   function bindOptions(root) {
@@ -117,12 +131,9 @@
       if (box.dataset.locked) return; // 已确认，锁定
       const q = S.set.find(x => x.id === qid);
       box.querySelectorAll(".opt").forEach(el => el.onclick = () => {
-        if (q.subAnswers) {
-          const cur = S.answers[qid] || {};
-          if (cur.q1 === undefined) cur.q1 = +el.dataset.idx; else cur.q2 = +el.dataset.idx;
-          S.answers[qid] = cur;
-        } else S.answers[qid] = +el.dataset.idx;
-        renderAnswer();
+        pick(q, box, +el.dataset.idx);
+        side.querySelector(`[data-goto="${S.set.indexOf(q)}"]`)?.classList.add("answered");
+        document.getElementById("confirm").hidden = !canConfirm(q);
       });
     });
     root.querySelectorAll("audio[data-once]").forEach(a =>
@@ -152,6 +163,7 @@
     document.getElementById("again").onclick = () => {
       S.set = examSet(state.exam); resetSession(); S.examMode = state.mode;
       state.screen = "answer";
+      state.sideOpen = !isNarrow();
       if (state.mode === "sim") startTimer(155 * 60, () => finish(true));
       renderAnswer(); window.scrollTo(0, 0);
     };

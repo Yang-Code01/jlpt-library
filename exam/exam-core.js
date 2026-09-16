@@ -159,6 +159,27 @@ const EXAM = (() => {
   // 共享会话状态（页面各自驱动）
   const S = { set: [], answers: {}, locked: {}, idx: 0, mode: null, examMode: null, subType: null, timer: null, remain: 0 };
   function resetSession() { S.answers = {}; S.locked = {}; S.idx = 0; stopTimer(); }
+
+  function canConfirm(q) {
+    const a = S.answers[q.id];
+    return !!q.options && !S.locked[q.id] && (q.subAnswers
+      ? !!(a && a.q1 !== undefined && a.q2 !== undefined)
+      : a !== undefined && !q.optionsMissing);
+  }
+
+  // 记一次作答并就地重绘选项：整块重渲染会把窗口滚动位置、音频进度、原文滚动位置一起清掉
+  function pick(q, box, idx) {
+    if (q.subAnswers) {
+      const cur = S.answers[q.id] || {};
+      if (cur.q1 === undefined) cur.q1 = idx; else cur.q2 = idx;
+      S.answers[q.id] = cur;
+    } else S.answers[q.id] = idx;
+    const a = S.answers[q.id];
+    box.querySelectorAll(".opt").forEach(el => {
+      const i = +el.dataset.idx;
+      el.classList.toggle("on", a === i || (a && typeof a === "object" && a.q1 === i));
+    });
+  }
   function stopTimer() { if (S.timer) { clearInterval(S.timer); S.timer = null; } }
   function startTimer(totalSec, onDone) {
     stopTimer();
@@ -175,8 +196,10 @@ const EXAM = (() => {
     const m = Math.floor(s / 60), r = s % 60;
     return String(m).padStart(2, "0") + ":" + String(r).padStart(2, "0");
   }
+  // 与 exam.css 的 800px 断点保持一致：窄屏单列布局下侧栏会压在题目上方
+  const isNarrow = () => matchMedia("(max-width: 800px)").matches;
 
   return { S, PART_LABEL, PART_ORDER, loadExam, allQuestions, poolOf, examSet, shuffle,
-           records, isCorrect, scoreSet, esc, mk, examKeyOf, qHTML,
-           resetSession, stopTimer, startTimer, fmtTime };
+           records, isCorrect, scoreSet, esc, mk, examKeyOf, qHTML, canConfirm, pick,
+           resetSession, stopTimer, startTimer, fmtTime, isNarrow };
 })();
