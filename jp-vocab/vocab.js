@@ -6,6 +6,8 @@
    相对原型的修正：
    - today() 改用本地日界（原为 UTC 日界，北京时间早上 8 点才翻日）
    - 进度 KEY 改用目录 slug（原用中文标题，单元改名即丢进度）
+   - 音频按单元配置：数据顶层 audio:false 时不渲染播放入口
+   - 测验的干扰项改为确定性抽样（原 while 凑数在中途会永不退出）
    ============================================================ */
 
 var DATA = JSON.parse(document.getElementById('vocab-data').textContent);
@@ -30,7 +32,15 @@ DATA.categories.forEach(cat=>{
 });
 
 /* ---- audio + furigana display ---- */
+/* 单元数据顶层 audio:false 表示该单元暂无音频：此时一个播放入口都不渲染，
+   免得按钮点了没反应、也省掉必然 404 的请求。音频补齐后删掉那一行即可。 */
+var HAS_AUDIO = DATA.audio !== false;
 function play(id, kind){ try{ new Audio('audio/'+id+'-'+kind+'.wav').play(); }catch(e){} }
+function playBtn(c, kind){
+  if(!HAS_AUDIO) return '';
+  return '<button onclick="play(\''+c.id+'\',\''+kind+'\')">▶ '+(kind==='w'?'副词':'例文')+'</button>';
+}
+function audioBtns(c){ return HAS_AUDIO ? playBtn(c,'w')+playBtn(c,'e') : ''; }
 function exHtml(c){ return c.example_jp_ruby || c.example_jp; }   // ruby version for display, plain for fallback
 
 /* ---- SRS (SM-2) in localStorage ---- */
@@ -97,8 +107,7 @@ function renderBrowse(){
         '<span class="pos">'+c.pos+'</span><span class="meaning'+(cnHidden?' hide':'')+'">'+c.meaning_cn+'</span></div>'+
         '<div class="ex">'+exHtml(c)+'</div>'+
         '<div class="excn'+(cnHidden?' hide':'')+'">'+c.example_cn+'</div>'+
-        '<div class="plays"><button onclick="play(\''+c.id+'\',\'w\')">▶ 副词</button>'+
-        '<button onclick="play(\''+c.id+'\',\'e\')">▶ 例文</button></div>';
+        (HAS_AUDIO ? '<div class="plays">'+playBtn(c,'w')+playBtn(c,'e')+'</div>' : '');
       wrap.appendChild(card);
     });
     root.appendChild(wrap);
@@ -127,8 +136,7 @@ function showCard(){
   root.appendChild(stage);
   const ctrl=document.createElement('div'); ctrl.className='ctrl';
   ctrl.innerHTML='<button class="ghost" onclick="cardPrev()">‹ 上一张</button>'+
-    '<button onclick="play(\''+c.id+'\',\'w\')">▶ 副词</button>'+
-    '<button onclick="play(\''+c.id+'\',\'e\')">▶ 例文</button>'+
+    audioBtns(c)+
     '<button class="ghost" onclick="cardNext()">下一张 ›</button>';
   root.appendChild(ctrl);
 }
@@ -137,15 +145,21 @@ function cardPrev(){ cardIdx=(cardIdx-1+CARDS.length)%CARDS.length; cardFlipped=
 
 /* ---- quiz ---- */
 let qCurrent=null, qOptions=[], qAnswered=false;
+function shuffle(a){
+  const r=a.slice();
+  for(let i=r.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=r[i]; r[i]=r[j]; r[j]=t; }
+  return r;
+}
 function newQuiz(){
   const root=document.getElementById('quiz');
-  if(CARDS.length<4){ root.innerHTML='<p>卡片不足4张，无法测验</p>'; return; }
+  if(CARDS.length<2){ root.innerHTML='<p>卡片不足2张，无法测验</p>'; return; }
   qCurrent=CARDS[Math.floor(Math.random()*CARDS.length)];
-  const pool=CARDS.filter(c=>c.id!==qCurrent.id);
-  const distractors=[]; const used=new Set();
-  while(distractors.length<3){ const p=pool[Math.floor(Math.random()*pool.length)];
-    if(!used.has(p.meaning_cn)){ used.add(p.meaning_cn); distractors.push(p);} }
-  qOptions=[qCurrent,...distractors].sort(()=>Math.random()-0.5);
+  // 干扰项：按释义去重后抽样。近义簇可能让去重后不足 3 个，此处按实际数量出题即可，不做凑数循环。
+  const seen=new Set([qCurrent.meaning_cn]), pool=[];
+  CARDS.forEach(c=>{
+    if(c.id!==qCurrent.id && !seen.has(c.meaning_cn)){ seen.add(c.meaning_cn); pool.push(c); }
+  });
+  qOptions=shuffle([qCurrent].concat(shuffle(pool).slice(0,3)));
   qAnswered=false; renderQuiz();
 }
 function renderQuiz(){
@@ -162,8 +176,7 @@ function renderQuiz(){
   });
   root.appendChild(opts);
   const ctrl=document.createElement('div'); ctrl.className='ctrl';
-  ctrl.innerHTML='<button onclick="play(\''+c.id+'\',\'w\')">▶ 副词</button>'+
-    '<button onclick="play(\''+c.id+'\',\'e\')">▶ 例文</button>'+
+  ctrl.innerHTML=audioBtns(c)+
     '<button class="ghost" onclick="newQuiz()">换一题</button>';
   root.appendChild(ctrl);
 }
@@ -204,7 +217,7 @@ function showSrsCard(){
   root.appendChild(stage);
   const ctrl=document.createElement('div'); ctrl.className='ctrl';
   ctrl.innerHTML='<button class="bad" onclick="srsRate(1)">不会</button>'+
-    '<button onclick="play(\''+c.id+'\',\'e\')">▶ 例文</button>'+
+    playBtn(c,'e')+
     '<button onclick="srsRate(4)">会</button>';
   root.appendChild(ctrl);
   const info=document.createElement('div'); info.className='muted';

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课堂单词</title>
+<link rel="stylesheet" href="../vocab.css">
+</head>
+<body>
+<div class="wrap">
+<nav class="pagenav">
+  <a href="../index.html">← 返回课堂单词</a>
+  <span class="spacer"></span>
+  <a href="../../index.html">门户首页</a>
+</nav>
+
+<header>
+  <h1 id="title">—</h1>
+  <div class="sub" id="sub"></div>
+  <span class="meaning" id="hmeaning"></span>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="browse" class="active">浏览</button>
+  <button data-tab="card">翻转卡</button>
+  <button data-tab="quiz">测验</button>
+  <button data-tab="srs">复习<span id="duepill" class="pill" style="display:none">0</span></button>
+</nav>
+
+<section id="browse"></section>
+<section id="card" style="display:none"></section>
+<section id="quiz" style="display:none"></section>
+<section id="srs" style="display:none"></section>
+</div>
+
+<!-- 数据内联：file:// 下不可 fetch，故以本块为准；与同目录 data.json 内容一致 -->
+<script type="application/json" id="vocab-data">
+{
+  "title": "意味の近い副詞",
+  "reading": "いみのちかいふくし",
+  "meaning_cn": "意思相近的副词",
+  "categories": [
+    {
+      "name": "ついに・結局",
+      "reading": "ついに・けっきょく",
+      "cards": [
+        { "id": "1-1", "word": "いよいよ", "kana": "いよいよ", "pos": "副詞", "meaning_cn": "终于要、即将（期待已久的事就在眼前）", "example_jp": "明日からいよいよ入学試験が始まる。", "example_jp_ruby": "<ruby>明日<rt>あした</rt></ruby>からいよいよ<ruby>入学試験<rt>にゅうがくしけん</rt></ruby>が<ruby>始<rt>はじ</rt></ruby>まる。", "example_cn": "从明天起，入学考试终于要开始了。" },
+        { "id": "1-2", "word": "とうとう", "kana": "とうとう", "pos": "副詞", "meaning_cn": "到底、最终还是（漫长过程后落到某个结局）", "example_jp": "けんかばかりしていた二人はとうとう離婚した。", "example_jp_ruby": "けんかばかりしていた<ruby>二人<rt>ふたり</rt></ruby>はとうとう<ruby>離婚<rt>りこん</rt></ruby>した。", "example_cn": "总是吵架的两个人最终还是离婚了。" },
+        { "id": "1-3", "word": "ついに", "kana": "ついに", "pos": "副詞", "meaning_cn": "终于、总算（长时间之后达成，可含褒义）", "example_jp": "彼らはついに自分たちの会社を作った。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>らはついに<ruby>自分<rt>じぶん</rt></ruby>たちの<ruby>会社<rt>かいしゃ</rt></ruby>を<ruby>作<rt>つく</rt></ruby>った。", "example_cn": "他们终于创办了自己的公司。" },
+        { "id": "1-4", "word": "ようやく", "kana": "ようやく", "pos": "副詞", "meaning_cn": "好容易才、总算（费了时间或功夫之后）", "example_jp": "けがも治り、ようやく歩けるようになった。", "example_jp_ruby": "けがも<ruby>治<rt>なお</rt></ruby>り、ようやく<ruby>歩<rt>ある</rt></ruby>けるようになった。", "example_cn": "伤也好了，总算能走路了。" },
+        { "id": "1-5", "word": "結局", "kana": "けっきょく", "pos": "副詞", "meaning_cn": "结果、最终（经过一番周折后的结局）", "example_jp": "随分悩んだようだったが、結局彼はその服を買わなかった。", "example_jp_ruby": "<ruby>随分<rt>ずいぶん</rt></ruby><ruby>悩<rt>なや</rt></ruby>んだようだったが、<ruby>結局<rt>けっきょく</rt></ruby><ruby>彼<rt>かれ</rt></ruby>はその<ruby>服<rt>ふく</rt></ruby>を<ruby>買<rt>か</rt></ruby>わなかった。", "example_cn": "他好像犹豫了很久，结果还是没买那件衣服。" }
+      ]
+    },
+    {
+      "name": "無意識の動作",
+      "reading": "むいしきのどうさ",
+      "cards": [
+        { "id": "2-1", "word": "うっかり", "kana": "うっかり", "pos": "副詞", "meaning_cn": "不留神、无意中（因疏忽造成的失误）", "example_jp": "帰るとき、うっかり人の傘を持ってきてしまった。", "example_jp_ruby": "<ruby>帰<rt>かえ</rt></ruby>るとき、うっかり<ruby>人<rt>ひと</rt></ruby>の<ruby>傘<rt>かさ</rt></ruby>を<ruby>持<rt>も</rt></ruby>ってきてしまった。", "example_cn": "回来的时候，一不留神把别人的伞拿走了。" },
+        { "id": "2-2", "word": "思わず", "kana": "おもわず", "pos": "副詞", "meaning_cn": "不由得、情不自禁（无意识地做出反应）", "example_jp": "足を踏まれて、思わず叫んでしまった。", "example_jp_ruby": "<ruby>足<rt>あし</rt></ruby>を<ruby>踏<rt>ふ</rt></ruby>まれて、<ruby>思<rt>おも</rt></ruby>わず<ruby>叫<rt>さけ</rt></ruby>んでしまった。", "example_cn": "被人踩了脚，不由得叫出声来。" },
+        { "id": "2-3", "word": "つい", "kana": "つい", "pos": "副詞", "meaning_cn": "一不小心、忍不住（明知不该却做了）", "example_jp": "禁煙中なのに、つい、たばこを吸ってしまった。", "example_jp_ruby": "<ruby>禁煙<rt>きんえん</rt></ruby><ruby>中<rt>ちゅう</rt></ruby>なのに、つい、たばこを<ruby>吸<rt>す</rt></ruby>ってしまった。", "example_cn": "明明在戒烟，却忍不住抽了一支。" },
+        { "id": "2-4", "word": "ふと", "kana": "ふと", "pos": "副詞", "meaning_cn": "忽然、不经意（无来由地、偶然地）", "example_jp": "ふと時計を見ると、もう一時になっていた。", "example_jp_ruby": "ふと<ruby>時計<rt>とけい</rt></ruby>を<ruby>見<rt>み</rt></ruby>ると、もう<ruby>一時<rt>いちじ</rt></ruby>になっていた。", "example_cn": "不经意看了一眼表，已经一点了。" }
+      ]
+    },
+    {
+      "name": "予想外",
+      "reading": "よそうがい",
+      "cards": [
+        { "id": "3-1", "word": "案外", "kana": "あんがい", "pos": "副詞", "meaning_cn": "出乎意料地（与预想相反，语气较轻）", "example_jp": "人気の店だったが、案外料理はまずかった。", "example_jp_ruby": "<ruby>人気<rt>にんき</rt></ruby>の<ruby>店<rt>みせ</rt></ruby>だったが、<ruby>案外<rt>あんがい</rt></ruby><ruby>料理<rt>りょうり</rt></ruby>はまずかった。", "example_cn": "是家人气店，但菜意外地难吃。" },
+        { "id": "3-2", "word": "意外（に／と）", "speak_word": "意外に", "kana": "いがい", "pos": "副詞", "meaning_cn": "意外地（与预想不符，也可作形容动词）", "example_jp": "難しいかと思っていたが、テストは意外に易しかった。", "example_jp_ruby": "<ruby>難<rt>むずか</rt></ruby>しいかと<ruby>思<rt>おも</rt></ruby>っていたが、テストは<ruby>意外<rt>いがい</rt></ruby>に<ruby>易<rt>やさ</rt></ruby>しかった。", "example_cn": "本以为会很难，考试却意外地容易。" },
+        { "id": "3-3", "word": "思いのほか", "kana": "おもいのほか", "pos": "副詞", "meaning_cn": "出乎意料、意想不到（超出预想的程度）", "example_jp": "その靴の値段は思いのほか高かった。", "example_jp_ruby": "その<ruby>靴<rt>くつ</rt></ruby>の<ruby>値段<rt>ねだん</rt></ruby>は<ruby>思<rt>おも</rt></ruby>いのほか<ruby>高<rt>たか</rt></ruby>かった。", "example_cn": "那双鞋的价钱出乎意料地贵。" }
+      ]
+    },
+    {
+      "name": "程度・態度",
+      "reading": "ていど・たいど",
+      "cards": [
+        { "id": "4-1", "word": "結構", "kana": "けっこう", "pos": "副詞", "meaning_cn": "相当、挺（超出预想的程度；也可用于婉拒）", "example_jp": "私って、こう見えて結構料理が得意なんですよ。", "example_jp_ruby": "<ruby>私<rt>わたし</rt></ruby>って、こう<ruby>見<rt>み</rt></ruby>えて<ruby>結構<rt>けっこう</rt></ruby><ruby>料理<rt>りょうり</rt></ruby>が<ruby>得意<rt>とくい</rt></ruby>なんですよ。", "example_cn": "我啊，别看这样，做菜还挺拿手的。" },
+        { "id": "4-2", "word": "一応", "kana": "いちおう", "pos": "副詞", "meaning_cn": "姑且、大致（虽不充分，但先做到某个程度）", "example_jp": "時間は掛かったが、一応料理が完成した。", "example_jp_ruby": "<ruby>時間<rt>じかん</rt></ruby>は<ruby>掛<rt>か</rt></ruby>かったが、<ruby>一応<rt>いちおう</rt></ruby><ruby>料理<rt>りょうり</rt></ruby>が<ruby>完成<rt>かんせい</rt></ruby>した。", "example_cn": "虽然花了些时间，菜总算做完了。" },
+        { "id": "4-3", "word": "とりあえず", "kana": "とりあえず", "pos": "副詞", "meaning_cn": "先、暂且（先处理眼前这件，其余以后再说）", "example_jp": "ひどい熱だから、とりあえず病院に行ったら？", "example_jp_ruby": "ひどい<ruby>熱<rt>ねつ</rt></ruby>だから、とりあえず<ruby>病院<rt>びょういん</rt></ruby>に<ruby>行<rt>い</rt></ruby>ったら？", "example_cn": "烧得这么厉害，先去医院看看怎么样？" },
+        { "id": "4-4", "word": "やむをえず", "kana": "やむをえず", "pos": "副詞", "meaning_cn": "不得已、无奈（别无选择）", "example_jp": "電車が動かず、やむをえずタクシーに乗った。", "example_jp_ruby": "<ruby>電車<rt>でんしゃ</rt></ruby>が<ruby>動<rt>うご</rt></ruby>かず、やむをえずタクシーに<ruby>乗<rt>の</rt></ruby>った。", "example_cn": "电车不动了，不得已坐了出租车。" },
+        { "id": "4-5", "word": "かえって", "kana": "かえって", "pos": "副詞", "meaning_cn": "反而、倒（结果与预期相反）", "example_jp": "お礼にお金を差し上げるのはかえって失礼だ。", "example_jp_ruby": "お<ruby>礼<rt>れい</rt></ruby>にお<ruby>金<rt>かね</rt></ruby>を<ruby>差<rt>さ</rt></ruby>し<ruby>上<rt>あ</rt></ruby>げるのはかえって<ruby>失礼<rt>しつれい</rt></ruby>だ。", "example_cn": "作为谢礼送钱反而失礼。" },
+        { "id": "4-6", "word": "まして", "kana": "まして", "pos": "副詞", "meaning_cn": "何况、更不用说（前项如此，后项更甚）", "example_jp": "彼にできないことが、まして私にできるはずがない。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>にできないことが、まして<ruby>私<rt>わたし</rt></ruby>にできるはずがない。", "example_cn": "他都做不到的事，更何况是我，怎么可能做到。" },
+        { "id": "4-7", "word": "むしろ", "kana": "むしろ", "pos": "副詞", "meaning_cn": "宁可、倒不如（两相比较，倾向于后者）", "example_jp": "私は大きな会社よりむしろ小さな会社に入りたい。", "example_jp_ruby": "<ruby>私<rt>わたし</rt></ruby>は<ruby>大<rt>おお</rt></ruby>きな<ruby>会社<rt>かいしゃ</rt></ruby>よりむしろ<ruby>小<rt>ちい</rt></ruby>さな<ruby>会社<rt>かいしゃ</rt></ruby>に<ruby>入<rt>はい</rt></ruby>りたい。", "example_cn": "比起大公司，我倒更想进小公司。" }
+      ]
+    },
+    {
+      "name": "わざと系",
+      "reading": "わざとけい",
+      "cards": [
+        { "id": "5-1", "word": "わざと", "kana": "わざと", "pos": "副詞", "meaning_cn": "故意、成心（有意做出某行为）", "example_jp": "彼はわざと私の話が聞こえない振りをした。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>はわざと<ruby>私<rt>わたし</rt></ruby>の<ruby>話<rt>はなし</rt></ruby>が<ruby>聞<rt>き</rt></ruby>こえない<ruby>振<rt>ふ</rt></ruby>りをした。", "example_cn": "他故意装作听不见我说话。" },
+        { "id": "5-2", "word": "わざわざ", "kana": "わざわざ", "pos": "副詞", "meaning_cn": "特意、专程（不惜麻烦地去做）", "example_jp": "先生がわざわざお見舞いに来てくださった。", "example_jp_ruby": "<ruby>先生<rt>せんせい</rt></ruby>がわざわざお<ruby>見舞<rt>みま</rt></ruby>いに<ruby>来<rt>き</rt></ruby>てくださった。", "example_cn": "老师特意来看望我。" },
+        { "id": "5-3", "word": "せっかく", "kana": "せっかく", "pos": "副詞", "meaning_cn": "好不容易、特意（付出的努力或机会被浪费）", "example_jp": "せっかく作った料理が冷たくなってしまった。", "example_jp_ruby": "せっかく<ruby>作<rt>つく</rt></ruby>った<ruby>料理<rt>りょうり</rt></ruby>が<ruby>冷<rt>つめ</rt></ruby>たくなってしまった。", "example_cn": "好不容易做好的菜都凉了。" }
+      ]
+    },
+    {
+      "name": "数量と上下限",
+      "reading": "すうりょうとじょうげげん",
+      "cards": [
+        { "id": "6-1", "word": "たった", "kana": "たった", "pos": "副詞", "meaning_cn": "仅仅、只（强调数量之少）", "example_jp": "彼女はたった一人でその仕事をやってしまった。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>はたった<ruby>一人<rt>ひとり</rt></ruby>でその<ruby>仕事<rt>しごと</rt></ruby>をやってしまった。", "example_cn": "她只凭一个人就做完了那项工作。" },
+        { "id": "6-2", "word": "ほんの", "kana": "ほんの", "pos": "副詞", "meaning_cn": "仅仅、一点点（程度轻微，多接表示少量的词）", "example_jp": "油をほんの少し入れてください。", "example_jp_ruby": "<ruby>油<rt>あぶら</rt></ruby>をほんの<ruby>少<rt>すこ</rt></ruby>し<ruby>入<rt>い</rt></ruby>れてください。", "example_cn": "请放一点点油。" },
+        { "id": "6-3", "word": "わずか（に）", "speak_word": "わずか", "kana": "わずか", "pos": "副詞", "meaning_cn": "仅、只（数量少或时间短）", "example_jp": "わずか半年で日本語が話せるようになった。", "example_jp_ruby": "わずか<ruby>半年<rt>はんねん</rt></ruby>で<ruby>日本語<rt>にほんご</rt></ruby>が<ruby>話<rt>はな</rt></ruby>せるようになった。", "example_cn": "仅仅半年就能说日语了。" },
+        { "id": "6-4", "word": "およそ", "kana": "およそ", "pos": "副詞", "meaning_cn": "大约、大概（数量上的概略）", "example_jp": "この化石はおよそ十万年前のものです。", "example_jp_ruby": "この<ruby>化石<rt>かせき</rt></ruby>はおよそ<ruby>十万年<rt>じゅうまんねん</rt></ruby><ruby>前<rt>まえ</rt></ruby>のものです。", "example_cn": "这块化石大约是十万年前的。" },
+        { "id": "6-5", "word": "ほぼ", "kana": "ほぼ", "pos": "副詞", "meaning_cn": "大致、几乎（接近全部或接近完成）", "example_jp": "今日の仕事はほぼ終わった。", "example_jp_ruby": "<ruby>今日<rt>きょう</rt></ruby>の<ruby>仕事<rt>しごと</rt></ruby>はほぼ<ruby>終<rt>お</rt></ruby>わった。", "example_cn": "今天的工作大致做完了。" },
+        { "id": "6-6", "word": "せいぜい", "kana": "せいぜい", "pos": "副詞", "meaning_cn": "至多、充其量（给出上限）", "example_jp": "歩いても、せいぜい十分で駅に着きますよ。", "example_jp_ruby": "<ruby>歩<rt>ある</rt></ruby>いても、せいぜい<ruby>十分<rt>じゅっぷん</rt></ruby>で<ruby>駅<rt>えき</rt></ruby>に<ruby>着<rt>つ</rt></ruby>きますよ。", "example_cn": "就算走路，最多十分钟也能到车站。" },
+        { "id": "6-7", "word": "せめて", "kana": "せめて", "pos": "副詞", "meaning_cn": "至少、起码（最低限度的愿望）", "example_jp": "一か月にせめて十万円は収入が欲しい。", "example_jp_ruby": "<ruby>一<rt>いっ</rt></ruby>か<ruby>月<rt>げつ</rt></ruby>にせめて<ruby>十万円<rt>じゅうまんえん</rt></ruby>は<ruby>収入<rt>しゅうにゅう</rt></ruby>が<ruby>欲<rt>ほ</rt></ruby>しい。", "example_cn": "希望一个月至少能有十万日元的收入。" },
+        { "id": "6-8", "word": "どうせ", "kana": "どうせ", "pos": "副詞", "meaning_cn": "反正、终归（料定结果不变，带放弃语气）", "example_jp": "あいつは時間を守らないから、どうせまた遅刻するよ。", "example_jp_ruby": "あいつは<ruby>時間<rt>じかん</rt></ruby>を<ruby>守<rt>まも</rt></ruby>らないから、どうせまた<ruby>遅刻<rt>ちこく</rt></ruby>するよ。", "example_cn": "那家伙不守时，反正又会迟到。" },
+        { "id": "6-9", "word": "決まって", "kana": "きまって", "pos": "副詞", "meaning_cn": "一定、总是（每次都是同样的情况）", "example_jp": "彼女は決まって朝八時半に会社に来る。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>決<rt>き</rt></ruby>まって<ruby>朝<rt>あさ</rt></ruby><ruby>八時半<rt>はちじはん</rt></ruby>に<ruby>会社<rt>かいしゃ</rt></ruby>に<ruby>来<rt>く</rt></ruby>る。", "example_cn": "她总是早上八点半来公司。" }
+      ]
+    },
+    {
+      "name": "時間と様態",
+      "reading": "じかんとようたい",
+      "cards": [
+        { "id": "7-1", "word": "早速", "kana": "さっそく", "pos": "副詞", "meaning_cn": "立刻、马上（不拖延，迅速着手）", "example_jp": "新しく開店したスーパーに早速行ってみた。", "example_jp_ruby": "<ruby>新<rt>あたら</rt></ruby>しく<ruby>開店<rt>かいてん</rt></ruby>したスーパーに<ruby>早速<rt>さっそく</rt></ruby><ruby>行<rt>い</rt></ruby>ってみた。", "example_cn": "新开张的超市，我马上去看了看。" },
+        { "id": "7-2", "word": "至急", "kana": "しきゅう", "pos": "副詞", "meaning_cn": "火急、紧急（需要马上处理，多用于文书）", "example_jp": "お父さんが倒れたので、至急連絡ください。", "example_jp_ruby": "お<ruby>父<rt>とう</rt></ruby>さんが<ruby>倒<rt>たお</rt></ruby>れたので、<ruby>至急<rt>しきゅう</rt></ruby><ruby>連絡<rt>れんらく</rt></ruby>ください。", "example_cn": "父亲倒下了，请火速联系。" },
+        { "id": "7-3", "word": "いきなり", "kana": "いきなり", "pos": "副詞", "meaning_cn": "突然、冷不防（毫无预兆地）", "example_jp": "母親の顔を見ると、彼女はいきなり泣き出した。", "example_jp_ruby": "<ruby>母親<rt>ははおや</rt></ruby>の<ruby>顔<rt>かお</rt></ruby>を<ruby>見<rt>み</rt></ruby>ると、<ruby>彼女<rt>かのじょ</rt></ruby>はいきなり<ruby>泣<rt>な</rt></ruby>き<ruby>出<rt>だ</rt></ruby>した。", "example_cn": "一看到母亲的脸，她突然哭了起来。" },
+        { "id": "7-4", "word": "突如", "kana": "とつじょ", "pos": "副詞", "meaning_cn": "突然（书面语，用于事态骤变）", "example_jp": "止まっていた電車が突如動き出した。", "example_jp_ruby": "<ruby>止<rt>と</rt></ruby>まっていた<ruby>電車<rt>でんしゃ</rt></ruby>が<ruby>突如<rt>とつじょ</rt></ruby><ruby>動<rt>うご</rt></ruby>き<ruby>出<rt>だ</rt></ruby>した。", "example_cn": "停着的电车突然开动了。" },
+        { "id": "7-5", "word": "次第に", "kana": "しだいに", "pos": "副詞", "meaning_cn": "逐渐、渐渐（阶段性地变化，偏书面）", "example_jp": "彼女の病状は次第に悪化していった。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>の<ruby>病状<rt>びょうじょう</rt></ruby>は<ruby>次第<rt>しだい</rt></ruby>に<ruby>悪化<rt>あっか</rt></ruby>していった。", "example_cn": "她的病情逐渐恶化了。" },
+        { "id": "7-6", "word": "徐々に", "kana": "じょじょに", "pos": "副詞", "meaning_cn": "慢慢、逐步（一点一点地变化）", "example_jp": "たばこの値段が徐々に引き上げられた。", "example_jp_ruby": "たばこの<ruby>値段<rt>ねだん</rt></ruby>が<ruby>徐々<rt>じょじょ</rt></ruby>に<ruby>引<rt>ひ</rt></ruby>き<ruby>上<rt>あ</rt></ruby>げられた。", "example_cn": "香烟的价格被逐步提高了。" }
+      ]
+    }
+  ]
+}
+</script>
+<script src="../vocab.js"></script>
+</body>
+</html>

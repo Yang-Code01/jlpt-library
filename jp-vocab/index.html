@@ -64,27 +64,31 @@
   <div class="grid" id="grid"></div>
 
   <p class="note">
-    点击任一卡片即可跳转到对应单元。新增单元时：在子目录建好 <code>index.html</code> 与 <code>data.json</code>，
-    再在本页 <code>UNITS</code> 数组里加一行 <code>{ dir, title, reading, meaning }</code> 即可。
+    点击任一卡片即可跳转到对应单元。新增单元：只写一份 <code>&lt;单元目录&gt;/data.json</code>，再跑
+    <code>node jp-vocab/gen.js write</code>；单元页 <code>index.html</code> 与本页 <code>UNITS</code>
+    都由此生成，不要手改（校验用 <code>node jp-vocab/gen.js check</code>）。
+    音频由 <code>gen-audio.ps1</code> 按同一份 <code>data.json</code> 合成（词条含「（…）」「・」时用 <code>speak_word</code> 指定朗读形）。
   </p>
 </div>
 
 <script>
-  // 单元列表。新增单元时在此添加一行；title/reading/meaning 可从该单元的 data.json 复制。
-  // （本地用 file:// 打开时按此内联信息显示；在线时还会尝试 fetch 各 data.json 自动补全词数并核对标题。）
+  // 本数组由 jp-vocab/gen.js 从各单元的 data.json 生成——加单元请建 data.json 后跑 gen.js，不要手改。
+  // 显示顺序＝上次的顺序，新单元追加在末尾；cards 词数由 data.json 统计得出。
   const UNITS = [
-    { dir:"teido",                    title:"程度",            reading:"ていど",                meaning:"程度、地步" },
-    { dir:"jikan-to-hindo-no-fukushi", title:"時間・頻度の副詞", reading:"じかん・ひんどのふくし", meaning:"表时间与频率的副词" },
-    { dir:"hitei",                    title:"否定",            reading:"ひてい",                meaning:"否定（与否定表达搭配的副词）" },
-    { dir:"koou",                     title:"呼応",            reading:"こおう",                meaning:"副詞の呼応（与推量・様子・仮定・疑問等固定句末表达呼应的副词）" },
+    { dir:"teido",                     title:"程度",                  reading:"ていど",                  meaning:"程度、地步",                                                    cards:17 },
+    { dir:"jikan-to-hindo-no-fukushi", title:"時間・頻度の副詞",      reading:"じかん・ひんどのふくし",  meaning:"表时间与频率的副词",                                            cards:23 },
+    { dir:"hitei",                     title:"否定",                  reading:"ひてい",                  meaning:"否定（与否定表达搭配的副词）",                                  cards:11 },
+    { dir:"koou",                      title:"呼応",                  reading:"こおう",                  meaning:"副詞の呼応（与推量・様子・仮定・疑問等固定句末表达呼应的副词）", cards:12 },
+    { dir:"igi-no-chikai-fukushi",     title:"意味の近い副詞",        reading:"いみのちかいふくし",      meaning:"意思相近的副词",                                                cards:37 },
+    { dir:"kanji-ni-sonota-no-fukushi", title:"漢字＋に・その他の副詞", reading:"かんじに・そのたのふくし", meaning:"「漢字＋に」形式与其他副词",                                    cards:12 },
   ];
 
   const grid = document.getElementById("grid");
   const unitCount = document.getElementById("unitCount");
   unitCount.textContent = `共 ${UNITS.length} 个单元`;
 
-  // 先用内联信息渲染（保证 file:// 下也可用）
-  const cards = UNITS.map(u => {
+  // 词数直接取内联的 cards，file:// 下也显示（不再依赖 fetch）
+  UNITS.forEach(u => {
     const a = document.createElement("a");
     a.className = "card";
     a.href = u.dir + "/index.html";
@@ -92,24 +96,8 @@
       `<div class="kana">${u.reading}</div>
        <div class="word">${u.title}</div>
        <div class="meaning">${u.meaning}</div>
-       <div class="meta"><span class="pill muted" data-count>— 词</span></div>`;
+       <div class="meta"><span class="pill ok">${u.cards} 词</span></div>`;
     grid.appendChild(a);
-    return a;
-  });
-
-  // 可选增强：尝试读取各单元 data.json，补全词数并核对标题（在线环境有效；本地失败则静默保留内联值）
-  UNITS.forEach((u, i) => {
-    fetch(u.dir + "/data.json")
-      .then(r => r.ok ? r.json() : null)
-      .then(d => {
-        if(!d) return;
-        if(d.title) cards[i].querySelector(".word").textContent = d.title;
-        if(d.reading) cards[i].querySelector(".kana").textContent = d.reading;
-        if(d.meaning_cn) cards[i].querySelector(".meaning").textContent = d.meaning_cn;
-        const n = (d.categories||[]).reduce((s,c)=>s + (c.cards?c.cards.length:0), 0);
-        const p = cards[i].querySelector("[data-count]");
-        if(n){ p.textContent = n + " 词"; p.classList.add("ok"); }
-      }).catch(()=>{});
   });
 
   // 全部打开（best-effort；浏览器可能拦截多弹窗，若被拦截请逐个点击）
