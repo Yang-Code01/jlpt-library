@@ -1,0 +1,31 @@
+{
+  "title": "漢字＋に・その他の副詞",
+  "reading": "かんじに・そのたのふくし",
+  "meaning_cn": "「漢字＋に」形式与其他副词",
+  "categories": [
+    {
+      "name": "漢字＋に",
+      "reading": "かんじに",
+      "cards": [
+        { "id": "1-1", "word": "主に", "kana": "おもに", "pos": "副詞", "meaning_cn": "主要、大多（用于指出主体部分）", "example_jp": "大学では主に日本の現代文学について勉強している。", "example_jp_ruby": "<ruby>大学<rt>だいがく</rt></ruby>では<ruby>主<rt>おも</rt></ruby>に<ruby>日本<rt>にほん</rt></ruby>の<ruby>現代文学<rt>げんだいぶんがく</rt></ruby>について<ruby>勉強<rt>べんきょう</rt></ruby>している。", "example_cn": "在大学主要学习日本现代文学。" },
+        { "id": "1-2", "word": "既に", "kana": "すでに", "pos": "副詞", "meaning_cn": "已经（某事在某个时点之前就已完成）", "example_jp": "救急車が来たとき、彼は既に死んでいた。", "example_jp_ruby": "<ruby>救急車<rt>きゅうきゅうしゃ</rt></ruby>が<ruby>来<rt>き</rt></ruby>たとき、<ruby>彼<rt>かれ</rt></ruby>は<ruby>既<rt>すで</rt></ruby>に<ruby>死<rt>し</rt></ruby>んでいた。", "example_cn": "救护车赶到时，他已经死了。" },
+        { "id": "1-3", "word": "単に", "kana": "たんに", "pos": "副詞", "meaning_cn": "仅仅、只是（排除其他因素）", "example_jp": "病気ではない。単におなかが減っているだけだ。", "example_jp_ruby": "<ruby>病気<rt>びょうき</rt></ruby>ではない。<ruby>単<rt>たん</rt></ruby>におなかが<ruby>減<rt>へ</rt></ruby>っているだけだ。", "example_cn": "不是生病，只是肚子饿了。" },
+        { "id": "1-4", "word": "常に", "kana": "つねに", "pos": "副詞", "meaning_cn": "总是、经常（一直如此，无例外）", "example_jp": "彼女は常にスカーフを首に巻いていた。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>常<rt>つね</rt></ruby>にスカーフを<ruby>首<rt>くび</rt></ruby>に<ruby>巻<rt>ま</rt></ruby>いていた。", "example_cn": "她总是围着围巾。" },
+        { "id": "1-5", "word": "まさに（正に）", "speak_word": "まさに", "kana": "まさに", "pos": "副詞", "meaning_cn": "正是、恰好（完全吻合，强调确实如此）", "example_jp": "これこそ、まさに私が求めていた彫刻だ。", "example_jp_ruby": "これこそ、まさに<ruby>私<rt>わたし</rt></ruby>が<ruby>求<rt>もと</rt></ruby>めていた<ruby>彫刻<rt>ちょうこく</rt></ruby>だ。", "example_cn": "这正是我一直在寻找的雕塑。" }
+      ]
+    },
+    {
+      "name": "その他の副詞",
+      "reading": "そのたのふくし",
+      "cards": [
+        { "id": "2-1", "word": "あいにく", "kana": "あいにく", "pos": "副詞", "meaning_cn": "不凑巧、偏巧（时机不合，多表遗憾）", "example_jp": "社長はあいにく留守にしております。", "example_jp_ruby": "<ruby>社長<rt>しゃちょう</rt></ruby>はあいにく<ruby>留守<rt>るす</rt></ruby>にしております。", "example_cn": "很不凑巧，社长现在不在。" },
+        { "id": "2-2", "word": "あくまで", "kana": "あくまで", "pos": "副詞", "meaning_cn": "彻底、坚决（始终坚持某个立场或做法）", "example_jp": "彼はあくまで自分の意見にこだわった。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>はあくまで<ruby>自分<rt>じぶん</rt></ruby>の<ruby>意見<rt>いけん</rt></ruby>にこだわった。", "example_cn": "他始终坚持自己的意见。" },
+        { "id": "2-3", "word": "改めて", "kana": "あらためて", "pos": "副詞", "meaning_cn": "重新、再次（换个时机重新做或重新认识）", "example_jp": "彼を失って、改めて彼の大切さに気付いた。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>を<ruby>失<rt>うしな</rt></ruby>って、<ruby>改<rt>あらた</rt></ruby>めて<ruby>彼<rt>かれ</rt></ruby>の<ruby>大切<rt>たいせつ</rt></ruby>さに<ruby>気付<rt>きづ</rt></ruby>いた。", "example_cn": "失去他之后，才重新意识到他的重要。" },
+        { "id": "2-4", "word": "思い切って", "kana": "おもいきって", "pos": "副詞", "meaning_cn": "索性、下决心（抛开犹豫去做）", "example_jp": "恥ずかしかったが、思い切って宣言してみた。", "example_jp_ruby": "<ruby>恥<rt>は</rt></ruby>ずかしかったが、<ruby>思<rt>おも</rt></ruby>い<ruby>切<rt>き</rt></ruby>って<ruby>宣言<rt>せんげん</rt></ruby>してみた。", "example_cn": "虽然有些难为情，还是鼓起勇气试着宣告了。" },
+        { "id": "2-5", "word": "思い切り・思いっ切り", "speak_word": "思い切り", "kana": "おもいきり", "pos": "副詞", "meaning_cn": "尽情、彻底（做到最大限度）", "example_jp": "すき焼きを思いっ切り食べたい。", "example_jp_ruby": "すき<ruby>焼<rt>や</rt></ruby>きを<ruby>思<rt>おも</rt></ruby>いっ<ruby>切<rt>き</rt></ruby>り<ruby>食<rt>た</rt></ruby>べたい。", "example_cn": "想吃寿喜烧吃个够。" },
+        { "id": "2-6", "word": "中でも", "kana": "なかでも", "pos": "副詞", "meaning_cn": "其中尤其（在多数之中特别突出）", "example_jp": "彼は秀才で、何でもよくできるが、中でも数学が得意だ。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>秀才<rt>しゅうさい</rt></ruby>で、<ruby>何<rt>なん</rt></ruby>でもよくできるが、<ruby>中<rt>なか</rt></ruby>でも<ruby>数学<rt>すうがく</rt></ruby>が<ruby>得意<rt>とくい</rt></ruby>だ。", "example_cn": "他是优等生，什么都擅长，其中尤其数学最好。" },
+        { "id": "2-7", "word": "半ば", "kana": "なかば", "pos": "副詞", "meaning_cn": "一半、大半（程度上到了中途；也表「心里已多半…」）", "example_jp": "彼に頼んでも無理だと、半ばあきらめていた。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>に<ruby>頼<rt>たの</rt></ruby>んでも<ruby>無理<rt>むり</rt></ruby>だと、<ruby>半<rt>なか</rt></ruby>ばあきらめていた。", "example_cn": "觉得求他也没用，心里已多半放弃了。" }
+      ]
+    }
+  ]
+}

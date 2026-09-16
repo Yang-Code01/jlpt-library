@@ -1,2 +1,4 @@
 .workbuddy/
 .scratch/
+.agents/
+skills-lock.json
