@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>动词专练</title>
+<!-- 双入口对等页（Q8 方案 b；设计档案：.scratch/verb-module/prototype/verb-ia-compare.html） -->
+<style>
+  :root{
+    --bg:#f6f3ee; --ink:#2b2a26; --muted:#8a857a; --line:#e4ddd1;
+    --card:#fffdf9; --accent:#9b6b3f; --accent2:#c98a4b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Sans","Yu Gothic","Noto Sans CJK JP","Microsoft YaHei",system-ui,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:920px;margin:0 auto;padding:40px 20px 90px}
+  nav.pagenav{display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+    margin-bottom:26px;border-bottom:1px solid var(--line);padding-bottom:12px}
+  nav.pagenav a{text-decoration:none;font-size:.88em;padding:4px 14px;border-radius:999px;
+    border:1px solid var(--line);color:var(--accent);background:var(--card);
+    transition:background .15s ease}
+  nav.pagenav a:hover{background:#f0e7d6}
+  nav.pagenav .spacer{flex:1}
+  header h1{margin:0;font-size:2.6rem;font-weight:800;letter-spacing:.02em}
+  header .sub{color:var(--muted);font-size:1.05rem;margin-top:6px}
+  .peer{margin-top:16px}
+  a.peer{display:flex;align-items:center;gap:20px;text-decoration:none;color:inherit;
+    background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 28px;
+    box-shadow:0 1px 3px rgba(0,0,0,.04);transition:transform .15s,border-color .15s,box-shadow .15s}
+  a.peer:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 8px 22px rgba(120,90,50,.14)}
+  a.peer .p-ico{font-size:2.3rem}
+  a.peer .p-body{flex:1}
+  a.peer .p-body h2{margin:0;font-size:1.4rem;letter-spacing:.02em}
+  a.peer .p-body p{margin:4px 0 0;color:#5a4a2e;font-size:.95rem}
+  a.peer .p-go{font-size:1.7rem;font-weight:800;color:var(--accent2)}
+  @media(max-width:560px){header h1{font-size:2rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="pagenav">
+    <a href="../index.html">← 返回门户首页</a>
+    <span class="spacer"></span>
+  </nav>
+
+  <header>
+    <h1>动词专练</h1>
+    <div class="sub">N2 动词词卡 + 变形练习——按辞书形结尾分单元，同类结尾共享同一て形音变规则</div>
+  </header>
+
+  <div class="peer">
+    <a class="peer" href="units/index.html">
+      <span class="p-ico">🗂</span>
+      <span class="p-body">
+        <h2>动词词卡</h2>
+        <p>按辞书形结尾分单元的 N2 动词卡；浏览・翻转卡・测验・间隔重复复习四态，词读み配音频。</p>
+      </span>
+      <span class="p-go">→</span>
+    </a>
+  </div>
+  <div class="peer">
+    <a class="peer" href="conjugation/index.html">
+      <span class="p-ico">⚡</span>
+      <span class="p-body">
+        <h2>动词变形练习</h2>
+        <p>辞书形 × 11 种形态，输入 / 选择 / 自揭三模式随时切换，按形态与类别筛题。</p>
+      </span>
+      <span class="p-go">→</span>
+    </a>
+  </div>
+</div>
+</body>
+</html>

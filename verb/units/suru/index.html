@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>动词专练</title>
+<link rel="stylesheet" href="../../vocab.css">
+</head>
+<body>
+<div class="wrap">
+<nav class="pagenav">
+  <a href="../index.html">← 返回词卡目录</a>
+  <span class="spacer"></span>
+  <a href="../../index.html">动词专练首页</a>
+  <a href="../../../index.html">门户首页</a>
+</nav>
+
+<header>
+  <h1 id="title">—</h1>
+  <div class="sub" id="sub"></div>
+  <span class="meaning" id="hmeaning"></span>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="browse" class="active">浏览</button>
+  <button data-tab="card">翻转卡</button>
+  <button data-tab="quiz">测验</button>
+  <button data-tab="srs">复习<span id="duepill" class="pill" style="display:none">0</span></button>
+</nav>
+
+<section id="browse"></section>
+<section id="card" style="display:none"></section>
+<section id="quiz" style="display:none"></section>
+<section id="srs" style="display:none"></section>
+</div>
+
+<!-- 数据内联：file:// 下不可 fetch，故以本块为准；与同目录 data.json 内容一致 -->
+<script type="application/json" id="vocab-data">
+{
+  "title": "〜する",
+  "reading": "て形 → して",
+  "meaning_cn": "愛する・関する・接する・属する …",
+  "categories": [
+    {
+      "name": "〜する",
+      "reading": "する",
+      "cards": [
+        { "id": "1-1", "word": "愛する", "kana": "あいする", "pos": "動詞", "meaning_cn": "爱恋；热爱，喜欢，喜爱", "example_jp": "彼は家族を深く愛している。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>家族<rt>かぞく</rt></ruby>を<ruby>深<rt>ふか</rt></ruby>く<ruby>愛<rt>あい</rt></ruby>している。", "example_cn": "他深深地爱着家人。" },
+        { "id": "1-2", "word": "関する", "kana": "かんする", "pos": "動詞", "meaning_cn": "关于，有关", "example_jp": "この問題に関する資料を集めた。", "example_jp_ruby": "この<ruby>問題<rt>もんだい</rt></ruby>に<ruby>関<rt>かん</rt></ruby>する<ruby>資料<rt>しりょう</rt></ruby>を<ruby>集<rt>あつ</rt></ruby>めた。", "example_cn": "收集了有关这个问题的资料。" },
+        { "id": "1-3", "word": "接する", "kana": "せっする", "pos": "動詞", "meaning_cn": "接触；接连，靠近", "example_jp": "初めて外国の文化に接した。", "example_jp_ruby": "<ruby>初<rt>はじ</rt></ruby>めて<ruby>外国<rt>がいこく</rt></ruby>の<ruby>文化<rt>ぶんか</rt></ruby>に<ruby>接<rt>せっ</rt></ruby>した。", "example_cn": "第一次接触到外国文化。" },
+        { "id": "1-4", "word": "属する", "kana": "ぞくする", "pos": "動詞", "meaning_cn": "从属于，归于", "example_jp": "この部は営業本部に属する。", "example_jp_ruby": "この<ruby>部<rt>ぶ</rt></ruby>は<ruby>営業<rt>えいぎょう</rt></ruby><ruby>本部<rt>ほんぶ</rt></ruby>に<ruby>属<rt>ぞく</rt></ruby>する。", "example_cn": "这个部门隶属营业总部。" },
+        { "id": "1-5", "word": "対する", "kana": "たいする", "pos": "動詞", "meaning_cn": "针对，对于", "example_jp": "両者の意見は互いに対している。", "example_jp_ruby": "<ruby>両者<rt>りょうしゃ</rt></ruby>の<ruby>意見<rt>いけん</rt></ruby>は<ruby>互<rt>たが</rt></ruby>いに<ruby>対<rt>たい</rt></ruby>している。", "example_cn": "双方的意见相互对立。" },
+        { "id": "1-6", "word": "達する", "kana": "たっする", "pos": "動詞", "meaning_cn": "到达（自）；实现（他）", "example_jp": "気温が三十度に達した。", "example_jp_ruby": "<ruby>気温<rt>きおん</rt></ruby>が<ruby>三十度<rt>さんじゅうど</rt></ruby>に<ruby>達<rt>たっ</rt></ruby>した。", "example_cn": "气温达到了三十度。" },
+        { "id": "1-7", "word": "適する", "kana": "てきする", "pos": "動詞", "meaning_cn": "适合，适应，适于", "example_jp": "この土は畑に適している。", "example_jp_ruby": "この<ruby>土<rt>つち</rt></ruby>は<ruby>畑<rt>はたけ</rt></ruby>に<ruby>適<rt>てき</rt></ruby>している。", "example_cn": "这种土壤适合做田地。" },
+        { "id": "1-8", "word": "熱する", "kana": "ねっする", "pos": "動詞", "meaning_cn": "加热", "example_jp": "鉄を高温で熱する。", "example_jp_ruby": "<ruby>鉄<rt>てつ</rt></ruby>を<ruby>高温<rt>こうおん</rt></ruby>で<ruby>熱<rt>ねっ</rt></ruby>する。", "example_cn": "将铁高温加热。" },
+        { "id": "1-9", "word": "反する", "kana": "はんする", "pos": "動詞", "meaning_cn": "违反；与···相反", "example_jp": "彼の行動は規則に反する。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>の<ruby>行動<rt>こうどう</rt></ruby>は<ruby>規則<rt>きそく</rt></ruby>に<ruby>反<rt>はん</rt></ruby>する。", "example_cn": "他的行为违反规则。" },
+        { "id": "1-10", "word": "罰する", "kana": "ばっする", "pos": "動詞", "meaning_cn": "处罚，受罚，处分", "example_jp": "違反者は厳しく罰せられる。", "example_jp_ruby": "<ruby>違反<rt>いはん</rt></ruby><ruby>者<rt>しゃ</rt></ruby>は<ruby>厳<rt>きび</rt></ruby>しく<ruby>罰<rt>ばっ</rt></ruby>せられる。", "example_cn": "违规者会受到严厉处罚。" },
+        { "id": "1-11", "word": "訳する", "kana": "やくする", "pos": "動詞", "meaning_cn": "翻译", "example_jp": "この小説を中国語に訳した。", "example_jp_ruby": "この<ruby>小説<rt>しょうせつ</rt></ruby>を<ruby>中国語<rt>ちゅうごくご</rt></ruby>に<ruby>訳<rt>やく</rt></ruby>した。", "example_cn": "把这本小说译成了中文。" },
+        { "id": "1-12", "word": "略する", "kana": "りゃくする", "pos": "動詞", "meaning_cn": "省略，简略", "example_jp": "以下の説明は略する。", "example_jp_ruby": "<ruby>以下<rt>いか</rt></ruby>の<ruby>説明<rt>せつめい</rt></ruby>は<ruby>略<rt>りゃく</rt></ruby>する。", "example_cn": "以下的说明从略。" }
+      ]
+    }
+  ]
+}
+</script>
+<script src="../../vocab.js"></script>
+</body>
+</html>

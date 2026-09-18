@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>动词专练 · 变形练习</title>
+<!-- 本页由 verb/gen.js 从 conjugation/data.json 生成，不要手改（交互设计档案：.scratch/verb-module/prototype/conjugation-template.html） -->
+<style>
+  :root{
+    --bg:#f6f3ee; --ink:#2b2a26; --muted:#8a857a; --line:#e4ddd1;
+    --card:#fffdf9; --accent:#9b6b3f; --accent2:#c98a4b; --ok:#5a7d52; --bad:#b3574c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Sans","Yu Gothic","Noto Sans CJK JP","Microsoft YaHei",system-ui,sans-serif;
+    line-height:1.6;padding-top:0}
+  .wrap{max-width:680px;margin:0 auto;padding:28px 20px 60px}
+  nav.pagenav{display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+    margin-bottom:20px;border-bottom:1px solid var(--line);padding-bottom:12px}
+  nav.pagenav a{text-decoration:none;font-size:.88em;padding:4px 14px;border-radius:999px;
+    border:1px solid var(--line);color:var(--accent);background:var(--card);transition:background .15s ease}
+  nav.pagenav a:hover{background:#f0e7d6}
+  nav.pagenav .spacer{flex:1}
+  h1{font-size:1.5rem;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:18px}
+  .lbl{font-size:.82rem;font-weight:700;color:var(--muted);letter-spacing:.05em;margin:10px 0 6px}
+  .lbl:first-child{margin-top:0}
+  .pills{display:flex;flex-wrap:wrap;gap:8px}
+  .pills button{font-size:.85rem;font-weight:600;border:1px solid var(--line);background:#fff;color:#5a4a2e;padding:5px 13px;border-radius:999px;cursor:pointer;font-family:inherit}
+  .pills button:hover{border-color:var(--accent)}
+  .pills button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .startr{display:flex;gap:12px;align-items:center;margin-top:16px;flex-wrap:wrap}
+  .count{color:var(--muted);font-size:.88rem}
+  button.act{font-size:1rem;font-weight:700;background:var(--accent2);color:#fff;border:none;border-radius:10px;padding:10px 22px;cursor:pointer;font-family:inherit}
+  button.act:hover{background:var(--accent)}
+  button.ghost{font-size:.92rem;background:transparent;border:1px solid var(--line);color:var(--accent);border-radius:10px;padding:9px 16px;cursor:pointer;font-family:inherit}
+  button.ghost:hover{background:#f0e7d6}
+  .status{display:flex;gap:14px;color:var(--muted);font-size:.88rem;margin-bottom:14px;flex-wrap:wrap}
+  .status b{color:var(--ink)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 24px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+  .prompt .cls{color:var(--muted);font-size:.9rem}
+  .prompt .dict{font-size:2.6rem;font-weight:800;letter-spacing:.02em}
+  .prompt .rd{color:var(--muted);font-size:1rem;margin-left:10px;font-weight:400}
+  .prompt .form{margin-top:2px;font-weight:700;color:var(--accent)}
+  .prompt .form em{font-style:normal;background:#ece3d2;border-radius:6px;padding:1px 8px}
+  .row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;align-items:center}
+  input[type=text]{flex:1;min-width:180px;font-size:1.25rem;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-family:inherit}
+  input[type=text]:focus{outline:2px solid var(--accent2)}
+  .fb{margin-top:16px;font-weight:700;min-height:1.6em}
+  .fb.ok{color:var(--ok)} .fb.bad{color:var(--bad)} .fb.ans{color:var(--accent)}
+  .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
+  .choices button{font-size:1.3rem;font-weight:700;padding:14px 10px;border-radius:12px;border:1px solid var(--line);background:#fff;cursor:pointer;font-family:inherit}
+  .choices button:hover:not(:disabled){border-color:var(--accent)}
+  .choices button.right{background:#e8efe5;border-color:var(--ok);color:var(--ok)}
+  .choices button.wrong{background:#f5e4e1;border-color:var(--bad);color:var(--bad)}
+  .choices button:disabled{cursor:default}
+  .reveal{font-size:2.4rem;font-weight:800;color:var(--accent);margin:18px 0 4px;letter-spacing:.02em}
+  .done{text-align:center}
+  .done .score{font-size:1.5rem;font-weight:800;color:var(--accent);margin:14px 0}
+  .headrow{position:sticky;top:0;z-index:9;background:var(--bg);display:flex;align-items:center;
+    justify-content:space-between;gap:16px;flex-wrap:wrap;padding:6px 0 12px;margin-bottom:18px;
+    border-bottom:1px solid var(--line)}
+  .titles{min-width:0}
+  .titles .sub{margin:2px 0 0}
+  .topbar{position:static;display:none;align-items:center;gap:10px;flex-wrap:wrap}
+  .topbar.show{display:flex}
+  .topbar .pills{gap:6px}
+  .topbar .pills button{padding:3px 11px;font-size:.8rem}
+  .tbstat{color:var(--muted);font-size:.85rem;font-weight:600;white-space:nowrap}
+  .tbstat b{color:var(--ink)}
+  .pbar{width:120px;height:6px;background:#ece3d2;border-radius:99px;overflow:hidden}
+  .pbar i{display:block;height:100%;width:0;background:var(--accent2);border-radius:99px;transition:width .2s}
+  .hint{color:var(--muted);font-size:.95rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="pagenav">
+    <a href="../index.html">← 返回动词专练</a>
+    <span class="spacer"></span>
+    <a href="../units/index.html">词卡目录</a>
+    <a href="../../index.html">门户首页</a>
+  </nav>
+  <div class="headrow" id="headrow">
+    <div class="titles">
+      <h1>动词变形练习</h1>
+      <p class="sub">三种交互并存，练习中可随时切换（标题右侧工具条）。筛题按形态与动词类别。</p>
+    </div>
+    <div class="topbar" id="topbar">
+      <div class="pills" id="modepills2">
+        <button data-mode="a">A 输入</button>
+        <button data-mode="b">B 选择</button>
+        <button data-mode="c">C 自揭</button>
+      </div>
+      <span class="tbstat" id="tbstat"></span>
+      <div class="pbar"><i id="pfill"></i></div>
+      <button class="ghost" id="editsetup" style="padding:3px 11px;font-size:.8rem;margin-left:auto">修改设置</button>
+    </div>
+  </div>
+
+  <div class="panel" id="setup">
+    <div class="lbl">模式（练习中可随时切换）</div>
+    <div class="pills" id="modepills">
+      <button data-mode="a">A 输入式填空</button>
+      <button data-mode="b">B 选择式四选一</button>
+      <button data-mode="c">C 自我揭示</button>
+    </div>
+    <div class="lbl">形态范围</div>
+    <div class="pills" id="formpills"></div>
+    <div class="lbl">动词类别</div>
+    <div class="pills" id="classpills"></div>
+    <div class="startr">
+      <button class="act" id="startbtn">开始练习</button>
+      <span class="count" id="count"></span>
+    </div>
+  </div>
+  <div id="app"><p class="hint">选好模式与范围后，点「开始练习」。</p></div>
+</div>
+<script type="application/json" id="conj-data">
+{
+  "title": "动词变形练习",
+  "forms": [
+    "ます形",
+    "ない形",
+    "て形",
+    "た形",
+    "命令形",
+    "可能形",
+    "假定形",
+    "意志形",
+    "被动形",
+    "使役形",
+    "使役被动形"
+  ],
+  "verbs": [
+    {
+      "word": "行く",
+      "reading": "いく",
+      "class": 1,
+      "forms": {
+        "ます形": "行きます",
+        "ない形": "行かない",
+        "て形": "行って",
+        "た形": "行った",
+        "命令形": "行け",
+        "可能形": "行ける",
+        "假定形": "行けば",
+        "意志形": "行こう",
+        "被动形": "行かれる",
+        "使役形": "行かせる",
+        "使役被动形": "行かされる"
+      }
+    },
+    {
+      "word": "遊ぶ",
+      "reading": "あそぶ",
+      "class": 1,
+      "forms": {
+        "ます形": "遊びます",
+        "ない形": "遊ばない",
+        "て形": "遊んで",
+        "た形": "遊んだ",
+        "命令形": "遊べ",
+        "可能形": "遊べる",
+        "假定形": "遊べば",
+        "意志形": "遊ぼう",
+        "被动形": "遊ばれる",
+        "使役形": "遊ばせる",
+        "使役被动形": "遊ばされる"
+      }
+    },
+    {
+      "word": "貸す",
+      "reading": "かす",
+      "class": 1,
+      "forms": {
+        "ます形": "貸します",
+        "ない形": "貸さない",
+        "て形": "貸して",
+        "た形": "貸した",
+        "命令形": "貸せ",
+        "可能形": "貸せる",
+        "假定形": "貸せば",
+        "意志形": "貸そう",
+        "被动形": "貸される",
+        "使役形": "貸させる",
+        "使役被动形": "貸さされる"
+      }
+    },
+    {
+      "word": "飲む",
+      "reading": "のむ",
+      "class": 1,
+      "forms": {
+        "ます形": "飲みます",
+        "ない形": "飲まない",
+        "て形": "飲んで",
+        "た形": "飲んだ",
+        "命令形": "飲め",
+        "可能形": "飲める",
+        "假定形": "飲めば",
+        "意志形": "飲もう",
+        "被动形": "飲まれる",
+        "使役形": "飲ませる",
+        "使役被动形": "飲まされる"
+      }
+    },
+    {
+      "word": "吸う",
+      "reading": "すう",
+      "class": 1,
+      "forms": {
+        "ます形": "吸います",
+        "ない形": "吸わない",
+        "て形": "吸って",
+        "た形": "吸った",
+        "命令形": "吸え",
+        "可能形": "吸える",
+        "假定形": "吸えば",
+        "意志形": "吸おう",
+        "被动形": "吸われる",
+        "使役形": "吸わせる",
+        "使役被动形": "吸わされる"
+      }
+    },
+    {
+      "word": "折る",
+      "reading": "おる",
+      "class": 1,
+      "forms": {
+        "ます形": "折ります",
+        "ない形": "折らない",
+        "て形": "折って",
+        "た形": "折った",
+        "命令形": "折れ",
+        "可能形": "折れる",
+        "假定形": "折れば",
+        "意志形": "折ろう",
+        "被动形": "折られる",
+        "使役形": "折らせる",
+        "使役被动形": "折らされる"
+      }
+    },
+    {
+      "word": "開く",
+      "reading": "あく",
+      "class": 1,
+      "forms": {
+        "ます形": "開きます",
+        "ない形": "開かない",
+        "て形": "開いて",
+        "た形": "開いた",
+        "命令形": "開け",
+        "可能形": "開ける",
+        "假定形": "開けば",
+        "意志形": "開こう",
+        "被动形": "開かれる",
+        "使役形": "開かせる",
+        "使役被动形": "開かされる"
+      }
+    },
+    {
+      "word": "待つ",
+      "reading": "まつ",
+      "class": 1,
+      "forms": {
+        "ます形": "待ちます",
+        "ない形": "待たない",
+        "て形": "待って",
+        "た形": "待った",
+        "命令形": "待て",
+        "可能形": "待てる",
+        "假定形": "待てば",
+        "意志形": "待とう",
+        "被动形": "待たれる",
+        "使役形": "待たせる",
+        "使役被动形": "待たされる"
+      }
+    },
+    {
+      "word": "役立つ",
+      "reading": "やくだつ",
+      "class": 1,
+      "forms": {
+        "ます形": "役立ちます",
+        "ない形": "役立たない",
+        "て形": "役立って",
+        "た形": "役立った",
+        "命令形": "役立て",
+        "可能形": "役立てる",
+        "假定形": "役立てば",
+        "意志形": "役立とう",
+        "被动形": "役立たれる",
+        "使役形": "役立たせる",
+        "使役被动形": "役立たされる"
+      }
+    },
+    {
+      "word": "起きる",
+      "reading": "おきる",
+      "class": 2,
+      "forms": {
+        "ます形": "起きます",
+        "ない形": "起きない",
+        "て形": "起きて",
+        "た形": "起きた",
+        "命令形": "起きろ",
+        "可能形": "起きられる",
+        "假定形": "起きれば",
+        "意志形": "起きよう",
+        "被动形": "起きられる",
+        "使役形": "起きさせる",
+        "使役被动形": "起きさせられる"
+      }
+    },
+    {
+      "word": "借りる",
+      "reading": "かりる",
+      "class": 2,
+      "forms": {
+        "ます形": "借ります",
+        "ない形": "借りない",
+        "て形": "借りて",
+        "た形": "借りた",
+        "命令形": "借りろ",
+        "可能形": "借りられる",
+        "假定形": "借りれば",
+        "意志形": "借りよう",
+        "被动形": "借りられる",
+        "使役形": "借りさせる",
+        "使役被动形": "借りさせられる"
+      }
+    },
+    {
+      "word": "開ける",
+      "reading": "あける",
+      "class": 2,
+      "forms": {
+        "ます形": "開けます",
+        "ない形": "開けない",
+        "て形": "開けて",
+        "た形": "開けた",
+        "命令形": "開けろ",
+        "可能形": "開けられる",
+        "假定形": "開ければ",
+        "意志形": "開けよう",
+        "被动形": "開けられる",
+        "使役形": "開けさせる",
+        "使役被动形": "開けさせられる"
+      }
+    },
+    {
+      "word": "浴びる",
+      "reading": "あびる",
+      "class": 2,
+      "forms": {
+        "ます形": "浴びます",
+        "ない形": "浴びない",
+        "て形": "浴びて",
+        "た形": "浴びた",
+        "命令形": "浴びろ",
+        "可能形": "浴びられる",
+        "假定形": "浴びれば",
+        "意志形": "浴びよう",
+        "被动形": "浴びられる",
+        "使役形": "浴びさせる",
+        "使役被动形": "浴びさせられる"
+      }
+    },
+    {
+      "word": "食べる",
+      "reading": "たべる",
+      "class": 2,
+      "forms": {
+        "ます形": "食べます",
+        "ない形": "食べない",
+        "て形": "食べて",
+        "た形": "食べた",
+        "命令形": "食べろ",
+        "可能形": "食べられる",
+        "假定形": "食べれば",
+        "意志形": "食べよう",
+        "被动形": "食べられる",
+        "使役形": "食べさせる",
+        "使役被动形": "食べさせられる"
+      }
+    },
+    {
+      "word": "増える",
+      "reading": "ふえる",
+      "class": 2,
+      "forms": {
+        "ます形": "増えます",
+        "ない形": "増えない",
+        "て形": "増えて",
+        "た形": "増えた",
+        "命令形": "増えろ",
+        "可能形": "増えられる",
+        "假定形": "増えれば",
+        "意志形": "増えよう",
+        "被动形": "増えられる",
+        "使役形": "増えさせる",
+        "使役被动形": "増えさせられる"
+      }
+    },
+    {
+      "word": "捨てる",
+      "reading": "すてる",
+      "class": 2,
+      "forms": {
+        "ます形": "捨てます",
+        "ない形": "捨てない",
+        "て形": "捨てて",
+        "た形": "捨てた",
+        "命令形": "捨てろ",
+        "可能形": "捨てられる",
+        "假定形": "捨てれば",
+        "意志形": "捨てよう",
+        "被动形": "捨てられる",
+        "使役形": "捨てさせる",
+        "使役被动形": "捨てさせられる"
+      }
+    },
+    {
+      "word": "する",
+      "reading": "する",
+      "class": 3,
+      "forms": {
+        "ます形": "します",
+        "ない形": "しない",
+        "て形": "して",
+        "た形": "した",
+        "命令形": "しろ",
+        "可能形": "できる",
+        "假定形": "すれば",
+        "意志形": "しよう",
+        "被动形": "される",
+        "使役形": "させる",
+        "使役被动形": "させられる"
+      }
+    },
+    {
+      "word": "来る",
+      "reading": "くる",
+      "class": 3,
+      "forms": {
+        "ます形": "きます",
+        "ない形": "こない",
+        "て形": "きて",
+        "た形": "きた",
+        "命令形": "こい",
+        "可能形": "こられる",
+        "假定形": "くれば",
+        "意志形": "こよう",
+        "被动形": "こられる",
+        "使役形": "こさせる",
+        "使役被动形": "こさせられる"
+      }
+    },
+    {
+      "word": "運転する",
+      "reading": "うんてんする",
+      "class": 3,
+      "forms": {
+        "ます形": "運転します",
+        "ない形": "運転しない",
+        "て形": "運転して",
+        "た形": "運転した",
+        "命令形": "運転しろ",
+        "可能形": "運転できる",
+        "假定形": "運転すれば",
+        "意志形": "運転しよう",
+        "被动形": "運転される",
+        "使役形": "運転させる",
+        "使役被动形": "運転させられる"
+      }
+    }
+  ]
+}
+</script>
+<script>
+(function(){
+  var DATA = JSON.parse(document.getElementById('conj-data').textContent);
+  var FORMS = DATA.forms;
+  var CLS = {1:'一类（五段）', 2:'二类（一段）', 3:'三类（サ变）'};
+  var VERBS = DATA.verbs.map(function(v){
+    return { d:v.word, r:v.reading, cls:v.class, a:FORMS.map(function(f){ return v.forms[f]; }) };
+  });
+
+  var app = document.getElementById('app');
+  var topbar = document.getElementById('topbar');
+  var setup = document.getElementById('setup');
+  var editsetup = document.getElementById('editsetup');
+  var state = null;
+  var mode = 'a';
+  var formSel = -1;
+  var classSel = 0;
+
+  function norm(s){ return (s||'').replace(/[\s\u3000]+/g,''); }
+  function shuffle(arr){
+    for(var i=arr.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=arr[i]; arr[i]=arr[j]; arr[j]=t; }
+    return arr;
+  }
+  function pickSome(arr, n, notIn){
+    var pool = arr.filter(function(x){ return notIn.indexOf(x)<0; });
+    shuffle(pool);
+    return pool.slice(0, n);
+  }
+
+  function buildItems(){
+    var items = [];
+    VERBS.forEach(function(v){
+      if(classSel && v.cls !== classSel) return;
+      var idxs = (formSel < 0) ? FORMS.map(function(_,k){return k;}) : [formSel];
+      idxs.forEach(function(k){ items.push({ v:v, k:k, answer:v.a[k] }); });
+    });
+    return shuffle(items);
+  }
+  function itemTotal(){ var n=0; VERBS.forEach(function(v){ if(!classSel || v.cls===classSel) n += (formSel<0?FORMS.length:1); }); return n; }
+
+  function start(){
+    state = { items:buildItems(), i:0, results:[] };
+    render();
+  }
+  function backToSetup(){ state = null; render(); }
+  function rightN(){ return state.results.filter(function(r){return r==='right';}).length; }
+
+  function syncTopbar(){
+    topbar.className = 'topbar show';
+    ['modepills','modepills2'].forEach(function(id){
+      Array.prototype.forEach.call(document.querySelectorAll('#'+id+' button'), function(b){
+        b.className = (b.getAttribute('data-mode')===mode) ? 'on' : '';
+      });
+    });
+    if(state){
+      document.getElementById('tbstat').innerHTML =
+        '<b>' + Math.min(state.i+1, state.items.length) + '</b>/' + state.items.length +
+        ' · 对 <b>' + rightN() + '</b>';
+      document.getElementById('pfill').style.width =
+        (state.items.length ? (state.i/state.items.length*100) : 100) + '%';
+    }
+  }
+
+  function render(){
+    setup.style.display = state ? 'none' : '';
+    if(!state){
+      topbar.className = 'topbar';
+      app.innerHTML = '<p class="hint">设置已更新，点「开始练习」应用新设置。</p>';
+      return;
+    }
+    if(state.i >= state.items.length){
+      topbar.className = 'topbar show';
+      document.getElementById('tbstat').innerHTML = '完成 · 对 <b>' + rightN() + '</b>/' + state.items.length;
+      document.getElementById('pfill').style.width = '100%';
+      app.innerHTML = '<div class="card done"><div>做完了。</div>' +
+        '<div class="score">答对 ' + rightN() + ' / ' + state.items.length + '</div>' +
+        '<button class="act" id="again">再来一轮（重新洗牌）</button></div>';
+      document.getElementById('again').onclick = start;
+      return;
+    }
+    syncTopbar();
+    var it = state.items[state.i];
+    var body = (mode==='a') ? inputBody() : (mode==='b') ? choiceBody(it) : revealBody();
+    app.innerHTML =
+      '<div class="status"><span>第 <b>' + (state.i+1) + '</b>/' + state.items.length + ' 题</span>' +
+      '<span>答对 <b>' + rightN() + '</b> · 未对 <b>' + (state.i - rightN()) + '</b></span>' +
+      '<span>模式 ' + mode.toUpperCase() + '</span></div>' +
+      '<div class="card">' + promptHtml(it) + body + '</div>';
+    wire(it);
+  }
+
+  function promptHtml(it){
+    return '<div class="prompt"><div class="cls">' + CLS[it.v.cls] + '动词</div>' +
+      '<div class="dict">' + it.v.d + '<span class="rd">' + it.v.r + '</span></div>' +
+      '<div class="form">→ <em>' + FORMS[it.k] + '</em> ？</div></div>';
+  }
+
+  /* ---- A 输入式 ---- */
+  function inputBody(){
+    return '<div class="row"><input type="text" id="ans" placeholder="输入变形后的形态" autocomplete="off">' +
+      '<button class="act" id="judge">判定</button></div>' +
+      '<div class="fb" id="fb"></div>' +
+      '<div class="row" id="after" style="display:none">' +
+      '<button class="ghost" id="see">看答案（计入未对）</button>' +
+      '<button class="act" id="next">下一题 →</button></div>';
+  }
+  function wireInput(it){
+    var input = document.getElementById('ans');
+    function judge(){
+      if(state.results[state.i]) return;
+      var fb = document.getElementById('fb');
+      if(norm(input.value) === norm(it.answer)){
+        state.results[state.i] = 'right';
+        fb.className = 'fb ok'; fb.textContent = '✓ 正确';
+        finish();
+      }else{
+        fb.className = 'fb bad'; fb.textContent = '✗ 不对，再试一次（或看答案）';
+      }
+    }
+    document.getElementById('judge').onclick = judge;
+    input.addEventListener('keydown', function(e){ if(e.key === 'Enter') judge(); });
+    document.getElementById('see').onclick = function(){
+      state.results[state.i] = 'wrong';
+      var fb = document.getElementById('fb');
+      fb.className = 'fb ans'; fb.textContent = '答案：' + it.answer;
+      finish();
+    };
+    document.getElementById('next').onclick = nextItem;
+    input.focus();
+  }
+  function finish(){
+    document.getElementById('after').style.display = 'flex';
+    document.getElementById('see').style.display = 'none';
+    var input = document.getElementById('ans');
+    if(input) input.disabled = true;
+    syncTopbar();
+  }
+  function nextItem(){ state.i++; render(); }
+
+  /* ---- B 选择式 ---- */
+  function makeChoices(it){
+    // 干扰项：1 个同词异形态（考形态辨别）+ 2 个同形态异词（考动词接续），全部是真实日语
+    var sameVerbOther = it.v.a.filter(function(_,k){ return k!==it.k; });
+    var sameFormOther = VERBS.filter(function(v){ return v!==it.v; }).map(function(v){ return v.a[it.k]; });
+    var ds = pickSome(sameVerbOther, 1, [it.answer]).concat(pickSome(sameFormOther, 2, [it.answer]));
+    return shuffle([it.answer].concat(ds.slice(0,3)));
+  }
+  function choiceBody(it){
+    var btns = makeChoices(it).map(function(c){ return '<button data-c="' + c + '">' + c + '</button>'; }).join('');
+    return '<div class="choices">' + btns + '</div>' +
+      '<div class="fb" id="fb"></div>' +
+      '<div class="row" id="after" style="display:none"><button class="act" id="next">下一题 →</button></div>';
+  }
+  function wireChoice(it){
+    Array.prototype.forEach.call(document.querySelectorAll('.choices button'), function(b){
+      b.onclick = function(){
+        if(state.results[state.i]) return;
+        var fb = document.getElementById('fb');
+        if(b.getAttribute('data-c') === it.answer){
+          state.results[state.i] = 'right';
+          b.className = 'right';
+          fb.className = 'fb ok'; fb.textContent = '✓ 正确';
+        }else{
+          state.results[state.i] = 'wrong';
+          b.className = 'wrong';
+          Array.prototype.forEach.call(document.querySelectorAll('.choices button'), function(o){
+            if(o.getAttribute('data-c') === it.answer) o.className = 'right';
+          });
+          fb.className = 'fb bad'; fb.textContent = '✗ 正确是「' + it.answer + '」';
+        }
+        Array.prototype.forEach.call(document.querySelectorAll('.choices button'), function(o){ o.disabled = true; });
+        document.getElementById('after').style.display = 'flex';
+        syncTopbar();
+      };
+    });
+    document.getElementById('next').onclick = nextItem;
+  }
+
+  /* ---- C 自我揭示 ---- */
+  function revealBody(){
+    return '<div class="row"><button class="act" id="flip">想好了 · 翻开答案</button></div>' +
+      '<div class="reveal" id="rev" style="display:none"></div>' +
+      '<div class="row" id="after" style="display:none">' +
+      '<button class="act" id="yes">记对了</button>' +
+      '<button class="ghost" id="no">记错了</button>' +
+      '<span style="color:var(--muted);font-size:.85rem">自评后进入下一题</span></div>';
+  }
+  function wireReveal(it){
+    document.getElementById('flip').onclick = function(){
+      this.style.display = 'none';
+      var rev = document.getElementById('rev');
+      rev.textContent = it.answer; rev.style.display = 'block';
+      document.getElementById('after').style.display = 'flex';
+    };
+    document.getElementById('yes').onclick = function(){ state.results[state.i] = 'right'; nextItem(); };
+    document.getElementById('no').onclick  = function(){ state.results[state.i] = 'wrong'; nextItem(); };
+  }
+
+  function wire(it){
+    if(mode==='a') wireInput(it);
+    else if(mode==='b') wireChoice(it);
+    else wireReveal(it);
+  }
+
+  function switchMode(m){
+    if(m === mode) return;
+    mode = m;
+    if(state && state.i < state.items.length) state.results[state.i] = null;
+    render();
+  }
+
+  function buildPanel(){
+    var fp = document.getElementById('formpills');
+    var html = '<button data-f="-1" class="on">全部</button>';
+    FORMS.forEach(function(f,k){ html += '<button data-f="' + k + '">' + f + '</button>'; });
+    fp.innerHTML = html;
+    Array.prototype.forEach.call(fp.querySelectorAll('button'), function(b){
+      b.onclick = function(){
+        Array.prototype.forEach.call(fp.querySelectorAll('button'), function(o){ o.className=''; });
+        b.className = 'on';
+        formSel = parseInt(b.getAttribute('data-f'), 10);
+        state = null; updateCount(); render();
+      };
+    });
+
+    var cp = document.getElementById('classpills');
+    var cnames = ['全部','一类（五段）','二类（一段）','三类（サ变）'];
+    cp.innerHTML = cnames.map(function(c,k){ return '<button data-c="'+k+'"'+(k===0?' class="on"':'')+'>'+c+'</button>'; }).join('');
+    Array.prototype.forEach.call(cp.querySelectorAll('button'), function(b){
+      b.onclick = function(){
+        Array.prototype.forEach.call(cp.querySelectorAll('button'), function(o){ o.className=''; });
+        b.className = 'on';
+        classSel = parseInt(b.getAttribute('data-c'), 10);
+        state = null; updateCount(); render();
+      };
+    });
+
+    ['modepills','modepills2'].forEach(function(id){
+      Array.prototype.forEach.call(document.querySelectorAll('#'+id+' button'), function(b){
+        b.onclick = function(){ switchMode(b.getAttribute('data-mode')); };
+      });
+    });
+    document.getElementById('modepills').querySelector('button[data-mode="a"]').className = 'on';
+
+    document.getElementById('startbtn').onclick = start;
+    editsetup.onclick = backToSetup;
+    updateCount();
+  }
+  function updateCount(){
+    document.getElementById('count').textContent = '当前设置共 ' + itemTotal() + ' 题';
+  }
+
+  buildPanel();
+})();
+</script>
+</body>
+</html>

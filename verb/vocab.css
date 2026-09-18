@@ -1,0 +1,75 @@
+/* ============================================================
+   动词专练 · 模块样式
+   单元页（verb/units/<unit>/index.html）专用的暖色皮肤。
+   复制改造自 jp-vocab/vocab.css：刻意不自带站内 assets/style.css 的令牌，
+   也不挂 theme.js——本模块保持一套独立的暖米色配色，不参与全站浅色/护眼/深色切换。
+   ============================================================ */
+
+:root{
+  --bg:#f6f3ee; --ink:#2b2a26; --muted:#8a857a; --line:#e4ddd1;
+  --card:#fffdf9; --accent:#9b6b3f; --accent2:#c98a4b; --ok:#5a7d52; --bad:#b1493b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Hiragino Sans","Yu Gothic","Noto Sans CJK JP","Microsoft YaHei",system-ui,sans-serif;
+  line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:880px;margin:0 auto;padding:28px 20px 90px}
+header h1{margin:0;font-size:2.4rem;font-weight:800;letter-spacing:.02em}
+header .sub{color:var(--muted);font-size:1.05rem;margin-top:4px}
+header .meaning{display:inline-block;margin-top:10px;background:#ece3d2;color:#6b4a27;
+   padding:3px 10px;border-radius:6px;font-size:.92rem}
+
+/* ---- 页间导航（与全站 nav.pagenav 同位，但用本模块暖色令牌） ---- */
+nav.pagenav{display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+   margin-bottom:20px;border-bottom:1px solid var(--line);padding-bottom:12px}
+nav.pagenav a{text-decoration:none;font-size:.88em;padding:4px 14px;border-radius:999px;
+   border:1px solid var(--line);color:var(--accent);background:var(--card);
+   transition:background .15s ease}
+nav.pagenav a:hover{background:#f0e7d6}
+nav.pagenav .spacer{flex:1}
+
+nav.tabs{display:flex;gap:4px;margin:22px 0 8px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav.tabs button{background:none;border:none;border-bottom:2px solid transparent;
+   padding:8px 14px;font-size:1rem;color:var(--muted);cursor:pointer;font-weight:600}
+nav.tabs button.active{color:var(--ink);border-color:var(--accent)}
+.cat{margin:26px 0 8px}
+.cat .cname{font-size:.8rem;letter-spacing:.18em;color:var(--accent);font-weight:700}
+.cat .creading{font-size:.82rem;color:var(--muted);margin-left:6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+   padding:16px 18px;margin:10px 0;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.card .top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.card .word{font-size:1.7rem;font-weight:700}
+.card .kana{color:var(--muted);font-size:1.05rem}
+.card .pos{font-size:.72rem;background:#efe7d8;color:#7a5a30;padding:2px 8px;border-radius:5px}
+.card .meaning{margin-left:auto;font-weight:600;color:#4a3b22}
+.card .ex{margin-top:10px;font-size:1.08rem;line-height:2}
+.card .excn{color:var(--muted);font-size:.96rem;margin-top:2px}
+.hide{display:none!important}
+.plays{margin-top:10px;display:flex;gap:8px}
+.plays button{font-size:.82rem;background:#f0e7d6;border:1px solid var(--line);
+   color:#5a4a2e;padding:5px 10px;border-radius:7px;cursor:pointer}
+.plays button:hover{background:var(--accent2);color:#fff}
+.toggle-cn{font-size:.78rem;background:none;border:1px solid var(--line);color:var(--muted);
+   padding:4px 9px;border-radius:6px;cursor:pointer;margin:0 0 8px}
+/* furigana */
+ruby rt{font-size:.46em;color:#b3a487;font-weight:400;letter-spacing:0;line-height:1}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:14px;
+   padding:34px 26px;text-align:center;min-height:240px}
+.stage .big{font-size:2.8rem;font-weight:800}
+.stage .kana{color:var(--muted);font-size:1.2rem;margin-top:6px}
+.stage .ex{margin-top:18px;font-size:1.2rem;line-height:2}
+.stage .excn{color:var(--muted);margin-top:6px}
+.stage .meaning{margin-top:14px;font-weight:700;color:#4a3b22;font-size:1.1rem}
+.ctrl{display:flex;gap:10px;justify-content:center;margin-top:26px;flex-wrap:wrap}
+.ctrl button{background:var(--accent);color:#fff;border:none;padding:9px 18px;
+   border-radius:8px;font-size:.95rem;cursor:pointer;font-weight:600}
+.ctrl button.ghost{background:none;color:var(--accent);border:1px solid var(--accent)}
+.ctrl button.bad{background:var(--bad)}
+.quiz-opts{display:grid;gap:10px;margin-top:18px}
+.quiz-opts button{text-align:left;background:#fbf6ec;border:1px solid var(--line);
+   padding:12px 14px;border-radius:9px;font-size:1rem;cursor:pointer;color:var(--ink)}
+.quiz-opts button:hover{border-color:var(--accent)}
+.quiz-opts button.correct{background:#e7efe2;border-color:var(--ok)}
+.quiz-opts button.wrong{background:#f4e0dc;border-color:var(--bad)}
+.muted{color:var(--muted)}
+.pill{display:inline-block;background:#ece3d2;color:#6b4a27;padding:1px 8px;border-radius:6px;font-size:.78rem;margin-left:4px}
