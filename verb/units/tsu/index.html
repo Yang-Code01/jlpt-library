@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>动词专练</title>
+<link rel="stylesheet" href="../../vocab.css">
+</head>
+<body>
+<div class="wrap">
+<nav class="pagenav">
+  <a href="../index.html">← 返回词卡目录</a>
+  <span class="spacer"></span>
+  <a href="../../index.html">动词专练首页</a>
+  <a href="../../../index.html">门户首页</a>
+</nav>
+
+<header>
+  <h1 id="title">—</h1>
+  <div class="sub" id="sub"></div>
+  <span class="meaning" id="hmeaning"></span>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="browse" class="active">浏览</button>
+  <button data-tab="card">翻转卡</button>
+  <button data-tab="quiz">测验</button>
+  <button data-tab="srs">复习<span id="duepill" class="pill" style="display:none">0</span></button>
+</nav>
+
+<section id="browse"></section>
+<section id="card" style="display:none"></section>
+<section id="quiz" style="display:none"></section>
+<section id="srs" style="display:none"></section>
+</div>
+
+<!-- 数据内联：file:// 下不可 fetch，故以本块为准；与同目录 data.json 内容一致 -->
+<script type="application/json" id="vocab-data">
+{
+  "title": "〜つ",
+  "reading": "て形 → って",
+  "meaning_cn": "受け持つ・打つ・撃つ・勝つ …",
+  "categories": [
+    {
+      "name": "〜つ",
+      "reading": "つ",
+      "cards": [
+        { "id": "1-1", "word": "受け持つ", "kana": "うけもつ", "pos": "動詞", "meaning_cn": "担任（授课等）", "example_jp": "今年度は一年生を受け持っている。", "example_jp_ruby": "<ruby>今年度<rt>こんねんど</rt></ruby>は<ruby>一年生<rt>いちねんせい</rt></ruby>を<ruby>受<rt>う</rt></ruby>け<ruby>持<rt>も</rt></ruby>っている。", "example_cn": "今年负责一年级的课。" },
+        { "id": "1-2", "word": "打つ", "kana": "うつ", "pos": "動詞", "meaning_cn": "殴打；撞击；感动；打字；", "example_jp": "キーボードを打つ速度が上がった。", "example_jp_ruby": "キーボードを<ruby>打<rt>う</rt></ruby>つ<ruby>速度<rt>そくど</rt></ruby>が<ruby>上<rt>あ</rt></ruby>がった。", "example_cn": "打键盘的速度提高了。" },
+        { "id": "1-3", "word": "撃つ", "kana": "うつ", "pos": "動詞", "meaning_cn": "用枪等射击", "example_jp": "猟師が山で鹿を撃った。", "example_jp_ruby": "<ruby>猟師<rt>りょうし</rt></ruby>が<ruby>山<rt>やま</rt></ruby>で<ruby>鹿<rt>しか</rt></ruby>を<ruby>撃<rt>う</rt></ruby>った。", "example_cn": "猎人在山上射中了鹿。" },
+        { "id": "1-4", "word": "勝つ", "kana": "かつ", "pos": "動詞", "meaning_cn": "战胜、获胜", "example_jp": "決勝で強い相手に勝った。", "example_jp_ruby": "<ruby>決勝<rt>けっしょう</rt></ruby>で<ruby>強<rt>つよ</rt></ruby>い<ruby>相手<rt>あいて</rt></ruby>に<ruby>勝<rt>か</rt></ruby>った。", "example_cn": "在决赛中战胜了强敌。" },
+        { "id": "1-5", "word": "育つ", "kana": "そだつ", "pos": "動詞", "meaning_cn": "成长", "example_jp": "この木は日陰でもよく育つ。", "example_jp_ruby": "この<ruby>木<rt>き</rt></ruby>は<ruby>日陰<rt>ひかげ</rt></ruby>でもよく<ruby>育<rt>そだ</rt></ruby>つ。", "example_cn": "这棵树在背阴处也长得很好。" },
+        { "id": "1-6", "word": "建つ", "kana": "たつ", "pos": "動詞", "meaning_cn": "建房子", "example_jp": "駅前に新しいビルが建った。", "example_jp_ruby": "<ruby>駅前<rt>えきまえ</rt></ruby>に<ruby>新<rt>あたら</rt></ruby>しいビルが<ruby>建<rt>た</rt></ruby>った。", "example_cn": "车站前建起了新大楼。" },
+        { "id": "1-7", "word": "発つ", "kana": "たつ", "pos": "動詞", "meaning_cn": "离开某地", "example_jp": "明日の朝に東京を発つ。", "example_jp_ruby": "<ruby>明日<rt>あす</rt></ruby>の<ruby>朝<rt>あさ</rt></ruby>に<ruby>東京<rt>とうきょう</rt></ruby>を<ruby>発<rt>た</rt></ruby>つ。", "example_cn": "明天早上离开东京。" },
+        { "id": "1-8", "word": "立つ", "kana": "たつ", "pos": "動詞", "meaning_cn": "站立；升起；离开；出发；起风浪(雾)；处于", "example_jp": "彼は入り口に立っている。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>入<rt>い</rt></ruby>り<ruby>口<rt>ぐち</rt></ruby>に<ruby>立<rt>た</rt></ruby>っている。", "example_cn": "他站在入口处。" },
+        { "id": "1-9", "word": "経つ", "kana": "たつ", "pos": "動詞", "meaning_cn": "（岁月）经过、流逝", "example_jp": "事件から十年が経った。", "example_jp_ruby": "<ruby>事件<rt>じけん</rt></ruby>から<ruby>十年<rt>じゅうねん</rt></ruby>が<ruby>経<rt>た</rt></ruby>った。", "example_cn": "事件已经过去十年了。" },
+        { "id": "1-10", "word": "旅立つ", "kana": "たびだつ", "pos": "動詞", "meaning_cn": "踏上旅程", "example_jp": "兄は春に故郷を旅立った。", "example_jp_ruby": "<ruby>兄<rt>あに</rt></ruby>は<ruby>春<rt>はる</rt></ruby>に<ruby>故郷<rt>こきょう</rt></ruby>を<ruby>旅立<rt>たびだ</rt></ruby>った。", "example_cn": "哥哥在春天离开故乡踏上了旅程。" },
+        { "id": "1-11", "word": "保つ", "kana": "たもつ", "pos": "動詞", "meaning_cn": "保持、维持", "example_jp": "健康を保つために毎日歩いている。", "example_jp_ruby": "<ruby>健康<rt>けんこう</rt></ruby>を<ruby>保<rt>たも</rt></ruby>つために<ruby>毎日<rt>まいにち</rt></ruby><ruby>歩<rt>ある</rt></ruby>いている。", "example_cn": "为了保持健康每天走路。" },
+        { "id": "1-12", "word": "打つ", "kana": "ぶつ", "pos": "動詞", "meaning_cn": "敲打、击打；演讲", "example_jp": "釘を金槌で打った。", "example_jp_ruby": "<ruby>釘<rt>くぎ</rt></ruby>を<ruby>金槌<rt>かなづち</rt></ruby>で<ruby>打<rt>ぶ</rt></ruby>った。", "example_cn": "用锤子敲了钉子。" },
+        { "id": "1-13", "word": "待つ", "kana": "まつ", "pos": "動詞", "meaning_cn": "等、等待、等候", "example_jp": "ここで一時間待った。", "example_jp_ruby": "ここで<ruby>一時間<rt>いちじかん</rt></ruby><ruby>待<rt>ま</rt></ruby>った。", "example_cn": "在这里等了一小时。" },
+        { "id": "1-14", "word": "目立つ", "kana": "めだつ", "pos": "動詞", "meaning_cn": "显眼、引人注目", "example_jp": "彼女の赤い服はよく目立つ。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>の<ruby>赤<rt>あか</rt></ruby>い<ruby>服<rt>ふく</rt></ruby>はよく<ruby>目立<rt>めだ</rt></ruby>つ。", "example_cn": "她的红衣服很显眼。" },
+        { "id": "1-15", "word": "持つ", "kana": "もつ", "pos": "動詞", "meaning_cn": "拿在手上；拥有、持有", "example_jp": "その店は長い歴史を持っている。", "example_jp_ruby": "その<ruby>店<rt>みせ</rt></ruby>は<ruby>長<rt>なが</rt></ruby>い<ruby>歴史<rt>れきし</rt></ruby>を<ruby>持<rt>も</rt></ruby>っている。", "example_cn": "那家店有着悠久历史。" },
+        { "id": "1-16", "word": "役立つ", "kana": "やくだつ", "pos": "動詞", "meaning_cn": "有用、发挥作用", "example_jp": "この資料は研究に役立つ。", "example_jp_ruby": "この<ruby>資料<rt>しりょう</rt></ruby>は<ruby>研究<rt>けんきゅう</rt></ruby>に<ruby>役立<rt>やくだ</rt></ruby>つ。", "example_cn": "这份资料对研究有用。" }
+      ]
+    }
+  ]
+}
+</script>
+<script src="../../vocab.js"></script>
+</body>
+</html>

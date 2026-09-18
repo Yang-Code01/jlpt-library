@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>动词专练 · 词卡目录</title>
+<style>
+  :root{
+    --bg:#f6f3ee; --ink:#2b2a26; --muted:#8a857a; --line:#e4ddd1;
+    --card:#fffdf9; --accent:#9b6b3f; --accent2:#c98a4b; --ok:#5a7d52;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Hiragino Sans","Yu Gothic","Noto Sans CJK JP","Microsoft YaHei",system-ui,sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:920px;margin:0 auto;padding:40px 20px 90px}
+  nav.pagenav{display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+    margin-bottom:26px;border-bottom:1px solid var(--line);padding-bottom:12px}
+  nav.pagenav a{text-decoration:none;font-size:.88em;padding:4px 14px;border-radius:999px;
+    border:1px solid var(--line);color:var(--accent);background:var(--card);
+    transition:background .15s ease}
+  nav.pagenav a:hover{background:#f0e7d6}
+  nav.pagenav .spacer{flex:1}
+  header h1{margin:0;font-size:2.6rem;font-weight:800;letter-spacing:.02em}
+  header .sub{color:var(--muted);font-size:1.05rem;margin-top:6px}
+  .toolbar{display:flex;gap:10px;align-items:center;margin:20px 0 6px;flex-wrap:wrap}
+  .toolbar .count{color:var(--muted);font-size:.9rem}
+  .toolbar button{font-size:.88rem;background:#f0e7d6;border:1px solid var(--line);
+     color:#5a4a2e;padding:7px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+  .toolbar button:hover{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:18px}
+  a.card{display:block;text-decoration:none;color:inherit;background:var(--card);
+    border:1px solid var(--line);border-radius:14px;padding:20px 20px 18px;
+    box-shadow:0 1px 2px rgba(0,0,0,.03);transition:transform .15s,border-color .15s,box-shadow .15s}
+  a.card:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 6px 18px rgba(120,90,50,.12)}
+  a.card .kana{color:var(--muted);font-size:1rem}
+  a.card .word{font-size:1.9rem;font-weight:800;margin-top:2px;letter-spacing:.02em}
+  a.card .meaning{margin-top:10px;color:#5a4a2e;font-weight:600;font-size:.98rem}
+  a.card .meta{margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .pill{display:inline-block;background:#ece3d2;color:#6b4a27;padding:2px 9px;border-radius:6px;font-size:.78rem}
+  .pill.ok{background:#e7efe2;color:#4a5d3a}
+  .muted{color:var(--muted);font-size:.82rem}
+  .note{color:var(--muted);font-size:.8rem;margin-top:18px;line-height:1.7}
+  @media(max-width:560px){header h1{font-size:2rem}.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="pagenav">
+    <a href="../index.html">← 返回动词专练</a>
+    <span class="spacer"></span>
+    <a href="../conjugation/index.html">变形练习</a>
+    <a href="../../index.html">门户首页</a>
+  </nav>
+
+  <header>
+    <h1>动词词卡</h1>
+    <div class="sub">按辞书形结尾分单元的 N2 动词——同类结尾共享同一て形音变规则</div>
+  </header>
+
+  <div class="toolbar">
+    <button id="openAll">在新标签全部打开</button>
+    <span class="count" id="unitCount"></span>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <p class="note">
+    点击任一卡片即可跳转到对应单元。新增单元：只写一份 <code>&lt;单元目录&gt;/data.json</code>，再跑
+    <code>node verb/gen.js write</code>；单元页 <code>index.html</code> 与本页 <code>UNITS</code>
+    都由此生成，不要手改（校验用 <code>node verb/gen.js check</code>）。
+    音频由 <code>verb/gen-audio.ps1</code> 按同一份 <code>data.json</code> 合成（词条含「（…）」「・」时用 <code>speak_word</code> 指定朗读形）。
+    单元顶层 <code>"audio": false</code> / <code>"examples": false</code> 分别是音频与例文的待办旗标，补齐后移除。
+  </p>
+</div>
+
+<script>
+  // 本数组由 verb/gen.js 从各单元的 data.json 生成——加单元请建 data.json 后跑 gen.js，不要手改。
+  // 显示顺序＝上次的顺序，新单元追加在末尾；cards 词数由 data.json 统计得出。
+  const UNITS = [
+    { dir:"u",          title:"〜う",                    reading:"て形 → って", meaning:"会う・合う・遭う・味わう …",                              cards:79 },
+    { dir:"ku",         title:"〜く",                    reading:"て形 → いて", meaning:"書く・聞く・咲く・歩く …（例外：行く→って）",             cards:97 },
+    { dir:"gu",         title:"〜ぐ",                    reading:"て形 → いで", meaning:"喘ぐ・扇ぐ・急ぐ・泳ぐ …",                                cards:17 },
+    { dir:"su",         title:"〜す",                    reading:"て形 → して", meaning:"甘やかす・現す・著わす・表す …",                          cards:154 },
+    { dir:"tsu",        title:"〜つ",                    reading:"て形 → って", meaning:"受け持つ・打つ・撃つ・勝つ …",                            cards:16 },
+    { dir:"mu-bu-nu",   title:"〜む・ぶ・ぬ",            reading:"て形 → んで", meaning:"遊ぶ・編む・怪しむ・痛む …",                              cards:85 },
+    { dir:"ru-godan",   title:"〜る（五段）",            reading:"て形 → って", meaning:"上がる・預かる・温（暖）まる・当たる …",                  cards:206 },
+    { dir:"ru-godan-ie", title:"〜いる・える（五段特例）", reading:"て形 → って", meaning:"帰る・切る・知る・走る・滑る …（看着像一段，其实是五段）", cards:40 },
+    { dir:"eru",        title:"〜える（一段）",          reading:"て形 → て",  meaning:"諦める・呆れる・明ける・開ける …",                        cards:263 },
+    { dir:"iru",        title:"〜いる（一段）",          reading:"て形 → て",  meaning:"飽きる・浴びる・生きる・居る …",                          cards:34 },
+    { dir:"suru",       title:"〜する",                  reading:"て形 → して", meaning:"愛する・関する・接する・属する …",                        cards:12 },
+  ];
+
+  const grid = document.getElementById("grid");
+  const unitCount = document.getElementById("unitCount");
+  unitCount.textContent = `共 ${UNITS.length} 个单元`;
+
+  // 词数直接取内联的 cards，file:// 下也显示（不再依赖 fetch）
+  UNITS.forEach(u => {
+    const a = document.createElement("a");
+    a.className = "card";
+    a.href = u.dir + "/index.html";
+    a.innerHTML =
+      `<div class="kana">${u.reading}</div>
+       <div class="word">${u.title}</div>
+       <div class="meaning">${u.meaning}</div>
+       <div class="meta"><span class="pill ok">${u.cards} 词</span></div>`;
+    grid.appendChild(a);
+  });
+
+  // 全部打开（best-effort；浏览器可能拦截多弹窗，若被拦截请逐个点击）
+  document.getElementById("openAll").addEventListener("click", () => {
+    UNITS.forEach(u => window.open(u.dir + "/index.html", "_blank"));
+  });
+</script>
+</body>
+</html>

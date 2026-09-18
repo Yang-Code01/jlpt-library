@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>动词专练</title>
+<link rel="stylesheet" href="../../vocab.css">
+</head>
+<body>
+<div class="wrap">
+<nav class="pagenav">
+  <a href="../index.html">← 返回词卡目录</a>
+  <span class="spacer"></span>
+  <a href="../../index.html">动词专练首页</a>
+  <a href="../../../index.html">门户首页</a>
+</nav>
+
+<header>
+  <h1 id="title">—</h1>
+  <div class="sub" id="sub"></div>
+  <span class="meaning" id="hmeaning"></span>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="browse" class="active">浏览</button>
+  <button data-tab="card">翻转卡</button>
+  <button data-tab="quiz">测验</button>
+  <button data-tab="srs">复习<span id="duepill" class="pill" style="display:none">0</span></button>
+</nav>
+
+<section id="browse"></section>
+<section id="card" style="display:none"></section>
+<section id="quiz" style="display:none"></section>
+<section id="srs" style="display:none"></section>
+</div>
+
+<!-- 数据内联：file:// 下不可 fetch，故以本块为准；与同目录 data.json 内容一致 -->
+<script type="application/json" id="vocab-data">
+{
+  "title": "〜いる（一段）",
+  "reading": "て形 → て",
+  "meaning_cn": "飽きる・浴びる・生きる・居る …",
+  "categories": [
+    {
+      "name": "〜いる（一段）",
+      "reading": "いる",
+      "cards": [
+        { "id": "1-1", "word": "飽きる", "kana": "あきる", "pos": "動詞", "meaning_cn": "腻烦、厌烦；...腻了", "example_jp": "毎日同じ料理では飽きてしまう。", "example_jp_ruby": "<ruby>毎日<rt>まいにち</rt></ruby><ruby>同<rt>おな</rt></ruby>じ<ruby>料理<rt>りょうり</rt></ruby>では<ruby>飽<rt>あ</rt></ruby>きてしまう。", "example_cn": "每天都吃同样的菜会腻。" },
+        { "id": "1-2", "word": "浴びる", "kana": "あびる", "pos": "動詞", "meaning_cn": "淋浴；日光浴；遭到、受到", "example_jp": "朝の光を浴びて目が覚めた。", "example_jp_ruby": "<ruby>朝<rt>あさ</rt></ruby>の<ruby>光<rt>ひかり</rt></ruby>を<ruby>浴<rt>あ</rt></ruby>びて<ruby>目<rt>め</rt></ruby>が<ruby>覚<rt>さ</rt></ruby>めた。", "example_cn": "沐浴着晨光醒来。" },
+        { "id": "1-3", "word": "生きる", "kana": "いきる", "pos": "動詞", "meaning_cn": "生存；谋生；发挥作用", "example_jp": "この技術は今も現場で生きている。", "example_jp_ruby": "この<ruby>技術<rt>ぎじゅつ</rt></ruby>は<ruby>今<rt>いま</rt></ruby>も<ruby>現場<rt>げんば</rt></ruby>で<ruby>生<rt>い</rt></ruby>きている。", "example_cn": "这项技术如今仍在现场发挥作用。" },
+        { "id": "1-4", "word": "居る", "kana": "いる", "pos": "動詞", "meaning_cn": "（人，动物）在，住在", "example_jp": "弟は今部屋に居る。", "example_jp_ruby": "<ruby>弟<rt>おとうと</rt></ruby>は<ruby>今<rt>いま</rt></ruby><ruby>部屋<rt>へや</rt></ruby>に<ruby>居<rt>い</rt></ruby>る。", "example_cn": "弟弟现在在房间里。" },
+        { "id": "1-5", "word": "応じる", "kana": "おうじる", "pos": "動詞", "meaning_cn": "回应，满足，响应（号召）；适应", "example_jp": "要望に応じて資料を送った。", "example_jp_ruby": "<ruby>要望<rt>ようぼう</rt></ruby>に<ruby>応<rt>おう</rt></ruby>じて<ruby>資料<rt>しりょう</rt></ruby>を<ruby>送<rt>おく</rt></ruby>った。", "example_cn": "应要求寄去了资料。" },
+        { "id": "1-6", "word": "起きる", "kana": "おきる", "pos": "動詞", "meaning_cn": "起床；发生不好的事", "example_jp": "昨夜、近所で火事が起きた。", "example_jp_ruby": "<ruby>昨夜<rt>さくや</rt></ruby>、<ruby>近所<rt>きんじょ</rt></ruby>で<ruby>火事<rt>かじ</rt></ruby>が<ruby>起<rt>お</rt></ruby>きた。", "example_cn": "昨晚附近发生了火灾。" },
+        { "id": "1-7", "word": "落ちる", "kana": "おちる", "pos": "動詞", "meaning_cn": "落下，坠落；脱落，剥落；败落，衰落；落第，落选", "example_jp": "階段から財布が落ちた。", "example_jp_ruby": "<ruby>階段<rt>かいだん</rt></ruby>から<ruby>財布<rt>さいふ</rt></ruby>が<ruby>落<rt>お</rt></ruby>ちた。", "example_cn": "钱包从楼梯上掉了下去。" },
+        { "id": "1-8", "word": "下りる", "kana": "おりる", "pos": "動詞", "meaning_cn": "下降；（签证等）批下来", "example_jp": "ビザが下りるまで一ヶ月かかった。", "example_jp_ruby": "ビザが<ruby>下<rt>お</rt></ruby>りるまで一ヶ<ruby>月<rt>いっかげつ</rt></ruby>かかった。", "example_cn": "签证批下来花了一个月。" },
+        { "id": "1-9", "word": "降りる", "kana": "おりる", "pos": "動詞", "meaning_cn": "（霜等）降下；下交通工具", "example_jp": "次の駅で電車を降りる。", "example_jp_ruby": "<ruby>次<rt>つぎ</rt></ruby>の<ruby>駅<rt>えき</rt></ruby>で<ruby>電車<rt>でんしゃ</rt></ruby>を<ruby>降<rt>お</rt></ruby>りる。", "example_cn": "在下一站下电车。" },
+        { "id": "1-10", "word": "借りる", "kana": "かりる", "pos": "動詞", "meaning_cn": "借进(钱或物)；借助", "example_jp": "図書館から本を三冊借りた。", "example_jp_ruby": "<ruby>図書館<rt>としょかん</rt></ruby>から<ruby>本<rt>ほん</rt></ruby>を<ruby>三冊<rt>さんさつ</rt></ruby><ruby>借<rt>か</rt></ruby>りた。", "example_cn": "从图书馆借了三本书。" },
+        { "id": "1-11", "word": "感じる", "kana": "かんじる", "pos": "動詞", "meaning_cn": "感觉，感到，觉得", "example_jp": "最近、寒さを強く感じる。", "example_jp_ruby": "<ruby>最近<rt>さいきん</rt></ruby>、<ruby>寒<rt>さむ</rt></ruby>さを<ruby>強<rt>つよ</rt></ruby>く<ruby>感<rt>かん</rt></ruby>じる。", "example_cn": "最近强烈感到寒冷。" },
+        { "id": "1-12", "word": "着る", "kana": "きる", "pos": "動詞", "meaning_cn": "穿；自己承担；领情", "example_jp": "息子は自分で服を着られる。", "example_jp_ruby": "<ruby>息子<rt>むすこ</rt></ruby>は<ruby>自分<rt>じぶん</rt></ruby>で<ruby>服<rt>ふく</rt></ruby>を<ruby>着<rt>き</rt></ruby>られる。", "example_cn": "儿子自己会穿衣服。" },
+        { "id": "1-13", "word": "錆びる", "kana": "さびる", "pos": "動詞", "meaning_cn": "生锈", "example_jp": "雨に濡れて鎖が錆びた。", "example_jp_ruby": "<ruby>雨<rt>あめ</rt></ruby>に<ruby>濡<rt>ぬ</rt></ruby>れて<ruby>鎖<rt>くさり</rt></ruby>が<ruby>錆<rt>さ</rt></ruby>びた。", "example_cn": "被雨淋湿，锁链生了锈。" },
+        { "id": "1-14", "word": "生じる", "kana": "しょうじる", "pos": "動詞", "meaning_cn": "产生，发生", "example_jp": "両者の間に誤解が生じた。", "example_jp_ruby": "<ruby>両者<rt>りょうしゃ</rt></ruby>の<ruby>間<rt>あいだ</rt></ruby>に<ruby>誤解<rt>ごかい</rt></ruby>が<ruby>生<rt>しょう</rt></ruby>じた。", "example_cn": "双方之间产生了误解。" },
+        { "id": "1-15", "word": "信じる", "kana": "しんじる", "pos": "動詞", "meaning_cn": "相信，确信", "example_jp": "彼の説明を今も信じている。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>の<ruby>説明<rt>せつめい</rt></ruby>を<ruby>今<rt>いま</rt></ruby>も<ruby>信<rt>しん</rt></ruby>じている。", "example_cn": "至今仍相信他的说明。" },
+        { "id": "1-16", "word": "過ぎる", "kana": "すぎる", "pos": "動詞", "meaning_cn": "经过某场所；过去，消失；超过（某基准），过于", "example_jp": "この料理は少し塩が多すぎる。", "example_jp_ruby": "この<ruby>料理<rt>りょうり</rt></ruby>は<ruby>少<rt>すこ</rt></ruby>し<ruby>塩<rt>しお</rt></ruby>が<ruby>多<rt>おお</rt></ruby>すぎる。", "example_cn": "这道菜盐稍微放多了点。" },
+        { "id": "1-17", "word": "存じる", "kana": "ぞんじる", "pos": "動詞", "meaning_cn": "「思う」「知る」的谦让语", "example_jp": "その件については存じません。", "example_jp_ruby": "その<ruby>件<rt>けん</rt></ruby>については<ruby>存<rt>ぞん</rt></ruby>じません。", "example_cn": "关于那件事我不了解。" },
+        { "id": "1-18", "word": "足りる", "kana": "たりる", "pos": "動詞", "meaning_cn": "足，足够；值得，有价值", "example_jp": "予算が足りれば次の計画に移る。", "example_jp_ruby": "<ruby>予算<rt>よさん</rt></ruby>が<ruby>足<rt>た</rt></ruby>りれば<ruby>次<rt>つぎ</rt></ruby>の<ruby>計画<rt>けいかく</rt></ruby>に<ruby>移<rt>うつ</rt></ruby>る。", "example_cn": "预算够的话就转入下一个计划。" },
+        { "id": "1-19", "word": "通じる", "kana": "つうじる", "pos": "動詞", "meaning_cn": "通；通往；精通，通晓；理解，懂得，领会（自）；在整个区域或期间；通过者", "example_jp": "この道は駅の北口に通じている。", "example_jp_ruby": "この<ruby>道<rt>みち</rt></ruby>は<ruby>駅<rt>えき</rt></ruby>の<ruby>北口<rt>きたぐち</rt></ruby>に<ruby>通<rt>つう</rt></ruby>じている。", "example_cn": "这条路通往车站北口。" },
+        { "id": "1-20", "word": "尽きる", "kana": "つきる", "pos": "動詞", "meaning_cn": "耗尽；完毕；到头", "example_jp": "話しの種が尽きてしまった。", "example_jp_ruby": "<ruby>話<rt>はな</rt></ruby>しの<ruby>種<rt>たね</rt></ruby>が<ruby>尽<rt>つ</rt></ruby>きてしまった。", "example_cn": "话题都说尽了。" },
+        { "id": "1-21", "word": "できる", "kana": "できる", "pos": "動詞", "meaning_cn": "完成；建成，生产出；生孩子；出现；会；做得好", "example_jp": "来月までに新しい工場ができる。", "example_jp_ruby": "<ruby>来月<rt>らいげつ</rt></ruby>までに<ruby>新<rt>あたら</rt></ruby>しい<ruby>工場<rt>こうじょう</rt></ruby>ができる。", "example_cn": "下个月之前新工厂会建成。" },
+        { "id": "1-22", "word": "通り過ぎる", "kana": "とおりすぎる", "pos": "動詞", "meaning_cn": "走过头，走过去", "example_jp": "目的の駅を通り過ぎてしまった。", "example_jp_ruby": "<ruby>目的<rt>もくてき</rt></ruby>の<ruby>駅<rt>えき</rt></ruby>を<ruby>通<rt>とお</rt></ruby>り<ruby>過<rt>す</rt></ruby>ぎてしまった。", "example_cn": "坐过了要下的车站。" },
+        { "id": "1-23", "word": "閉じる", "kana": "とじる", "pos": "動詞", "meaning_cn": "关闭；闭会，打烊（他）", "example_jp": "店は夜十時に閉じる。", "example_jp_ruby": "<ruby>店<rt>みせ</rt></ruby>は<ruby>夜<rt>よる</rt></ruby><ruby>十時<rt>じゅうじ</rt></ruby>に<ruby>閉<rt>と</rt></ruby>じる。", "example_cn": "店晚上十点关门。" },
+        { "id": "1-24", "word": "似る", "kana": "にる", "pos": "動詞", "meaning_cn": "相似，类似", "example_jp": "彼は父親によく似ている。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>父親<rt>ちちおや</rt></ruby>によく<ruby>似<rt>に</rt></ruby>ている。", "example_cn": "他长得很像父亲。" },
+        { "id": "1-25", "word": "煮る", "kana": "にる", "pos": "動詞", "meaning_cn": "煮", "example_jp": "野菜を十分に煮てから食べる。", "example_jp_ruby": "<ruby>野菜<rt>やさい</rt></ruby>を<ruby>十分<rt>じゅうぶん</rt></ruby>に<ruby>煮<rt>に</rt></ruby>てから<ruby>食<rt>た</rt></ruby>べる。", "example_cn": "把蔬菜煮透之后再吃。" },
+        { "id": "1-26", "word": "伸びる", "kana": "のびる", "pos": "動詞", "meaning_cn": "伸长；提高，增加，扩大", "example_jp": "身長がこの一年で五センチ伸びた。", "example_jp_ruby": "<ruby>身長<rt>しんちょう</rt></ruby>がこの<ruby>一年<rt>いちねん</rt></ruby>で五センチ<ruby>伸<rt>の</rt></ruby>びた。", "example_cn": "身高这一年长了五厘米。" },
+        { "id": "1-27", "word": "延びる", "kana": "のびる", "pos": "動詞", "meaning_cn": "时间，距离等延长", "example_jp": "会議が予定より一時間延びた。", "example_jp_ruby": "<ruby>会議<rt>かいぎ</rt></ruby>が<ruby>予定<rt>よてい</rt></ruby>より<ruby>一時間<rt>いちじかん</rt></ruby><ruby>延<rt>の</rt></ruby>びた。", "example_cn": "会议比预定延长了一小时。" },
+        { "id": "1-28", "word": "満ちる", "kana": "みちる", "pos": "動詞", "meaning_cn": "满员；充满；月圆；期满", "example_jp": "部屋に笑い声が満ちた。", "example_jp_ruby": "<ruby>部屋<rt>へや</rt></ruby>に<ruby>笑<rt>わら</rt></ruby>い<ruby>声<rt>ごえ</rt></ruby>が<ruby>満<rt>み</rt></ruby>ちた。", "example_cn": "房间里充满了笑声。" },
+        { "id": "1-29", "word": "見る", "kana": "みる", "pos": "動詞", "meaning_cn": "观看；参观；照料；辅导；阅读；批改；尝试；看作", "example_jp": "毎晩ニュースを見る。", "example_jp_ruby": "<ruby>毎晩<rt>まいばん</rt></ruby>ニュースを<ruby>見<rt>み</rt></ruby>る。", "example_cn": "每天晚上看新闻。" },
+        { "id": "1-30", "word": "診る", "kana": "みる", "pos": "動詞", "meaning_cn": "诊断，看病", "example_jp": "医者が患者を診ている。", "example_jp_ruby": "<ruby>医者<rt>いしゃ</rt></ruby>が<ruby>患者<rt>かんじゃ</rt></ruby>を<ruby>診<rt>み</rt></ruby>ている。", "example_cn": "医生正在给病人看病。" },
+        { "id": "1-31", "word": "命じる", "kana": "めいじる", "pos": "動詞", "meaning_cn": "命令；任命，委派；命名", "example_jp": "社長は再び調査を命じた。", "example_jp_ruby": "<ruby>社長<rt>しゃちょう</rt></ruby>は<ruby>再<rt>ふたた</rt></ruby>び<ruby>調査<rt>ちょうさ</rt></ruby>を<ruby>命<rt>めい</rt></ruby>じた。", "example_cn": "社长命令再次调查。" },
+        { "id": "1-32", "word": "用いる", "kana": "もちいる", "pos": "動詞", "meaning_cn": "使用；采纳；录用，任用", "example_jp": "この方法は広く用いられている。", "example_jp_ruby": "この<ruby>方法<rt>ほうほう</rt></ruby>は<ruby>広<rt>ひろ</rt></ruby>く<ruby>用<rt>もち</rt></ruby>いられている。", "example_cn": "这种方法被广泛使用。" },
+        { "id": "1-33", "word": "論じる", "kana": "ろんじる", "pos": "動詞", "meaning_cn": "论述，讨论，议论", "example_jp": "両者の違いを論じる。", "example_jp_ruby": "<ruby>両者<rt>りょうしゃ</rt></ruby>の<ruby>違<rt>ちが</rt></ruby>いを<ruby>論<rt>ろん</rt></ruby>じる。", "example_cn": "论述两者的差异。" },
+        { "id": "1-34", "word": "詫びる", "kana": "わびる", "pos": "動詞", "meaning_cn": "道歉，赔不是", "example_jp": "遅刻したことを詫びた。", "example_jp_ruby": "<ruby>遅刻<rt>ちこく</rt></ruby>したことを<ruby>詫<rt>わ</rt></ruby>びた。", "example_cn": "为迟到一事道了歉。" }
+      ]
+    }
+  ]
+}
+</script>
+<script src="../../vocab.js"></script>
+</body>
+</html>

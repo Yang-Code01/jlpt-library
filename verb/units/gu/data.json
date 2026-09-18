@@ -1,0 +1,30 @@
+{
+  "title": "〜ぐ",
+  "reading": "て形 → いで",
+  "meaning_cn": "喘ぐ・扇ぐ・急ぐ・泳ぐ …",
+  "categories": [
+    {
+      "name": "〜ぐ",
+      "reading": "ぐ",
+      "cards": [
+        { "id": "1-1", "word": "喘ぐ", "kana": "あえぐ", "pos": "動詞", "meaning_cn": "喘息；挣扎", "example_jp": "山道を駆け上がって喘いだ。", "example_jp_ruby": "<ruby>山道<rt>さんどう</rt></ruby>を<ruby>駆<rt>か</rt></ruby>け<ruby>上<rt>あ</rt></ruby>がって<ruby>喘<rt>あえ</rt></ruby>いだ。", "example_cn": "跑上山路后气喘吁吁。" },
+        { "id": "1-2", "word": "扇ぐ", "kana": "あおぐ", "pos": "動詞", "meaning_cn": "扇风", "example_jp": "うちわで火を扇いだ。", "example_jp_ruby": "うちわで<ruby>火<rt>ひ</rt></ruby>を<ruby>扇<rt>あお</rt></ruby>いだ。", "example_cn": "用团扇把火扇旺。" },
+        { "id": "1-3", "word": "急ぐ", "kana": "いそぐ", "pos": "動詞", "meaning_cn": "抓紧时间进行；赶路", "example_jp": "時間がないので急いでください。", "example_jp_ruby": "<ruby>時間<rt>じかん</rt></ruby>がないので<ruby>急<rt>いそ</rt></ruby>いでください。", "example_cn": "没时间了，请抓紧。" },
+        { "id": "1-4", "word": "泳ぐ", "kana": "およぐ", "pos": "動詞", "meaning_cn": "游泳", "example_jp": "夏は毎日プールで泳ぐ。", "example_jp_ruby": "<ruby>夏<rt>なつ</rt></ruby>は<ruby>毎日<rt>まいにち</rt></ruby>プールで<ruby>泳<rt>およ</rt></ruby>ぐ。", "example_cn": "夏天每天在泳池游泳。" },
+        { "id": "1-5", "word": "嗅ぐ", "kana": "かぐ", "pos": "動詞", "meaning_cn": "用鼻子闻", "example_jp": "犬が地面の匂いを嗅いだ。", "example_jp_ruby": "<ruby>犬<rt>いぬ</rt></ruby>が<ruby>地面<rt>じめん</rt></ruby>の<ruby>匂<rt>にお</rt></ruby>いを<ruby>嗅<rt>か</rt></ruby>いだ。", "example_cn": "狗闻了地面的气味。" },
+        { "id": "1-6", "word": "稼ぐ", "kana": "かせぐ", "pos": "動詞", "meaning_cn": "赚钱；争取（获得，赢得)", "example_jp": "アルバイトで生活費を稼ぐ。", "example_jp_ruby": "アルバイトで<ruby>生活費<rt>せいかつひ</rt></ruby>を<ruby>稼<rt>かせ</rt></ruby>ぐ。", "example_cn": "靠打工赚取生活费。" },
+        { "id": "1-7", "word": "担ぐ", "kana": "かつぐ", "pos": "動詞", "meaning_cn": "肩扛（挑）", "example_jp": "若い者が神輿を肩に担いだ。", "example_jp_ruby": "<ruby>若<rt>わか</rt></ruby>い<ruby>者<rt>もの</rt></ruby>が<ruby>神輿<rt>みこし</rt></ruby>を<ruby>肩<rt>かた</rt></ruby>に<ruby>担<rt>かつ</rt></ruby>いだ。", "example_cn": "年轻人把神轿扛在肩上。" },
+        { "id": "1-8", "word": "漕ぐ", "kana": "こぐ", "pos": "動詞", "meaning_cn": "划船，蹬自行车；荡秋千", "example_jp": "二人でボートを漕いだ。", "example_jp_ruby": "<ruby>二人<rt>ふたり</rt></ruby>でボートを<ruby>漕<rt>こ</rt></ruby>いだ。", "example_cn": "两个人划了船。" },
+        { "id": "1-9", "word": "騒ぐ", "kana": "さわぐ", "pos": "動詞", "meaning_cn": "吵闹大声喧哗；骚动，闹事", "example_jp": "隣の部屋で子供が騒いでいる。", "example_jp_ruby": "<ruby>隣<rt>となり</rt></ruby>の<ruby>部屋<rt>へや</rt></ruby>で<ruby>子供<rt>こども</rt></ruby>が<ruby>騒<rt>さわ</rt></ruby>いでいる。", "example_cn": "隔壁房间里孩子们在吵闹。" },
+        { "id": "1-10", "word": "注ぐ", "kana": "そそぐ", "pos": "動詞", "meaning_cn": "液体流入，；倒入，灌入液体", "example_jp": "川の水が海に注ぐ。", "example_jp_ruby": "<ruby>川<rt>かわ</rt></ruby>の<ruby>水<rt>みず</rt></ruby>が<ruby>海<rt>うみ</rt></ruby>に<ruby>注<rt>そそ</rt></ruby>ぐ。", "example_cn": "河水流进大海。" },
+        { "id": "1-11", "word": "次ぐ", "kana": "つぐ", "pos": "動詞", "meaning_cn": "次于，亚于", "example_jp": "彼は社長に次ぐ地位にある。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>社長<rt>しゃちょう</rt></ruby>に<ruby>次<rt>つ</rt></ruby>ぐ<ruby>地位<rt>ちい</rt></ruby>にある。", "example_cn": "他的地位仅次于社长。" },
+        { "id": "1-12", "word": "注ぐ", "kana": "つぐ", "pos": "動詞", "meaning_cn": "倒入，灌入液体", "example_jp": "コーヒーをカップに注いだ。", "example_jp_ruby": "コーヒーをカップに<ruby>注<rt>つ</rt></ruby>いだ。", "example_cn": "把咖啡倒进杯子里。" },
+        { "id": "1-13", "word": "繋ぐ", "kana": "つなぐ", "pos": "動詞", "meaning_cn": "拴住，系住；把…连接起来", "example_jp": "二つの島を橋で繋いだ。", "example_jp_ruby": "<ruby>二<rt>ふた</rt></ruby>つの<ruby>島<rt>しま</rt></ruby>を<ruby>橋<rt>はし</rt></ruby>で<ruby>繋<rt>つな</rt></ruby>いだ。", "example_cn": "用桥把两座岛连了起来。" },
+        { "id": "1-14", "word": "脱ぐ", "kana": "ぬぐ", "pos": "動詞", "meaning_cn": "脱去（衣服，鞋帽等）", "example_jp": "部屋に入る前に靴を脱ぐ。", "example_jp_ruby": "<ruby>部屋<rt>へや</rt></ruby>に<ruby>入<rt>はい</rt></ruby>る<ruby>前<rt>まえ</rt></ruby>に<ruby>靴<rt>くつ</rt></ruby>を<ruby>脱<rt>ぬ</rt></ruby>ぐ。", "example_cn": "进房间前先脱鞋。" },
+        { "id": "1-15", "word": "塞ぐ", "kana": "ふさぐ", "pos": "動詞", "meaning_cn": "堵住，塞住，挡住", "example_jp": "床の穴を板で塞いだ。", "example_jp_ruby": "<ruby>床<rt>ゆか</rt></ruby>の<ruby>穴<rt>あな</rt></ruby>を<ruby>板<rt>いた</rt></ruby>で<ruby>塞<rt>ふさ</rt></ruby>いだ。", "example_cn": "用木板堵住了地板上的洞。" },
+        { "id": "1-16", "word": "防ぐ", "kana": "ふせぐ", "pos": "動詞", "meaning_cn": "防止，防守，防备，预防", "example_jp": "事故を未然に防ぐ。", "example_jp_ruby": "<ruby>事故<rt>じこ</rt></ruby>を<ruby>未然<rt>みぜん</rt></ruby>に<ruby>防<rt>ふせ</rt></ruby>ぐ。", "example_cn": "把事故防患于未然。" },
+        { "id": "1-17", "word": "跨ぐ", "kana": "またぐ", "pos": "動詞", "meaning_cn": "两脚跨过，叉腿站立", "example_jp": "溝を跨いで向こうへ行った。", "example_jp_ruby": "<ruby>溝<rt>みぞ</rt></ruby>を<ruby>跨<rt>また</rt></ruby>いで<ruby>向<rt>む</rt></ruby>こうへ<ruby>行<rt>い</rt></ruby>った。", "example_cn": "跨过水沟走到了对面。" }
+      ]
+    }
+  ]
+}

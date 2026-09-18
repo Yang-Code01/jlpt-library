@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>动词专练</title>
+<link rel="stylesheet" href="../../vocab.css">
+</head>
+<body>
+<div class="wrap">
+<nav class="pagenav">
+  <a href="../index.html">← 返回词卡目录</a>
+  <span class="spacer"></span>
+  <a href="../../index.html">动词专练首页</a>
+  <a href="../../../index.html">门户首页</a>
+</nav>
+
+<header>
+  <h1 id="title">—</h1>
+  <div class="sub" id="sub"></div>
+  <span class="meaning" id="hmeaning"></span>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="browse" class="active">浏览</button>
+  <button data-tab="card">翻转卡</button>
+  <button data-tab="quiz">测验</button>
+  <button data-tab="srs">复习<span id="duepill" class="pill" style="display:none">0</span></button>
+</nav>
+
+<section id="browse"></section>
+<section id="card" style="display:none"></section>
+<section id="quiz" style="display:none"></section>
+<section id="srs" style="display:none"></section>
+</div>
+
+<!-- 数据内联：file:// 下不可 fetch，故以本块为准；与同目录 data.json 内容一致 -->
+<script type="application/json" id="vocab-data">
+{
+  "title": "〜く",
+  "reading": "て形 → いて",
+  "meaning_cn": "書く・聞く・咲く・歩く …（例外：行く→って）",
+  "categories": [
+    {
+      "name": "〜く",
+      "reading": "く",
+      "cards": [
+        { "id": "1-1", "word": "空く", "kana": "あく", "pos": "動詞", "meaning_cn": "空出，腾出，空着", "example_jp": "一階の席が空いている。", "example_jp_ruby": "<ruby>一階<rt>いっかい</rt></ruby>の<ruby>席<rt>せき</rt></ruby>が<ruby>空<rt>あ</rt></ruby>いている。", "example_cn": "一楼的座位空着。" },
+        { "id": "1-2", "word": "開く", "kana": "あく", "pos": "動詞", "meaning_cn": "（窗户等）开；开门", "example_jp": "風で窓が開いた。", "example_jp_ruby": "<ruby>風<rt>かぜ</rt></ruby>で<ruby>窓<rt>まど</rt></ruby>が<ruby>開<rt>あ</rt></ruby>いた。", "example_cn": "窗户被风吹开了。" },
+        { "id": "1-3", "word": "歩く", "kana": "あるく", "pos": "動詞", "meaning_cn": "走，步行", "example_jp": "十分ほど歩いて駅へ行く。", "example_jp_ruby": "<ruby>十分<rt>じゅっぷん</rt></ruby>ほど<ruby>歩<rt>ある</rt></ruby>いて<ruby>駅<rt>えき</rt></ruby>へ<ruby>行<rt>い</rt></ruby>く。", "example_cn": "走十分钟左右去车站。" },
+        { "id": "1-4", "word": "行く", "kana": "いく", "pos": "動詞", "meaning_cn": "去前往；走；通向；进行", "example_jp": "来週から旅行に行く。", "example_jp_ruby": "<ruby>来週<rt>らいしゅう</rt></ruby>から<ruby>旅行<rt>りょこう</rt></ruby>に<ruby>行<rt>い</rt></ruby>く。", "example_cn": "下周去旅行。" },
+        { "id": "1-5", "word": "頂く", "kana": "いただく", "pos": "動詞", "meaning_cn": "领受物品等；吃，喝的谦语", "example_jp": "先生から手紙を頂いた。", "example_jp_ruby": "<ruby>先生<rt>せんせい</rt></ruby>から<ruby>手紙<rt>てがみ</rt></ruby>を<ruby>頂<rt>いただ</rt></ruby>いた。", "example_cn": "收到了老师的信。" },
+        { "id": "1-6", "word": "抱く", "kana": "いだく", "pos": "動詞", "meaning_cn": "胸怀理想等", "example_jp": "彼は大きな夢を抱いている。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>大<rt>おお</rt></ruby>きな<ruby>夢<rt>ゆめ</rt></ruby>を<ruby>抱<rt>いだ</rt></ruby>いている。", "example_cn": "他怀抱着远大的梦想。" },
+        { "id": "1-7", "word": "浮く", "kana": "うく", "pos": "動詞", "meaning_cn": "漂浮，浮出表面；浮动", "example_jp": "氷が水に浮いている。", "example_jp_ruby": "<ruby>氷<rt>こおり</rt></ruby>が<ruby>水<rt>みず</rt></ruby>に<ruby>浮<rt>う</rt></ruby>いている。", "example_cn": "冰浮在水面上。" },
+        { "id": "1-8", "word": "動く", "kana": "うごく", "pos": "動詞", "meaning_cn": "动，转动，活动；不稳定", "example_jp": "機械が規則的に動いている。", "example_jp_ruby": "<ruby>機械<rt>きかい</rt></ruby>が<ruby>規則的<rt>きそくてき</rt></ruby>に<ruby>動<rt>うご</rt></ruby>いている。", "example_cn": "机器在有规律地运转。" },
+        { "id": "1-9", "word": "頷く", "kana": "うなずく", "pos": "動詞", "meaning_cn": "点头同意，首肯", "example_jp": "彼女は小さく頷いた。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>小<rt>ちい</rt></ruby>さく<ruby>頷<rt>うなず</rt></ruby>いた。", "example_cn": "她轻轻点了点头。" },
+        { "id": "1-10", "word": "描く", "kana": "えがく", "pos": "動詞", "meaning_cn": "描绘，描写；想象", "example_jp": "故郷の風景を絵に描いた。", "example_jp_ruby": "<ruby>故郷<rt>こきょう</rt></ruby>の<ruby>風景<rt>ふうけい</rt></ruby>を<ruby>絵<rt>え</rt></ruby>に<ruby>描<rt>えが</rt></ruby>いた。", "example_cn": "把故乡的风景画成了画。" },
+        { "id": "1-11", "word": "追いつく", "kana": "おいつく", "pos": "動詞", "meaning_cn": "赶上，追上", "example_jp": "後ろから走って追いついた。", "example_jp_ruby": "<ruby>後<rt>うし</rt></ruby>ろから<ruby>走<rt>はし</rt></ruby>って<ruby>追<rt>お</rt></ruby>いついた。", "example_cn": "从后面跑着追上了。" },
+        { "id": "1-12", "word": "追い抜く", "kana": "おいぬく", "pos": "動詞", "meaning_cn": "赶上并超过", "example_jp": "最後の曲がり角で追い抜いた。", "example_jp_ruby": "<ruby>最後<rt>さいご</rt></ruby>の<ruby>曲<rt>ま</rt></ruby>がり<ruby>角<rt>かど</rt></ruby>で<ruby>追<rt>お</rt></ruby>い<ruby>抜<rt>ぬ</rt></ruby>いた。", "example_cn": "在最后一个拐角超过去了。" },
+        { "id": "1-13", "word": "置く", "kana": "おく", "pos": "動詞", "meaning_cn": "放置，搁置；处在；间隔", "example_jp": "荷物を床に置いてください。", "example_jp_ruby": "<ruby>荷物<rt>にもつ</rt></ruby>を<ruby>床<rt>ゆか</rt></ruby>に<ruby>置<rt>お</rt></ruby>いてください。", "example_cn": "请把行李放在地上。" },
+        { "id": "1-14", "word": "落ち着く", "kana": "おちつく", "pos": "動詞", "meaning_cn": "沉着，稳重；稳定；朴素", "example_jp": "試験の前に気持ちを落ち着かせる。", "example_jp_ruby": "<ruby>試験<rt>しけん</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>に<ruby>気持<rt>きも</rt></ruby>ちを<ruby>落<rt>お</rt></ruby>ち<ruby>着<rt>つ</rt></ruby>かせる。", "example_cn": "考试前让心情平静下来。" },
+        { "id": "1-15", "word": "驚く", "kana": "おどろく", "pos": "動詞", "meaning_cn": "惊慌，吓一跳；惊人，惊讶", "example_jp": "その知らせに皆が驚いた。", "example_jp_ruby": "その<ruby>知<rt>し</rt></ruby>らせに<ruby>皆<rt>みな</rt></ruby>が<ruby>驚<rt>おどろ</rt></ruby>いた。", "example_cn": "大家都为那个消息而吃惊。" },
+        { "id": "1-16", "word": "思いつく", "kana": "おもいつく", "pos": "動詞", "meaning_cn": "忽然想起来", "example_jp": "いい方法を思いついた。", "example_jp_ruby": "いい<ruby>方法<rt>ほうほう</rt></ruby>を<ruby>思<rt>おも</rt></ruby>いついた。", "example_cn": "忽然想到了好办法。" },
+        { "id": "1-17", "word": "輝く", "kana": "かがやく", "pos": "動詞", "meaning_cn": "发光，闪耀；引人注目", "example_jp": "夜空に星が輝いている。", "example_jp_ruby": "<ruby>夜空<rt>よぞら</rt></ruby>に<ruby>星<rt>ほし</rt></ruby>が<ruby>輝<rt>かがや</rt></ruby>いている。", "example_cn": "星星在夜空中闪耀。" },
+        { "id": "1-18", "word": "掻く", "kana": "かく", "pos": "動詞", "meaning_cn": "出汗，流汗；丢人，丢脸", "example_jp": "緊張して冷や汗を掻いた。", "example_jp_ruby": "<ruby>緊張<rt>きんちょう</rt></ruby>して<ruby>冷<rt>ひ</rt></ruby>や<ruby>汗<rt>あせ</rt></ruby>を<ruby>掻<rt>か</rt></ruby>いた。", "example_cn": "紧张得出冷汗。" },
+        { "id": "1-19", "word": "書く", "kana": "かく", "pos": "動詞", "meaning_cn": "写，书写，描写；绘画", "example_jp": "名前をここに書いてください。", "example_jp_ruby": "<ruby>名前<rt>なまえ</rt></ruby>をここに<ruby>書<rt>か</rt></ruby>いてください。", "example_cn": "请把名字写在这里。" },
+        { "id": "1-20", "word": "片付く", "kana": "かたづく", "pos": "動詞", "meaning_cn": "整理好；事情得到解决", "example_jp": "ようやく問題が片付いた。", "example_jp_ruby": "ようやく<ruby>問題<rt>もんだい</rt></ruby>が<ruby>片付<rt>かたづ</rt></ruby>いた。", "example_cn": "问题总算解决了。" },
+        { "id": "1-21", "word": "傾く", "kana": "かたむく", "pos": "動詞", "meaning_cn": "倾斜，歪斜；倾向于", "example_jp": "建物が少し傾いている。", "example_jp_ruby": "<ruby>建物<rt>たてもの</rt></ruby>が<ruby>少<rt>すこ</rt></ruby>し<ruby>傾<rt>かたむ</rt></ruby>いている。", "example_cn": "建筑物略微倾斜。" },
+        { "id": "1-22", "word": "乾く", "kana": "かわく", "pos": "動詞", "meaning_cn": "晒干，晾干", "example_jp": "洗濯物がすっかり乾いた。", "example_jp_ruby": "<ruby>洗濯物<rt>せんたくもの</rt></ruby>がすっかり<ruby>乾<rt>かわ</rt></ruby>いた。", "example_cn": "洗的衣物完全干了。" },
+        { "id": "1-23", "word": "渇く", "kana": "かわく", "pos": "動詞", "meaning_cn": "口渴；（知识）饥渴", "example_jp": "走った後で喉が渇いた。", "example_jp_ruby": "<ruby>走<rt>はし</rt></ruby>った<ruby>後<rt>あと</rt></ruby>で<ruby>喉<rt>のど</rt></ruby>が<ruby>渇<rt>かわ</rt></ruby>いた。", "example_cn": "跑完后口渴了。" },
+        { "id": "1-24", "word": "消えゆく", "kana": "きえゆく", "pos": "動詞", "meaning_cn": "消失", "example_jp": "星が夜の空に消えゆく。", "example_jp_ruby": "<ruby>星<rt>ほし</rt></ruby>が<ruby>夜<rt>よる</rt></ruby>の<ruby>空<rt>そら</rt></ruby>に<ruby>消<rt>き</rt></ruby>えゆく。", "example_cn": "星星消失在夜空中。" },
+        { "id": "1-25", "word": "利く", "kana": "きく", "pos": "動詞", "meaning_cn": "起作用，好使；擅长说话", "example_jp": "この薬はよく利く。", "example_jp_ruby": "この<ruby>薬<rt>くすり</rt></ruby>はよく<ruby>利<rt>き</rt></ruby>く。", "example_cn": "这种药很管用。" },
+        { "id": "1-26", "word": "効く", "kana": "きく", "pos": "動詞", "meaning_cn": "（药物）有效，见效，奏效", "example_jp": "薬が効いて熱が下がった。", "example_jp_ruby": "<ruby>薬<rt>くすり</rt></ruby>が<ruby>効<rt>き</rt></ruby>いて<ruby>熱<rt>ねつ</rt></ruby>が<ruby>下<rt>さ</rt></ruby>がった。", "example_cn": "药见效，烧退了。" },
+        { "id": "1-27", "word": "聞く", "kana": "きく", "pos": "動詞", "meaning_cn": "听，听从；打听，咨询", "example_jp": "先生の話をよく聞く。", "example_jp_ruby": "<ruby>先生<rt>せんせい</rt></ruby>の<ruby>話<rt>はなし</rt></ruby>をよく<ruby>聞<rt>き</rt></ruby>く。", "example_cn": "认真听老师讲话。" },
+        { "id": "1-28", "word": "傷付く", "kana": "きずつく", "pos": "動詞", "meaning_cn": "受伤，名誉受损", "example_jp": "言葉で深く傷付いた。", "example_jp_ruby": "<ruby>言葉<rt>ことば</rt></ruby>で<ruby>深<rt>ふか</rt></ruby>く<ruby>傷付<rt>きずつ</rt></ruby>いた。", "example_cn": "被言语深深伤害了。" },
+        { "id": "1-29", "word": "気づく", "kana": "きづく", "pos": "動詞", "meaning_cn": "注意到，意识到，发觉", "example_jp": "財布がないことに気づいた。", "example_jp_ruby": "<ruby>財布<rt>さいふ</rt></ruby>がないことに<ruby>気<rt>き</rt></ruby>づいた。", "example_cn": "发觉钱包不见了。" },
+        { "id": "1-30", "word": "くずつく", "kana": "くずつく", "pos": "動詞", "meaning_cn": "磨蹭；久阴不晴；久病不愈", "example_jp": "天気がくずついて洗濯ができない。", "example_jp_ruby": "<ruby>天気<rt>てんき</rt></ruby>がくずついて<ruby>洗濯<rt>せんたく</rt></ruby>ができない。", "example_cn": "天气阴沉没法洗衣服。" },
+        { "id": "1-31", "word": "砕く", "kana": "くだく", "pos": "動詞", "meaning_cn": "打碎，敲碎，粉碎", "example_jp": "氷を砕いて水にする。", "example_jp_ruby": "<ruby>氷<rt>こおり</rt></ruby>を<ruby>砕<rt>くだ</rt></ruby>いて<ruby>水<rt>みず</rt></ruby>にする。", "example_cn": "把冰敲碎化成水。" },
+        { "id": "1-32", "word": "くっ付く", "kana": "くっつく", "pos": "動詞", "meaning_cn": "紧贴在一起；附着；紧跟着", "example_jp": "切手が手にくっ付いた。", "example_jp_ruby": "<ruby>切手<rt>きって</rt></ruby>が<ruby>手<rt>て</rt></ruby>にくっ<ruby>付<rt>つ</rt></ruby>いた。", "example_cn": "邮票粘在手上了。" },
+        { "id": "1-33", "word": "咲く", "kana": "さく", "pos": "動詞", "meaning_cn": "花开放", "example_jp": "庭の桜が咲いた。", "example_jp_ruby": "<ruby>庭<rt>にわ</rt></ruby>の<ruby>桜<rt>さくら</rt></ruby>が<ruby>咲<rt>さ</rt></ruby>いた。", "example_cn": "院子里的樱花开了。" },
+        { "id": "1-34", "word": "裂く", "kana": "さく", "pos": "動詞", "meaning_cn": "撕开，撕破；挑拨离间", "example_jp": "紙を二つに裂いた。", "example_jp_ruby": "<ruby>紙<rt>かみ</rt></ruby>を<ruby>二<rt>ふた</rt></ruby>つに<ruby>裂<rt>さ</rt></ruby>いた。", "example_cn": "把纸撕成了两半。" },
+        { "id": "1-35", "word": "囁く", "kana": "ささやく", "pos": "動詞", "meaning_cn": "（两人）低声私语", "example_jp": "二人が隅で囁いている。", "example_jp_ruby": "<ruby>二人<rt>ふたり</rt></ruby>が<ruby>隅<rt>すみ</rt></ruby>で<ruby>囁<rt>ささや</rt></ruby>いている。", "example_cn": "两个人在角落低声私语。" },
+        { "id": "1-36", "word": "差し引く", "kana": "さしひく", "pos": "動詞", "meaning_cn": "减去，扣除（钱或分量）", "example_jp": "税金を差し引いた額を受け取る。", "example_jp_ruby": "<ruby>税金<rt>ぜいきん</rt></ruby>を<ruby>差<rt>さ</rt></ruby>し<ruby>引<rt>ひ</rt></ruby>いた<ruby>額<rt>がく</rt></ruby>を<ruby>受<rt>う</rt></ruby>け<ruby>取<rt>と</rt></ruby>る。", "example_cn": "领取扣除税金后的金额。" },
+        { "id": "1-37", "word": "敷く", "kana": "しく", "pos": "動詞", "meaning_cn": "铺垫，铺设", "example_jp": "床に新しい畳を敷いた。", "example_jp_ruby": "<ruby>床<rt>ゆか</rt></ruby>に<ruby>新<rt>あたら</rt></ruby>しい<ruby>畳<rt>たたみ</rt></ruby>を<ruby>敷<rt>し</rt></ruby>いた。", "example_cn": "在地上铺了新榻榻米。" },
+        { "id": "1-38", "word": "空く", "kana": "すく", "pos": "動詞", "meaning_cn": "少；饿；有空闲时间", "example_jp": "午後なら少し空いている。", "example_jp_ruby": "<ruby>午後<rt>ごご</rt></ruby>なら<ruby>少<rt>すこ</rt></ruby>し<ruby>空<rt>す</rt></ruby>いている。", "example_cn": "下午的话稍微空一些。" },
+        { "id": "1-39", "word": "住み着く", "kana": "すみつく", "pos": "動詞", "meaning_cn": "定居，安居", "example_jp": "この町に住み着いて二十年になる。", "example_jp_ruby": "この<ruby>町<rt>まち</rt></ruby>に<ruby>住<rt>す</rt></ruby>み<ruby>着<rt>つ</rt></ruby>いて<ruby>二十年<rt>にじゅうねん</rt></ruby>になる。", "example_cn": "在这个镇上定居二十年了。" },
+        { "id": "1-40", "word": "炊く", "kana": "たく", "pos": "動詞", "meaning_cn": "煮饭", "example_jp": "朝早く起きてご飯を炊く。", "example_jp_ruby": "<ruby>朝<rt>あさ</rt></ruby><ruby>早<rt>はや</rt></ruby>く<ruby>起<rt>お</rt></ruby>きてご<ruby>飯<rt>はん</rt></ruby>を<ruby>炊<rt>た</rt></ruby>く。", "example_cn": "早上早早起来煮饭。" },
+        { "id": "1-41", "word": "焚く", "kana": "たく", "pos": "動詞", "meaning_cn": "烧火，烧水", "example_jp": "風呂の湯を焚く。", "example_jp_ruby": "<ruby>風呂<rt>ふろ</rt></ruby>の<ruby>湯<rt>ゆ</rt></ruby>を<ruby>焚<rt>た</rt></ruby>く。", "example_cn": "烧洗澡水。" },
+        { "id": "1-42", "word": "叩く", "kana": "たたく", "pos": "動詞", "meaning_cn": "（用手或工具）敲打", "example_jp": "門を軽く叩いた。", "example_jp_ruby": "<ruby>門<rt>もん</rt></ruby>を<ruby>軽<rt>かる</rt></ruby>く<ruby>叩<rt>たた</rt></ruby>いた。", "example_cn": "轻轻敲了门。" },
+        { "id": "1-43", "word": "抱く", "kana": "だく", "pos": "動詞", "meaning_cn": "抱小孩或宠物", "example_jp": "母が赤ちゃんを抱いている。", "example_jp_ruby": "<ruby>母<rt>はは</rt></ruby>が<ruby>赤<rt>あか</rt></ruby>ちゃんを<ruby>抱<rt>だ</rt></ruby>いている。", "example_cn": "母亲抱着婴儿。" },
+        { "id": "1-44", "word": "近付く", "kana": "ちかづく", "pos": "動詞", "meaning_cn": "靠近，临近；接近，亲近（人）", "example_jp": "冬が近づいてきた。", "example_jp_ruby": "<ruby>冬<rt>ふゆ</rt></ruby>が<ruby>近<rt>ちか</rt></ruby>づいてきた。", "example_cn": "冬天临近了。" },
+        { "id": "1-45", "word": "力づく", "kana": "ちからづく", "pos": "動詞", "meaning_cn": "恢复体力；来劲、起劲", "example_jp": "休んで少し力づいた。", "example_jp_ruby": "<ruby>休<rt>やす</rt></ruby>んで<ruby>少<rt>すこ</rt></ruby>し<ruby>力<rt>ちから</rt></ruby>づいた。", "example_cn": "休息后恢复了一点体力。" },
+        { "id": "1-46", "word": "付く", "kana": "つく", "pos": "動詞", "meaning_cn": "附着；跟随；跟得上；", "example_jp": "靴に泥が付いている。", "example_jp_ruby": "<ruby>靴<rt>くつ</rt></ruby>に<ruby>泥<rt>どろ</rt></ruby>が<ruby>付<rt>つ</rt></ruby>いている。", "example_cn": "鞋上沾着泥。" },
+        { "id": "1-47", "word": "就く", "kana": "つく", "pos": "動詞", "meaning_cn": "就坐；就职，从事", "example_jp": "来月から新しい職に就く。", "example_jp_ruby": "<ruby>来月<rt>らいげつ</rt></ruby>から<ruby>新<rt>あたら</rt></ruby>しい<ruby>職<rt>しょく</rt></ruby>に<ruby>就<rt>つ</rt></ruby>く。", "example_cn": "下月起就任新职。" },
+        { "id": "1-48", "word": "点く", "kana": "つく", "pos": "動詞", "meaning_cn": "点灯，点火", "example_jp": "暗くなって街灯が点いた。", "example_jp_ruby": "<ruby>暗<rt>くら</rt></ruby>くなって<ruby>街灯<rt>がいとう</rt></ruby>が<ruby>点<rt>つ</rt></ruby>いた。", "example_cn": "天黑了路灯亮了。" },
+        { "id": "1-49", "word": "着く", "kana": "つく", "pos": "動詞", "meaning_cn": "到达；送到", "example_jp": "夜八時に無事着いた。", "example_jp_ruby": "<ruby>夜<rt>よる</rt></ruby><ruby>八時<rt>はちじ</rt></ruby>に<ruby>無事<rt>ぶじ</rt></ruby><ruby>着<rt>つ</rt></ruby>いた。", "example_cn": "晚上八点平安到达。" },
+        { "id": "1-50", "word": "突く", "kana": "つく", "pos": "動詞", "meaning_cn": "刺，扎，戳，撞，打，顶", "example_jp": "指で相手の肩を突いた。", "example_jp_ruby": "<ruby>指<rt>ゆび</rt></ruby>で<ruby>相手<rt>あいて</rt></ruby>の<ruby>肩<rt>かた</rt></ruby>を<ruby>突<rt>つ</rt></ruby>いた。", "example_cn": "用手指戳对方的肩。" },
+        { "id": "1-51", "word": "続く", "kana": "つづく", "pos": "動詞", "meaning_cn": "继续，连续；接着；待续", "example_jp": "雨が三日続いている。", "example_jp_ruby": "<ruby>雨<rt>あめ</rt></ruby>が<ruby>三日<rt>みっか</rt></ruby><ruby>続<rt>つづ</rt></ruby>いている。", "example_cn": "雨连续下了三天。" },
+        { "id": "1-52", "word": "呟く", "kana": "つぶやく", "pos": "動詞", "meaning_cn": "嘟囔，嘀咕", "example_jp": "彼は小さく呟いた。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>小<rt>ちい</rt></ruby>さく<ruby>呟<rt>つぶや</rt></ruby>いた。", "example_cn": "他小声嘟囔了一句。" },
+        { "id": "1-53", "word": "躓く", "kana": "つまづく", "pos": "動詞", "meaning_cn": "绊倒，跌跤；受挫，失败", "example_jp": "石につまずいて転びそうになった。", "example_jp_ruby": "<ruby>石<rt>いし</rt></ruby>につまずいて<ruby>転<rt>ころ</rt></ruby>びそうになった。", "example_cn": "被石头绊了一下差点摔倒。" },
+        { "id": "1-54", "word": "梳く", "kana": "とく", "pos": "動詞", "meaning_cn": "梳头", "example_jp": "毎朝髪を梳いてから出かける。", "example_jp_ruby": "<ruby>毎朝<rt>まいあさ</rt></ruby><ruby>髪<rt>かみ</rt></ruby>を<ruby>梳<rt>と</rt></ruby>いてから<ruby>出<rt>で</rt></ruby>かける。", "example_cn": "每天早上梳好头发再出门。" },
+        { "id": "1-55", "word": "溶く", "kana": "とく", "pos": "動詞", "meaning_cn": "溶解，融化", "example_jp": "卵を溶いてから焼く。", "example_jp_ruby": "<ruby>卵<rt>たまご</rt></ruby>を<ruby>溶<rt>と</rt></ruby>いてから<ruby>焼<rt>や</rt></ruby>く。", "example_cn": "把鸡蛋打散后再煎。" },
+        { "id": "1-56", "word": "解く", "kana": "とく", "pos": "動詞", "meaning_cn": "解开；解除；解题，解谜", "example_jp": "時間をかけて難問を解いた。", "example_jp_ruby": "<ruby>時間<rt>じかん</rt></ruby>をかけて<ruby>難問<rt>なんもん</rt></ruby>を<ruby>解<rt>と</rt></ruby>いた。", "example_cn": "花时间解出了难题。" },
+        { "id": "1-57", "word": "届く", "kana": "とどく", "pos": "動詞", "meaning_cn": "送到；达到（目标）；够得着", "example_jp": "荷物が今日の午後に届く。", "example_jp_ruby": "<ruby>荷物<rt>にもつ</rt></ruby>が<ruby>今日<rt>きょう</rt></ruby>の<ruby>午後<rt>ごご</rt></ruby>に<ruby>届<rt>とど</rt></ruby>く。", "example_cn": "行李今天下午送到。" },
+        { "id": "1-58", "word": "退く", "kana": "どく", "pos": "動詞", "meaning_cn": "让开，躲开，退下", "example_jp": "道を譲るために少し退いた。", "example_jp_ruby": "<ruby>道<rt>みち</rt></ruby>を<ruby>譲<rt>ゆず</rt></ruby>るために<ruby>少<rt>すこ</rt></ruby>し<ruby>退<rt>ど</rt></ruby>いた。", "example_cn": "为让路稍微退开了些。" },
+        { "id": "1-59", "word": "長引く", "kana": "ながびく", "pos": "動詞", "meaning_cn": "（时间，病情）拖长，拖延", "example_jp": "風邪が長引いて困っている。", "example_jp_ruby": "<ruby>風邪<rt>かぜ</rt></ruby>が<ruby>長引<rt>ながび</rt></ruby>いて<ruby>困<rt>こま</rt></ruby>っている。", "example_cn": "感冒拖很久很困扰。" },
+        { "id": "1-60", "word": "泣く", "kana": "なく", "pos": "動詞", "meaning_cn": "哭泣，啼哭", "example_jp": "子供が転んで泣いた。", "example_jp_ruby": "<ruby>子供<rt>こども</rt></ruby>が<ruby>転<rt>ころ</rt></ruby>んで<ruby>泣<rt>な</rt></ruby>いた。", "example_cn": "孩子摔倒哭了。" },
+        { "id": "1-61", "word": "鳴く", "kana": "なく", "pos": "動詞", "meaning_cn": "（鸟等小动物）叫", "example_jp": "庭で小鳥が鳴いている。", "example_jp_ruby": "<ruby>庭<rt>にわ</rt></ruby>で<ruby>小鳥<rt>ことり</rt></ruby>が<ruby>鳴<rt>な</rt></ruby>いている。", "example_cn": "小鸟在院子里鸣叫。" },
+        { "id": "1-62", "word": "嘆く", "kana": "なげく", "pos": "動詞", "meaning_cn": "叹息", "example_jp": "現状の悪さを嘆いた。", "example_jp_ruby": "<ruby>現状<rt>げんじょう</rt></ruby>の<ruby>悪<rt>わる</rt></ruby>さを<ruby>嘆<rt>なげ</rt></ruby>いた。", "example_cn": "叹息现状的糟糕。" },
+        { "id": "1-63", "word": "抜く", "kana": "ぬく", "pos": "動詞", "meaning_cn": "抽出；清除；省略；超越", "example_jp": "資料から必要な部分を抜いた。", "example_jp_ruby": "<ruby>資料<rt>しりょう</rt></ruby>から<ruby>必要<rt>ひつよう</rt></ruby>な<ruby>部分<rt>ぶぶん</rt></ruby>を<ruby>抜<rt>ぬ</rt></ruby>いた。", "example_cn": "从资料中抽出了必要的部分。" },
+        { "id": "1-64", "word": "覗く", "kana": "のぞく", "pos": "動詞", "meaning_cn": "窥视，窥探；稍稍看一下；露出可以看到的一部分", "example_jp": "部屋の中を覗いてみた。", "example_jp_ruby": "<ruby>部屋<rt>へや</rt></ruby>の<ruby>中<rt>なか</rt></ruby>を<ruby>覗<rt>のぞ</rt></ruby>いてみた。", "example_cn": "往房间里看了看。" },
+        { "id": "1-65", "word": "除く", "kana": "のぞく", "pos": "動詞", "meaning_cn": "消除，取消；除了…之外", "example_jp": "彼を除いて全員が賛成した。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>を<ruby>除<rt>のぞ</rt></ruby>いて<ruby>全員<rt>ぜんいん</rt></ruby>が<ruby>賛成<rt>さんせい</rt></ruby>した。", "example_cn": "除他之外所有人都赞成。" },
+        { "id": "1-66", "word": "吐く", "kana": "はく", "pos": "動詞", "meaning_cn": "吐出，呕吐；吐露；冒烟", "example_jp": "煙草の煙を吐いた。", "example_jp_ruby": "<ruby>煙草<rt>たばこ</rt></ruby>の<ruby>煙<rt>けむり</rt></ruby>を<ruby>吐<rt>は</rt></ruby>いた。", "example_cn": "吐出香烟的烟雾。" },
+        { "id": "1-67", "word": "履く", "kana": "はく", "pos": "動詞", "meaning_cn": "穿鞋", "example_jp": "出かける前に靴を履く。", "example_jp_ruby": "<ruby>出<rt>で</rt></ruby>かける<ruby>前<rt>まえ</rt></ruby>に<ruby>靴<rt>くつ</rt></ruby>を<ruby>履<rt>は</rt></ruby>く。", "example_cn": "出门前穿鞋。" },
+        { "id": "1-68", "word": "掃く", "kana": "はく", "pos": "動詞", "meaning_cn": "打扫，清扫", "example_jp": "朝は庭を掃く。", "example_jp_ruby": "<ruby>朝<rt>あさ</rt></ruby>は<ruby>庭<rt>にわ</rt></ruby>を<ruby>掃<rt>は</rt></ruby>く。", "example_cn": "早上打扫院子。" },
+        { "id": "1-69", "word": "穿く", "kana": "はく", "pos": "動詞", "meaning_cn": "穿袜子（裤子，裙子等）", "example_jp": "新しいズボンを穿いた。", "example_jp_ruby": "<ruby>新<rt>あたら</rt></ruby>しいズボンを<ruby>穿<rt>は</rt></ruby>いた。", "example_cn": "穿上了新裤子。" },
+        { "id": "1-70", "word": "弾く", "kana": "はじく", "pos": "動詞", "meaning_cn": "迸开，弹开；用指尖弹拨", "example_jp": "指でボールを弾いた。", "example_jp_ruby": "<ruby>指<rt>ゆび</rt></ruby>でボールを<ruby>弾<rt>はじ</rt></ruby>いた。", "example_cn": "用手指弹了一下球。" },
+        { "id": "1-71", "word": "働く", "kana": "はたらく", "pos": "動詞", "meaning_cn": "劳动，工作；干坏事", "example_jp": "父は毎日八時間働く。", "example_jp_ruby": "<ruby>父<rt>ちち</rt></ruby>は<ruby>毎日<rt>まいにち</rt></ruby><ruby>八時間<rt>はちじかん</rt></ruby><ruby>働<rt>はたら</rt></ruby>く。", "example_cn": "父亲每天工作八小时。" },
+        { "id": "1-72", "word": "省く", "kana": "はぶく", "pos": "動詞", "meaning_cn": "节省，节约，减去；省略", "example_jp": "説明を省いて結論だけ伝える。", "example_jp_ruby": "<ruby>説明<rt>せつめい</rt></ruby>を<ruby>省<rt>はぶ</rt></ruby>いて<ruby>結論<rt>けつろん</rt></ruby>だけ<ruby>伝<rt>つた</rt></ruby>える。", "example_cn": "省略说明只传达结论。" },
+        { "id": "1-73", "word": "引く", "kana": "ひく", "pos": "動詞", "meaning_cn": "拉；牵；吸引；查字典；减去，削减，扣除；减价", "example_jp": "辞書で知らない語を引く。", "example_jp_ruby": "<ruby>辞書<rt>じしょ</rt></ruby>で<ruby>知<rt>し</rt></ruby>らない<ruby>語<rt>ご</rt></ruby>を<ruby>引<rt>ひ</rt></ruby>く。", "example_cn": "用字典查不懂的词。" },
+        { "id": "1-74", "word": "弾く", "kana": "ひく", "pos": "動詞", "meaning_cn": "弹拨（乐器）", "example_jp": "妹がピアノを弾いている。", "example_jp_ruby": "<ruby>妹<rt>いもうと</rt></ruby>がピアノを<ruby>弾<rt>ひ</rt></ruby>いている。", "example_cn": "妹妹在弹钢琴。" },
+        { "id": "1-75", "word": "轢く", "kana": "ひく", "pos": "動詞", "meaning_cn": "车轧人", "example_jp": "車が歩行者を轢いた。", "example_jp_ruby": "<ruby>車<rt>くるま</rt></ruby>が<ruby>歩行者<rt>ほこうしゃ</rt></ruby>を<ruby>轢<rt>ひ</rt></ruby>いた。", "example_cn": "汽车撞了行人。" },
+        { "id": "1-76", "word": "響く", "kana": "ひびく", "pos": "動詞", "meaning_cn": "（声音）响，有回音", "example_jp": "鐘の音が谷に響いた。", "example_jp_ruby": "<ruby>鐘<rt>かね</rt></ruby>の<ruby>音<rt>おと</rt></ruby>が<ruby>谷<rt>たに</rt></ruby>に<ruby>響<rt>ひび</rt></ruby>いた。", "example_cn": "钟声在山谷中回响。" },
+        { "id": "1-77", "word": "開く", "kana": "ひらく", "pos": "動詞", "meaning_cn": "召开；打开；开设，开张", "example_jp": "来週、新しい店を開く。", "example_jp_ruby": "<ruby>来週<rt>らいしゅう</rt></ruby>、<ruby>新<rt>あたら</rt></ruby>しい<ruby>店<rt>みせ</rt></ruby>を<ruby>開<rt>ひら</rt></ruby>く。", "example_cn": "下周开新店。" },
+        { "id": "1-78", "word": "吹く", "kana": "ふく", "pos": "動詞", "meaning_cn": "刮风；用气吹", "example_jp": "北の風が強く吹いている。", "example_jp_ruby": "<ruby>北<rt>きた</rt></ruby>の<ruby>風<rt>かぜ</rt></ruby>が<ruby>強<rt>つよ</rt></ruby>く<ruby>吹<rt>ふ</rt></ruby>いている。", "example_cn": "北风刮得很猛。" },
+        { "id": "1-79", "word": "拭く", "kana": "ふく", "pos": "動詞", "meaning_cn": "（用抹布等）擦，抹", "example_jp": "雑巾で机を拭いた。", "example_jp_ruby": "<ruby>雑巾<rt>ぞうきん</rt></ruby>で<ruby>机<rt>つくえ</rt></ruby>を<ruby>拭<rt>ふ</rt></ruby>いた。", "example_cn": "用抹布擦了桌子。" },
+        { "id": "1-80", "word": "振り向く", "kana": "ふりむく", "pos": "動詞", "meaning_cn": "回头（看）；理睬，搭理", "example_jp": "声に振り向いて友だちに気づいた。", "example_jp_ruby": "<ruby>声<rt>こえ</rt></ruby>に<ruby>振<rt>ふ</rt></ruby>り<ruby>向<rt>む</rt></ruby>いて<ruby>友<rt>とも</rt></ruby>だちに<ruby>気<rt>き</rt></ruby>づいた。", "example_cn": "循声回头发现了朋友。" },
+        { "id": "1-81", "word": "解く", "kana": "ほどく", "pos": "動詞", "meaning_cn": "解开、拆开、松绑", "example_jp": "結んだ紐をほどいた。", "example_jp_ruby": "<ruby>結<rt>むす</rt></ruby>んだ<ruby>紐<rt>ひも</rt></ruby>をほどいた。", "example_cn": "解开了系好的绳子。" },
+        { "id": "1-82", "word": "巻く", "kana": "まく", "pos": "動詞", "meaning_cn": "卷起来，卷上，缠绕", "example_jp": "フィルムを巻いてカメラに戻す。", "example_jp_ruby": "フィルムを<ruby>巻<rt>ま</rt></ruby>いてカメラに<ruby>戻<rt>もど</rt></ruby>す。", "example_cn": "把胶卷卷好放回相机。" },
+        { "id": "1-83", "word": "撒く", "kana": "まく", "pos": "動詞", "meaning_cn": "撒；散发", "example_jp": "庭に水を撒いた。", "example_jp_ruby": "<ruby>庭<rt>にわ</rt></ruby>に<ruby>水<rt>みず</rt></ruby>を<ruby>撒<rt>ま</rt></ruby>いた。", "example_cn": "在院子里洒了水。" },
+        { "id": "1-84", "word": "蒔く", "kana": "まく", "pos": "動詞", "meaning_cn": "播种", "example_jp": "春に畑に種を蒔く。", "example_jp_ruby": "<ruby>春<rt>はる</rt></ruby>に<ruby>畑<rt>はたけ</rt></ruby>に<ruby>種<rt>たね</rt></ruby>を<ruby>蒔<rt>ま</rt></ruby>く。", "example_cn": "春天在田里播种。" },
+        { "id": "1-85", "word": "まごつく", "kana": "まごつく", "pos": "動詞", "meaning_cn": "不知所措，张皇失措，彷徨", "example_jp": "初めての土地でまごついた。", "example_jp_ruby": "<ruby>初<rt>はじ</rt></ruby>めての<ruby>土地<rt>とち</rt></ruby>でまごついた。", "example_cn": "在陌生的地方不知所措。" },
+        { "id": "1-86", "word": "招く", "kana": "まねく", "pos": "動詞", "meaning_cn": "邀请；招致", "example_jp": "専門家を会議に招いた。", "example_jp_ruby": "<ruby>専門家<rt>せんもんか</rt></ruby>を<ruby>会議<rt>かいぎ</rt></ruby>に<ruby>招<rt>まね</rt></ruby>いた。", "example_cn": "把专家请到了会议上。" },
+        { "id": "1-87", "word": "磨く", "kana": "みがく", "pos": "動詞", "meaning_cn": "擦亮，磨光；磨炼；琢磨", "example_jp": "技術を磨いて現場に立つ。", "example_jp_ruby": "<ruby>技術<rt>ぎじゅつ</rt></ruby>を<ruby>磨<rt>みが</rt></ruby>いて<ruby>現場<rt>げんば</rt></ruby>に<ruby>立<rt>た</rt></ruby>つ。", "example_cn": "磨炼技术站在一线。" },
+        { "id": "1-88", "word": "見抜く", "kana": "みぬく", "pos": "動詞", "meaning_cn": "看穿，看透，识破", "example_jp": "相手の嘘を見抜いた。", "example_jp_ruby": "<ruby>相手<rt>あいて</rt></ruby>の<ruby>嘘<rt>うそ</rt></ruby>を<ruby>見抜<rt>みぬ</rt></ruby>いた。", "example_cn": "识破了对方的谎言。" },
+        { "id": "1-89", "word": "剥く", "kana": "むく", "pos": "動詞", "meaning_cn": "（用刀具）削皮，剥皮", "example_jp": "包丁でリンゴの皮を剥いた。", "example_jp_ruby": "<ruby>包丁<rt>ほうちょう</rt></ruby>でリンゴの<ruby>皮<rt>かわ</rt></ruby>を<ruby>剥<rt>む</rt></ruby>いた。", "example_cn": "用菜刀削了苹果皮。" },
+        { "id": "1-90", "word": "向く", "kana": "むく", "pos": "動詞", "meaning_cn": "朝向（某方向）；适合", "example_jp": "その仕事は彼に向いている。", "example_jp_ruby": "その<ruby>仕事<rt>しごと</rt></ruby>は<ruby>彼<rt>かれ</rt></ruby>に<ruby>向<rt>む</rt></ruby>いている。", "example_cn": "那份工作适合他。" },
+        { "id": "1-91", "word": "結び付く", "kana": "むすびつく", "pos": "動詞", "meaning_cn": "连接，有关联", "example_jp": "二つの事件が深く結び付いている。", "example_jp_ruby": "<ruby>二<rt>ふた</rt></ruby>つの<ruby>事件<rt>じけん</rt></ruby>が<ruby>深<rt>ふか</rt></ruby>く<ruby>結<rt>むす</rt></ruby>び<ruby>付<rt>つ</rt></ruby>いている。", "example_cn": "两件事深深关联。" },
+        { "id": "1-92", "word": "基づく", "kana": "もとづく", "pos": "動詞", "meaning_cn": "根据，基于，本着", "example_jp": "実際の記録に基づいて書く。", "example_jp_ruby": "<ruby>実際<rt>じっさい</rt></ruby>の<ruby>記録<rt>きろく</rt></ruby>に<ruby>基<rt>もと</rt></ruby>づいて<ruby>書<rt>か</rt></ruby>く。", "example_cn": "依据实际记录来写。" },
+        { "id": "1-93", "word": "焼く", "kana": "やく", "pos": "動詞", "meaning_cn": "烧烤，焚烧；把皮肤晒黑", "example_jp": "魚を炭火で焼いた。", "example_jp_ruby": "<ruby>魚<rt>さかな</rt></ruby>を<ruby>炭火<rt>すみび</rt></ruby>で<ruby>焼<rt>や</rt></ruby>いた。", "example_cn": "用炭火烤了鱼。" },
+        { "id": "1-94", "word": "破く", "kana": "やぶく", "pos": "動詞", "meaning_cn": "撕破，弄破", "example_jp": "うっかり手紙を破いてしまった。", "example_jp_ruby": "うっかり<ruby>手紙<rt>てがみ</rt></ruby>を<ruby>破<rt>やぶ</rt></ruby>いてしまった。", "example_cn": "不小心把信撕破了。" },
+        { "id": "1-95", "word": "行く", "kana": "ゆく", "pos": "動詞", "meaning_cn": "去，前往", "example_jp": "これから京都へゆく。", "example_jp_ruby": "これから<ruby>京都<rt>きょうと</rt></ruby>へゆく。", "example_cn": "接下来前往京都。" },
+        { "id": "1-96", "word": "沸く", "kana": "わく", "pos": "動詞", "meaning_cn": "沸腾，烧开；激动，兴奋", "example_jp": "やかんの湯が沸いている。", "example_jp_ruby": "やかんの<ruby>湯<rt>ゆ</rt></ruby>が<ruby>沸<rt>わ</rt></ruby>いている。", "example_cn": "水壶里的水开了。" },
+        { "id": "1-97", "word": "湧く", "kana": "わく", "pos": "動詞", "meaning_cn": "涌出，冒出；产生（感情）", "example_jp": "温泉が地中から湧いている。", "example_jp_ruby": "<ruby>温泉<rt>おんせん</rt></ruby>が<ruby>地中<rt>ちちゅう</rt></ruby>から<ruby>湧<rt>わ</rt></ruby>いている。", "example_cn": "温泉从地下涌出。" }
+      ]
+    }
+  ]
+}
+</script>
+<script src="../../vocab.js"></script>
+</body>
+</html>
