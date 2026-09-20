@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>听力练习 · JLPT 系统学习资料库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="listening.css">
+</head>
+<body>
+<div class="lp-wrap" id="app">
+  <div style="text-align:center;padding:60px 20px;color:var(--muted)">加载中…</div>
+</div>
+
+<script src="listening.js"></script>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var exam = params.get('exam') || '2021-07';
+  var section = params.get('section') ? parseInt(params.get('section')) : null;
+  var level = params.get('level') || 'N2';
+
+  var dataVar = 'LISTENING_' + level + '_' + exam.replace('-', '_');
+  var scriptSrc = 'data/' + level + '/' + exam + '.js';
+
+  function init() {
+    var data = window[dataVar];
+    if (!data) {
+      document.getElementById('app').innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--red)">数据加载失败，请检查文件: ' + scriptSrc + '</div>';
+      return;
+    }
+    new ListeningPractice(document.getElementById('app'), data, {
+      mode: 'practice',
+      section: section,
+      audioBase: 'data/' + level + '/audio/'
+    });
+  }
+
+  // 加载数据文件
+  if (window[dataVar]) { init(); return; }
+  var s = document.createElement('script');
+  s.src = scriptSrc;
+  s.onload = init;
+  s.onerror = function () {
+    document.getElementById('app').innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--red)">无法加载数据文件: ' + scriptSrc + '</div>';
+  };
+  document.head.appendChild(s);
+})();
+</script>
+</body>
+</html>

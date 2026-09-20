@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>听力专项练习 · JLPT 系统学习资料库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/theme.js"></script>
+<link rel="stylesheet" href="listening.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="hero-main l-hero">
+      <p class="eyebrow">JLPT 系统学习资料库</p>
+      <h1>听力专项练习</h1>
+      <p>针对 JLPT 听力五大题型（課題理解・要点理解・概要理解・即時応答・統合理解）进行专项训练。支持音频变速播放、逐题精听、原文对照，两种模式随时切换。</p>
+    </div>
+  </header>
+
+  <nav class="crumb" style="font-size:13px;color:var(--muted);margin:4px 0 0">
+    <a href="../index.html">资料库首页</a> ／ 听力专项练习
+  </nav>
+
+  <!-- 按级别分组的试卷选择 -->
+  <div class="exam-select" id="exam-select"></div>
+
+  <!-- 题型入口 -->
+  <h3 style="font-size:15px;margin:26px 0 10px">选择题型（或全部练习）</h3>
+  <div class="section-grid" id="section-grid"></div>
+
+  <!-- 全部练习入口 -->
+  <div style="margin:18px 0 30px">
+    <a class="sec-card" id="btn-all" href="#" style="border-color:var(--accent-line);background:var(--accent-soft)">
+      <div class="sc-head">
+        <span class="sc-num" style="background:var(--accent);color:var(--on-accent)">全</span>
+        <div>
+          <h3>全部题目</h3>
+          <span class="sc-sub">一括練習</span>
+        </div>
+      </div>
+      <p class="sc-desc">按真题顺序练习全部题目，模拟真实听力考试的完整体验。</p>
+    </a>
+  </div>
+</div>
+
+<script>
+(function () {
+  /* ===== 试卷注册表 =====
+   * 新增试卷只需在此追加条目，并放入对应 data/{level}/{exam}.js 文件
+   */
+  var EXAMS = [
+    { level: 'N2', exam: '2021-07', label: '2021.07', available: true },
+    { level: 'N2', exam: '2021-12', label: '2021.12', available: false },
+    { level: 'N2', exam: '2022-07', label: '2022.07', available: false },
+    { level: 'N2', exam: '2022-12', label: '2022.12', available: false },
+    { level: 'N2', exam: '2023-07', label: '2023.07', available: false },
+    { level: 'N2', exam: '2023-12', label: '2023.12', available: false },
+    { level: 'N1', exam: '2021-07', label: '2021.07', available: false },
+    { level: 'N1', exam: '2021-12', label: '2021.12', available: false },
+    { level: 'N1', exam: '2022-07', label: '2022.07', available: false },
+    { level: 'N1', exam: '2022-12', label: '2022.12', available: false },
+    { level: 'N1', exam: '2023-07', label: '2023.07', available: false },
+    { level: 'N1', exam: '2023-12', label: '2023.12', available: false },
+    { level: 'N3', exam: '2021-07', label: '2021.07', available: false },
+    { level: 'N3', exam: '2021-12', label: '2021.12', available: false },
+    { level: 'N3', exam: '2022-07', label: '2022.07', available: false },
+    { level: 'N3', exam: '2022-12', label: '2022.12', available: false },
+    { level: 'N3', exam: '2023-07', label: '2023.07', available: false },
+    { level: 'N3', exam: '2023-12', label: '2023.12', available: false }
+  ];
+
+  var LEVELS = ['N1', 'N2', 'N3', 'N4', 'N5'];
+  var LEVEL_LABEL = { N1: 'N1 一级', N2: 'N2 二级', N3: 'N3 三级', N4: 'N4 四级', N5: 'N5 五级' };
+
+  var currentLevel = 'N2';
+  var currentExam = '2021-07';
+
+  /* ===== 渲染试卷选择区 ===== */
+  function renderExamSelect() {
+    var box = document.getElementById('exam-select');
+    var html = '<h3 style="font-size:15px;margin:22px 0 10px">选择试卷</h3>';
+
+    LEVELS.forEach(function (lv) {
+      var exams = EXAMS.filter(function (e) { return e.level === lv; });
+      var hasAvailable = exams.some(function (e) { return e.available; });
+      // 只显示有数据的级别，或者 N1-N3（占位展示）
+      if (!exams.length && lv !== currentLevel) return;
+      if (['N4', 'N5'].indexOf(lv) >= 0 && !exams.length) return;
+
+      html += '<div class="level-group' + (lv === currentLevel ? ' active' : '') + '">';
+      html += '<div class="level-header" data-level="' + lv + '">';
+      html += '<span class="lv-badge lv-' + lv.toLowerCase() + '">' + lv + '</span>';
+      html += '<span class="lv-name">' + (LEVEL_LABEL[lv] || lv) + '</span>';
+      if (!hasAvailable && exams.length) html += '<span class="lv-soon">即将上线</span>';
+      if (!exams.length) html += '<span class="lv-soon">暂无数据</span>';
+      html += '</div>';
+
+      if (exams.length) {
+        html += '<div class="exam-pills">';
+        exams.forEach(function (e) {
+          var cls = 'exam-pill';
+          if (!e.available) cls += ' disabled';
+          if (e.level === currentLevel && e.exam === currentExam) cls += ' on';
+          html += '<button class="' + cls + '" data-exam="' + e.exam + '" data-level="' + e.level + '"' +
+            (e.available ? '' : ' disabled') + '>' + e.label + '</button>';
+        });
+        html += '</div>';
+      }
+      html += '</div>';
+    });
+
+    box.innerHTML = html;
+  }
+
+  /* ===== 加载数据 ===== */
+  function loadData(cb) {
+    var dataVar = 'LISTENING_' + currentLevel + '_' + currentExam.replace('-', '_');
+    if (window[dataVar]) { cb(window[dataVar]); return; }
+    var s = document.createElement('script');
+    s.src = 'data/' + currentLevel + '/' + currentExam + '.js';
+    s.onload = function () { cb(window[dataVar]); };
+    s.onerror = function () {
+      document.getElementById('section-grid').innerHTML =
+        '<p style="color:var(--red);font-size:13px">数据文件加载失败: data/' + currentLevel + '/' + currentExam + '.js</p>';
+    };
+    document.head.appendChild(s);
+  }
+
+  /* ===== 渲染题型卡片 ===== */
+  function renderSections(data) {
+    var grid = document.getElementById('section-grid');
+    grid.innerHTML = data.meta.sections.map(function (sec) {
+      var qs = data.questions.filter(function (q) { return q.section === sec.id; });
+      var withData = qs.filter(function (q) { return q.options && q.options.some(function (o) { return o !== ''; }); }).length;
+      return '<a class="sec-card" href="practice.html?level=' + data.meta.level + '&exam=' + data.meta.exam + '&section=' + sec.id + '">' +
+        '<div class="sc-head">' +
+          '<span class="sc-num">' + sec.id + '</span>' +
+          '<div><h3>' + sec.name + '</h3><span class="sc-sub">' + sec.nameZh + '</span></div>' +
+        '</div>' +
+        '<p class="sc-desc">' + sec.desc + '</p>' +
+        '<div class="sc-meta"><span>共 ' + sec.count + ' 题</span><span>已录入 ' + withData + ' 题选项</span></div>' +
+      '</a>';
+    }).join('');
+
+    var btnAll = document.getElementById('btn-all');
+    btnAll.href = 'practice.html?level=' + data.meta.level + '&exam=' + data.meta.exam;
+    btnAll.querySelector('.sc-desc').textContent =
+      '按真题顺序练习全部 ' + data.meta.totalQuestions + ' 题，模拟真实听力考试的完整体验。';
+  }
+
+  /* ===== 事件 ===== */
+  document.getElementById('exam-select').addEventListener('click', function (e) {
+    var pill = e.target.closest('.exam-pill');
+    if (!pill || pill.disabled) return;
+    currentLevel = pill.dataset.level;
+    currentExam = pill.dataset.exam;
+    renderExamSelect();
+    loadData(renderSections);
+  });
+
+  /* ===== 初始化 ===== */
+  renderExamSelect();
+  loadData(renderSections);
+})();
+</script>
+</body>
+</html>
