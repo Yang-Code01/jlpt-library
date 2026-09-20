@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>听写练习 · 日语学习资料库</title>
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="dictation.css">
+<script src="../assets/theme.js"></script>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="pagenav">
+  <a href="../index.html">首页</a>
+  <span class="spacer"></span>
+</nav>
+
+<!-- ================= 视图：词单 ================= -->
+<section id="viewLists">
+  <header class="top">
+    <div class="hero-main">
+      <p class="eyebrow">Dictation Practice</p>
+      <h1>日语单词听写</h1>
+      <p>播放单词音频、听音写词（假名或汉字均可）。答错后拼写正确再进入下一词，错词自动收入本地错词本，可随时复习。</p>
+    </div>
+  </header>
+  <div id="listGrid" class="list-groups"></div>
+</section>
+
+<!-- ================= 视图：练习 ================= -->
+<section id="viewPractice" style="display:none">
+  <header class="top prac-header">
+    <div class="hero-main">
+      <p class="eyebrow">Dictation Practice</p>
+      <h1 id="hdrTitle">日语单词听写</h1>
+      <p id="hdrSub">— · 答错后拼写正确再进入下一词</p>
+    </div>
+    <div class="hdr-actions">
+      <button class="hdr-btn back" id="btnBack">← 返回词单</button>
+      <button class="hdr-btn" id="btnWordList">当前词表</button>
+      <button class="hdr-btn" id="btnSettings">⚙ 设置</button>
+    </div>
+  </header>
+
+  <div class="prac-layout">
+
+    <!-- ===== 左：本次练习侧栏 ===== -->
+    <aside class="side-card">
+      <div class="side-head">
+        <h2>本次练习</h2>
+        <span class="pill pill-run" id="sideStatus">进行中</span>
+      </div>
+      <p class="side-sub" id="sideListName">— · 独立进度</p>
+
+      <div class="side-stats">
+        <div class="stat-box"><span>已完成</span><b id="statDone">0</b></div>
+        <div class="stat-box"><span>错误次数</span><b id="statErr">0</b></div>
+      </div>
+
+      <div class="side-div"></div>
+
+      <h3 class="side-h">本词结果</h3>
+      <div class="word-result" id="wordResult">
+        <p class="wr-empty">提交答案后在此显示本词结果</p>
+      </div>
+
+      <div class="side-foot">
+        <button class="wrong-btn" id="btnReview">
+          复习本地错词 <span class="wb-badge" id="wbBadge">0</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ===== 右：主练习面板 ===== -->
+    <main class="main-card">
+      <div class="main-bar"></div>
+
+      <div class="main-head">
+        <span class="pill pill-list" id="listPill">—</span>
+        <h2 id="mainTitle">—</h2>
+        <div class="main-count"><b id="cntNow">0</b><span> / <span id="cntTotal">0</span></span></div>
+      </div>
+
+      <div class="list-tabs" id="listTabs"></div>
+
+      <div class="main-body" id="mainBody">
+        <div class="play-row">
+          <button class="play-circle" id="btnPlay" title="播放当前单词 (Tab)">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M16.5 12a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 16.5 12z"/><path d="M14 3.8v2.06a6.5 6.5 0 0 1 0 12.28v2.06a8.5 8.5 0 0 0 0-16.4z"/></svg>
+          </button>
+          <div class="play-meta">
+            <b>播放当前单词</b>
+            <span id="playStatus">未播放</span>
+          </div>
+        </div>
+
+        <div class="meaning-box" id="meaningBox">
+          <span class="mb-label">中文释义</span>
+          <span class="mb-text" id="meaningText">—</span>
+        </div>
+
+        <label class="input-label" for="answerInput">输入听到的单词</label>
+        <input type="text" id="answerInput" class="answer-input" placeholder="在这里输入答案" autocomplete="off" spellcheck="false">
+
+        <div class="action-row">
+          <button class="btn-hint" id="btnHint">提示</button>
+          <button class="btn-submit" id="btnSubmit">提交答案</button>
+        </div>
+
+        <p class="kbd-hints"><kbd>Tab</kbd> 重播当前单词 <kbd>Enter</kbd> 提交答案</p>
+        <p class="fb-line" id="fbLine"></p>
+      </div>
+
+      <div class="main-foot">
+        <span class="mf-label">本组进度</span>
+        <span class="mf-remain" id="footRemain">还剩 0 个词</span>
+        <div class="mf-track"><div class="mf-fill" id="footFill"></div></div>
+      </div>
+    </main>
+
+  </div>
+</section>
+
+<!-- ================= 设置弹窗 ================= -->
+<dialog class="dlg" id="settingsDialog">
+  <h3>练习设置</h3>
+  <div class="setting-row">
+    <label>发音引擎</label>
+    <div class="setting-ctrl radio-group">
+      <label><input type="radio" name="engine" value="browser" checked> 浏览器内置</label>
+      <label><input type="radio" name="engine" value="voicevox"> VOICEVOX</label>
+      <label><input type="radio" name="engine" value="azure"> Azure AI Speech</label>
+    </div>
+  </div>
+  <div class="set-group" id="grpVoicevox" style="display:none">
+    <div class="setting-row">
+      <label>引擎地址</label>
+      <div class="setting-ctrl"><input type="text" id="setVvUrl" class="txt-input" value="http://127.0.0.1:50021"></div>
+    </div>
+    <div class="setting-row">
+      <label>声线</label>
+      <div class="setting-ctrl"><select id="setVvSpeaker" class="txt-input"></select></div>
+    </div>
+    <p class="set-note">需本机运行 VOICEVOX（软件自带引擎，默认端口 50021）。若本页以 file:// 打开被 CORS 拦截，请以 <code>--cors-policy-mode all</code> 启动引擎。</p>
+  </div>
+  <div class="set-group" id="grpAzure" style="display:none">
+    <div class="setting-row">
+      <label>密钥 Key</label>
+      <div class="setting-ctrl"><input type="password" id="setAzKey" class="txt-input" placeholder="Azure Speech 资源 Key"></div>
+    </div>
+    <div class="setting-row">
+      <label>区域 Region</label>
+      <div class="setting-ctrl"><input type="text" id="setAzRegion" class="txt-input" value="japaneast"></div>
+    </div>
+    <div class="setting-row">
+      <label>音色 Voice</label>
+      <div class="setting-ctrl"><input type="text" id="setAzVoice" class="txt-input" value="ja-JP-NanamiNeural"></div>
+    </div>
+    <p class="set-note">Key 仅存本机浏览器 localStorage；合成需联网。首次使用从国内镜像按需加载 SDK。可选音色如 ja-JP-NanamiNeural / ja-JP-KeitaNeural / ja-JP-AoiNeural。</p>
+  </div>
+  <div class="setting-row">
+    <label>试听</label>
+    <div class="setting-ctrl">
+      <button class="hdr-btn" id="btnTestVoice" type="button">播放测试句</button>
+      <span id="testVoiceMsg" class="setting-note"></span>
+    </div>
+  </div>
+  <div class="setting-row">
+    <label>语速</label>
+    <div class="setting-ctrl">
+      <input type="range" id="setSpeed" min="0.5" max="1.5" step="0.1" value="0.9">
+      <span id="setSpeedVal">0.9x</span>
+    </div>
+  </div>
+  <div class="setting-row">
+    <label>每题播放次数</label>
+    <div class="setting-ctrl">
+      <input type="number" id="setRepeats" min="1" max="5" value="2" class="num-input">
+      <span class="setting-note">自动连播</span>
+    </div>
+  </div>
+  <div class="setting-row">
+    <label>播放间隔</label>
+    <div class="setting-ctrl">
+      <input type="range" id="setGap" min="0.3" max="2" step="0.1" value="0.8">
+      <span id="setGapVal">0.8s</span>
+    </div>
+  </div>
+  <div class="setting-row">
+    <label>默认显示中文释义</label>
+    <div class="setting-ctrl">
+      <label class="toggle-wrap"><input type="checkbox" id="setShowHint" checked><span class="toggle-slider"></span></label>
+    </div>
+  </div>
+  <div class="setting-row">
+    <label>接受答案</label>
+    <div class="setting-ctrl radio-group">
+      <label><input type="radio" name="acceptMode" value="both" checked> 假名或汉字</label>
+      <label><input type="radio" name="acceptMode" value="kana"> 仅假名</label>
+      <label><input type="radio" name="acceptMode" value="kanji"> 仅汉字</label>
+    </div>
+  </div>
+  <div class="setting-row">
+    <label>词序</label>
+    <div class="setting-ctrl radio-group">
+      <label><input type="radio" name="orderMode" value="seq" checked> 顺序</label>
+      <label><input type="radio" name="orderMode" value="shuffle"> 随机</label>
+    </div>
+  </div>
+  <button class="dlg-close" id="btnCloseSettings">关闭</button>
+</dialog>
+
+<!-- ================= 当前词表弹窗 ================= -->
+<dialog class="dlg dlg-wide" id="wordListDialog">
+  <h3 id="wlTitle">当前词表</h3>
+  <p class="dlg-sub" id="wlSub"></p>
+  <div class="wl-scroll">
+    <table class="wl-table">
+      <thead><tr><th>#</th><th>单词</th><th>假名</th><th>中文释义</th><th>状态</th></tr></thead>
+      <tbody id="wlBody"></tbody>
+    </table>
+  </div>
+  <button class="dlg-close" id="btnCloseWordList">关闭</button>
+</dialog>
+
+</div>
+
+<script src="words-data.js"></script>
+<script src="dictation.js"></script>
+</body>
+</html>
