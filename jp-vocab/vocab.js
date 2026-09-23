@@ -26,10 +26,69 @@ document.getElementById('hmeaning').textContent = DATA.meaning_cn;
 document.title = '课堂单词 · ' + DATA.title;
 
 /* ---- flatten cards ---- */
-const CARDS = [];
+const ALL_CARDS = [];
 DATA.categories.forEach(cat=>{
-  cat.cards.forEach(c=> CARDS.push(Object.assign({cat:cat.name, catreading:cat.reading}, c)));
+  cat.cards.forEach(c=> ALL_CARDS.push(Object.assign({cat:cat.name, catreading:cat.reading}, c)));
 });
+
+/* ---- unit-specific study mode ---- */
+const FOCUS_IDS = new Set([
+  '1-2', '1-5', '2-1', '2-4', '3-1',
+  '3-2', '3-5', '4-1', '4-4', '4-7',
+  '4-9', '5-4', '5-6', '5-12', '5-15'
+]);
+const HAS_FOCUS_MODE = unitSlug() === 'yousu-no-fukushi';
+const MODE_KEY = 'jp-vocab-mode-' + unitSlug();
+let focusMode = HAS_FOCUS_MODE && localStorage.getItem(MODE_KEY) === 'focus';
+let CARDS = focusMode ? ALL_CARDS.filter(c=>FOCUS_IDS.has(c.id)) : ALL_CARDS.slice();
+
+function updateModeSwitch(){
+  const root = document.getElementById('study-mode');
+  if(!root) return;
+  root.querySelectorAll('button[data-mode]').forEach(button=>{
+    const active = (button.dataset.mode === 'focus') === focusMode;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+}
+
+function setStudyMode(mode){
+  focusMode = mode === 'focus';
+  localStorage.setItem(MODE_KEY, focusMode ? 'focus' : 'all');
+  CARDS = focusMode ? ALL_CARDS.filter(c=>FOCUS_IDS.has(c.id)) : ALL_CARDS.slice();
+  cardIdx = 0;
+  cardFlipped = false;
+  qCurrent = null;
+  qAnswered = false;
+  srsQueue = [];
+  srsCur = null;
+  srsFlipped = false;
+  updateModeSwitch();
+  renderBrowse();
+  showCard();
+  updateDuePill();
+
+  const activeTab = document.querySelector('#tabs button.active');
+  if(activeTab && activeTab.dataset.tab === 'quiz') newQuiz();
+  if(activeTab && activeTab.dataset.tab === 'srs') renderSrs();
+}
+
+function renderModeSwitch(){
+  if(!HAS_FOCUS_MODE) return;
+  const tabsRoot = document.getElementById('tabs');
+  const root = document.createElement('div');
+  root.id = 'study-mode';
+  root.className = 'study-mode';
+  root.innerHTML =
+    '<span class="study-mode-label">词汇模式</span>' +
+    '<button type="button" data-mode="all" aria-pressed="false">全部 '+ALL_CARDS.length+' 词</button>' +
+    '<button type="button" data-mode="focus" aria-pressed="false">重点 '+FOCUS_IDS.size+' 词</button>';
+  root.querySelectorAll('button[data-mode]').forEach(button=>{
+    button.addEventListener('click', ()=>setStudyMode(button.dataset.mode));
+  });
+  tabsRoot.parentNode.insertBefore(root, tabsRoot);
+  updateModeSwitch();
+}
 
 /* ---- audio + furigana display ---- */
 /* 单元数据顶层 audio:false 表示该单元暂无音频：此时一个播放入口都不渲染，
@@ -95,12 +154,15 @@ function renderBrowse(){
   toggle.textContent= cnHidden?'显示中文':'隐藏中文';
   toggle.onclick=()=>{ cnHidden=!cnHidden; renderBrowse(); };
   root.appendChild(toggle);
+  const visibleIds = new Set(CARDS.map(c=>c.id));
   DATA.categories.forEach(cat=>{
+    const cards = cat.cards.filter(c=>visibleIds.has(c.id));
+    if(!cards.length) return;
     const wrap=document.createElement('div'); wrap.className='cat';
     const head=document.createElement('div');
     head.innerHTML='<span class="cname">'+cat.name+'</span><span class="creading">'+cat.reading+'</span>';
     wrap.appendChild(head);
-    cat.cards.forEach(c=>{
+    cards.forEach(c=>{
       const card=document.createElement('div'); card.className='card';
       card.innerHTML =
         '<div class="top"><span class="word">'+c.word+'</span><span class="kana">'+c.kana+'</span>'+
@@ -237,4 +299,5 @@ window.play=play; window.cardNext=cardNext; window.cardPrev=cardPrev;
 window.newQuiz=newQuiz; window.srsRate=srsRate; window.showSrsCard=showSrsCard;
 
 /* ---- init ---- */
+renderModeSwitch();
 renderBrowse(); showCard(); updateDuePill();

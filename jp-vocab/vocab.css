@@ -32,6 +32,12 @@ nav.tabs{display:flex;gap:4px;margin:22px 0 8px;border-bottom:1px solid var(--li
 nav.tabs button{background:none;border:none;border-bottom:2px solid transparent;
    padding:8px 14px;font-size:1rem;color:var(--muted);cursor:pointer;font-weight:600}
 nav.tabs button.active{color:var(--ink);border-color:var(--accent)}
+.study-mode{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:20px}
+.study-mode-label{color:var(--muted);font-size:.82rem;font-weight:700;margin-right:3px}
+.study-mode button{background:var(--card);border:1px solid var(--line);color:var(--muted);
+   padding:6px 11px;border-radius:7px;cursor:pointer;font-size:.82rem}
+.study-mode button:hover{border-color:var(--accent);color:var(--accent)}
+.study-mode button.active{background:#f0e7d6;border-color:var(--accent);color:#5a4a2e;font-weight:700}
 .cat{margin:26px 0 8px}
 .cat .cname{font-size:.8rem;letter-spacing:.18em;color:var(--accent);font-weight:700}
 .cat .creading{font-size:.82rem;color:var(--muted);margin-left:6px}
