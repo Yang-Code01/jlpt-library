@@ -1,0 +1,88 @@
+{
+  "title": "様子の副詞",
+  "reading": "ようすのふくし",
+  "meaning_cn": "表示事物和人的样子、状态的副词",
+  "categories": [
+    {
+      "name": "ものの様子（〜と）",
+      "reading": "もののようす（〜と）",
+      "cards": [
+        { "id": "1-1", "word": "びっしり（と）", "speak_word": "びっしり", "kana": "びっしり", "pos": "副詞", "meaning_cn": "密密麻麻地、满满地", "example_jp": "彼のノートにはびっしりと数字が書き込まれていた。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>のノートにはびっしりと<ruby>数字<rt>すうじ</rt></ruby>が<ruby>書<rt>か</rt></ruby>き<ruby>込<rt>こ</rt></ruby>まれていた。", "example_cn": "他的笔记本上密密麻麻地写满了数字。" },
+        { "id": "1-2", "word": "ぎっしり（と／だ／に／な／の）", "speak_word": "ぎっしり", "kana": "ぎっしり", "pos": "副詞", "meaning_cn": "塞得满满的、挤得满满的", "example_jp": "箱にはお菓子がぎっしり入っていた。", "example_jp_ruby": "<ruby>箱<rt>はこ</rt></ruby>にはお<ruby>菓子<rt>かし</rt></ruby>がぎっしり<ruby>入<rt>はい</rt></ruby>っていた。", "example_cn": "盒子里塞满了点心。" },
+        { "id": "1-3", "word": "くっきり（と）", "speak_word": "くっきり", "kana": "くっきり", "pos": "副詞", "meaning_cn": "清晰地、鲜明地", "example_jp": "今日は天気がよく、富士山がくっきり見えた。", "example_jp_ruby": "<ruby>今日<rt>きょう</rt></ruby>は<ruby>天気<rt>てんき</rt></ruby>がよく、<ruby>富士山<rt>ふじさん</rt></ruby>がくっきり<ruby>見<rt>み</rt></ruby>えた。", "example_cn": "今天天气很好，富士山清晰可见。" },
+        { "id": "1-4", "word": "どっさり（と）", "speak_word": "どっさり", "kana": "どっさり", "pos": "副詞", "meaning_cn": "大量地、一大堆地", "example_jp": "お土産にミカンをどっさりもらった。", "example_jp_ruby": "お<ruby>土産<rt>みやげ</rt></ruby>にミカンをどっさりもらった。", "example_cn": "收到了一大堆橘子作为礼物。" },
+        { "id": "1-5", "word": "びっしょり（と／だ／に／な／の）", "speak_word": "びっしょり", "kana": "びっしょり", "pos": "副詞", "meaning_cn": "湿透地、全是水地", "example_jp": "一時間走って、びっしょり汗をかいた。", "example_jp_ruby": "<ruby>一時間<rt>いちじかん</rt></ruby><ruby>走<rt>はし</rt></ruby>って、びっしょり<ruby>汗<rt>あせ</rt></ruby>をかいた。", "example_cn": "跑了一个小时，出了满身大汗。" }
+      ]
+    },
+    {
+      "name": "ものの様子（〜する／〜している／〜と）",
+      "reading": "もののようす（〜する／〜している／〜と）",
+      "cards": [
+        { "id": "2-1", "word": "ぽかぽか（と／する／している）", "speak_word": "ぽかぽか", "kana": "ぽかぽか", "pos": "副詞", "meaning_cn": "暖洋洋地、暖和地", "example_jp": "薬を飲んだら、体がぽかぽかしてきた。", "example_jp_ruby": "<ruby>薬<rt>くすり</rt></ruby>を<ruby>飲<rt>の</rt></ruby>んだら、<ruby>体<rt>からだ</rt></ruby>がぽかぽかしてきた。", "example_cn": "吃药后身体暖和起来了。" },
+        { "id": "2-2", "word": "ひんやり（と／する／している）", "speak_word": "ひんやり", "kana": "ひんやり", "pos": "副詞", "meaning_cn": "凉飕飕地、冰凉地", "example_jp": "朝の高原の空気はひんやりとしていた。", "example_jp_ruby": "<ruby>朝<rt>あさ</rt></ruby>の<ruby>高原<rt>こうげん</rt></ruby>の<ruby>空気<rt>くうき</rt></ruby>はひんやりとしていた。", "example_cn": "清晨高原的空气凉飕飕的。" },
+        { "id": "2-3", "word": "しっとり（と／する／している）", "speak_word": "しっとり", "kana": "しっとり", "pos": "副詞", "meaning_cn": "湿润地、滋润地", "example_jp": "このクリームを使うと、肌がしっとりする。", "example_jp_ruby": "このクリームを<ruby>使<rt>つか</rt></ruby>うと、<ruby>肌<rt>はだ</rt></ruby>がしっとりする。", "example_cn": "使用这个乳霜后，皮肤会变得滋润。" },
+        { "id": "2-4", "word": "じめじめ（と／する／している）", "speak_word": "じめじめ", "kana": "じめじめ", "pos": "副詞", "meaning_cn": "潮湿闷热地、湿漉漉地", "example_jp": "雨の日が続き、部屋の中がじめじめしている。", "example_jp_ruby": "<ruby>雨<rt>あめ</rt></ruby>の<ruby>日<rt>ひ</rt></ruby>が<ruby>続<rt>つづ</rt></ruby>き、<ruby>部屋<rt>へや</rt></ruby>の<ruby>中<rt>なか</rt></ruby>がじめじめしている。", "example_cn": "连续下雨，房间里湿漉漉的。" },
+        { "id": "2-5", "word": "ずっしり（と／する／している）", "speak_word": "ずっしり", "kana": "ずっしり", "pos": "副詞", "meaning_cn": "沉甸甸地、很有分量地", "example_jp": "銅でできた花瓶はずっしりと重かった。", "example_jp_ruby": "<ruby>銅<rt>どう</rt></ruby>でできた<ruby>花瓶<rt>かびん</rt></ruby>はずっしりと<ruby>重<rt>おも</rt></ruby>かった。", "example_cn": "铜制花瓶沉甸甸的。" },
+        { "id": "2-6", "word": "ひっそり（と／する／している）", "speak_word": "ひっそり", "kana": "ひっそり", "pos": "副詞", "meaning_cn": "寂静地、悄无声息地", "example_jp": "放課後の教室はひっそりとして、静かだった。", "example_jp_ruby": "<ruby>放課後<rt>ほうかご</rt></ruby>の<ruby>教室<rt>きょうしつ</rt></ruby>はひっそりとして、<ruby>静<rt>しず</rt></ruby>かだった。", "example_cn": "放学后的教室寂静无声。" }
+      ]
+    },
+    {
+      "name": "ものの様子（〜だ／〜に／〜な〜／〜の〜）",
+      "reading": "もののようす（〜だ／〜に／〜な〜／〜の〜）",
+      "cards": [
+        { "id": "3-1", "word": "ぐちゃぐちゃ（だ／に／の）", "speak_word": "ぐちゃぐちゃ", "kana": "ぐちゃぐちゃ", "pos": "副詞", "meaning_cn": "乱七八糟地、稀烂地", "example_jp": "彼女の部屋の中はぐちゃぐちゃだった。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>の<ruby>部屋<rt>へや</rt></ruby>の<ruby>中<rt>なか</rt></ruby>はぐちゃぐちゃだった。", "example_cn": "她的房间里乱七八糟的。" },
+        { "id": "3-2", "word": "めちゃくちゃ（だ／に／の）", "speak_word": "めちゃくちゃ", "kana": "めちゃくちゃ", "pos": "副詞", "meaning_cn": "乱七八糟地、糟糕得一塌糊涂", "example_jp": "台風のあとで、町はめちゃくちゃな状態だった。", "example_jp_ruby": "<ruby>台風<rt>たいふう</rt></ruby>のあとで、<ruby>町<rt>まち</rt></ruby>はめちゃくちゃな<ruby>状態<rt>じょうたい</rt></ruby>だった。", "example_cn": "台风过后，城镇一片狼藉。" },
+        { "id": "3-3", "word": "すれすれ（だ／に／の）", "speak_word": "すれすれ", "kana": "すれすれ", "pos": "副詞", "meaning_cn": "紧贴着、险些擦过", "example_jp": "海面すれすれのところを鳥が飛んでいた。", "example_jp_ruby": "<ruby>海面<rt>かいめん</rt></ruby>すれすれのところを<ruby>鳥<rt>とり</rt></ruby>が<ruby>飛<rt>と</rt></ruby>んでいた。", "example_cn": "鸟贴着海面飞行。" },
+        { "id": "3-4", "word": "ほやほや（だ／の）", "speak_word": "ほやほや", "kana": "ほやほや", "pos": "副詞", "meaning_cn": "刚出炉的、热乎乎的", "example_jp": "その店で焼き立てほやほやのパンを食べた。", "example_jp_ruby": "その<ruby>店<rt>みせ</rt></ruby>で<ruby>焼<rt>や</rt></ruby>き<ruby>立<rt>た</rt></ruby>てほやほやのパンを<ruby>食<rt>た</rt></ruby>べた。", "example_cn": "在那家店吃了刚出炉的热乎面包。" },
+        { "id": "3-5", "word": "ぼろぼろ（だ／に／の）", "speak_word": "ぼろぼろ", "kana": "ぼろぼろ", "pos": "副詞", "meaning_cn": "破破烂烂地、破旧不堪地", "example_jp": "十年間履いた靴なので、もうぼろぼろだった。", "example_jp_ruby": "<ruby>十年間<rt>じゅうねんかん</rt></ruby><ruby>履<rt>は</rt></ruby>いた<ruby>靴<rt>くつ</rt></ruby>なので、もうぼろぼろだった。", "example_cn": "这双鞋穿了十年，已经破旧不堪了。" }
+      ]
+    },
+    {
+      "name": "人の様子（〜と）",
+      "reading": "ひとのようす（〜と）",
+      "cards": [
+        { "id": "4-1", "word": "さっさと", "kana": "さっさと", "pos": "副詞", "meaning_cn": "赶快地、利索地", "example_jp": "おしゃべりしないで、さっさと食べなさい。", "example_jp_ruby": "おしゃべりしないで、さっさと<ruby>食<rt>た</rt></ruby>べなさい。", "example_cn": "别聊天，快点吃。" },
+        { "id": "4-2", "word": "せっせと", "kana": "せっせと", "pos": "副詞", "meaning_cn": "勤勤恳恳地、忙个不停地", "example_jp": "親鳥はせっせとひなにえさを運んできた。", "example_jp_ruby": "<ruby>親鳥<rt>おやどり</rt></ruby>はせっせとひなにえさを<ruby>運<rt>はこ</rt></ruby>んできた。", "example_cn": "母鸟勤勤恳恳地给雏鸟运来食物。" },
+        { "id": "4-3", "word": "てきぱき（と）", "speak_word": "てきぱき", "kana": "てきぱき", "pos": "副詞", "meaning_cn": "麻利地、干脆利落地", "example_jp": "彼女は家事をてきぱきと片付けた。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>家事<rt>かじ</rt></ruby>をてきぱきと<ruby>片付<rt>かたづ</rt></ruby>けた。", "example_cn": "她麻利地把家务收拾妥当。" },
+        { "id": "4-4", "word": "こつこつ（と）", "speak_word": "こつこつ", "kana": "こつこつ", "pos": "副詞", "meaning_cn": "踏踏实实地、坚持不懈地", "example_jp": "彼はこつこつと受験の準備を進めていた。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>はこつこつと<ruby>受験<rt>じゅけん</rt></ruby>の<ruby>準備<rt>じゅんび</rt></ruby>を<ruby>進<rt>すす</rt></ruby>めていた。", "example_cn": "他踏踏实实地准备着考试。" },
+        { "id": "4-5", "word": "じっくり（と）", "speak_word": "じっくり", "kana": "じっくり", "pos": "副詞", "meaning_cn": "仔细地、充分地", "example_jp": "一度自分の将来のことをじっくり考えたい。", "example_jp_ruby": "<ruby>一度<rt>いちど</rt></ruby><ruby>自分<rt>じぶん</rt></ruby>の<ruby>将来<rt>しょうらい</rt></ruby>のことをじっくり<ruby>考<rt>かんが</rt></ruby>えたい。", "example_cn": "我想认真考虑一次自己的未来。" },
+        { "id": "4-6", "word": "のろのろ（と／する）", "speak_word": "のろのろ", "kana": "のろのろ", "pos": "副詞", "meaning_cn": "慢吞吞地、迟缓地", "example_jp": "のろのろ歩いていると、夕方までに家に帰れないよ。", "example_jp_ruby": "のろのろ<ruby>歩<rt>ある</rt></ruby>いていると、<ruby>夕方<rt>ゆうがた</rt></ruby>までに<ruby>家<rt>いえ</rt></ruby>に<ruby>帰<rt>かえ</rt></ruby>れないよ。", "example_cn": "走得慢吞吞的话，到傍晚也回不了家哦。" },
+        { "id": "4-7", "word": "しみじみ（と）", "speak_word": "しみじみ", "kana": "しみじみ", "pos": "副詞", "meaning_cn": "深切地、感慨地", "example_jp": "手紙を読み、親の優しさをしみじみ感じた。", "example_jp_ruby": "<ruby>手紙<rt>てがみ</rt></ruby>を<ruby>読<rt>よ</rt></ruby>み、<ruby>親<rt>おや</rt></ruby>の<ruby>優<rt>やさ</rt></ruby>しさをしみじみ<ruby>感<rt>かん</rt></ruby>じた。", "example_cn": "读了信，深切感受到父母的温柔。" },
+        { "id": "4-8", "word": "つくづく（と）", "speak_word": "つくづく", "kana": "つくづく", "pos": "副詞", "meaning_cn": "深深地、痛切地", "example_jp": "彼女が泣くのを見て、つくづく自分が悪かったと反省した。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>が<ruby>泣<rt>な</rt></ruby>くのを<ruby>見<rt>み</rt></ruby>て、つくづく<ruby>自分<rt>じぶん</rt></ruby>が<ruby>悪<rt>わる</rt></ruby>かったと<ruby>反省<rt>はんせい</rt></ruby>した。", "example_cn": "看着她哭，我深深反省自己确实做错了。" },
+        { "id": "4-9", "word": "ざっと", "kana": "ざっと", "pos": "副詞", "meaning_cn": "粗略地、大致地", "example_jp": "昨日の夜、教科書をざっと読んでおいた。", "example_jp_ruby": "<ruby>昨日<rt>きのう</rt></ruby>の<ruby>夜<rt>よる</rt></ruby>、<ruby>教科書<rt>きょうかしょ</rt></ruby>をざっと<ruby>読<rt>よ</rt></ruby>んでおいた。", "example_cn": "昨晚把教科书粗略读了一遍。" },
+        { "id": "4-10", "word": "ずばり（と）", "speak_word": "ずばり", "kana": "ずばり", "pos": "副詞", "meaning_cn": "直截了当地、一针见血地", "example_jp": "自分の欠点をずばりと言われたので、腹が立った。", "example_jp_ruby": "<ruby>自分<rt>じぶん</rt></ruby>の<ruby>欠点<rt>けってん</rt></ruby>をずばりと<ruby>言<rt>い</rt></ruby>われたので、<ruby>腹<rt>はら</rt></ruby>が<ruby>立<rt>た</rt></ruby>った。", "example_cn": "被直截了当地指出缺点，所以很生气。" },
+        { "id": "4-11", "word": "すんなり（と）", "speak_word": "すんなり", "kana": "すんなり", "pos": "副詞", "meaning_cn": "顺利地、毫无阻碍地", "example_jp": "彼が社長になることがすんなり決まった。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>が<ruby>社長<rt>しゃちょう</rt></ruby>になることがすんなり<ruby>決<rt>き</rt></ruby>まった。", "example_cn": "他成为社长一事顺利决定了。" }
+      ]
+    },
+    {
+      "name": "人の様子（〜する／〜している／〜と）",
+      "reading": "ひとのようす（〜する／〜している／〜と）",
+      "cards": [
+        { "id": "5-1", "word": "おっとり（と／する／している）", "speak_word": "おっとり", "kana": "おっとり", "pos": "副詞", "meaning_cn": "温和地、文静地", "example_jp": "彼はおっとりしていて、あまり怒らない。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>はおっとりしていて、あまり<ruby>怒<rt>おこ</rt></ruby>らない。", "example_cn": "他性情温和，不太生气。" },
+        { "id": "5-2", "word": "のんびり（と／する／している）", "speak_word": "のんびり", "kana": "のんびり", "pos": "副詞", "meaning_cn": "悠闲地、轻松自在地", "example_jp": "たまには温泉にでも入ってのんびりしたい。", "example_jp_ruby": "たまには<ruby>温泉<rt>おんせん</rt></ruby>にでも<ruby>入<rt>はい</rt></ruby>ってのんびりしたい。", "example_cn": "偶尔也想泡泡温泉，悠闲地放松一下。" },
+        { "id": "5-3", "word": "のびのび（と／する／している）", "speak_word": "のびのび", "kana": "のびのび", "pos": "副詞", "meaning_cn": "自由自在地、无拘无束地", "example_jp": "両親が旅行で留守なので、のびのびできる。", "example_jp_ruby": "<ruby>両親<rt>りょうしん</rt></ruby>が<ruby>旅行<rt>りょこう</rt></ruby>で<ruby>留守<rt>るす</rt></ruby>なので、のびのびできる。", "example_cn": "父母去旅行不在家，所以可以自在放松。" },
+        { "id": "5-4", "word": "いきいき（と／する／している）", "speak_word": "いきいき", "kana": "いきいき", "pos": "副詞", "meaning_cn": "生气勃勃地、充满活力地", "example_jp": "子供たちの目はいきいきとしていた。", "example_jp_ruby": "<ruby>子供<rt>こども</rt></ruby>たちの<ruby>目<rt>め</rt></ruby>はいきいきとしていた。", "example_cn": "孩子们的眼睛充满了活力。" },
+        { "id": "5-5", "word": "きびきび（と／する／している）", "speak_word": "きびきび", "kana": "きびきび", "pos": "副詞", "meaning_cn": "动作利落地、干练地", "example_jp": "彼はきびきびとした動きで荷物を運んだ。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>はきびきびとした<ruby>動<rt>うご</rt></ruby>きで<ruby>荷物<rt>にもつ</rt></ruby>を<ruby>運<rt>はこ</rt></ruby>んだ。", "example_cn": "他动作利落地搬运了行李。" },
+        { "id": "5-6", "word": "いらいら（する／している）", "speak_word": "いらいら", "kana": "いらいら", "pos": "副詞", "meaning_cn": "焦躁地、心烦地", "example_jp": "渋滞で車が進まず、いらいらした。", "example_jp_ruby": "<ruby>渋滞<rt>じゅうたい</rt></ruby>で<ruby>車<rt>くるま</rt></ruby>が<ruby>進<rt>すす</rt></ruby>まず、いらいらした。", "example_cn": "因为堵车，车开不动，让人很焦躁。" },
+        { "id": "5-7", "word": "むかむか（する／している）", "speak_word": "むかむか", "kana": "むかむか", "pos": "副詞", "meaning_cn": "恶心地、气恼地", "example_jp": "彼の言い訳を聞いていると、むかむかする。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>の<ruby>言<rt>い</rt></ruby>い<ruby>訳<rt>わけ</rt></ruby>を<ruby>聞<rt>き</rt></ruby>いていると、むかむかする。", "example_cn": "听着他的借口就觉得气恼。" },
+        { "id": "5-8", "word": "きっぱり（と／する／している）", "speak_word": "きっぱり", "kana": "きっぱり", "pos": "副詞", "meaning_cn": "断然地、干脆地", "example_jp": "彼はきっぱりとした態度で誘いを断った。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>はきっぱりとした<ruby>態度<rt>たいど</rt></ruby>で<ruby>誘<rt>さそ</rt></ruby>いを<ruby>断<rt>ことわ</rt></ruby>った。", "example_cn": "他态度坚决地拒绝了邀请。" },
+        { "id": "5-9", "word": "はきはき（と／する／している）", "speak_word": "はきはき", "kana": "はきはき", "pos": "副詞", "meaning_cn": "清楚利落地、爽快地", "example_jp": "面接での回答がはきはきしていて、よかった。", "example_jp_ruby": "<ruby>面接<rt>めんせつ</rt></ruby>での<ruby>回答<rt>かいとう</rt></ruby>がはきはきしていて、よかった。", "example_cn": "面试时回答清楚利落，表现很好。" },
+        { "id": "5-10", "word": "おどおど（と／する／している）", "speak_word": "おどおど", "kana": "おどおど", "pos": "副詞", "meaning_cn": "局促不安地、胆怯地", "example_jp": "面接のとき、その学生はおどおどしていた。", "example_jp_ruby": "<ruby>面接<rt>めんせつ</rt></ruby>のとき、その<ruby>学生<rt>がくせい</rt></ruby>はおどおどしていた。", "example_cn": "面试时，那个学生显得局促不安。" },
+        { "id": "5-11", "word": "そわそわ（と／する／している）", "speak_word": "そわそわ", "kana": "そわそわ", "pos": "副詞", "meaning_cn": "坐立不安地、心神不宁地", "example_jp": "姉の結婚式の朝、父はそわそわしていた。", "example_jp_ruby": "<ruby>姉<rt>あね</rt></ruby>の<ruby>結婚式<rt>けっこんしき</rt></ruby>の<ruby>朝<rt>あさ</rt></ruby>、<ruby>父<rt>ちち</rt></ruby>はそわそわしていた。", "example_cn": "姐姐结婚典礼的早晨，父亲坐立不安。" },
+        { "id": "5-12", "word": "くよくよ（と／する／している）", "speak_word": "くよくよ", "kana": "くよくよ", "pos": "副詞", "meaning_cn": "闷闷不乐地、忧心忡忡地", "example_jp": "試験に落ちたぐらいで、くよくよするな。", "example_jp_ruby": "<ruby>試験<rt>しけん</rt></ruby>に<ruby>落<rt>お</rt></ruby>ちたぐらいで、くよくよするな。", "example_cn": "不就是考试落榜嘛，别闷闷不乐的。" },
+        { "id": "5-13", "word": "にやにや（と／する／している）", "speak_word": "にやにや", "kana": "にやにや", "pos": "副詞", "meaning_cn": "傻笑地、嘿嘿地笑", "example_jp": "彼は私の顔を見てにやにやしていた。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>私<rt>わたし</rt></ruby>の<ruby>顔<rt>かお</rt></ruby>を<ruby>見<rt>み</rt></ruby>てにやにやしていた。", "example_cn": "他看着我的脸嘿嘿地笑。" },
+        { "id": "5-14", "word": "ひやひや（する／している）", "speak_word": "ひやひや", "kana": "ひやひや", "pos": "副詞", "meaning_cn": "提心吊胆地、担心地", "example_jp": "妹の運転にはいつもひやひやさせられる。", "example_jp_ruby": "<ruby>妹<rt>いもうと</rt></ruby>の<ruby>運転<rt>うんてん</rt></ruby>にはいつもひやひやさせられる。", "example_cn": "妹妹开车总让我提心吊胆。" },
+        { "id": "5-15", "word": "ぼんやり（と／する／している）", "speak_word": "ぼんやり", "kana": "ぼんやり", "pos": "副詞", "meaning_cn": "发呆地、迷糊地", "example_jp": "ぼんやりしていて、パンを買うのを忘れた。", "example_jp_ruby": "ぼんやりしていて、パンを<ruby>買<rt>か</rt></ruby>うのを<ruby>忘<rt>わす</rt></ruby>れた。", "example_cn": "因为发呆，忘了买面包。" },
+        { "id": "5-16", "word": "ぐったり（と／する／している）", "speak_word": "ぐったり", "kana": "ぐったり", "pos": "副詞", "meaning_cn": "无精打采地、筋疲力尽地", "example_jp": "今日は彼は二日酔いでぐったりしていた。", "example_jp_ruby": "<ruby>今日<rt>きょう</rt></ruby>は<ruby>彼<rt>かれ</rt></ruby>は<ruby>二日酔<rt>ふつかよ</rt></ruby>いでぐったりしていた。", "example_cn": "今天他因为宿醉而无精打采。" }
+      ]
+    },
+    {
+      "name": "人の様子（〜だ／〜に／〜な〜／〜の〜）",
+      "reading": "ひとのようす（〜だ／〜に／〜な〜／〜の〜）",
+      "cards": [
+        { "id": "6-1", "word": "くたくた（だ／に／な／の）", "speak_word": "くたくた", "kana": "くたくた", "pos": "副詞", "meaning_cn": "筋疲力尽地、累得精疲力竭", "example_jp": "六時間も山道を登ってきたので、くたくただ。", "example_jp_ruby": "<ruby>六時間<rt>ろくじかん</rt></ruby>も<ruby>山道<rt>やまみち</rt></ruby>を<ruby>登<rt>のぼ</rt></ruby>ってきたので、くたくただ。", "example_cn": "爬了六个小时的山路，已经累得筋疲力尽了。" },
+        { "id": "6-2", "word": "へとへと（だ／に／な／の）", "speak_word": "へとへと", "kana": "へとへと", "pos": "副詞", "meaning_cn": "精疲力竭地、累得不行", "example_jp": "六時間連続で試験を受けて、もうへとへとだ。", "example_jp_ruby": "<ruby>六時間<rt>ろくじかん</rt></ruby><ruby>連続<rt>れんぞく</rt></ruby>で<ruby>試験<rt>しけん</rt></ruby>を<ruby>受<rt>う</rt></ruby>けて、もうへとへとだ。", "example_cn": "连续考了六个小时的试，已经累得精疲力竭了。" }
+      ]
+    }
+  ]
+}
