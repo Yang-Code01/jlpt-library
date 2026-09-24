@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>动词专练</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/theme.js"></script>
 <!-- 双入口对等页（Q8 方案 b；设计档案：.scratch/verb-module/prototype/verb-ia-compare.html） -->
 <style>
   :root{
-    --bg:#f6f3ee; --ink:#2b2a26; --muted:#8a857a; --line:#e4ddd1;
-    --card:#fffdf9; --accent:#9b6b3f; --accent2:#c98a4b;
+    --bg:var(--paper); --line:var(--border); --card:var(--surface); --accent2:var(--accent);
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
@@ -20,7 +21,7 @@
   nav.pagenav a{text-decoration:none;font-size:.88em;padding:4px 14px;border-radius:999px;
     border:1px solid var(--line);color:var(--accent);background:var(--card);
     transition:background .15s ease}
-  nav.pagenav a:hover{background:#f0e7d6}
+  nav.pagenav a:hover{background:var(--accent-soft)}
   nav.pagenav .spacer{flex:1}
   header h1{margin:0;font-size:2.6rem;font-weight:800;letter-spacing:.02em}
   header .sub{color:var(--muted);font-size:1.05rem;margin-top:6px}
@@ -32,7 +33,7 @@
   a.peer .p-ico{font-size:2.3rem}
   a.peer .p-body{flex:1}
   a.peer .p-body h2{margin:0;font-size:1.4rem;letter-spacing:.02em}
-  a.peer .p-body p{margin:4px 0 0;color:#5a4a2e;font-size:.95rem}
+  a.peer .p-body p{margin:4px 0 0;color:var(--muted);font-size:.95rem}
   a.peer .p-go{font-size:1.7rem;font-weight:800;color:var(--accent2)}
   @media(max-width:560px){header h1{font-size:2rem}}
 </style>

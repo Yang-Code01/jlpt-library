@@ -130,9 +130,49 @@ function forceReview(id){
   s.due=today(); s.reps=0; s.interval=1; srs[id]=s; saveSrs();
 }
 function dueCards(){ return CARDS.filter(c=>{ let s=srs[c.id]; return !s || s.due<=today(); }); }
+function renderContextPanel(){
+  let root=document.getElementById('context-panel');
+  if(!root){
+    root=document.createElement('aside');
+    root.id='context-panel';
+    root.className='context-panel';
+    root.innerHTML=
+      '<div class="context-kicker">UNIT CONTEXT</div>'+
+      '<h2 id="context-title"></h2>'+
+      '<div id="context-reading" class="context-reading"></div>'+
+      '<div class="context-rule"></div>'+
+      '<div class="context-stat"><span>当前范围</span><strong id="context-count"></strong></div>'+
+      '<div class="context-progress"><i id="context-progress-bar"></i></div>'+
+      '<div id="context-progress-label" class="context-caption"></div>'+
+      '<div class="context-stat"><span>待复习</span><strong id="context-due"></strong></div>'+
+      '<div class="context-rule"></div>'+
+      '<div class="context-kicker">CATEGORIES</div>'+
+      '<div id="context-categories" class="context-categories"></div>'+
+      '<a class="context-link" href="../index.html">切换其他单元 ↗</a>';
+    document.querySelector('.left-rail').appendChild(root);
+  }
+  document.getElementById('context-title').textContent=DATA.title;
+  document.getElementById('context-reading').textContent=DATA.reading;
+  document.getElementById('context-count').textContent=CARDS.length+' 词';
+  const mastered=CARDS.filter(c=>srs[c.id] && srs[c.id].reps>0).length;
+  const percent=CARDS.length ? Math.round(mastered/CARDS.length*100) : 0;
+  document.getElementById('context-progress-bar').style.width=percent+'%';
+  document.getElementById('context-progress-label').textContent='已掌握 '+mastered+' / '+CARDS.length+' · '+percent+'%';
+  document.getElementById('context-due').textContent=dueCards().length;
+  const categories=document.getElementById('context-categories');
+  categories.innerHTML='';
+  DATA.categories.forEach(cat=>{
+    const count=cat.cards.filter(c=>CARDS.some(active=>active.id===c.id)).length;
+    if(!count) return;
+    const row=document.createElement('div');
+    row.innerHTML='<span>'+cat.name+'</span><b>'+count+'</b>';
+    categories.appendChild(row);
+  });
+}
 function updateDuePill(){
   const n=dueCards().length; const el=document.getElementById('duepill');
   if(n>0){ el.textContent=n; el.style.display='inline-block'; } else el.style.display='none';
+  renderContextPanel();
 }
 
 /* ---- tabs ---- */
@@ -299,5 +339,6 @@ window.play=play; window.cardNext=cardNext; window.cardPrev=cardPrev;
 window.newQuiz=newQuiz; window.srsRate=srsRate; window.showSrsCard=showSrsCard;
 
 /* ---- init ---- */
+renderContextPanel();
 renderModeSwitch();
 renderBrowse(); showCard(); updateDuePill();
