@@ -4,52 +4,134 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>课堂单词 · 单元目录</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/theme.js"></script>
 <style>
   :root{
-    --bg:#f6f3ee; --ink:#2b2a26; --muted:#8a857a; --line:#e4ddd1;
-    --card:#fffdf9; --accent:#9b6b3f; --accent2:#c98a4b; --ok:#5a7d52;
+    --paper:#f5f6f7; --surface:#fff; --surface-2:#eef1f3; --ink:#17202a;
+    --muted:#66727e; --line:var(--border); --accent:#c3422a; --accent-soft:#f7e9e5;
+    --green:#3f7a5a; --shadow:0 18px 48px rgba(28,43,58,.1);
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);
-    font-family:"Hiragino Sans","Yu Gothic","Noto Sans CJK JP","Microsoft YaHei",system-ui,sans-serif;
-    line-height:1.6;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:920px;margin:0 auto;padding:40px 20px 90px}
-  nav.pagenav{display:flex;flex-wrap:wrap;gap:8px;align-items:center;
-    margin-bottom:26px;border-bottom:1px solid var(--line);padding-bottom:12px}
-  nav.pagenav a{text-decoration:none;font-size:.88em;padding:4px 14px;border-radius:999px;
-    border:1px solid var(--line);color:var(--accent);background:var(--card);
-    transition:background .15s ease}
-  nav.pagenav a:hover{background:#f0e7d6}
+  body{
+    margin:0;
+    background:radial-gradient(circle at 68% 0,color-mix(in srgb,var(--surface) 90%,transparent),transparent 34rem),var(--paper);
+    color:var(--ink);
+    font-family:"Noto Sans JP","Hiragino Sans","Yu Gothic","Microsoft YaHei",system-ui,sans-serif;
+    line-height:1.7;-webkit-font-smoothing:antialiased
+  }
+  button{font:inherit}
+  button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+  .wrap{
+    width:min(1320px,calc(100% - 36px));margin:0 auto;padding:34px 0 90px;
+    display:grid;grid-template-columns:270px minmax(0,1fr);column-gap:22px;align-items:start
+  }
+  .left-rail{
+    grid-column:1;grid-row:1 / span 5;display:grid;align-content:start;gap:14px;
+    position:sticky;top:20px;max-height:calc(100vh - 40px);overflow-y:auto;scrollbar-width:thin
+  }
+  nav.pagenav{
+    padding:22px 16px;
+    display:flex;flex-direction:column;align-items:stretch;gap:8px;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow)
+  }
+  nav.pagenav:before{
+    content:"JLPT LIBRARY";color:var(--muted);font-size:.68rem;letter-spacing:.18em;
+    font-weight:800;padding:4px 10px 18px
+  }
+  nav.pagenav a{
+    text-decoration:none;color:var(--muted);border:1px solid transparent;border-radius:12px;
+    padding:10px 11px;font-size:.86rem;transition:background .2s ease,color .2s ease
+  }
+  nav.pagenav a:hover,nav.pagenav a:first-of-type{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent-line)}
   nav.pagenav .spacer{flex:1}
-  header h1{margin:0;font-size:2.6rem;font-weight:800;letter-spacing:.02em}
-  header .sub{color:var(--muted);font-size:1.05rem;margin-top:6px}
-  .toolbar{display:flex;gap:10px;align-items:center;margin:20px 0 6px;flex-wrap:wrap}
-  .toolbar .count{color:var(--muted);font-size:.9rem}
-  .toolbar button{font-size:.88rem;background:#f0e7d6;border:1px solid var(--line);
-     color:#5a4a2e;padding:7px 12px;border-radius:8px;cursor:pointer;font-weight:600}
-  .toolbar button:hover{background:var(--accent2);color:#fff;border-color:var(--accent2)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:18px}
-  a.card{display:block;text-decoration:none;color:inherit;background:var(--card);
-    border:1px solid var(--line);border-radius:14px;padding:20px 20px 18px;
-    box-shadow:0 1px 2px rgba(0,0,0,.03);transition:transform .15s,border-color .15s,box-shadow .15s}
-  a.card:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 6px 18px rgba(120,90,50,.12)}
-  a.card .kana{color:var(--muted);font-size:1rem}
-  a.card .word{font-size:1.9rem;font-weight:800;margin-top:2px;letter-spacing:.02em}
-  a.card .meaning{margin-top:10px;color:#5a4a2e;font-weight:600;font-size:.98rem}
-  a.card .meta{margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .pill{display:inline-block;background:#ece3d2;color:#6b4a27;padding:2px 9px;border-radius:6px;font-size:.78rem}
-  .pill.ok{background:#e7efe2;color:#4a5d3a}
-  .muted{color:var(--muted);font-size:.82rem}
-  .note{color:var(--muted);font-size:.8rem;margin-top:18px;line-height:1.7}
-  @media(max-width:560px){header h1{font-size:2rem}.grid{grid-template-columns:1fr}}
+  header{grid-column:2;padding:6px 4px 18px}
+  header h1{margin:0;font-size:clamp(2.5rem,5vw,4.8rem);line-height:1.02;letter-spacing:-.07em;font-weight:900}
+  header .sub{margin-top:9px;color:var(--muted);font-size:1rem}
+  .toolbar{
+    grid-column:2;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 20px;
+    padding:4px;background:color-mix(in srgb,var(--surface) 82%,transparent);border:1px solid var(--line);border-radius:999px;width:max-content
+  }
+  .toolbar .count{padding:0 8px;color:var(--muted);font-size:.82rem}
+  .toolbar button{
+    border:0;border-radius:999px;padding:9px 14px;color:var(--paper);background:var(--ink);
+    cursor:pointer;font-size:.82rem;font-weight:800
+  }
+  .toolbar button:hover{background:var(--accent)}
+  .grid{grid-column:2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  a.card{
+    display:block;min-height:190px;padding:21px;text-decoration:none;color:inherit;
+    background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--line);border-radius:20px;
+    box-shadow:0 4px 14px rgba(28,43,58,.035);transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease
+  }
+  a.card:hover{transform:translateY(-4px);border-color:var(--accent-line);box-shadow:var(--shadow)}
+  a.card .kana{color:var(--muted);font-size:.78rem;letter-spacing:.08em}
+  a.card .word{margin-top:10px;font-size:1.85rem;font-weight:900;letter-spacing:-.05em}
+  a.card .meaning{margin-top:11px;color:var(--ink);font-size:.86rem;line-height:1.55}
+  a.card .meta{display:flex;align-items:center;gap:8px;margin-top:18px}
+  .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);font-size:.74rem;font-weight:800}
+  .pill.ok{background:var(--green-l);color:var(--green)}
+  .note{grid-column:2;margin:20px 4px 0;color:var(--muted);font-size:.78rem;line-height:1.7}
+  .context-panel{
+    padding:22px 18px;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:24px
+  }
+  .context-kicker{color:var(--muted);font-size:.67rem;letter-spacing:.18em;font-weight:800}
+  .context-panel h2{margin:10px 0 3px;font-size:1.45rem;line-height:1.2;letter-spacing:-.04em}
+  .context-panel p{margin:0;color:var(--muted);font-size:.82rem}
+  .context-rule{height:1px;margin:20px 0;background:var(--line)}
+  .context-stat{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:12px 0}
+  .context-stat span{color:var(--muted);font-size:.82rem}
+  .context-stat strong{font-size:1.25rem}
+  .context-list{display:grid;gap:9px;margin-top:12px}
+  .context-list div{display:flex;justify-content:space-between;gap:8px;color:var(--muted);font-size:.79rem}
+  .context-list b{color:var(--ink)}
+  .context-link{display:block;margin-top:28px;color:var(--accent);font-size:.8rem;font-weight:800;text-decoration:none}
+  .context-link:hover{text-decoration:underline}
+  @media(max-width:980px){
+    .wrap{width:min(900px,calc(100% - 28px));grid-template-columns:230px minmax(0,1fr);column-gap:18px}
+    .left-rail{grid-row:1 / span 5;max-height:calc(100vh - 36px);position:static}
+  }
+  @media(max-width:680px){
+    .wrap{width:min(100% - 22px,560px);display:flex;flex-direction:column;padding-top:16px}
+    .left-rail{width:100%;max-height:none;overflow:visible}
+    nav.pagenav{width:100%;position:static;flex-direction:row;align-items:center;padding:9px;border-radius:18px;box-shadow:none}
+    nav.pagenav:before{padding:0 5px;font-size:.58rem;white-space:nowrap}
+    nav.pagenav a{padding:7px 9px;font-size:.75rem}
+    nav.pagenav .spacer{display:none}
+    header{padding:34px 2px 18px}
+    header h1{font-size:clamp(2.6rem,14vw,4rem)}
+    .toolbar{width:100%;overflow:auto;flex-wrap:nowrap}
+    .grid{grid-template-columns:1fr;width:100%}
+    .note{margin-left:2px;margin-right:2px}
+    .context-panel{width:100%}
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="left-rail">
   <nav class="pagenav">
     <a href="../index.html">← 返回门户首页</a>
     <span class="spacer"></span>
   </nav>
+  <aside class="context-panel">
+    <div class="context-kicker">LEARNING HUB</div>
+    <h2>课堂单词</h2>
+    <p>副词学习包 · 主题单元</p>
+    <div class="context-rule"></div>
+    <div class="context-stat"><span>当前单元</span><strong>7</strong></div>
+    <div class="context-stat"><span>词汇总量</span><strong>157</strong></div>
+    <div class="context-rule"></div>
+    <div class="context-kicker">STUDY FLOW</div>
+    <div class="context-list">
+      <div><span>浏览词汇</span><b>7 单元</b></div>
+      <div><span>翻转卡片</span><b>间隔记忆</b></div>
+      <div><span>听写练习</span><b>同步重点词</b></div>
+    </div>
+    <a class="context-link" href="../index.html">返回门户首页 ↗</a>
+  </aside>
+  </div>
 
   <header>
     <h1>课堂单词</h1>
@@ -69,6 +151,7 @@
     都由此生成，不要手改（校验用 <code>node jp-vocab/gen.js check</code>）。
     音频由 <code>gen-audio.ps1</code> 按同一份 <code>data.json</code> 合成（词条含「（…）」「・」时用 <code>speak_word</code> 指定朗读形）。
   </p>
+
 </div>
 
 <script>

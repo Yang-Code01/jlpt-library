@@ -4,10 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>动词专练 · 词卡目录</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/theme.js"></script>
 <style>
   :root{
-    --bg:#f6f3ee; --ink:#2b2a26; --muted:#8a857a; --line:#e4ddd1;
-    --card:#fffdf9; --accent:#9b6b3f; --accent2:#c98a4b; --ok:#5a7d52;
+    --bg:var(--paper); --line:var(--border); --card:var(--surface);
+    --accent2:var(--accent); --ok:var(--green);
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
@@ -19,15 +21,15 @@
   nav.pagenav a{text-decoration:none;font-size:.88em;padding:4px 14px;border-radius:999px;
     border:1px solid var(--line);color:var(--accent);background:var(--card);
     transition:background .15s ease}
-  nav.pagenav a:hover{background:#f0e7d6}
+  nav.pagenav a:hover{background:var(--accent-soft)}
   nav.pagenav .spacer{flex:1}
   header h1{margin:0;font-size:2.6rem;font-weight:800;letter-spacing:.02em}
   header .sub{color:var(--muted);font-size:1.05rem;margin-top:6px}
   .toolbar{display:flex;gap:10px;align-items:center;margin:20px 0 6px;flex-wrap:wrap}
   .toolbar .count{color:var(--muted);font-size:.9rem}
-  .toolbar button{font-size:.88rem;background:#f0e7d6;border:1px solid var(--line);
-     color:#5a4a2e;padding:7px 12px;border-radius:8px;cursor:pointer;font-weight:600}
-  .toolbar button:hover{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+  .toolbar button{font-size:.88rem;background:var(--accent-soft);border:1px solid var(--line);
+     color:var(--accent-ink);padding:7px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+  .toolbar button:hover{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:18px}
   a.card{display:block;text-decoration:none;color:inherit;background:var(--card);
     border:1px solid var(--line);border-radius:14px;padding:20px 20px 18px;
@@ -35,10 +37,10 @@
   a.card:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 6px 18px rgba(120,90,50,.12)}
   a.card .kana{color:var(--muted);font-size:1rem}
   a.card .word{font-size:1.9rem;font-weight:800;margin-top:2px;letter-spacing:.02em}
-  a.card .meaning{margin-top:10px;color:#5a4a2e;font-weight:600;font-size:.98rem}
+  a.card .meaning{margin-top:10px;color:var(--ink);font-weight:600;font-size:.98rem}
   a.card .meta{margin-top:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .pill{display:inline-block;background:#ece3d2;color:#6b4a27;padding:2px 9px;border-radius:6px;font-size:.78rem}
-  .pill.ok{background:#e7efe2;color:#4a5d3a}
+  .pill{display:inline-block;background:var(--accent-soft);color:var(--accent-ink);padding:2px 9px;border-radius:6px;font-size:.78rem}
+  .pill.ok{background:var(--green-l);color:var(--green)}
   .muted{color:var(--muted);font-size:.82rem}
   .note{color:var(--muted);font-size:.8rem;margin-top:18px;line-height:1.7}
   @media(max-width:560px){header h1{font-size:2rem}.grid{grid-template-columns:1fr}}

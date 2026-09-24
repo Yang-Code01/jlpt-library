@@ -48,6 +48,8 @@ const SHELL_HEAD = [
   '<meta charset="UTF-8">',
   '<meta name="viewport" content="width=device-width, initial-scale=1">',
   '<title>动词专练</title>',
+  '<link rel="stylesheet" href="../../../assets/style.css">',
+  '<script src="../../../assets/theme.js"></script>',
   '<link rel="stylesheet" href="../../vocab.css">',
   '</head>',
   '<body>',
@@ -377,10 +379,12 @@ function renderConjPage(d){
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>动词专练 · 变形练习</title>
 <!-- 本页由 verb/gen.js 从 conjugation/data.json 生成，不要手改（交互设计档案：.scratch/verb-module/prototype/conjugation-template.html） -->
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/theme.js"></script>
 <style>
   :root{
-    --bg:#f6f3ee; --ink:#2b2a26; --muted:#8a857a; --line:#e4ddd1;
-    --card:#fffdf9; --accent:#9b6b3f; --accent2:#c98a4b; --ok:#5a7d52; --bad:#b3574c;
+    --bg:var(--paper); --line:var(--border); --card:var(--surface);
+    --accent2:var(--accent); --ok:var(--green); --bad:var(--red);
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
@@ -391,7 +395,7 @@ function renderConjPage(d){
     margin-bottom:20px;border-bottom:1px solid var(--line);padding-bottom:12px}
   nav.pagenav a{text-decoration:none;font-size:.88em;padding:4px 14px;border-radius:999px;
     border:1px solid var(--line);color:var(--accent);background:var(--card);transition:background .15s ease}
-  nav.pagenav a:hover{background:#f0e7d6}
+  nav.pagenav a:hover{background:var(--accent-soft)}
   nav.pagenav .spacer{flex:1}
   h1{font-size:1.5rem;margin:0 0 4px}
   .sub{color:var(--muted);font-size:.92rem;margin:0 0 18px}
@@ -399,15 +403,15 @@ function renderConjPage(d){
   .lbl{font-size:.82rem;font-weight:700;color:var(--muted);letter-spacing:.05em;margin:10px 0 6px}
   .lbl:first-child{margin-top:0}
   .pills{display:flex;flex-wrap:wrap;gap:8px}
-  .pills button{font-size:.85rem;font-weight:600;border:1px solid var(--line);background:#fff;color:#5a4a2e;padding:5px 13px;border-radius:999px;cursor:pointer;font-family:inherit}
+  .pills button{font-size:.85rem;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:5px 13px;border-radius:999px;cursor:pointer;font-family:inherit}
   .pills button:hover{border-color:var(--accent)}
-  .pills button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .pills button.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
   .startr{display:flex;gap:12px;align-items:center;margin-top:16px;flex-wrap:wrap}
   .count{color:var(--muted);font-size:.88rem}
-  button.act{font-size:1rem;font-weight:700;background:var(--accent2);color:#fff;border:none;border-radius:10px;padding:10px 22px;cursor:pointer;font-family:inherit}
+  button.act{font-size:1rem;font-weight:700;background:var(--accent2);color:var(--on-accent);border:none;border-radius:10px;padding:10px 22px;cursor:pointer;font-family:inherit}
   button.act:hover{background:var(--accent)}
   button.ghost{font-size:.92rem;background:transparent;border:1px solid var(--line);color:var(--accent);border-radius:10px;padding:9px 16px;cursor:pointer;font-family:inherit}
-  button.ghost:hover{background:#f0e7d6}
+  button.ghost:hover{background:var(--accent-soft)}
   .status{display:flex;gap:14px;color:var(--muted);font-size:.88rem;margin-bottom:14px;flex-wrap:wrap}
   .status b{color:var(--ink)}
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px 24px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
@@ -415,19 +419,19 @@ function renderConjPage(d){
   .prompt .dict{font-size:2.6rem;font-weight:800;letter-spacing:.02em}
   .prompt .rd{color:var(--muted);font-size:1rem;margin-left:10px;font-weight:400}
   .prompt .form{margin-top:2px;font-weight:700;color:var(--accent)}
-  .prompt .form em{font-style:normal;background:#ece3d2;border-radius:6px;padding:1px 8px}
+  .prompt .form em{font-style:normal;background:var(--accent-soft);border-radius:6px;padding:1px 8px}
   .row{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;align-items:center}
-  input[type=text]{flex:1;min-width:180px;font-size:1.25rem;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-family:inherit}
+  input[type=text]{flex:1;min-width:180px;font-size:1.25rem;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font-family:inherit}
   input[type=text]:focus{outline:2px solid var(--accent2)}
   .fb{margin-top:16px;font-weight:700;min-height:1.6em}
   .fb.ok{color:var(--ok)} .fb.bad{color:var(--bad)} .fb.ans{color:var(--accent)}
   .choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}
-  .choices button{font-size:1.3rem;font-weight:700;padding:14px 10px;border-radius:12px;border:1px solid var(--line);background:#fff;cursor:pointer;font-family:inherit}
+  .choices button{font-size:1.3rem;font-weight:700;padding:14px 10px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;font-family:inherit}
   .choices button:hover:not(:disabled){border-color:var(--accent)}
-  .choices button.right{background:#e8efe5;border-color:var(--ok);color:var(--ok)}
-  .choices button.wrong{background:#f5e4e1;border-color:var(--bad);color:var(--bad)}
+  .choices button.right{background:var(--green-l);border-color:var(--green-line);color:var(--ok)}
+  .choices button.wrong{background:var(--red-l);border-color:var(--red-line);color:var(--bad)}
   .choices button:disabled{cursor:default}
-  .reveal{font-size:2.4rem;font-weight:800;color:var(--accent);margin:18px 0 4px;letter-spacing:.02em}
+  .answer-reveal{font-size:2.4rem;font-weight:800;color:var(--accent);margin:18px 0 4px;letter-spacing:.02em}
   .done{text-align:center}
   .done .score{font-size:1.5rem;font-weight:800;color:var(--accent);margin:14px 0}
   .headrow{position:sticky;top:0;z-index:9;background:var(--bg);display:flex;align-items:center;
@@ -441,7 +445,7 @@ function renderConjPage(d){
   .topbar .pills button{padding:3px 11px;font-size:.8rem}
   .tbstat{color:var(--muted);font-size:.85rem;font-weight:600;white-space:nowrap}
   .tbstat b{color:var(--ink)}
-  .pbar{width:120px;height:6px;background:#ece3d2;border-radius:99px;overflow:hidden}
+  .pbar{width:120px;height:6px;background:var(--border-soft);border-radius:99px;overflow:hidden}
   .pbar i{display:block;height:100%;width:0;background:var(--accent2);border-radius:99px;transition:width .2s}
   .hint{color:var(--muted);font-size:.95rem}
 </style>
@@ -608,6 +612,8 @@ ${json}</script>
         finish();
       }else{
         fb.className = 'fb bad'; fb.textContent = '✗ 不对，再试一次（或看答案）';
+        document.getElementById('after').style.display = 'flex';
+        document.getElementById('next').style.display = 'none';
       }
     }
     document.getElementById('judge').onclick = judge;
@@ -624,6 +630,7 @@ ${json}</script>
   function finish(){
     document.getElementById('after').style.display = 'flex';
     document.getElementById('see').style.display = 'none';
+    document.getElementById('next').style.display = '';
     var input = document.getElementById('ans');
     if(input) input.disabled = true;
     syncTopbar();
@@ -672,7 +679,7 @@ ${json}</script>
   /* ---- C 自我揭示 ---- */
   function revealBody(){
     return '<div class="row"><button class="act" id="flip">想好了 · 翻开答案</button></div>' +
-      '<div class="reveal" id="rev" style="display:none"></div>' +
+      '<div class="answer-reveal" id="rev" style="display:none"></div>' +
       '<div class="row" id="after" style="display:none">' +
       '<button class="act" id="yes">记对了</button>' +
       '<button class="ghost" id="no">记错了</button>' +
