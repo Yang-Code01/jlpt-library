@@ -118,14 +118,14 @@
   <aside class="context-panel">
     <div class="context-kicker">LEARNING HUB</div>
     <h2>课堂单词</h2>
-    <p>副词学习包 · 主题单元</p>
+    <p>主题词汇 · 单元学习</p>
     <div class="context-rule"></div>
-    <div class="context-stat"><span>当前单元</span><strong>7</strong></div>
-    <div class="context-stat"><span>词汇总量</span><strong>157</strong></div>
+    <div class="context-stat"><span>当前单元</span><strong id="unitTotal">0</strong></div>
+    <div class="context-stat"><span>词汇总量</span><strong id="wordTotal">0</strong></div>
     <div class="context-rule"></div>
     <div class="context-kicker">STUDY FLOW</div>
     <div class="context-list">
-      <div><span>浏览词汇</span><b>7 单元</b></div>
+      <div><span>浏览词汇</span><b id="unitSummary">0 单元</b></div>
       <div><span>翻转卡片</span><b>间隔记忆</b></div>
       <div><span>听写练习</span><b>同步重点词</b></div>
     </div>
@@ -135,7 +135,7 @@
 
   <header>
     <h1>课堂单词</h1>
-    <div class="sub">副词学习包 · 选择单元开始</div>
+    <div class="sub">按课堂主题整理 · 选择单元开始</div>
   </header>
 
   <div class="toolbar">
@@ -158,18 +158,23 @@
   // 本数组由 jp-vocab/gen.js 从各单元的 data.json 生成——加单元请建 data.json 后跑 gen.js，不要手改。
   // 显示顺序＝上次的顺序，新单元追加在末尾；cards 词数由 data.json 统计得出。
   const UNITS = [
-    { dir:"teido",                     title:"程度",                  reading:"ていど",                  meaning:"程度、地步",                                                    cards:17 },
-    { dir:"jikan-to-hindo-no-fukushi", title:"時間・頻度の副詞",      reading:"じかん・ひんどのふくし",  meaning:"表时间与频率的副词",                                            cards:23 },
-    { dir:"hitei",                     title:"否定",                  reading:"ひてい",                  meaning:"否定（与否定表达搭配的副词）",                                  cards:11 },
-    { dir:"koou",                      title:"呼応",                  reading:"こおう",                  meaning:"副詞の呼応（与推量・様子・仮定・疑問等固定句末表达呼应的副词）", cards:12 },
-    { dir:"igi-no-chikai-fukushi",     title:"意味の近い副詞",        reading:"いみのちかいふくし",      meaning:"意思相近的副词",                                                cards:37 },
-    { dir:"kanji-ni-sonota-no-fukushi", title:"漢字＋に・その他の副詞", reading:"かんじに・そのたのふくし", meaning:"「漢字＋に」形式与其他副词",                                    cards:12 },
-    { dir:"yousu-no-fukushi",          title:"様子の副詞",            reading:"ようすのふくし",            meaning:"表示事物和人的样子、状态的副词",                                cards:45 },
+    { dir:"teido",                           title:"程度",                     reading:"ていど",                                        meaning:"程度、地步",                                                    cards:17 },
+    { dir:"jikan-to-hindo-no-fukushi",       title:"時間・頻度の副詞",         reading:"じかん・ひんどのふくし",                        meaning:"表时间与频率的副词",                                            cards:23 },
+    { dir:"hitei",                           title:"否定",                     reading:"ひてい",                                        meaning:"否定（与否定表达搭配的副词）",                                  cards:11 },
+    { dir:"koou",                            title:"呼応",                     reading:"こおう",                                        meaning:"副詞の呼応（与推量・様子・仮定・疑問等固定句末表达呼应的副词）", cards:12 },
+    { dir:"igi-no-chikai-fukushi",           title:"意味の近い副詞",           reading:"いみのちかいふくし",                            meaning:"意思相近的副词",                                                cards:37 },
+    { dir:"kanji-ni-sonota-no-fukushi",      title:"漢字＋に・その他の副詞",   reading:"かんじに・そのたのふくし",                      meaning:"「漢字＋に」形式与其他副词",                                    cards:12 },
+    { dir:"yousu-no-fukushi",                title:"様子の副詞",               reading:"ようすのふくし",                                meaning:"表示事物和人的样子、状态的副词",                                cards:45 },
+    { dir:"karada-no-kotoba-kan-you-hyougen", title:"体の言葉を使った慣用表現①", reading:"からだのことばをつかったかんようひょうげんいち", meaning:"第6章「惯用表达」第1课：与身体相关的惯用表达",                  cards:43 },
   ];
 
   const grid = document.getElementById("grid");
   const unitCount = document.getElementById("unitCount");
+  const totalWords = UNITS.reduce((sum, unit) => sum + unit.cards, 0);
   unitCount.textContent = `共 ${UNITS.length} 个单元`;
+  document.getElementById("unitTotal").textContent = String(UNITS.length);
+  document.getElementById("wordTotal").textContent = String(totalWords);
+  document.getElementById("unitSummary").textContent = `${UNITS.length} 单元`;
 
   // 词数直接取内联的 cards，file:// 下也显示（不再依赖 fetch）
   UNITS.forEach(u => {
