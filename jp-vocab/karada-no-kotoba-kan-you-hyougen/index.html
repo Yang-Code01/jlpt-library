@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课堂单词</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/theme.js"></script>
+<link rel="stylesheet" href="../vocab.css">
+</head>
+<body>
+<div class="wrap">
+<div class="left-rail">
+<nav class="pagenav">
+  <a href="../index.html">← 返回课堂单词</a>
+  <span class="spacer"></span>
+  <a href="../../index.html">门户首页</a>
+</nav>
+</div>
+
+<header>
+  <h1 id="title">—</h1>
+  <div class="sub" id="sub"></div>
+  <span class="meaning" id="hmeaning"></span>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="browse" class="active">浏览</button>
+  <button data-tab="card">翻转卡</button>
+  <button data-tab="quiz">测验</button>
+  <button data-tab="srs">复习<span id="duepill" class="pill" style="display:none">0</span></button>
+</nav>
+
+<section id="browse"></section>
+<section id="card" style="display:none"></section>
+<section id="quiz" style="display:none"></section>
+<section id="srs" style="display:none"></section>
+</div>
+
+<!-- 数据内联：file:// 下不可 fetch，故以本块为准；与同目录 data.json 内容一致 -->
+<script type="application/json" id="vocab-data">
+{
+  "title": "体の言葉を使った慣用表現①",
+  "reading": "からだのことばをつかったかんようひょうげんいち",
+  "meaning_cn": "第6章「惯用表达」第1课：与身体相关的惯用表达",
+  "categories": [
+    {
+      "name": "顔",
+      "reading": "かお",
+      "cards": [
+        { "id": "1-1", "word": "顔が広い", "kana": "かおがひろい", "pos": "慣用句", "meaning_cn": "人脉广、认识的人多", "example_jp": "彼女は顔が広いので、いろいろな人を紹介してもらうことがある。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>顔<rt>かお</rt></ruby>が<ruby>広<rt>ひろ</rt></ruby>いので、いろいろな<ruby>人<rt>ひと</rt></ruby>を<ruby>紹介<rt>しょうかい</rt></ruby>してもらうことがある。", "example_cn": "她人脉很广，有时能请她介绍各方面的人认识。" },
+        { "id": "1-2", "word": "顔を貸す", "kana": "かおをかす", "pos": "慣用句", "meaning_cn": "抽空见面、帮忙露面", "example_jp": "少し頼みがあるので、明日、顔を貸してほしい。", "example_jp_ruby": "<ruby>少<rt>すこ</rt></ruby>し<ruby>頼<rt>たの</rt></ruby>みがあるので、<ruby>明日<rt>あした</rt></ruby>、<ruby>顔<rt>かお</rt></ruby>を<ruby>貸<rt>か</rt></ruby>してほしい。", "example_cn": "我有件事想拜托你，明天希望你能抽空见个面。" },
+        { "id": "1-3", "word": "顔を出す", "kana": "かおをだす", "pos": "慣用句", "meaning_cn": "露面、顺道拜访", "example_jp": "帰る前に事務所に顔を出して、明日の予定を確認した。", "example_jp_ruby": "<ruby>帰<rt>かえ</rt></ruby>る<ruby>前<rt>まえ</rt></ruby>に<ruby>事務所<rt>じむしょ</rt></ruby>に<ruby>顔<rt>かお</rt></ruby>を<ruby>出<rt>だ</rt></ruby>して、<ruby>明日<rt>あした</rt></ruby>の<ruby>予定<rt>よてい</rt></ruby>を<ruby>確認<rt>かくにん</rt></ruby>した。", "example_cn": "回去前我去办公室露了个面，并确认了明天的安排。" }
+      ]
+    },
+    {
+      "name": "頭",
+      "reading": "あたま",
+      "cards": [
+        { "id": "2-1", "word": "頭が上がらない", "kana": "あたまがあがらない", "pos": "慣用句", "meaning_cn": "抬不起头；对人心怀感激、处于劣势", "example_jp": "とてもお世話になった人なので、頭が上がらない。", "example_jp_ruby": "とてもお<ruby>世話<rt>せわ</rt></ruby>になった<ruby>人<rt>ひと</rt></ruby>なので、<ruby>頭<rt>あたま</rt></ruby>が<ruby>上<rt>あ</rt></ruby>がらない。", "example_cn": "那人曾经帮过我很多忙，所以我在他面前抬不起头。" },
+        { "id": "2-2", "word": "頭が痛い", "kana": "あたまがいたい", "pos": "慣用句", "meaning_cn": "头疼；为难、发愁", "example_jp": "不景気で給料が下がってしまい、来月の生活費のことで頭が痛い。", "example_jp_ruby": "<ruby>不景気<rt>ふけいき</rt></ruby>で<ruby>給料<rt>きゅうりょう</rt></ruby>が<ruby>下<rt>さ</rt></ruby>がってしまい、<ruby>来月<rt>らいげつ</rt></ruby>の<ruby>生活費<rt>せいかつひ</rt></ruby>のことで<ruby>頭<rt>あたま</rt></ruby>が<ruby>痛<rt>いた</rt></ruby>い。", "example_cn": "经济不景气，工资降了，想到下个月的生活费就头疼。" },
+        { "id": "2-3", "word": "頭が固い", "kana": "あたまがかたい", "pos": "慣用句", "meaning_cn": "思想顽固、不灵活", "example_jp": "若くても、頭が固くて、人の意見をあまり聞かない人もいる。", "example_jp_ruby": "<ruby>若<rt>わか</rt></ruby>くても、<ruby>頭<rt>あたま</rt></ruby>が<ruby>固<rt>かた</rt></ruby>くて、<ruby>人<rt>ひと</rt></ruby>の<ruby>意見<rt>いけん</rt></ruby>をあまり<ruby>聞<rt>き</rt></ruby>かない<ruby>人<rt>ひと</rt></ruby>もいる。", "example_cn": "即使年轻，也可能思想顽固、不太听取别人的意见。" },
+        { "id": "2-4", "word": "頭に来る", "kana": "あたまにくる", "pos": "慣用句", "meaning_cn": "生气、恼火", "example_jp": "何度やめてほしいと言っても、やめないので、本当に頭に来る。", "example_jp_ruby": "<ruby>何度<rt>なんど</rt></ruby>やめてほしいと<ruby>言<rt>い</rt></ruby>っても、やめないので、<ruby>本当<rt>ほんとう</rt></ruby>に<ruby>頭<rt>あたま</rt></ruby>に<ruby>来<rt>く</rt></ruby>る。", "example_cn": "无论我多少次要求他停下，他都不肯，真让我火大。" },
+        { "id": "2-5", "word": "頭を下げる", "kana": "あたまをさげる", "pos": "慣用句", "meaning_cn": "低头、道歉；恳求", "example_jp": "迷惑を掛けた人に頭を下げる。", "example_jp_ruby": "<ruby>迷惑<rt>めいわく</rt></ruby>を<ruby>掛<rt>か</rt></ruby>けた<ruby>人<rt>ひと</rt></ruby>に<ruby>頭<rt>あたま</rt></ruby>を<ruby>下<rt>さ</rt></ruby>げる。", "example_cn": "向被自己添了麻烦的人低头道歉。" },
+        { "id": "2-6", "word": "頭を冷やす", "kana": "あたまをひやす", "pos": "慣用句", "meaning_cn": "冷静下来、冷却头脑", "example_jp": "頭を冷やしてから、もう一度話し合おうと思う。", "example_jp_ruby": "<ruby>頭<rt>あたま</rt></ruby>を<ruby>冷<rt>ひ</rt></ruby>やしてから、もう<ruby>一度<rt>いちど</rt></ruby><ruby>話<rt>はな</rt></ruby>し<ruby>合<rt>あ</rt></ruby>おうと<ruby>思<rt>おも</rt></ruby>う。", "example_cn": "我想先冷静下来，然后再谈一次。" }
+      ]
+    },
+    {
+      "name": "目",
+      "reading": "め",
+      "cards": [
+        { "id": "3-1", "word": "目がない", "kana": "めがない", "pos": "慣用句", "meaning_cn": "极其喜爱、毫无抵抗力", "example_jp": "甘いものに目がないので、ケーキを見るとつい食べてしまう。", "example_jp_ruby": "<ruby>甘<rt>あま</rt></ruby>いものに<ruby>目<rt>め</rt></ruby>がないので、ケーキを<ruby>見<rt>み</rt></ruby>るとつい<ruby>食<rt>た</rt></ruby>べてしまう。", "example_cn": "我对甜食毫无抵抗力，一看到蛋糕就忍不住吃。" },
+        { "id": "3-2", "word": "目に浮かぶ", "kana": "めにうかぶ", "pos": "慣用句", "meaning_cn": "浮现在眼前、浮现脑海", "example_jp": "私の知らないところで話は進んでいて、部長の顔が目に浮かんだ。", "example_jp_ruby": "<ruby>私<rt>わたし</rt></ruby>の<ruby>知<rt>し</rt></ruby>らないところで<ruby>話<rt>はなし</rt></ruby>は<ruby>進<rt>すす</rt></ruby>んでいて、<ruby>部長<rt>ぶちょう</rt></ruby>の<ruby>顔<rt>かお</rt></ruby>が<ruby>目<rt>め</rt></ruby>に<ruby>浮<rt>う</rt></ruby>かんだ。", "example_cn": "事情在我不知道的情况下进展着，部长的脸浮现在我眼前。" },
+        { "id": "3-3", "word": "目に付く", "kana": "めにつく", "pos": "慣用句", "meaning_cn": "显眼、引人注意", "example_jp": "家族の写真をいつも目に付くところに置いている。", "example_jp_ruby": "<ruby>家族<rt>かぞく</rt></ruby>の<ruby>写真<rt>しゃしん</rt></ruby>をいつも<ruby>目<rt>め</rt></ruby>に<ruby>付<rt>つ</rt></ruby>くところに<ruby>置<rt>お</rt></ruby>いている。", "example_cn": "我把家人的照片放在总能看到的显眼处。" },
+        { "id": "3-4", "word": "目を付ける", "kana": "めをつける", "pos": "慣用句", "meaning_cn": "看中、留意", "example_jp": "これから注目の分野としてアニメに目を付けている。", "example_jp_ruby": "これから<ruby>注目<rt>ちゅうもく</rt></ruby>の<ruby>分野<rt>ぶんや</rt></ruby>としてアニメに<ruby>目<rt>め</rt></ruby>を<ruby>付<rt>つ</rt></ruby>けている。", "example_cn": "我看中了动画这个今后备受关注的领域。" },
+        { "id": "3-5", "word": "目を通す", "kana": "めをとおす", "pos": "慣用句", "meaning_cn": "浏览、过目", "example_jp": "先生がレポートに目を通して、コメントをしてくれた。", "example_jp_ruby": "<ruby>先生<rt>せんせい</rt></ruby>がレポートに<ruby>目<rt>め</rt></ruby>を<ruby>通<rt>とお</rt></ruby>して、コメントをしてくれた。", "example_cn": "老师看过报告后给了我意见。" }
+      ]
+    },
+    {
+      "name": "口",
+      "reading": "くち",
+      "cards": [
+        { "id": "4-1", "word": "口がうまい", "kana": "くちがうまい", "pos": "慣用句", "meaning_cn": "能说会道、嘴甜", "example_jp": "店員があまりにも口がうまいので、つい買いすぎてしまった。", "example_jp_ruby": "<ruby>店員<rt>てんいん</rt></ruby>があまりにも<ruby>口<rt>くち</rt></ruby>がうまいので、つい<ruby>買<rt>か</rt></ruby>いすぎてしまった。", "example_cn": "店员太会说了，我不知不觉就买多了。" },
+        { "id": "4-2", "word": "口が重い", "kana": "くちがおもい", "pos": "慣用句", "meaning_cn": "沉默寡言、不爱说话", "example_jp": "彼女は家庭がうまくいっていないらしく、家族の話になると口が重くなる。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>家庭<rt>かてい</rt></ruby>がうまくいっていないらしく、<ruby>家族<rt>かぞく</rt></ruby>の<ruby>話<rt>はなし</rt></ruby>になると<ruby>口<rt>くち</rt></ruby>が<ruby>重<rt>おも</rt></ruby>くなる。", "example_cn": "她家里似乎不太顺利，一谈到家人就沉默寡言。" },
+        { "id": "4-3", "word": "口が堅い", "kana": "くちがかたい", "pos": "慣用句", "meaning_cn": "嘴严、守口如瓶", "example_jp": "彼女は口が堅いから、絶対に誰にも話さないだろう。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>口<rt>くち</rt></ruby>が<ruby>堅<rt>かた</rt></ruby>いから、<ruby>絶対<rt>ぜったい</rt></ruby>に<ruby>誰<rt>だれ</rt></ruby>にも<ruby>話<rt>はな</rt></ruby>さないだろう。", "example_cn": "她嘴很严，绝对不会告诉任何人。" },
+        { "id": "4-4", "word": "口が軽い", "kana": "くちがかるい", "pos": "慣用句", "meaning_cn": "嘴不严、爱泄露秘密", "example_jp": "彼は口が軽いから、秘密もすぐ誰かに話してしまう。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>口<rt>くち</rt></ruby>が<ruby>軽<rt>かる</rt></ruby>いから、<ruby>秘密<rt>ひみつ</rt></ruby>もすぐ<ruby>誰<rt>だれ</rt></ruby>かに<ruby>話<rt>はな</rt></ruby>してしまう。", "example_cn": "他嘴不严，秘密也会很快告诉别人。" },
+        { "id": "4-5", "word": "口が滑る", "kana": "くちがすべる", "pos": "慣用句", "meaning_cn": "说漏嘴、失言", "example_jp": "うっかり口が滑って、言ってはいけないことを話してしまった。", "example_jp_ruby": "うっかり<ruby>口<rt>くち</rt></ruby>が<ruby>滑<rt>すべ</rt></ruby>って、<ruby>言<rt>い</rt></ruby>ってはいけないことを<ruby>話<rt>はな</rt></ruby>してしまった。", "example_cn": "我一不小心说漏了嘴，把不该说的话说了出来。" },
+        { "id": "4-6", "word": "口に合う", "kana": "くちにあう", "pos": "慣用句", "meaning_cn": "合口味", "example_jp": "彼のために料理を作ったが、彼の口に合うだろうか。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>のために<ruby>料理<rt>りょうり</rt></ruby>を<ruby>作<rt>つく</rt></ruby>ったが、<ruby>彼<rt>かれ</rt></ruby>の<ruby>口<rt>くち</rt></ruby>に<ruby>合<rt>あ</rt></ruby>うだろうか。", "example_cn": "我给他做了菜，不知道合不合他的口味。" },
+        { "id": "4-7", "word": "口にする", "kana": "くちにする", "pos": "慣用句", "meaning_cn": "说出口、提及", "example_jp": "初めは不満を口にしていたが、今はあきらめて何も言わなくなった。", "example_jp_ruby": "<ruby>初<rt>はじ</rt></ruby>めは<ruby>不満<rt>ふまん</rt></ruby>を<ruby>口<rt>くち</rt></ruby>にしていたが、<ruby>今<rt>いま</rt></ruby>はあきらめて<ruby>何<rt>なに</rt></ruby>も<ruby>言<rt>い</rt></ruby>わなくなった。", "example_cn": "起初他还表达不满，现在放弃了，什么也不说了。" },
+        { "id": "4-8", "word": "口に出す", "kana": "くちにだす", "pos": "慣用句", "meaning_cn": "说出来、说出口", "example_jp": "何度も口に出して練習すると、覚えられる。", "example_jp_ruby": "<ruby>何度<rt>なんど</rt></ruby>も<ruby>口<rt>くち</rt></ruby>に<ruby>出<rt>だ</rt></ruby>して<ruby>練習<rt>れんしゅう</rt></ruby>すると、<ruby>覚<rt>おぼ</rt></ruby>えられる。", "example_cn": "多次说出来练习，就能记住。" },
+        { "id": "4-9", "word": "口を出す", "kana": "くちをだす", "pos": "慣用句", "meaning_cn": "插嘴、插手", "example_jp": "自分に関係のないことに口を出すのは、あまりよくないと思う。", "example_jp_ruby": "<ruby>自分<rt>じぶん</rt></ruby>に<ruby>関係<rt>かんけい</rt></ruby>のないことに<ruby>口<rt>くち</rt></ruby>を<ruby>出<rt>だ</rt></ruby>すのは、あまりよくないと<ruby>思<rt>おも</rt></ruby>う。", "example_cn": "我觉得插手与自己无关的事不太好。" }
+      ]
+    },
+    {
+      "name": "耳",
+      "reading": "みみ",
+      "cards": [
+        { "id": "5-1", "word": "耳が痛い", "kana": "みみがいたい", "pos": "慣用句", "meaning_cn": "听了刺耳、被说中痛处", "example_jp": "練習が足りないことは自分でもよくわかっていて、監督の言葉は耳が痛い。", "example_jp_ruby": "<ruby>練習<rt>れんしゅう</rt></ruby>が<ruby>足<rt>た</rt></ruby>りないことは<ruby>自分<rt>じぶん</rt></ruby>でもよくわかっていて、<ruby>監督<rt>かんとく</rt></ruby>の<ruby>言葉<rt>ことば</rt></ruby>は<ruby>耳<rt>みみ</rt></ruby>が<ruby>痛<rt>いた</rt></ruby>い。", "example_cn": "我自己也很清楚练习不足，教练的话听起来真是刺耳。" },
+        { "id": "5-2", "word": "耳が早い", "kana": "みみがはやい", "pos": "慣用句", "meaning_cn": "消息灵通", "example_jp": "さっきの人に話したことを知っているとは、彼はなんて耳が早いんだ。", "example_jp_ruby": "さっきの<ruby>人<rt>ひと</rt></ruby>に<ruby>話<rt>はな</rt></ruby>したことを<ruby>知<rt>し</rt></ruby>っているとは、<ruby>彼<rt>かれ</rt></ruby>はなんて<ruby>耳<rt>みみ</rt></ruby>が<ruby>早<rt>はや</rt></ruby>いんだ。", "example_cn": "他竟然知道我刚才跟那个人说的话，消息真灵通。" },
+        { "id": "5-3", "word": "耳にする", "kana": "みみにする", "pos": "慣用句", "meaning_cn": "听到、听说", "example_jp": "この店はとてもおいしいという噂を耳にしたので、食べに来た。", "example_jp_ruby": "この<ruby>店<rt>みせ</rt></ruby>はとてもおいしいという<ruby>噂<rt>うわさ</rt></ruby>を<ruby>耳<rt>みみ</rt></ruby>にしたので、<ruby>食<rt>た</rt></ruby>べに<ruby>来<rt>き</rt></ruby>た。", "example_cn": "我听说这家店很好吃，所以来尝尝。" },
+        { "id": "5-4", "word": "耳を貸す", "kana": "みみをかす", "pos": "慣用句", "meaning_cn": "倾听、听取", "example_jp": "経験者の話には耳を貸すがいい。", "example_jp_ruby": "<ruby>経験者<rt>けいけんしゃ</rt></ruby>の<ruby>話<rt>はなし</rt></ruby>には<ruby>耳<rt>みみ</rt></ruby>を<ruby>貸<rt>か</rt></ruby>すがいい。", "example_cn": "最好听听有经验的人的意见。" }
+      ]
+    },
+    {
+      "name": "鼻",
+      "reading": "はな",
+      "cards": [
+        { "id": "6-1", "word": "鼻が高い", "kana": "はながたかい", "pos": "慣用句", "meaning_cn": "自豪、得意", "example_jp": "みんなが父のことをほめるので、鼻が高い。", "example_jp_ruby": "みんなが<ruby>父<rt>ちち</rt></ruby>のことをほめるので、<ruby>鼻<rt>はな</rt></ruby>が<ruby>高<rt>たか</rt></ruby>い。", "example_cn": "大家都夸父亲，我感到很自豪。" },
+        { "id": "6-2", "word": "鼻で笑う", "kana": "はなでわらう", "pos": "慣用句", "meaning_cn": "嗤之以鼻、冷笑", "example_jp": "一生懸命考えて出したアイデアを鼻で笑われて無視されたので、頭に来た。", "example_jp_ruby": "<ruby>一生懸命<rt>いっしょうけんめい</rt></ruby><ruby>考<rt>かんが</rt></ruby>えて<ruby>出<rt>だ</rt></ruby>したアイデアを<ruby>鼻<rt>はな</rt></ruby>で<ruby>笑<rt>わら</rt></ruby>われて<ruby>無視<rt>むし</rt></ruby>されたので、<ruby>頭<rt>あたま</rt></ruby>に<ruby>来<rt>き</rt></ruby>た。", "example_cn": "我认真想出的点子被人嗤之以鼻、还遭到无视，因此非常生气。" }
+      ]
+    },
+    {
+      "name": "手",
+      "reading": "て",
+      "cards": [
+        { "id": "7-1", "word": "手が掛かる", "kana": "てがかかる", "pos": "慣用句", "meaning_cn": "费心、费事", "example_jp": "私は、わがままで、手が掛かる子供だったそうで、親は大変だったらしい。", "example_jp_ruby": "<ruby>私<rt>わたし</rt></ruby>は、わがままで、<ruby>手<rt>て</rt></ruby>が<ruby>掛<rt>か</rt></ruby>かる<ruby>子供<rt>こども</rt></ruby>だったそうで、<ruby>親<rt>おや</rt></ruby>は<ruby>大変<rt>たいへん</rt></ruby>だったらしい。", "example_cn": "听说我小时候很任性又费心，父母当时一定很辛苦。" },
+        { "id": "7-2", "word": "手が空く", "kana": "てがあく", "pos": "慣用句", "meaning_cn": "有空、腾出手来", "example_jp": "その作業が終わって手が空いたら、こちらも手伝ってください。", "example_jp_ruby": "その<ruby>作業<rt>さぎょう</rt></ruby>が<ruby>終<rt>お</rt></ruby>わって<ruby>手<rt>て</rt></ruby>が<ruby>空<rt>あ</rt></ruby>いたら、こちらも<ruby>手伝<rt>てつだ</rt></ruby>ってください。", "example_cn": "那项工作结束腾出手后，也请来帮帮我们。" },
+        { "id": "7-3", "word": "手が足りない", "kana": "てがたりない", "pos": "慣用句", "meaning_cn": "人手不足", "example_jp": "今月はアルバイトの人が休んだので手が足りなくて、困った。", "example_jp_ruby": "<ruby>今月<rt>こんげつ</rt></ruby>はアルバイトの<ruby>人<rt>ひと</rt></ruby>が<ruby>休<rt>やす</rt></ruby>んだので<ruby>手<rt>て</rt></ruby>が<ruby>足<rt>た</rt></ruby>りなくて、<ruby>困<rt>こま</rt></ruby>った。", "example_cn": "这个月兼职人员请假了，人手不够，真让人头疼。" },
+        { "id": "7-4", "word": "手が出ない", "kana": "てがでない", "pos": "慣用句", "meaning_cn": "买不起；无从下手", "example_jp": "学生の私には、五万円のバッグは高すぎて手が出ない。", "example_jp_ruby": "<ruby>学生<rt>がくせい</rt></ruby>の<ruby>私<rt>わたし</rt></ruby>には、<ruby>五万円<rt>ごまんえん</rt></ruby>のバッグは<ruby>高<rt>たか</rt></ruby>すぎて<ruby>手<rt>て</rt></ruby>が<ruby>出<rt>で</rt></ruby>ない。", "example_cn": "对身为学生的我来说，五万日元的包太贵了，买不起。" },
+        { "id": "7-5", "word": "手が離せない", "kana": "てがはなせない", "pos": "慣用句", "meaning_cn": "忙得脱不开身", "example_jp": "今、忙しくて手が離せないので、一時間後に来てください。", "example_jp_ruby": "<ruby>今<rt>いま</rt></ruby>、<ruby>忙<rt>いそが</rt></ruby>しくて<ruby>手<rt>て</rt></ruby>が<ruby>離<rt>はな</rt></ruby>せないので、<ruby>一時間後<rt>いちじかんご</rt></ruby>に<ruby>来<rt>き</rt></ruby>てください。", "example_cn": "我现在正忙得脱不开身，请一小时后再来。" },
+        { "id": "7-6", "word": "手につかない", "kana": "てにつかない", "pos": "慣用句", "meaning_cn": "心不在焉、无法专心", "example_jp": "合格発表の日は、結果が気になって何も手につかなかった。", "example_jp_ruby": "<ruby>合格発表<rt>ごうかくはっぴょう</rt></ruby>の<ruby>日<rt>ひ</rt></ruby>は、<ruby>結果<rt>けっか</rt></ruby>が<ruby>気<rt>き</rt></ruby>になって<ruby>何<rt>なに</rt></ruby>も<ruby>手<rt>て</rt></ruby>につかなかった。", "example_cn": "公布录取结果那天，我一直惦记着结果，什么都做不下去。" },
+        { "id": "7-7", "word": "手を貸す／手を借りる", "speak_word": "手を貸す、手を借りる", "kana": "てをかす／てをかりる", "pos": "慣用句", "meaning_cn": "伸出援手／借助他人之手", "example_jp": "重い荷物を運ぶのに弟が手を貸してくれた。", "example_jp_ruby": "<ruby>重<rt>おも</rt></ruby>い<ruby>荷物<rt>にもつ</rt></ruby>を<ruby>運<rt>はこ</rt></ruby>ぶのに<ruby>弟<rt>おとうと</rt></ruby>が<ruby>手<rt>て</rt></ruby>を<ruby>貸<rt>か</rt></ruby>してくれた。", "example_cn": "搬运沉重的行李时，弟弟帮了我一把。" },
+        { "id": "7-8", "word": "手を組む", "kana": "てをくむ", "pos": "慣用句", "meaning_cn": "联手、合作", "example_jp": "これからライバル会社と手を組んで海外に進出する。", "example_jp_ruby": "これからライバル<ruby>会社<rt>がいしゃ</rt></ruby>と<ruby>手<rt>て</rt></ruby>を<ruby>組<rt>く</rt></ruby>んで<ruby>海外<rt>かいがい</rt></ruby>に<ruby>進出<rt>しんしゅつ</rt></ruby>する。", "example_cn": "今后将与竞争公司联手进军海外市场。" },
+        { "id": "7-9", "word": "手を出す", "kana": "てをだす", "pos": "慣用句", "meaning_cn": "动手；插手、涉足", "example_jp": "いろいろな事業に手を出した結果、会社の経営が傾いた。／先に手を出したほうが悪いと思うが、その原因を作ったのは相手のほうだ。", "example_jp_ruby": "いろいろな<ruby>事業<rt>じぎょう</rt></ruby>に<ruby>手<rt>て</rt></ruby>を<ruby>出<rt>だ</rt></ruby>した<ruby>結果<rt>けっか</rt></ruby>、<ruby>会社<rt>かいしゃ</rt></ruby>の<ruby>経営<rt>けいえい</rt></ruby>が<ruby>傾<rt>かたむ</rt></ruby>いた。<br><ruby>先<rt>さき</rt></ruby>に<ruby>手<rt>て</rt></ruby>を<ruby>出<rt>だ</rt></ruby>したほうが<ruby>悪<rt>わる</rt></ruby>いと<ruby>思<rt>おも</rt></ruby>うが、その<ruby>原因<rt>げんいん</rt></ruby>を<ruby>作<rt>つく</rt></ruby>ったのは<ruby>相手<rt>あいて</rt></ruby>のほうだ。", "example_cn": "涉足各种事业之后，公司经营陷入了困境。／我觉得先动手的一方有错，但事情的起因是对方造成的。" },
+        { "id": "7-10", "word": "手をつける", "kana": "てをつける", "pos": "慣用句", "meaning_cn": "着手、开始做", "example_jp": "宿題が多すぎて、何から手をつけていいのかわからない。", "example_jp_ruby": "<ruby>宿題<rt>しゅくだい</rt></ruby>が<ruby>多<rt>おお</rt></ruby>すぎて、<ruby>何<rt>なに</rt></ruby>から<ruby>手<rt>て</rt></ruby>をつけていいのかわからない。", "example_cn": "作业太多了，我不知道该从哪一项开始做。" }
+      ]
+    },
+    {
+      "name": "腕",
+      "reading": "うで",
+      "cards": [
+        { "id": "8-1", "word": "腕がいい", "kana": "うでがいい", "pos": "慣用句", "meaning_cn": "本领高、技术好", "example_jp": "あの歯医者は腕がいいと評判だ。", "example_jp_ruby": "あの<ruby>歯医者<rt>はいしゃ</rt></ruby>は<ruby>腕<rt>うで</rt></ruby>がいいと<ruby>評判<rt>ひょうばん</rt></ruby>だ。", "example_cn": "那位牙医技术很好，颇有口碑。" },
+        { "id": "8-2", "word": "腕を上げる", "kana": "うでをあげる", "pos": "慣用句", "meaning_cn": "本领提高、技术进步", "example_jp": "一年前と比べて料理の腕を上げた。", "example_jp_ruby": "<ruby>一年前<rt>いちねんまえ</rt></ruby>と<ruby>比<rt>くら</rt></ruby>べて<ruby>料理<rt>りょうり</rt></ruby>の<ruby>腕<rt>うで</rt></ruby>を<ruby>上<rt>あ</rt></ruby>げた。", "example_cn": "和一年前相比，他的厨艺进步了。" }
+      ]
+    },
+    {
+      "name": "肩",
+      "reading": "かた",
+      "cards": [
+        { "id": "9-1", "word": "肩を落とす", "kana": "かたをおとす", "pos": "慣用句", "meaning_cn": "垂头丧气、失望", "example_jp": "計画が失敗するとは思わなかった。肩を落として話していた。", "example_jp_ruby": "<ruby>計画<rt>けいかく</rt></ruby>が<ruby>失敗<rt>しっぱい</rt></ruby>するとは<ruby>思<rt>おも</rt></ruby>わなかった。<ruby>肩<rt>かた</rt></ruby>を<ruby>落<rt>お</rt></ruby>として<ruby>話<rt>はな</rt></ruby>していた。", "example_cn": "没想到计划会失败。他垂头丧气地说着。" },
+        { "id": "9-2", "word": "肩を貸す", "kana": "かたをかす", "pos": "慣用句", "meaning_cn": "借出肩膀；帮助、扶一把", "example_jp": "足が痛くて歩けなかったので、肩を貸してもらって部屋まで戻った。", "example_jp_ruby": "<ruby>足<rt>あし</rt></ruby>が<ruby>痛<rt>いた</rt></ruby>くて<ruby>歩<rt>ある</rt></ruby>けなかったので、<ruby>肩<rt>かた</rt></ruby>を<ruby>貸<rt>か</rt></ruby>してもらって<ruby>部屋<rt>へや</rt></ruby>まで<ruby>戻<rt>もど</rt></ruby>った。", "example_cn": "我脚痛得走不了路，于是让人扶着肩膀回到了房间。" }
+      ]
+    }
+  ]
+}
+</script>
+<script src="../vocab.js"></script>
+</body>
+</html>
