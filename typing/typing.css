@@ -1,0 +1,377 @@
+/* ============================================================
+   打字练习 · 独立暗色街机风样式
+   - 不依赖 ../assets/style.css 的全站令牌，全部使用本文件局部变量
+   - 变量挂在 .typing-app 上，不污染全站
+   - 传送带流水：.ty-card 的 left 从 100% 动画到 -120%
+   - prefers-reduced-motion: reduce 时改为静态居中切换（动画仍在跑，
+     只用于计时，视觉上不流动）——见文件末尾 @media 块
+   ============================================================ */
+
+/* ---------- 最小 reset（本页自用，避免依赖全站 reset） ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+h1, h2, h3, p { margin: 0; }
+[hidden] { display: none !important; }
+
+/* ---------- 局部设计令牌 ---------- */
+.typing-app {
+  --ty-bg:        #070a12;
+  --ty-bg-2:      #0d1322;
+  --ty-panel:     #131b2c;
+  --ty-panel-2:   #1a2438;
+  --ty-line:      #26314a;
+  --ty-fg:        #e9eefc;
+  --ty-muted:     #8491ab;
+  --ty-accent:    #35e0c8;   /* 荧光青：主强调 */
+  --ty-accent-2:  #ff5c8a;   /* 霓虹粉：连击 / 出错 */
+  --ty-good:      #7df0a9;   /* 已敲对 */
+  --ty-warn:      #ffd166;   /* 倒数告警 */
+  --ty-radius:    14px;
+  --ty-flow-ms:   8000ms;    /* 传送带单程时长；由 JS 按难度档改写（档越高越小 = 越快） */
+
+  min-height: 100vh;
+  padding: 18px clamp(14px, 4vw, 40px) 40px;
+  background:
+    radial-gradient(1100px 620px at 78% -12%, #14253f 0%, transparent 62%),
+    radial-gradient(900px 520px at 8% 108%, #1d1430 0%, transparent 60%),
+    var(--ty-bg);
+  color: var(--ty-fg);
+  font-family: system-ui, -apple-system, "Segoe UI", "Yu Gothic UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.typing-app ::selection { background: rgba(53, 224, 200, .32); }
+
+/* ---------- 顶部返回门户 ---------- */
+.ty-crumb {
+  max-width: 960px;
+  margin: 0 auto 14px;
+  font-size: 13px;
+  color: var(--ty-muted);
+  letter-spacing: .02em;
+}
+.ty-crumb a { color: var(--ty-accent); text-decoration: none; }
+.ty-crumb a:hover { text-decoration: underline; }
+.ty-crumb-sep { margin: 0 8px; opacity: .6; }
+
+/* ---------- 屏幕通用 ---------- */
+.ty-screen {
+  max-width: 960px;
+  margin: 0 auto;
+  animation: ty-fade .28s ease both;
+}
+@keyframes ty-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ============ 开始 / 选档屏 ============ */
+.ty-start { padding: 28px 0 0; }
+.ty-eyebrow {
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+  letter-spacing: .34em;
+  color: var(--ty-accent);
+  margin-bottom: 6px;
+}
+.ty-title {
+  font-size: clamp(30px, 6vw, 46px);
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-shadow: 0 0 26px rgba(53, 224, 200, .28);
+}
+.ty-lead { color: var(--ty-muted); font-size: 14px; margin-top: 8px; max-width: 60ch; }
+
+.ty-field { margin-top: 26px; }
+.ty-field-label {
+  display: block;
+  font-size: 12px;
+  letter-spacing: .22em;
+  color: var(--ty-muted);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.ty-opts { display: flex; flex-wrap: wrap; gap: 10px; }
+.ty-opt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 132px;
+  padding: 12px 16px;
+  border: 1px solid var(--ty-line);
+  border-radius: var(--ty-radius);
+  background: linear-gradient(180deg, var(--ty-panel), var(--ty-bg-2));
+  color: var(--ty-fg);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: left;
+  transition: border-color .15s, box-shadow .15s, transform .1s;
+}
+.ty-opt-sub { font-size: 11px; font-weight: 400; color: var(--ty-muted); letter-spacing: .02em; }
+.ty-opt:hover { border-color: #3d4d70; transform: translateY(-1px); }
+.ty-opt.is-active {
+  border-color: var(--ty-accent);
+  box-shadow: inset 0 0 0 1px rgba(53, 224, 200, .35), 0 0 22px rgba(53, 224, 200, .18);
+}
+.ty-opt.is-active .ty-opt-sub { color: var(--ty-accent); }
+
+.ty-best { margin-top: 24px; font-size: 13px; color: var(--ty-muted); }
+.ty-best strong { color: var(--ty-warn); }
+
+.ty-hint { margin-top: 12px; font-size: 12px; color: var(--ty-muted); }
+.ty-hint.is-error { color: var(--ty-accent-2); }
+
+/* ---------- 按钮 ---------- */
+.ty-btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--ty-line);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  transition: border-color .15s, background .15s, transform .1s, box-shadow .15s;
+}
+.ty-btn:hover { transform: translateY(-1px); }
+.ty-btn:active { transform: translateY(0); }
+.ty-btn-primary {
+  margin-top: 26px;
+  background: linear-gradient(180deg, #3ef0d6, #1fc4ad);
+  border-color: transparent;
+  color: #04231e;
+  box-shadow: 0 6px 26px rgba(53, 224, 200, .3);
+}
+.ty-btn-primary:hover { box-shadow: 0 8px 32px rgba(53, 224, 200, .42); }
+.ty-btn-ghost { background: rgba(255, 255, 255, .03); color: var(--ty-fg); }
+.ty-btn-ghost:hover { border-color: #3d4d70; }
+.ty-btn-danger { background: linear-gradient(180deg, #ff6f97, #e13c67); border-color: transparent; color: #2a0412; }
+.ty-btn-lg { padding: 13px 34px; font-size: 16px; }
+
+/* 键盘可达：焦点环清晰可见 */
+.ty-btn:focus-visible,
+.ty-opt:focus-visible,
+.ty-crumb a:focus-visible {
+  outline: 2px solid var(--ty-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- 移动端隐藏软键盘输入框 ---------- */
+/* 关键：不能用 display:none（iOS 下 display:none 的元素无法 focus）；
+   用 opacity:0 + 固定到视口角落 + 1px 尺寸，仍保持可聚焦；
+   font-size ≥ 16px 以避免 iOS 聚焦时自动放大页面。 */
+.ty-mobile-input {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  font-size: 16px;
+  color: transparent;
+  background: transparent;
+  caret-color: transparent;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============ 游戏台 ============ */
+.ty-game { padding-top: 6px; }
+
+.ty-hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 22px;
+  padding: 12px 16px;
+  border: 1px solid var(--ty-line);
+  border-radius: var(--ty-radius);
+  background: linear-gradient(180deg, rgba(26, 36, 56, .9), rgba(13, 19, 34, .9));
+}
+.ty-hud-item { display: flex; flex-direction: column; line-height: 1.25; }
+.ty-hud-k { font-size: 10px; letter-spacing: .2em; color: var(--ty-muted); }
+.ty-hud-v { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.ty-hud-score { color: var(--ty-accent); }
+.ty-hud-time.is-warn { color: var(--ty-warn); animation: ty-blink .6s steps(2, end) infinite; }
+@keyframes ty-blink { 50% { opacity: .35; } }
+.ty-hud-actions { margin-left: auto; display: flex; gap: 8px; }
+
+/* 传送带 */
+.ty-stage { position: relative; margin-top: 16px; }
+.ty-lane {
+  position: relative;
+  overflow: hidden;
+  min-height: clamp(230px, 34vh, 300px);
+  border: 1px solid var(--ty-line);
+  border-radius: 18px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .028) 0 2px, transparent 2px 34px),
+    linear-gradient(180deg, #0a1120, #0e1729 60%, #0a1120);
+}
+/* 传送带上下轨 */
+.ty-lane::before, .ty-lane::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(53, 224, 200, .35), transparent);
+}
+.ty-lane::before { top: 14px; }
+.ty-lane::after { bottom: 14px; }
+
+/* 当前词卡片：同一时刻一个词从右向左流过 */
+.ty-card {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+  width: max-content;
+  max-width: min(680px, 88%);
+  padding: 18px 26px 20px;
+  border: 1px solid rgba(53, 224, 200, .38);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(23, 34, 55, .96), rgba(12, 19, 34, .96));
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .4), 0 18px 44px rgba(0, 0, 0, .5), 0 0 30px rgba(53, 224, 200, .1);
+  text-align: center;
+  /* 单程时长由 --ty-flow-ms 控制（JS 按难度档改写） */
+  animation: ty-flow var(--ty-flow-ms, 8000ms) linear forwards;
+}
+/* 传送带流水：从右侧界外进入，流到左侧界外 */
+@keyframes ty-flow {
+  from { left: 100%; }
+  to   { left: -120%; }
+}
+.ty-card.ty-wrong {
+  border-color: var(--ty-accent-2);
+  box-shadow: 0 0 0 1px rgba(255, 92, 138, .5), 0 0 34px rgba(255, 92, 138, .4);
+}
+.ty-stage.ty-paused .ty-card { animation-play-state: paused; }
+
+/* 四行展示层（同屏常显） */
+.ty-line { white-space: nowrap; }
+.ty-line-kana {
+  font-size: clamp(30px, 6vw, 44px);
+  font-weight: 800;
+  letter-spacing: .1em;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(53, 224, 200, .35);
+}
+.ty-line-word { margin-top: 2px; font-size: 17px; font-weight: 700; color: #cfe0ff; }
+.ty-line-romaji {
+  margin-top: 10px;
+  font-family: ui-monospace, "SFMono-Regular", Consolas, "Courier New", monospace;
+  font-size: clamp(17px, 3.4vw, 22px);
+  letter-spacing: .06em;
+}
+.ty-romaji .ty-hit { color: var(--ty-good); text-shadow: 0 0 14px rgba(125, 240, 169, .5); }
+.ty-romaji .ty-rest { color: #8493b5; }
+.ty-echo {
+  margin-left: 12px;
+  color: var(--ty-accent);
+  font-size: .82em;
+  opacity: .9;
+}
+.ty-echo::before { content: "▸ "; opacity: .55; }
+.ty-line-mean { margin-top: 8px; font-size: 14px; color: var(--ty-muted); }
+
+.ty-paused-note {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: .3em;
+  color: var(--ty-accent);
+  background: rgba(7, 10, 18, .72);
+  border-radius: 18px;
+}
+.ty-tip { margin-top: 14px; font-size: 12px; color: var(--ty-muted); text-align: center; }
+
+/* ============ 结算屏 ============ */
+.ty-over { padding-top: 30px; text-align: center; }
+.ty-over-title { font-size: 26px; font-weight: 800; letter-spacing: .1em; }
+.ty-record {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: rgba(255, 209, 102, .14);
+  border: 1px solid rgba(255, 209, 102, .5);
+  color: var(--ty-warn);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .16em;
+}
+.ty-stats {
+  margin: 22px auto 0;
+  max-width: 520px;
+  border: 1px solid var(--ty-line);
+  border-radius: var(--ty-radius);
+  overflow: hidden;
+  text-align: left;
+}
+.ty-stat {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 11px 18px;
+  font-size: 14px;
+  border-top: 1px solid var(--ty-line);
+}
+.ty-stat:first-child { border-top: 0; }
+.ty-stat-k { color: var(--ty-muted); }
+.ty-stat-v { font-weight: 800; font-variant-numeric: tabular-nums; }
+.ty-stat.ty-stat-lead { background: rgba(53, 224, 200, .07); }
+.ty-stat.ty-stat-lead .ty-stat-v { color: var(--ty-accent); font-size: 18px; }
+.ty-over-actions { margin-top: 26px; display: flex; gap: 12px; justify-content: center; }
+.ty-over-actions .ty-btn-primary { margin-top: 0; }
+
+/* ============ 退出二次确认 ============ */
+.ty-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(4, 7, 13, .74);
+  backdrop-filter: blur(3px);
+}
+.ty-modal-box {
+  width: min(420px, 100%);
+  padding: 24px;
+  border: 1px solid var(--ty-line);
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--ty-panel-2), var(--ty-bg-2));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .6);
+}
+.ty-modal-text { font-size: 15px; }
+.ty-modal-actions { margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end; }
+
+/* ============================================================
+   无障碍：prefers-reduced-motion 下取消流动动画
+   - 卡片改为静态居中；动画仍按同一时长「跑」到结束，
+     用于驱动「词流出界」的计时，只是视觉上不移动 = 静态切换词
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .ty-card {
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-name: ty-flow-static;
+  }
+  @keyframes ty-flow-static {
+    from { left: 50%; }
+    to   { left: 50%; }
+  }
+  .ty-screen { animation: none; }
+  .ty-hud-time.is-warn { animation: none; }
+  .ty-btn:hover, .ty-opt:hover { transform: none; }
+}
+
+/* ---------- 窄屏 ---------- */
+@media (max-width: 560px) {
+  .ty-hud { gap: 8px 14px; }
+  .ty-hud-v { font-size: 17px; }
+  .ty-hud-actions { width: 100%; margin-left: 0; }
+  .ty-card { padding: 14px 18px 16px; max-width: 92%; }
+  .ty-opt { min-width: 108px; flex: 1 1 30%; }
+}
