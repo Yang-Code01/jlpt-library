@@ -138,8 +138,9 @@
     'color:var(--muted,#5a6672);margin:12px 0 0;cursor:pointer}',
     '#exam-lock .lk-remember input{margin:0;accent-color:var(--accent,#c3422a)}',
     '#exam-lock .lk-err{font-size:13px;color:var(--red,#a33b3b);min-height:20px;margin:10px 0 0}',
-    '#exam-lock .lk-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;',
-    'font-size:11.5px;line-height:1.7;color:var(--muted,#5a6672);margin:14px 0 0;padding-top:14px;',
+    /* 底部只剩「取消」一个按钮，改为右对齐（原来左边还有一行口令遗失的说明） */
+    '#exam-lock .lk-foot{display:flex;align-items:flex-end;justify-content:flex-end;gap:14px;',
+    'margin:14px 0 0;padding-top:14px;',
     'border-top:1px solid var(--border-soft,#e4e8ec)}',
     '#exam-lock .lk-cancel{font:inherit;font-size:12.5px;font-weight:400;background:none;border:none;',
     'color:var(--muted,#5a6672);padding:2px;cursor:pointer;flex:none;',
@@ -165,9 +166,8 @@
     root.innerHTML =
       '<div class="lk-card">' +
         '<p class="lk-eyebrow">JLPT 真题练习</p>' +
-        '<h2 id="lk-title">开始前先确认口令</h2>' +
-        '<p class="lk-note">题库以 AES-256-GCM 加密存放，没有口令读不出内容。' +
-        '口令只在本机内存里使用，不会发送到任何地方。</p>' +
+        '<h2 id="lk-title">请输入口令</h2>' +
+        '<p class="lk-note">因版权限制，本资料仅提供个人使用。如需获取，请联系作者。</p>' +
         '<div class="lk-row">' +
           '<input id="lk-pass" type="password" autocomplete="current-password" spellcheck="false" placeholder="输入口令">' +
           '<button id="lk-go" type="button">解锁</button>' +
@@ -176,7 +176,6 @@
         '本标签页内免重复输入（关闭标签页即失效）</label>' +
         '<p class="lk-err" id="lk-err"></p>' +
         '<div class="lk-foot">' +
-          '<span>口令没有找回通道，遗失后无法还原数据。</span>' +
           '<button class="lk-cancel" id="lk-cancel" type="button">取消</button>' +
         '</div>' +
       "</div>";
