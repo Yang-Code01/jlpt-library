@@ -1,33 +1,96 @@
 /* 题型专练页逻辑（形态 B） */
 (function () {
   "use strict";
-  const { S, PART_LABEL, PART_ORDER, loadExam, poolOf,
+  const { S, PART_LABEL, PART_ORDER, loadIndex, poolOfLazy, shuffle,
           records, isCorrect, scoreSet, qHTML, canConfirm, pick,
-          resetSession, fmtTime, isNarrow } = EXAM;
-  const EXAMS = ["2023-07", "2023-12"];
+          resetSession, fmtTime, isNarrow, esc } = EXAM;
+  const EXAMS = ["2010-07", "2010-12", "2011-07", "2011-12", "2012-07", "2012-12", "2013-07", "2013-12",
+                 "2014-07", "2014-12", "2015-07", "2015-12", "2016-07", "2016-12", "2017-07",
+                 "2017-12", "2018-07", "2018-12", "2019-07", "2019-12", "2020-12", "2021-07",
+                 "2021-12", "2022-07", "2022-12", "2023-07", "2023-12", "2024-07", "2024-12",
+                 "2025-07"];
   const TIER = [10, 20, 30];
   const LEVELS = ["N5", "N4", "N3", "N2", "N1"];
-  const state = { level: "N2", subType: null, tier: 10, screen: "setup", sideOpen: false };
+  // tier 支持 0 = 全部题量；custom 为用户自定义题量（与 tier 互斥）
+  const state = { level: "N2", subType: null, tier: 10, custom: null, screen: "setup", sideOpen: false };
   const side = document.getElementById("side");
   const main = document.getElementById("main");
 
+  // 选题屏只需要 ~12 KB 的题型索引（index-lite.js）：有哪些题型、各多少题。
+  // 30 卷题目数据（约 6.0 MB）等真正点「开始练习」时，按题型命中卷按需加载。
+  let IDX = null;
+
+  // 某题型在全库的题池大小（纯查索引，不加载任何题目数据）
+  function poolCount(subType) {
+    if (!IDX || !subType) return 0;
+    let n = 0;
+    for (const k of EXAMS) n += (IDX.exams[k] && IDX.exams[k].types[subType]) || 0;
+    return n;
+  }
   function subTypesOfPart(part) {
     const seen = [];
-    for (const k of EXAMS) for (const q of dataCache[k].questions)
-      if (q.part === part && !seen.includes(q.subType)) seen.push(q.subType);
+    for (const k of EXAMS) {
+      const t = IDX && IDX.exams[k] && IDX.exams[k].types;
+      if (!t) continue;
+      for (const st of Object.keys(t))
+        if (IDX.typePart[st] === part && !seen.includes(st)) seen.push(st);
+    }
     return seen;
   }
-  const dataCache = {};
-  // 加载完两卷数据后进入设置界面
-  Promise.all(EXAMS.map(e => loadExam(e))).then(ds => {
-    ds.forEach((d, i) => { dataCache[EXAMS[i]] = d; });
+
+  // 抽题：先把该题型在全库的题目并起来，打乱后取前 N。
+  // 不用「按时间序取前 N」——那样每次抽到的永远是 2010 年前几卷的题。
+  function drawSet(subType) {
+    return poolOfLazy(EXAMS, IDX, subType).then(pool => shuffle(pool).slice(0, wantCount(pool.length)));
+  }
+
+  loadIndex().then(ix => {
+    IDX = ix;
+    try { history.replaceState({ jlpt: "setup" }, ""); } catch (_) {}
     setupSide();
     renderMain();
+  }).catch(err => {
+    side.innerHTML = "<h4>题型</h4>";
+    main.innerHTML = `<div class="q-block"><div class="q-stem">题型索引加载失败：${esc(String(err && err.message || err))}</div></div>`;
+  });
+
+  // 抽题 → 进答题屏。等待期间按钮置灰，避免重复点击。
+  function runDraw(btn) {
+    if (btn.dataset.busy) return;
+    btn.dataset.busy = "1";
+    const idle = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "抽题中…";
+    drawSet(state.subType).then(set => {
+      S.set = set;
+      resetSession();
+      S.mode = "practice";
+      state.screen = "answer";
+      state.sideOpen = !isNarrow();
+      pushScreen("answer");   // 记一层历史：浏览器返回键从答题屏退回设置屏
+      setupSide(); renderMain(); window.scrollTo(0, 0);
+    }).catch(err => {
+      btn.disabled = false; btn.textContent = idle; delete btn.dataset.busy;
+      btn.insertAdjacentHTML("afterend",
+        `<div class="q-block" style="padding:10px 14px"><div class="q-stem" style="color:var(--accent-ink)">题目加载失败：${esc(String(err && err.message || err))}</div></div>`);
+    });
+  }
+
+  // ---------- 浏览器返回键：从答题屏退回选题型/题量屏 ----------
+  function pushScreen(name) {
+    try { history.pushState({ jlpt: name }, ""); } catch (_) {}
+  }
+  window.addEventListener("popstate", () => {
+    state.screen = "setup";
+    state.sideOpen = false;
+    setupSide();
+    renderMain();
+    window.scrollTo(0, 0);
   });
 
   function setupSide() {
     if (state.screen === "answer") {
-      const n = poolOf(EXAMS, state.subType).length;
+      const n = poolCount(state.subType);
       side.innerHTML = `<button class="b-fold" id="fold">
         <span>${state.level} · ${state.subType.replace(/^(听力·|读解·)/, "")} · 题池 ${n} 题</span>
         <span class="b-fold-i">${state.sideOpen ? "收起 ▴" : "换题型 ▾"}</span></button>
@@ -35,7 +98,7 @@
       document.getElementById("fold").onclick = () => { state.sideOpen = !state.sideOpen; setupSide(); };
     } else side.innerHTML = sideBody();
     side.querySelectorAll("[data-st]").forEach(el => el.onclick = () => {
-      state.subType = el.dataset.st; state.tier = 10; state.screen = "setup";
+      state.subType = el.dataset.st; state.tier = 10; state.custom = null; state.screen = "setup";
       setupSide(); renderMain();
     });
   }
@@ -49,11 +112,20 @@
     for (const part of PART_ORDER) {
       h += `<div class="b-nav-sec"><span>${PART_LABEL[part]}</span></div>`;
       for (const st of subTypesOfPart(part)) {
-        const n = poolOf(EXAMS, st).length;
+        const n = poolCount(st);
         h += `<div class="st-item ${state.subType === st ? "on" : ""}" data-st="${st}"><span>${st.replace(/^(听力·|读解·)/, "")}</span><small>${n} 题</small></div>`;
       }
     }
     return h;
+  }
+
+  // 解析本次要抽的题量：自定义 > 全部(0) > 固定档位；并对题池上限做钳制
+  function wantCount(pool) {
+    let n;
+    if (state.custom != null) n = state.custom;
+    else if (state.tier === 0) n = pool;
+    else n = state.tier;
+    return Math.min(Math.max(1, n || 1), pool);
   }
 
   function renderMain() {
@@ -62,19 +134,32 @@
         main.innerHTML = `<div class="q-block"><div class="q-stem">从左侧选择一个子题型，再从下方选题量，开始随机抽题。</div></div>`;
         return;
       }
-      const n = poolOf(EXAMS, state.subType).length;
-      main.innerHTML = `<div class="pick-group"><div class="pg-label">题量档位（题池 ${n} 题 = 两卷并集，按真题顺序取前 N）</div>
-        <div class="pills">${TIER.map(t => `<button class="pill ${state.tier === t ? "on" : ""}" data-tier="${t}" ${n < t ? "disabled" : ""}>${t} 题${n < t ? `<small>池 ${n}</small>` : ""}</button>`).join("")}</div></div>
+      const n = poolCount(state.subType);
+      const cur = wantCount(n);
+      main.innerHTML = `<div class="pick-group"><div class="pg-label">题量（题池 ${n} 题 = 全部已入库卷的并集，每次随机抽取）</div>
+        <div class="pills">
+          ${TIER.map(t => `<button class="pill ${state.custom == null && state.tier === t ? "on" : ""}" data-tier="${t}" ${n < t ? "disabled" : ""}>${t} 题${n < t ? `<small>池 ${n}</small>` : ""}</button>`).join("")}
+          <button class="pill ${state.custom == null && state.tier === 0 ? "on" : ""}" data-tier="0">全部 <small>${n} 题</small></button>
+        </div>
+        <div class="tier-custom">
+          <label for="tier-input">自定义题量</label>
+          <input id="tier-input" type="number" min="1" max="${n}" step="1" inputmode="numeric"
+                 value="${cur}" placeholder="1–${n}">
+          <span class="tc-hint">题（上限 ${n}）</span>
+        </div></div>
         <div style="margin-top:18px"><button class="btn" id="start">开始练习</button></div>`;
-      main.querySelectorAll("[data-tier]").forEach(el => el.onclick = () => { state.tier = +el.dataset.tier; renderMain(); });
-      document.getElementById("start").onclick = () => {
-        S.set = poolOf(EXAMS, state.subType).slice(0, Math.min(state.tier, n));
-        resetSession();
-        S.mode = "practice";
-        state.screen = "answer";
-        state.sideOpen = !isNarrow();
-        setupSide(); renderMain(); window.scrollTo(0, 0);
+      main.querySelectorAll("[data-tier]").forEach(el => el.onclick = () => {
+        state.tier = +el.dataset.tier; state.custom = null; renderMain();
+      });
+      const inp = document.getElementById("tier-input");
+      inp.oninput = () => {
+        const v = parseInt(inp.value, 10);
+        if (Number.isFinite(v)) { state.custom = v; state.tier = null; main.querySelectorAll("[data-tier]").forEach(b => b.classList.remove("on")); }
+        else state.custom = null;
+        document.getElementById("start").disabled = !(state.custom != null || state.tier != null);
       };
+      const startBtn = document.getElementById("start");
+      startBtn.onclick = () => runDraw(startBtn);
       return;
     }
     // 答题
@@ -82,6 +167,7 @@
     main.innerHTML = `
       <div class="q-block">${qHTML(q)}</div>
       <div class="b-actions">
+        <button class="btn ghost" id="back">‹ 返回</button>
         <button class="btn ghost" id="prev" ${S.idx === 0 ? "disabled" : ""}>上一题</button>
         <span class="spacer"></span>
         <button class="btn confirm" id="confirm" ${canConfirm(q) ? "" : "hidden"}>确认答案</button>
@@ -89,6 +175,8 @@
         <button class="btn" id="next">${S.idx < S.set.length - 1 ? "下一题" : "交卷"}</button>
       </div>`;
     bindOptions(main);
+    // 返回上一层：回到选题型/题量屏，而不是直接回到真题练习入口
+    document.getElementById("back").onclick = backToSetup;
     document.getElementById("prev").onclick = () => { S.idx--; collapseSide(); renderMain(); window.scrollTo(0, 0); };
     // 确认后判定与解析就长在选项下方，滚到顶部反而把它藏起来
     document.getElementById("confirm").onclick = () => { S.locked[q.id] = true; renderMain(); };
@@ -117,6 +205,19 @@
       a.addEventListener("ended", () => a.setAttribute("controls", "controlsdisabled")));
   }
 
+  // 回到上一层（选题型/题量屏），保留已选等级与子题型
+  function backToSetup() {
+    // 优先走 history.back()，让 popstate 统一处理，页内按钮与浏览器返回键行为一致
+    if (history.length > 1 && state.screen !== "setup") {
+      try { history.back(); return; } catch (_) {}
+    }
+    state.screen = "setup";
+    state.sideOpen = false;
+    setupSide();
+    renderMain();
+    window.scrollTo(0, 0);
+  }
+
   function finish() {
     const sc = scoreSet(S.set, S.answers);
     records.addPractice(state.subType, S.set.length);
@@ -128,16 +229,12 @@
       <div id="rlist"></div>
       <div style="margin-top:18px;display:flex;gap:10px">
         <button class="btn" id="again">再练一组</button>
-        <a class="btn ghost" href="index.html">回到入口</a>
+        <button class="btn ghost" id="back3">‹ 返回上一层</button>
       </div>`;
     document.getElementById("rlist").innerHTML = S.set.map(q => reviewItem(q)).join("");
-    document.getElementById("again").onclick = () => {
-      const n = poolOf(EXAMS, state.subType).length;
-      S.set = poolOf(EXAMS, state.subType).slice(0, Math.min(state.tier, n));
-      resetSession(); state.screen = "answer";
-      state.sideOpen = !isNarrow();
-      setupSide(); renderMain(); window.scrollTo(0, 0);
-    };
+    document.getElementById("back3").onclick = backToSetup;
+    const againBtn = document.getElementById("again");
+    againBtn.onclick = () => runDraw(againBtn);   // 再练一组同样占一层历史，返回键仍能退回设置屏
     window.scrollTo(0, 0);
   }
 

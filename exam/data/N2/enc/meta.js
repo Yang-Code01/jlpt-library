@@ -1,0 +1,1 @@
+window.EXAM_ENC_META = {"v":1,"kdf":"PBKDF2-SHA256","hash":"sha256","iter":600000,"salt":"zsa5GrDtRCmwxGp5bV8xaQ==","wrap":{"iv":"Mp/xas9k31Vx7pe6","ct":"5K+oBuQFprCkwZmOy7HgqHLKxLTXXKcWmBIvhLdnphhm9OUBLQBhyDUsc/lfGCu6"}};

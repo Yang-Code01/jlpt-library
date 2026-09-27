@@ -6,6 +6,7 @@
 <title>真题练习 · JLPT 系统学习资料库</title>
 <link rel="stylesheet" href="../assets/style.css">
 <script src="../assets/theme.js"></script>
+<script src="exam-lock.js"></script>
 <link rel="stylesheet" href="exam.css">
 </head>
 <body>
@@ -14,7 +15,7 @@
     <div class="hero-main">
       <p class="eyebrow">JLPT 系统学习资料库</p>
       <h1>真题练习</h1>
-      <p>题型专练 + 整卷仿真。N2 已入库 2023.7 / 2023.12 两卷（各 100 题，含 58 段听力音频）。</p>
+      <p>题型专练 + 整卷仿真。N2 已入库 30 卷：2010.7 – 2025.7（2020.7 因疫情取消）。</p>
     </div>
   </header>
 
@@ -26,14 +27,14 @@
     <a class="tile" href="practice.html">
       <div class="t-ico">🎯</div>
       <h3>题型专练</h3>
-      <p>按子题型练：选等级 → 子题型 → 题量档位（10 / 20 / 30），按真题顺序取前 N 题。题池为该等级所有已入库卷的并集。</p>
+      <p>按子题型练：选等级 → 子题型 → 题量（10 / 20 / 30 / 全部 / 自定义），从全库题池中随机抽取 N 题（跨年份）。题池为该等级所有已入库卷的并集。</p>
       <div class="t-foot">N2 已入库：词汇 6 类 · 文法 2 类 · 读解 6 类 · 听力 4 类</div>
     </a>
     <a class="tile" href="exam.html">
       <div class="t-ico">📄</div>
       <h3>真实考试</h3>
-      <p>整卷 100 题：选年份月份 → 仿真（155 分钟、听力只播一次）或宽松（不限时、可回放）→ 交卷复盘。</p>
-      <div class="t-foot">N2 已入库：2023.7 · 2023.12</div>
+      <p>整卷作答：选等级 → 年份月份 → 仿真（155 分钟、听力只播一次）或宽松（不限时、可回放）→ 交卷复盘。</p>
+      <div class="t-foot">N2 已入库 30 卷：2010.7 – 2025.7（2020.7 因疫情取消）</div>
     </a>
   </div>
 
@@ -52,7 +53,7 @@
   } else {
     if (exams.length) {
       h += '<div class="rec-row">' + exams.slice(0, 6).map(e =>
-        `<span class="chip">2023.${String(e.month || e.exam.slice(5)).padStart(2, "0")} N2 · ${e.mode === "sim" ? "仿真" : "宽松"} · <b>${e.score}/${e.countable ?? e.total}</b></span>`).join("") + "</div>";
+        `<span class="chip">${e.exam.slice(0, 4)}.${String(e.month || e.exam.slice(5)).padStart(2, "0")} N2 · ${e.mode === "sim" ? "仿真" : "宽松"} · <b>${e.score}/${e.countable ?? e.total}</b></span>`).join("") + "</div>";
     }
     if (prac.length) {
       h += '<div class="rec-row" style="margin-top:8px">' + prac.sort((a, b) => b[1].last - a[1].last).slice(0, 8).map(([k, v]) =>

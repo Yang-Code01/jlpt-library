@@ -2,3 +2,8 @@
 .scratch/
 .agents/
 skills-lock.json
+
+# 真题明文数据：只留本地。仓库里放的是 exam/data/N2/enc/ 下的密文，
+# 由 tools/encrypt-exam.mjs 生成；明文一旦入库，加密就没有意义了。
+exam/data/N2/*.js
+exam/data/N2/manifest.json
