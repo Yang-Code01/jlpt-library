@@ -2,19 +2,25 @@
    真题模块解锁层（exam-lock.js）
    ============================================================
    题目数据以密文形式存放（exam/data/N2/enc/*.js），本文件负责：
-     1. 页面一进来就铺一层不透明锁屏，内容区先藏起来
+     1. 被调用时弹出口令模态（不是页面一进来就锁）
      2. 收口令 → PBKDF2 派生 KEK → 解包 DEK（解不开 = 口令错）
      3. 解密时用 HKDF(DEK, 卷名) 得到分卷密钥，AES-256-GCM 解密 + 解压
      4. 解出来的对象与原先的 window.EXAM_<卷> 完全同形，上层代码无需知道加密存在
+
+   为什么不再入口即锁：题型专练的选题屏、真实考试的选卷屏都只需要「目录」信息
+   （有哪些卷、有哪些题型、各多少题），不涉及题目正文。所以口令推迟到真正
+   要读题的时刻——点「开始练习」/「开始考试」——才要，能少一道无谓的门。
 
    口令永不离开本机：没有网络请求、没有 cookie、没有服务端。
    密钥只活在内存闭包 + （可选）本标签页的 sessionStorage 里。
 
    对外接口：
-     EXAM_LOCK.ready                    Promise，解锁后 resolve
-     EXAM_LOCK.load(url, 全局名, AAD名)  → Promise<数据对象>
+     EXAM_LOCK.prompt()                 → Promise，解锁后 resolve；
+                                          用户取消则 reject(err.cancelled === true)
+     EXAM_LOCK.load(url, 全局名, AAD名)  → Promise<数据对象>（内部自动先 prompt）
      EXAM_LOCK.isUnlocked()             → boolean
-     EXAM_LOCK.lock()                   清除内存密钥并重新上锁
+     EXAM_LOCK.lock()                   清除内存密钥与 sessionStorage，下次重新要口令
+     EXAM_LOCK.ready                    Promise，首次解锁后 resolve
    ============================================================ */
 (function () {
   "use strict";
@@ -27,9 +33,13 @@
   const SS_KEY = "jlpt-exam-dek";   // sessionStorage：仅本标签页，关掉即失效
 
   let meta = null;          // meta.js 解出的公开参数（盐、KDF 次数、被包裹的 DEK）
+  let metaPromise = null;   // 只加载一次
   let dekKey = null;        // 非导出的 HKDF CryptoKey
   let unlocked = false;
-  let overlay = null;
+  let modal = null;         // 当前模态根节点
+  let pending = null;       // 正在等待的 prompt()：{ promise, resolve, reject }
+  let keyHandler = null;    // Esc 监听，关闭时要摘掉
+  let savedOverflow = "";   // 模态期间锁背景滚动，关闭时还原
   let readyResolve;
   const ready = new Promise((res) => { readyResolve = res; });
 
@@ -60,6 +70,13 @@
     }
     const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
     return new Uint8Array(await new Response(stream).arrayBuffer());
+  }
+  function focusEl(el) { try { el.focus(); } catch (_) {} }
+  function selectEl(el) { try { el.select(); } catch (_) {} }
+  function cancelledError() {
+    const e = new Error("已取消输入口令");
+    e.cancelled = true;
+    return e;
   }
 
   /* ---------- 密钥 ---------- */
@@ -99,12 +116,12 @@
 
   /* ---------- 样式 ---------- */
   const STYLE = [
-    'html[data-exam-locked] .wrap{visibility:hidden !important}',
     '#exam-lock{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;',
-    'padding:24px;background:var(--paper,#e9ebee);color:var(--ink,#17202a);',
+    'padding:24px;background:rgba(12,16,20,.55);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);',
     'font-family:var(--font-sans,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif)}',
-    '#exam-lock .lk-card{width:100%;max-width:402px;background:var(--surface,#fbfcfc);',
-    'border:1px solid var(--border,#d8dde2);border-radius:var(--radius,14px);padding:28px 26px 24px}',
+    '#exam-lock .lk-card{width:100%;max-width:402px;background:var(--surface,#fbfcfc);color:var(--ink,#17202a);',
+    'border:1px solid var(--border,#d8dde2);border-radius:var(--radius,14px);padding:28px 26px 24px;',
+    'box-shadow:0 18px 48px rgba(10,14,18,.28)}',
     '#exam-lock .lk-eyebrow{font-size:11px;letter-spacing:.14em;color:var(--muted,#5a6672);margin:0 0 8px}',
     '#exam-lock h2{font-size:19px;font-weight:600;letter-spacing:.01em;margin:0 0 10px}',
     '#exam-lock .lk-note{font-size:13px;line-height:1.7;color:var(--muted,#5a6672);margin:0 0 18px}',
@@ -113,107 +130,177 @@
     'background:var(--surface-2,#f2f4f5);border:1px solid var(--border,#d8dde2);',
     'border-radius:var(--radius-sm,10px);color:var(--ink,#17202a);outline:none}',
     '#exam-lock input[type=password]:focus{border-color:var(--accent,#c3422a)}',
-    '#exam-lock button{font:inherit;font-size:14px;font-weight:600;padding:11px 20px;cursor:pointer;',
+    '#exam-lock #lk-go{font:inherit;font-size:14px;font-weight:600;padding:11px 20px;cursor:pointer;',
     'background:var(--accent,#c3422a);color:var(--on-accent,#fff);border:none;',
     'border-radius:var(--radius-sm,10px);white-space:nowrap}',
-    '#exam-lock button:disabled{opacity:.55;cursor:default}',
+    '#exam-lock #lk-go:disabled{opacity:.55;cursor:default}',
     '#exam-lock .lk-remember{display:flex;align-items:center;gap:7px;font-size:12.5px;',
     'color:var(--muted,#5a6672);margin:12px 0 0;cursor:pointer}',
     '#exam-lock .lk-remember input{margin:0;accent-color:var(--accent,#c3422a)}',
     '#exam-lock .lk-err{font-size:13px;color:var(--red,#a33b3b);min-height:20px;margin:10px 0 0}',
-    '#exam-lock .lk-foot{font-size:11.5px;line-height:1.7;color:var(--muted,#5a6672);',
-    'margin:16px 0 0;padding-top:14px;border-top:1px solid var(--border-soft,#e4e8ec)}'
+    '#exam-lock .lk-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;',
+    'font-size:11.5px;line-height:1.7;color:var(--muted,#5a6672);margin:14px 0 0;padding-top:14px;',
+    'border-top:1px solid var(--border-soft,#e4e8ec)}',
+    '#exam-lock .lk-cancel{font:inherit;font-size:12.5px;font-weight:400;background:none;border:none;',
+    'color:var(--muted,#5a6672);padding:2px;cursor:pointer;flex:none;',
+    'text-decoration:underline;text-underline-offset:3px;white-space:nowrap}',
+    '#exam-lock .lk-cancel:hover{color:var(--ink,#17202a)}'
   ].join("");
 
-  /* ---------- 锁屏 ---------- */
-  function buildOverlay() {
-    overlay = document.createElement("div");
-    overlay.id = "exam-lock";
-    overlay.innerHTML =
+  /* ---------- 背景滚动 ---------- */
+  function bodyLock(on) {
+    const b = document.body;
+    if (!b || !b.style) return;
+    if (on) { savedOverflow = b.style.overflow || ""; b.style.overflow = "hidden"; }
+    else { b.style.overflow = savedOverflow; }
+  }
+
+  /* ---------- 模态 ---------- */
+  function buildModal() {
+    const root = document.createElement("div");
+    root.id = "exam-lock";
+    root.setAttribute("role", "dialog");
+    root.setAttribute("aria-modal", "true");
+    root.setAttribute("aria-labelledby", "lk-title");
+    root.innerHTML =
       '<div class="lk-card">' +
         '<p class="lk-eyebrow">JLPT 真题练习</p>' +
-        '<h2>这一区已加密</h2>' +
+        '<h2 id="lk-title">开始前先确认口令</h2>' +
         '<p class="lk-note">题库以 AES-256-GCM 加密存放，没有口令读不出内容。' +
         '口令只在本机内存里使用，不会发送到任何地方。</p>' +
         '<div class="lk-row">' +
           '<input id="lk-pass" type="password" autocomplete="current-password" spellcheck="false" placeholder="输入口令">' +
-          '<button id="lk-go" disabled>解锁</button>' +
+          '<button id="lk-go" type="button">解锁</button>' +
         '</div>' +
         '<label class="lk-remember"><input type="checkbox" id="lk-remember" checked>' +
         '本标签页内免重复输入（关闭标签页即失效）</label>' +
         '<p class="lk-err" id="lk-err"></p>' +
-        '<p class="lk-foot">口令没有找回通道，遗失后无法还原数据——这是设计使然，' +
-        '因为它同时也是唯一的解密依据。</p>' +
+        '<div class="lk-foot">' +
+          '<span>口令没有找回通道，遗失后无法还原数据。</span>' +
+          '<button class="lk-cancel" id="lk-cancel" type="button">取消</button>' +
+        '</div>' +
       "</div>";
-    document.body.appendChild(overlay);
+    document.body.appendChild(root);
+    return root;
+  }
 
-    const input = overlay.querySelector("#lk-pass");
-    const btn = overlay.querySelector("#lk-go");
-    const err = overlay.querySelector("#lk-err");
-    const remember = overlay.querySelector("#lk-remember");
+  function closeModal() {
+    if (keyHandler) {
+      try { document.removeEventListener("keydown", keyHandler); } catch (_) {}
+      keyHandler = null;
+    }
+    if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+    modal = null;
+    bodyLock(false);
+  }
 
+  // 收尾一次 prompt()：清 pending、关模态、按结果 resolve / reject
+  function settle(p, err) {
+    if (pending === p) pending = null;
+    closeModal();
+    if (err) p.reject(err); else p.resolve();
+  }
+
+  function openModal(p) {
+    if (modal) return;                 // 同一时刻只可能有一个模态
+    modal = buildModal();
+    const root = modal;
+
+    const input = root.querySelector("#lk-pass");
+    const btn = root.querySelector("#lk-go");
+    const err = root.querySelector("#lk-err");
+    const remember = root.querySelector("#lk-remember");
+    const cancel = root.querySelector("#lk-cancel");
+
+    let done = false;
     function setErr(msg) { err.textContent = msg || ""; }
     function setBusy(busy) {
-      btn.disabled = busy || !meta;
+      btn.disabled = busy;
       input.disabled = busy;
       btn.textContent = busy ? "解锁中…" : "解锁";
     }
-    function unlock() {
+    function close(errObj) {
+      if (done) return;
+      done = true;
+      settle(p, errObj || null);
+    }
+
+    function submit() {
+      if (done) return;
       const pass = input.value;
-      if (!pass) { setErr("请输入口令。"); input.focus(); return; }
+      if (!pass) { setErr("请输入口令。"); focusEl(input); return; }
       setErr(""); setBusy(true);
       unwrapDek(pass)
-        .then((dek) => activate(dek, remember.checked))
-        .catch(() => { setErr("口令错误。"); setBusy(false); input.select(); })
-        .then(() => setBusy(false));
+        .then((dek) => installDek(dek, !!remember.checked))
+        .then(() => close(null))
+        .catch(() => {
+          if (done) return;
+          setErr("口令错误。");
+          setBusy(false);
+          if (input.select) selectEl(input); else focusEl(input);
+        });
     }
-    btn.addEventListener("click", unlock);
-    input.addEventListener("keydown", (e) => { if (e.key === "Enter") unlock(); });
-    return { setErr, setBusy, focus: () => input.focus() };
+
+    btn.addEventListener("click", submit);
+    input.addEventListener("keydown", (e) => { if (e && e.key === "Enter") submit(); });
+    cancel.addEventListener("click", () => close(cancelledError()));
+    // 点遮罩空白处也算取消（点卡片内部不算）
+    root.addEventListener("click", (e) => { if (e && e.target === root) close(cancelledError()); });
+    keyHandler = (e) => { if (e && e.key === "Escape") close(cancelledError()); };
+    try { document.addEventListener("keydown", keyHandler); } catch (_) {}
+
+    bodyLock(true);
+    setBusy(false);
+    focusEl(input);
   }
 
-  let ui = null;
-  function lockAttrOn() { document.documentElement.setAttribute("data-exam-locked", ""); }
-  function lockAttrOff() { document.documentElement.removeAttribute("data-exam-locked"); }
-
-  function onDomReady() {
-    ui = buildOverlay();
-    loadMeta();
-  }
-
+  /* ---------- meta / 解锁 ---------- */
   function loadMeta() {
-    injectScript(META_URL)
-      .then(() => {
-        const m = window.EXAM_ENC_META;
-        if (!m || !m.wrap) throw new Error("meta.js 里没有口令包裹信息");
-        meta = m;
-        // 本标签页内已解锁过？直接复用，不必再输一次
-        let saved = null;
-        try { saved = sessionStorage.getItem(SS_KEY); } catch (_) {}
-        if (saved) {
-          activate(b64ToBytes(saved), false).catch(() => {
-            try { sessionStorage.removeItem(SS_KEY); } catch (_) {}
-            if (ui) { ui.setBusy(false); ui.setErr(""); ui.focus(); }
-          });
-        } else if (ui) {
-          ui.setBusy(false); ui.focus();
-        }
-      })
-      .catch((e) => { if (ui) { ui.setBusy(false); ui.setErr("无法加载加密参数：" + e.message); } });
+    if (metaPromise) return metaPromise;
+    metaPromise = injectScript(META_URL).then(() => {
+      const m = window.EXAM_ENC_META;
+      if (!m || !m.wrap) throw new Error("meta.js 里没有口令包裹信息");
+      meta = m;
+      return m;
+    });
+    return metaPromise;
   }
 
-  async function activate(dekBytes, remember) {
+  async function installDek(dekBytes, remember) {
     dekKey = await crypto.subtle.importKey("raw", dekBytes, "HKDF", false, ["deriveBits"]);
     if (remember) { try { sessionStorage.setItem(SS_KEY, bytesToB64(dekBytes)); } catch (_) {} }
-    if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-    overlay = null;
-    lockAttrOff();
-    if (!unlocked) { unlocked = true; readyResolve(); }
+    unlocked = true;
+    readyResolve();
   }
 
   /* ---------- 对外接口 ---------- */
+  // 需要口令时调它。已解锁则立刻 resolve；已有一次询问在进行则复用同一个 Promise。
+  function prompt() {
+    if (unlocked) return Promise.resolve();
+    if (pending) return pending.promise;
+
+    const p = {};
+    p.promise = new Promise((resolve, reject) => { p.resolve = resolve; p.reject = reject; });
+    pending = p;
+
+    loadMeta()
+      .then(() => {
+        if (pending !== p) return;              // 期间已被别处结束
+        if (unlocked) { pending = null; p.resolve(); return; }
+        openModal(p);
+      })
+      .catch((e) => {
+        if (pending !== p) return;
+        pending = null;
+        p.reject(new Error("无法加载加密参数：" + ((e && e.message) || e)));
+      });
+
+    return p.promise;
+  }
+
+  // 取数据：调用方忘了先 prompt() 也不会读到空数据，这里兜一道底。
   async function load(url, globalName, aadName) {
-    await ready;
+    await prompt();
     await injectScript(url);
     const b64 = window[globalName];
     if (typeof b64 !== "string") throw new Error("密文格式异常：" + globalName);
@@ -225,21 +312,25 @@
     dekKey = null;
     unlocked = false;
     try { sessionStorage.removeItem(SS_KEY); } catch (_) {}
-    if (!overlay) { lockAttrOn(); ui = buildOverlay(); }
-    if (ui) { ui.setBusy(false); ui.focus(); }
   }
 
-  /* ---------- 启动 ---------- */
+  /* ---------- 启动：不上锁、不动 DOM，只把密钥状态准备好 ---------- */
   document.head.insertAdjacentHTML("beforeend", "<style>" + STYLE + "</style>");
-  lockAttrOn();   // 先藏内容，避免加密数据没到、页面却先闪一下
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", onDomReady);
-  } else {
-    onDomReady();
-  }
+  loadMeta()
+    .then(() => {
+      // 本标签页内已经解锁过？直接复用，不必再输一次。
+      // 失败就清掉，安静地留给下一次 prompt() 重新问。
+      let saved = null;
+      try { saved = sessionStorage.getItem(SS_KEY); } catch (_) {}
+      if (!saved) return;
+      return installDek(b64ToBytes(saved), false)
+        .catch(() => { try { sessionStorage.removeItem(SS_KEY); } catch (_) {} });
+    })
+    .catch(() => { /* meta 加载失败：等真正 prompt() 时再把错误给人看 */ });
 
   window.EXAM_LOCK = {
     ready: ready,
+    prompt: prompt,
     load: load,
     lock: lock,
     isUnlocked: function () { return unlocked; }

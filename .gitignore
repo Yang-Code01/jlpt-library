@@ -5,5 +5,7 @@ skills-lock.json
 
 # 真题明文数据：只留本地。仓库里放的是 exam/data/N2/enc/ 下的密文，
 # 由 tools/encrypt-exam.mjs 生成；明文一旦入库，加密就没有意义了。
-exam/data/N2/*.js
+# 例外：index-lite.js 是明文常驻的题型索引，只有「哪些卷、哪些题型、各多少题」
+# 这层目录信息，不含任何题目正文；题型专练的选题屏要在输口令之前渲染，必须靠它。
+exam/data/N2/20*.js
 exam/data/N2/manifest.json

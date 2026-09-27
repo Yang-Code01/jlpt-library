@@ -9,7 +9,7 @@ const EXAM = (() => {
   const LS_PRACTICE = "jlpt_practice_records"; // {subType: {count, last}}
 
   // ---------- 数据加载 ----------
-  // 题库以密文存放（data/N2/enc/*.js），由 EXAM_LOCK 解密还原。
+  // 题目数据以密文存放（data/N2/enc/*.js），由 EXAM_LOCK 解密还原。
   // 解出来的对象与原先的 window.EXAM_<卷> 完全同形，所以本文件下游
   // （渲染 / 评分 / 记录 / 区间播放）不需要知道加密这回事。
   // 仍然走 script 注入而非 fetch，本地 file:// 直接打开依然可用。
@@ -17,6 +17,11 @@ const EXAM = (() => {
   function lockMod() {
     if (!window.EXAM_LOCK) throw new Error("解锁模块未加载（exam-lock.js）");
     return window.EXAM_LOCK;
+  }
+  // 读题目数据前必须先有口令。页面在「开始练习 / 开始考试」时调它：
+  // 已解锁立刻过，未解锁则弹出口令框。用户取消会 reject(err.cancelled)。
+  function requireUnlock() {
+    return lockMod().prompt();
   }
   function loadExam(exam) { // exam: "2023-12"
     if (cache[exam]) return Promise.resolve(cache[exam]);
@@ -38,18 +43,27 @@ const EXAM = (() => {
   }
   // ---------- 轻量索引（题型专练页用） ----------
   // 30 卷全量有 6 MB，只为「有哪些题型、各多少题」而全量加载不划算。
-  // index-lite 只含 {typePart, exams:{exam:{total,types}}}，压缩加密后不到 1 KB，
-  // 同样以密文存放（enc/index.js）——它也属于该藏起来的信息。
+  // index-lite 只含 {typePart, exams:{exam:{total,types}}}，约 13 KB。
+  // 它是**明文常驻**的：不含任何题目正文，只有「有哪些卷、哪些题型、各多少题」
+  // 这层目录信息；题型专练的选题屏要在输口令之前就渲染出来，只能靠它。
+  function loadPlainScript(url) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = url;
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error("无法加载 " + url));
+      document.head.appendChild(s);
+    });
+  }
   let indexCache = null;
   function loadIndex() {
     if (indexCache) return Promise.resolve(indexCache);
-    return lockMod()
-      .load("data/N2/enc/index.js", "EXAM_ENC_INDEX_LITE", "index-lite")
-      .then((d) => {
-        if (!d) throw new Error("no index");
-        indexCache = d;
-        return d;
-      });
+    return loadPlainScript("data/N2/index-lite.js").then(() => {
+      const d = window.EXAM_INDEX_N2;
+      if (!d) throw new Error("索引文件未定义 EXAM_INDEX_N2");
+      indexCache = d;
+      return d;
+    });
   }
   // 只加载「含该题型」的卷，再按 exams 给定顺序取池。排序与全量 poolOf 完全一致：
   // 传入的 exams 已是时间序，而 poolOf 就是按 exams 顺序遍历。
@@ -317,7 +331,8 @@ const EXAM = (() => {
     }, true);
   })();
 
-  return { S, PART_LABEL, PART_ORDER, loadExam, loadIndex, allQuestions, poolOf, poolOfLazy,
+  return { S, PART_LABEL, PART_ORDER, loadExam, loadIndex, requireUnlock,
+           allQuestions, poolOf, poolOfLazy,
            examSet, shuffle,
            records, isCorrect, scoreSet, esc, mk, examKeyOf, qHTML, canConfirm, pick,
            resetSession, stopTimer, startTimer, fmtTime, isNarrow };

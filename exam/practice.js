@@ -1,7 +1,7 @@
 /* 题型专练页逻辑（形态 B） */
 (function () {
   "use strict";
-  const { S, PART_LABEL, PART_ORDER, loadIndex, poolOfLazy, shuffle,
+  const { S, PART_LABEL, PART_ORDER, loadIndex, requireUnlock, poolOfLazy, shuffle,
           records, isCorrect, scoreSet, qHTML, canConfirm, pick,
           resetSession, fmtTime, isNarrow, esc } = EXAM;
   const EXAMS = ["2010-07", "2010-12", "2011-07", "2011-12", "2012-07", "2012-12", "2013-07", "2013-12",
@@ -16,8 +16,9 @@
   const side = document.getElementById("side");
   const main = document.getElementById("main");
 
-  // 选题屏只需要 ~12 KB 的题型索引（index-lite.js）：有哪些题型、各多少题。
-  // 30 卷题目数据（约 6.0 MB）等真正点「开始练习」时，按题型命中卷按需加载。
+  // 选题屏只需要 ~13 KB 的题型索引（index-lite.js）：有哪些题型、各多少题。
+  // 这份索引是明文常驻的（不含任何题目正文），所以选题屏不需要口令；
+  // 30 卷题目数据（约 6.0 MB）是密文，等真正点「开始练习」时按题型命中卷按需加载。
   let IDX = null;
 
   // 某题型在全库的题池大小（纯查索引，不加载任何题目数据）
@@ -55,13 +56,14 @@
   });
 
   // 抽题 → 进答题屏。等待期间按钮置灰，避免重复点击。
+  // 首次点「开始练习」时才要口令；已解锁的（同一标签页内输过）直接过。
   function runDraw(btn) {
     if (btn.dataset.busy) return;
     btn.dataset.busy = "1";
     const idle = btn.textContent;
     btn.disabled = true;
     btn.textContent = "抽题中…";
-    drawSet(state.subType).then(set => {
+    requireUnlock().then(() => drawSet(state.subType)).then(set => {
       S.set = set;
       resetSession();
       S.mode = "practice";
@@ -71,6 +73,7 @@
       setupSide(); renderMain(); window.scrollTo(0, 0);
     }).catch(err => {
       btn.disabled = false; btn.textContent = idle; delete btn.dataset.busy;
+      if (err && err.cancelled) return;   // 用户取消输入口令，静默回到可点状态
       btn.insertAdjacentHTML("afterend",
         `<div class="q-block" style="padding:10px 14px"><div class="q-stem" style="color:var(--accent-ink)">题目加载失败：${esc(String(err && err.message || err))}</div></div>`);
     });

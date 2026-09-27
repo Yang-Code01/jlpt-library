@@ -1,7 +1,7 @@
 /* 真实考试页逻辑（形态 B） */
 (function () {
   "use strict";
-  const { S, PART_LABEL, PART_ORDER, loadExam, examSet, records, isCorrect,
+  const { S, PART_LABEL, PART_ORDER, loadExam, requireUnlock, examSet, records, isCorrect,
           scoreSet, qHTML, canConfirm, pick, resetSession, startTimer, stopTimer, fmtTime,
           isNarrow, esc } = EXAM;
   const EXAMS = ["2010-07", "2010-12", "2011-07", "2011-12", "2012-07", "2012-12", "2013-07", "2013-12",
@@ -95,11 +95,13 @@
       startBtn.textContent = "加载本卷…";
       let d;
       try {
+        await requireUnlock();                          // 首次点「开始考试」才要口令
         d = await loadExam(e);                          // 此刻才拉这一卷的数据
       } catch (err) {
         startBtn.disabled = false;
         startBtn.textContent = idleLabel;
         delete startBtn.dataset.busy;
+        if (err && err.cancelled) return;               // 用户取消输入口令，不算加载失败
         startBtn.insertAdjacentHTML("afterend",
           `<div class="q-meta" style="color:var(--accent-ink);margin-top:10px">本卷数据加载失败：${esc(String(err && err.message || err))}</div>`);
         return;

@@ -2,8 +2,12 @@
 /* ============================================================
    真题模块数据加密工具（构建期，仅本地运行）
    ============================================================
-   把 exam/data/N2/*.js 明文加密成 exam/data/N2/enc/*.js 密文。
+   把 exam/data/N2/<卷>.js 明文加密成 exam/data/N2/enc/<卷>.js 密文。
    站点上只放密文，密码只用来解密钥。
+
+   注意：题型索引 exam/data/N2/index-lite.js **不加密**，明文常驻。
+   它只含「有哪些卷、哪些题型、各多少题」这层目录信息，没有任何题目正文，
+   而题型专练的选题屏必须在输口令之前就能渲染出来，所以它不能加密。
 
    密钥结构（三层信封）：
      口令 --PBKDF2-SHA256(600k)--> KEK --AES-256-GCM 包裹--> DEK
@@ -18,7 +22,7 @@
 
    用法：
      node tools/encrypt-exam.mjs gen-key            生成盐 + DEK（写入本地密钥文件）
-     node tools/encrypt-exam.mjs encrypt            加密全部卷 + 索引
+     node tools/encrypt-exam.mjs encrypt            加密全部卷（索引保持明文）
      node tools/encrypt-exam.mjs set-pass "<密码>"   把 DEK 用新口令包裹，写 meta.js
      node tools/encrypt-exam.mjs verify "<密码>"     用口令全量解密并与明文逐字节比对
      node tools/encrypt-exam.mjs status             查看当前状态
@@ -43,11 +47,6 @@ const WRAP_AAD = Buffer.from("jlpt-exam-dek-v1", "utf8");
 const IV_LEN = 12;
 const TAG_LEN = 16;
 
-const INDEX_SRC = "index-lite.js";
-const INDEX_NAME = "index-lite";     // AAD / HKDF info
-const INDEX_OUT = "index.js";        // 输出文件名
-const INDEX_GLOBAL = "EXAM_ENC_INDEX_LITE";
-
 /* ---------- 卷清单 ---------- */
 function volumes() {
   return fs.readdirSync(DATA)
@@ -57,9 +56,6 @@ function volumes() {
 }
 function globalOf(name) {
   return "EXAM_ENC_" + name.replace(/-/g, "_").toUpperCase();
-}
-function outFileOf(name) {
-  return name === INDEX_NAME ? INDEX_OUT : name + ".js";
 }
 // 明文 .js 内容是 `window.XXX = {...};` —— 只取等号之后的 JSON 文本，保留原始字节，
 // 这样 verify 可以做逐字节比对，不受重新序列化影响。
@@ -165,15 +161,14 @@ function cmdGenKey() {
 function cmdEncrypt() {
   const dek = loadDek();
   fs.mkdirSync(ENC, { recursive: true });
-  const names = volumes().concat([INDEX_NAME]);
+  const names = volumes();
   let plainTotal = 0, outTotal = 0;
   const rows = [];
   for (const name of names) {
-    const file = name === INDEX_NAME ? INDEX_SRC : name + ".js";
-    const plain = readPlain(file);
+    const plain = readPlain(name + ".js");
     const { b64, compressed } = encryptPayload(dek, name, plain);
     const out = "window." + globalOf(name) + " = " + JSON.stringify(b64) + ";\n";
-    fs.writeFileSync(path.join(ENC, outFileOf(name)), out);
+    fs.writeFileSync(path.join(ENC, name + ".js"), out);
     plainTotal += plain.length;
     outTotal += Buffer.byteLength(out);
     rows.push({ name, plain: plain.length, compressed, out: Buffer.byteLength(out) });
@@ -221,13 +216,12 @@ function cmdVerify(passphrase) {
     process.exitCode = 1;
     return;
   }
-  const names = volumes().concat([INDEX_NAME]);
+  const names = volumes();
   let ok = 0;
   const bad = [];
   for (const name of names) {
-    const file = name === INDEX_NAME ? INDEX_SRC : name + ".js";
-    const plain = readPlain(file);
-    const src = fs.readFileSync(path.join(ENC, outFileOf(name)), "utf8");
+    const plain = readPlain(name + ".js");
+    const src = fs.readFileSync(path.join(ENC, name + ".js"), "utf8");
     const i = src.indexOf("=");
     let b64 = src.slice(i + 1).trim();
     if (b64.endsWith(";")) b64 = b64.slice(0, -1);
@@ -276,7 +270,7 @@ try {
     default:
       console.log("用法：");
       console.log("  node tools/encrypt-exam.mjs gen-key            生成盐 + DEK");
-      console.log("  node tools/encrypt-exam.mjs encrypt            加密全部卷 + 索引");
+      console.log("  node tools/encrypt-exam.mjs encrypt            加密全部卷（索引明文不动）");
       console.log("  node tools/encrypt-exam.mjs set-pass \"<口令>\"   用口令包裹 DEK");
       console.log("  node tools/encrypt-exam.mjs verify \"<口令>\"    全量往返校验");
       console.log("  node tools/encrypt-exam.mjs status             查看状态");
