@@ -9,3 +9,10 @@ skills-lock.json
 # 这层目录信息，不含任何题目正文；题型专练的选题屏要在输口令之前渲染，必须靠它。
 exam/data/N2/20*.js
 exam/data/N2/manifest.json
+
+# Agent 文档：只留本地，不进仓库。
+# AGENTS.md / CONTEXT.md 是给 agent 的项目说明与领域术语源，docs/agents/ 是工程约定，
+# 均随本地工作区演进，不参与发布内容（docs/adr/ 仍入库）。
+AGENTS.md
+CONTEXT.md
+docs/agents/
