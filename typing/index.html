@@ -14,7 +14,7 @@
   <nav class="ty-crumb">
     <a href="../index.html">资料库首页</a>
     <span class="ty-crumb-sep">／</span>
-    <span>打字练习</span>
+    <a href="#" id="crumb-back">打字练习</a>
   </nav>
 
   <!-- 移动端隐藏软键盘输入框：定位屏外 / opacity:0 但仍可聚焦（不能用 display:none，
@@ -33,9 +33,11 @@
     <div class="ty-field">
       <span class="ty-field-label" id="label-tier">难度</span>
       <div class="ty-opts" id="opt-tier" role="group" aria-labelledby="label-tier">
-        <button type="button" class="ty-opt" data-tier="simple" aria-pressed="true">简单<span class="ty-opt-sub">1–2 假名</span></button>
-        <button type="button" class="ty-opt" data-tier="normal" aria-pressed="false">普通<span class="ty-opt-sub">3–4 假名</span></button>
-        <button type="button" class="ty-opt" data-tier="hard" aria-pressed="false">困难<span class="ty-opt-sub">5+ / 拗音促音</span></button>
+        <button type="button" class="ty-opt" data-tier="n5" aria-pressed="true">N5<span class="ty-opt-sub">346 词</span></button>
+        <button type="button" class="ty-opt" data-tier="n4" aria-pressed="false">N4<span class="ty-opt-sub">604 词</span></button>
+        <button type="button" class="ty-opt" data-tier="n3" aria-pressed="false">N3<span class="ty-opt-sub">1427 词</span></button>
+        <button type="button" class="ty-opt" data-tier="n2" aria-pressed="false">N2<span class="ty-opt-sub">1451 词</span></button>
+        <button type="button" class="ty-opt" data-tier="n1" aria-pressed="false">N1<span class="ty-opt-sub">1447 词</span></button>
       </div>
     </div>
 
@@ -48,9 +50,20 @@
       </div>
     </div>
 
+    <div class="ty-field">
+      <span class="ty-field-label" id="label-speed">速度</span>
+      <div class="ty-opts" id="opt-speed" role="group" aria-labelledby="label-speed">
+        <button type="button" class="ty-opt" data-speed="0.5" aria-pressed="false">0.5x<span class="ty-opt-sub">慢</span></button>
+        <button type="button" class="ty-opt" data-speed="1" aria-pressed="true">1.0x<span class="ty-opt-sub">标准</span></button>
+        <button type="button" class="ty-opt" data-speed="1.2" aria-pressed="false">1.2x<span class="ty-opt-sub">稍快</span></button>
+        <button type="button" class="ty-opt" data-speed="1.5" aria-pressed="false">1.5x<span class="ty-opt-sub">快</span></button>
+        <button type="button" class="ty-opt" data-speed="2" aria-pressed="false">2x<span class="ty-opt-sub">极快</span></button>
+      </div>
+    </div>
+
     <p class="ty-best" id="best-list">本档暂无记录</p>
     <button type="button" class="ty-btn ty-btn-primary ty-btn-lg" id="btn-start" aria-label="开始打字练习">开始</button>
-    <p class="ty-hint" id="start-hint">困难档词更长、传送带更快；也可随时退出重选。</p>
+    <p class="ty-hint" id="start-hint">Space 可开始 / 暂停 / 恢复；也可随时退出重选。</p>
   </section>
 
   <!-- ============ 游戏台 ============ -->
@@ -63,16 +76,15 @@
       <div class="ty-hud-item"><span class="ty-hud-k">收词</span><span class="ty-hud-v" id="hud-words">0</span></div>
       <div class="ty-hud-actions">
         <button type="button" class="ty-btn ty-btn-ghost ty-btn-sound" id="btn-sound" aria-pressed="true" aria-label="音效开关（开）">音效 开</button>
-        <button type="button" class="ty-btn ty-btn-ghost" id="btn-pause" aria-label="暂停或继续" hidden>暂停</button>
+        <button type="button" class="ty-btn ty-btn-ghost" id="btn-pause" aria-label="暂停或恢复（Space 键）">暂停 · Space</button>
         <button type="button" class="ty-btn ty-btn-ghost" id="btn-quit" aria-label="退出本局">退出</button>
       </div>
     </div>
 
     <div class="ty-stage" id="stage">
       <div class="ty-lane" id="lane">
-        <!-- 当前词：从右向左流过；四行信息同屏常显 -->
+        <!-- 当前词：从右向左流过；三行信息同屏常显（词形 ruby 为主视觉） -->
         <div class="ty-card" id="card">
-          <div class="ty-line ty-line-kana" id="ln-kana">—</div>
           <div class="ty-line ty-line-word" id="ln-word"></div>
           <div class="ty-line ty-line-romaji">
             <span class="ty-romaji" id="ln-romaji"></span>

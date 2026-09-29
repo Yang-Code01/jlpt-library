@@ -245,16 +245,25 @@ h1, h2, h3, p { margin: 0; }
 }
 .ty-stage.ty-paused .ty-card { animation-play-state: paused; }
 
-/* 四行展示层（同屏常显） */
+/* 三行展示层（同屏常显）：词形 ruby / 罗马字 / 释义 */
 .ty-line { white-space: nowrap; }
-.ty-line-kana {
+/* 词形主视觉：汉字 / 词最大 */
+.ty-line-word {
   font-size: clamp(30px, 6vw, 44px);
   font-weight: 800;
   letter-spacing: .1em;
   color: #fff;
   text-shadow: 0 0 20px rgba(53, 224, 200, .35);
 }
-.ty-line-word { margin-top: 2px; font-size: 17px; font-weight: 700; color: #cfe0ff; }
+/* 假名作为 ruby 标注：小一号，居上方，不抢主视觉 */
+.ty-line-word ruby { ruby-position: over; }
+.ty-line-word rt {
+  font-size: clamp(12px, 2.4vw, 15px);
+  font-weight: 400;
+  letter-spacing: .06em;
+  color: var(--ty-muted);
+  text-shadow: none;
+}
 .ty-line-romaji {
   margin-top: 10px;
   font-family: ui-monospace, "SFMono-Regular", Consolas, "Courier New", monospace;
