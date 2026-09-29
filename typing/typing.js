@@ -31,27 +31,43 @@ var COMP_MS = 60000;
 var COMP_WARN_MS = 3000;
 var TICK_MS = 120;
 
-/* 难度档
-   flowMs = 当前词从右界流到左界的单程时长。
-   档越高越短 ⇒ 传送带越快（简单 8s → 普通 6.5s → 困难 5s）。
-   改速度只需调 flowMs；CSS 侧通过 --ty-flow-ms 承接。 */
+/* 难度档 = JLPT 等级（N5 最易 → N1 最难），每档独立词表。
+   传送带速度与难度无关：基础单程时长统一 BASE_FLOW_MS，再乘用户自选速度倍率
+   （state.speed，越大越快）。CSS 侧通过 --ty-flow-ms 承接实际时长。 */
+var BASE_FLOW_MS = 7000;
+var SPEED_KEY = 'jlpt-typing-speed';
+var SPEEDS = [0.5, 1.0, 1.2, 1.5, 2.0];
 var TIERS = {
-  simple: { key: 'simple', label: '简单', src: 'data/simple.js', global: 'TYPING_WORDS_SIMPLE', flowMs: 8000 },
-  normal: { key: 'normal', label: '普通', src: 'data/normal.js', global: 'TYPING_WORDS_NORMAL', flowMs: 6500 },
-  hard:   { key: 'hard',   label: '困难', src: 'data/hard.js',   global: 'TYPING_WORDS_HARD',   flowMs: 5000 }
+  n5:   { key: 'n5', label: 'N5', src: 'data/n5.js', global: 'TYPING_WORDS_N5' },
+  n4:   { key: 'n4', label: 'N4', src: 'data/n4.js', global: 'TYPING_WORDS_N4' },
+  n3:   { key: 'n3', label: 'N3', src: 'data/n3.js', global: 'TYPING_WORDS_N3' },
+  n2:   { key: 'n2', label: 'N2', src: 'data/n2.js', global: 'TYPING_WORDS_N2' },
+  n1:   { key: 'n1', label: 'N1', src: 'data/n1.js', global: 'TYPING_WORDS_N1' }
 };
 
-/* 模式 */
+function loadSpeed() {
+  try {
+    var v = parseFloat(localStorage.getItem(SPEED_KEY));
+    if (SPEEDS.indexOf(v) !== -1) return v;
+  } catch (e) {}
+  return 1.0;
+}
+
+function saveSpeed(v) {
+  try { localStorage.setItem(SPEED_KEY, String(v)); } catch (e) {}
+}
+
+/* 模式（所有模式均可用 Space 暂停 / 恢复；竞技暂停同时冻结计时） */
 var MODES = {
   practice:    { key: 'practice',    label: '练习', limited: false, pausable: true,
                  failOnWrong: false, failOnMiss: false,
-                 tip: '错字只做红色反馈、不计分 · 词流出界自动换下一个 · 可暂停 / 恢复' },
-  competition: { key: 'competition', label: '竞技', limited: true,  pausable: false,
+                 tip: '无时限 · 错字只做红色反馈、不计分 · 词流出界自动换下一个 · Space 可暂停 / 恢复' },
+  competition: { key: 'competition', label: '竞技', limited: true,  pausable: true,
                  failOnWrong: false, failOnMiss: false,
-                 tip: '60 秒内尽可能多收词 · 连击每满 10 加 0.5 倍率 · 错字 −5 并断连' },
-  endless:     { key: 'endless',     label: '无尽', limited: false, pausable: false,
+                 tip: '60 秒内尽可能多收词 · 连击每满 10 加 0.5 倍率 · 错字 −5 并断连 · Space 暂停同时冻结计时' },
+  endless:     { key: 'endless',     label: '无尽', limited: false, pausable: true,
                  failOnWrong: true,  failOnMiss: true,
-                 tip: '敲错一个字符或当前词流出左界即结束 · 比谁走得远' }
+                 tip: '敲错一个字符或当前词流出左界即结束 · 比谁走得远 · Space 可暂停' }
 };
 
 /* ------------------------------------------------------------
@@ -60,7 +76,7 @@ var MODES = {
      被自动播放策略拦截的 suspended 上下文与控制台告警
    - 首次用户交互后 resume()（见 bindAudioUnlock）
    - 开关存 localStorage[jlpt-typing-sound]：'0' 关，其余（缺省）开
-   - 触发点：判对→key()；收词→collect()；连击满 10→combo()；
+   - 触发点：判对→key()；收词→speakWord()（单词发音）；连击满 10→combo()；
             错字→wrong()；竞技最后 3 秒→tick()；结算→over()
    - 六个方法在「无 AudioContext / 无 window / 无 localStorage」的 Node
      环境下均安全返回、不抛错（供 VM 冒烟测试直接调用）
@@ -124,7 +140,7 @@ function tone(type, from, to, dur, gain, delay) {
 var Sound = {
   /* 极短方波「嗒」 */
   key: function () { if (soundEnabled()) tone('square', 900, 760, 0.028, 0.05); },
-  /* 上滑短音：收词 */
+  /* 上滑短音：保留备用（收词已改为单词发音 speakWord） */
   collect: function () { if (soundEnabled()) tone('sine', 620, 1240, 0.11, 0.09); },
   /* 明亮双音：连击升级 */
   combo: function () {
@@ -141,12 +157,36 @@ var Sound = {
 };
 
 /* ------------------------------------------------------------
+   ②b 单词发音：Web Speech API（speechSynthesis，ja-JP 语音，零音频文件）
+   - 收词成功时朗读该词；先 cancel() 上一条，防止连击时语音排队堆积
+   - 发音质量取决于系统日语语音（Win10/11、macOS、iOS 均内置）；
+     环境不支持或合成失败时静默忽略，不影响游戏
+   ------------------------------------------------------------ */
+function speakWord(word) {
+  if (!soundEnabled()) return;
+  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+  try {
+    var ss = window.speechSynthesis;
+    if (typeof ss.cancel === 'function') ss.cancel();
+    var u = new SpeechSynthesisUtterance(word);
+    u.lang = 'ja-JP';
+    u.rate = 0.9;   // 稍慢，利于跟读
+    var voices = (typeof ss.getVoices === 'function') ? ss.getVoices() : [];
+    for (var i = 0; i < voices.length; i++) {
+      if (/^ja/i.test(voices[i].lang || '')) { u.voice = voices[i]; break; }
+    }
+    ss.speak(u);
+  } catch (e) { /* 不支持 / 合成失败：静默忽略 */ }
+}
+
+/* ------------------------------------------------------------
    ③ 运行状态
    ------------------------------------------------------------ */
 var state = {
   screen: 'idle',     // idle | playing | paused | over
   mode: 'practice',
-  tier: 'simple',
+  tier: 'n5',
+  speed: 1.0,         // 速度倍率（SPEEDS 之一，localStorage 记忆）
   pool: [],           // 当前档完整词表（原始顺序，洗牌时复制）
   queue: [],          // 本轮洗牌后的播放队列
   qi: 0,              // queue 游标
@@ -160,6 +200,8 @@ var state = {
   correctKeys: 0,     // 正确字符数（正确率分子 / WPM 分子）
   startAt: 0,
   endAt: 0,
+  pauseTotal: 0,      // 累计暂停时长（ms），计入 WPM / 竞技倒计时
+  pausedAt: 0,
   tickId: 0,
   lastWarnSec: -1
 };
@@ -232,8 +274,11 @@ function bestHint(kana, typed) {
 function renderWord() {
   var w = state.current;
   if (!w) return;
-  el.kana.textContent = w.k;
-  el.word.textContent = w.w;
+  /* 词形为主视觉；含汉字时用 ruby 标假名，纯假名词直接大字显示 */
+  var hasKanji = /[㐀-䶿一-龯豈-﫿]/.test(w.w);
+  el.word.innerHTML = hasKanji
+    ? '<ruby>' + esc(w.w) + '<rt>' + esc(w.k) + '</ruby>'
+    : esc(w.w);
   el.mean.textContent = w.p ? (w.m + '（' + w.p + '）') : w.m;
   renderTyped();
 }
@@ -253,7 +298,7 @@ function renderTyped() {
 function restartFlow() {
   var card = el.card;
   if (!card) return;
-  el.app.style.setProperty('--ty-flow-ms', TIERS[state.tier].flowMs + 'ms');
+  el.app.style.setProperty('--ty-flow-ms', Math.round(BASE_FLOW_MS / state.speed) + 'ms');
   card.style.animation = 'none';
   void card.offsetWidth;          // 强制回流，确保动画可重入
   card.style.animation = '';      // 回落样式表里的 ty-flow
@@ -346,6 +391,7 @@ function onWordComplete() {
   state.score += Math.round(base * mult);
 
   Sound.collect();
+  speakWord(state.current.w);   // 收词成功：朗读单词
   if (state.combo % 10 === 0) Sound.combo();
 
   updateHud();
@@ -364,7 +410,7 @@ function onFlowEnd() {
    ------------------------------------------------------------ */
 function tick() {
   if (state.screen !== 'playing' || !MODES[state.mode].limited) return;
-  var left = COMP_MS - (Date.now() - state.startAt);
+  var left = COMP_MS - (Date.now() - state.startAt - state.pauseTotal);
   if (left < 0) left = 0;
 
   var sec = Math.ceil(left / 1000);
@@ -382,7 +428,7 @@ function tick() {
    ⑨ HUD / 屏幕切换
    ------------------------------------------------------------ */
 function updateHud() {
-  el.hudMode.textContent = MODES[state.mode].label + '·' + TIERS[state.tier].label;
+  el.hudMode.textContent = MODES[state.mode].label + '·' + TIERS[state.tier].label + '·' + state.speed + 'x';
   el.score.textContent = state.score;
   el.combo.textContent = state.combo;
   el.words.textContent = state.words;
@@ -423,8 +469,7 @@ function startGame() {
 
     el.pausedNote.hidden = true;
     el.stage.classList.remove('ty-paused');
-    el.btnPause.textContent = '暂停';
-    el.btnPause.hidden = !MODES[state.mode].pausable;
+    el.btnPause.textContent = '暂停 · Space';
     el.tip.textContent = MODES[state.mode].tip;
     el.time.classList.remove('is-warn');
 
@@ -454,6 +499,8 @@ function resetRun(pool) {
   state.correctKeys = 0;
   state.startAt = 0;
   state.endAt = 0;
+  state.pauseTotal = 0;
+  state.pausedAt = 0;
   state.lastWarnSec = -1;
   if (state.tickId) { clearInterval(state.tickId); state.tickId = 0; }
 }
@@ -466,14 +513,16 @@ function togglePause() {
   if (!MODES[state.mode].pausable) return;
   if (state.screen === 'playing') {
     state.screen = 'paused';
+    state.pausedAt = Date.now();
     el.stage.classList.add('ty-paused');   // CSS animation-play-state: paused，冻结词的停留计时
     el.pausedNote.hidden = false;
-    el.btnPause.textContent = '继续';
+    el.btnPause.textContent = '继续 · Space';
   } else if (state.screen === 'paused') {
     state.screen = 'playing';
+    state.pauseTotal += Date.now() - state.pausedAt;   // 竞技模式暂停同时冻结计时
     el.stage.classList.remove('ty-paused');
     el.pausedNote.hidden = true;
-    el.btnPause.textContent = '暂停';
+    el.btnPause.textContent = '暂停 · Space';
   }
 }
 
@@ -508,7 +557,7 @@ function endGame(reason) {
 }
 
 function computeStats() {
-  var ms = Math.max(1, state.endAt - state.startAt);
+  var ms = Math.max(1, state.endAt - state.startAt - state.pauseTotal);
   var minutes = ms / 60000;
   return {
     score: state.score,
@@ -533,7 +582,7 @@ function loadBest() {
 
 function saveBest(s) {
   var all = loadBest();
-  var k = state.mode + ':' + state.tier;
+  var k = state.mode + ':' + state.tier + ':' + state.speed;
   var prev = all[k] || null;
   var isRecord = !prev || s.score > prev.score;
   if (isRecord) {
@@ -553,19 +602,20 @@ function fmtDate(iso) {
 }
 
 function renderBest() {
-  var rec = loadBest()[state.mode + ':' + state.tier];
+  var rec = loadBest()[state.mode + ':' + state.tier + ':' + state.speed];
+  var label = MODES[state.mode].label + '·' + TIERS[state.tier].label + '·' + state.speed + 'x';
   if (!rec) {
-    el.bestList.innerHTML = '本档暂无记录（' + esc(MODES[state.mode].label + '·' + TIERS[state.tier].label) + '）';
+    el.bestList.innerHTML = '本档暂无记录（' + esc(label) + '）';
     return;
   }
   el.bestList.innerHTML =
-    '本档最高（' + esc(MODES[state.mode].label + '·' + TIERS[state.tier].label) + '）：' +
+    '本档最高（' + esc(label) + '）：' +
     '<strong>' + rec.score + '</strong> 分 · ' + rec.words + ' 词 · ' + rec.wpm + ' WPM' +
     (fmtDate(rec.at) ? ' · ' + esc(fmtDate(rec.at)) : '');
 }
 
 function renderOver(reason, s, rec) {
-  el.overTitle.textContent = MODES[state.mode].label + '·' + TIERS[state.tier].label + ' · ' + reason;
+  el.overTitle.textContent = MODES[state.mode].label + '·' + TIERS[state.tier].label + '·' + state.speed + 'x · ' + reason;
   el.overRecord.hidden = !rec.isRecord;
   el.overRecord.textContent = rec.isRecord ? '新纪录！' : '';
 
@@ -573,7 +623,7 @@ function renderOver(reason, s, rec) {
     ['分数', s.score, true],
     ['收词数', s.words, false],
     ['正确率', Math.round(s.accuracy * 100) + '%', false],
-    ['WPM', Math.round(s.wpm), false],
+    ['WPM', Math.round(s.wpm) + '（' + state.speed + 'x）', false],
     ['最高连击', s.maxCombo, false],
     ['本档历史最高', rec.best.score + (fmtDate(rec.best.at) ? '（' + fmtDate(rec.best.at) + '）' : ''), false]
   ];
@@ -593,7 +643,9 @@ function applySelection() {
   each(document.querySelectorAll('.ty-opt'), function (btn) {
     var isTier = btn.getAttribute('data-tier');
     var isMode = btn.getAttribute('data-mode');
-    var on = (isTier && isTier === state.tier) || (isMode && isMode === state.mode);
+    var isSpeed = btn.getAttribute('data-speed');
+    var on = (isTier && isTier === state.tier) || (isMode && isMode === state.mode) ||
+             (isSpeed && parseFloat(isSpeed) === state.speed);
     btn.classList[on ? 'add' : 'remove']('is-active');
     if (typeof btn.setAttribute === 'function') btn.setAttribute('aria-pressed', on ? 'true' : 'false');
   });
@@ -648,6 +700,15 @@ function routeMobileValue() {
 
 /* 当前焦点是否落在「浏览器原生会用空格/回车激活」的可交互元素上。
    用于把空格让给按钮 / 链接，保证纯键盘用户能 Tab 到控件并用空格操作。 */
+/* 鼠标 / 触控点击控件后主动失焦，避免随后的 Space 被控件吞掉；
+   仅 pointerdown（真实指针）触发标记，键盘 Enter/Space 激活不受影响。 */
+function blurOnPointerClick(node) {
+  node.addEventListener('pointerdown', function () { node._mc = true; });
+  node.addEventListener('click', function () {
+    if (node._mc) { node._mc = false; try { node.blur(); } catch (e) {} }
+  });
+}
+
 function isInteractiveTarget(node) {
   if (!node) return false;
   var tag = node.tagName ? String(node.tagName).toLowerCase() : '';
@@ -673,11 +734,14 @@ function onKeyDown(e) {
   }
 
   if (e.key === ' ') {
-    /* 焦点在按钮 / 链接上时，空格归它们（激活），本处理不拦截、不切换暂停 */
+    /* 焦点在按钮 / 链接上（如 Tab 聚焦）时，空格归它们（激活）；
+       鼠标点击后控件已 blur，空格走全局：开始 / 暂停 / 恢复 / 再来一局 */
     var focusEl = (typeof document !== 'undefined') ? document.activeElement : null;
     if (isInteractiveTarget(focusEl)) return;
     e.preventDefault();                       // 否则阻止页面滚动
-    if (state.screen === 'paused') togglePause();
+    if (state.screen === 'idle') { startGame(); return; }
+    if (state.screen === 'over') { startGame(); return; }
+    if (state.screen === 'playing' || state.screen === 'paused') { togglePause(); return; }
     return;
   }
 
@@ -710,7 +774,6 @@ function cacheDom() {
 
   el.stage = $('stage');
   el.card = $('card');
-  el.kana = $('ln-kana');
   el.word = $('ln-word');
   el.romaji = $('ln-romaji');
   el.echo = $('ln-echo');
@@ -727,6 +790,7 @@ function cacheDom() {
   el.quitModal = $('quit-modal');
   el.btnQuitYes = $('btn-quit-yes');
   el.btnQuitNo = $('btn-quit-no');
+  el.crumbBack = $('crumb-back');
 }
 
 function bindEvents() {
@@ -734,8 +798,10 @@ function bindEvents() {
     btn.addEventListener('click', function () {
       var t = btn.getAttribute('data-tier');
       var m = btn.getAttribute('data-mode');
+      var sp = btn.getAttribute('data-speed');
       if (t) state.tier = t;
       if (m) state.mode = m;
+      if (sp) { state.speed = parseFloat(sp); saveSpeed(state.speed); }
       applySelection();
       renderBest();
     });
@@ -752,6 +818,23 @@ function bindEvents() {
     state.screen = 'idle';
     showScreen('start');
     renderBest();
+  });
+
+  /* 面包屑「打字练习」：游戏中触发退出确认，结算 / 空闲时直接回选档屏 */
+  if (el.crumbBack) {
+    el.crumbBack.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (state.screen === 'playing' || state.screen === 'paused') { openQuit(); return; }
+      state.screen = 'idle';
+      stopFlow();
+      showScreen('start');
+      renderBest();
+    });
+  }
+
+  /* 所有按钮 / 链接：鼠标点击后 blur，Space 才能全局生效 */
+  each(document.querySelectorAll('.ty-btn, .ty-opt, .ty-crumb a'), function (btn) {
+    blurOnPointerClick(btn);
   });
 
   /* 移动端隐藏输入框：input 事件是字符的唯一来源（虚拟 / 物理键盘都会触发）；
@@ -795,7 +878,8 @@ function init() {
     setHint('罗马字引擎（romaji.js）未加载，页面无法运行。', true);
     return;
   }
-  state.tier = 'simple';
+  state.tier = 'n5';
+  state.speed = loadSpeed();
   state.mode = 'practice';
   bindEvents();
   applySelection();
