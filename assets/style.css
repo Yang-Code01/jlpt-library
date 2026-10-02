@@ -23,8 +23,9 @@
   --border: #d8dde2;
   --border-soft: #e4e8ec;
 
-  /* ===== 交互色：朱（全站唯一 accent） ===== */
-  --accent: #c3422a;
+  /* ===== 交互色：朱（全站唯一 accent） =====
+     accent 同时用作正文小字颜色，故须在 --paper / --surface 上达 AA 4.5:1。 */
+  --accent: #b93e28;
   --accent-ink: #8e2a18;
   --accent-soft: #f6eae7;
   --accent-line: #e0b1a6;
@@ -108,11 +109,11 @@ html[data-theme="eye"] {
   --surface: #d2ecd6;
   --surface-2: #b8dabc;
   --ink: #2c3a30;
-  --muted: #56685c;
+  --muted: #526358;
   --border: #a3c7aa;
   --border-soft: #b3d2b9;
 
-  --accent: #b85f4e;
+  --accent: #944a3c;
   --accent-ink: #8e463a;
   --accent-soft: #e6efe6;
   --accent-line: #bfd6c4;

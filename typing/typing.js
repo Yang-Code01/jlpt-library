@@ -32,9 +32,14 @@ var COMP_WARN_MS = 3000;
 var TICK_MS = 120;
 
 /* 难度档 = JLPT 等级（N5 最易 → N1 最难），每档独立词表。
-   传送带速度与难度无关：基础单程时长统一 BASE_FLOW_MS，再乘用户自选速度倍率
-   （state.speed，越大越快）。CSS 侧通过 --ty-flow-ms 承接实际时长。 */
-var BASE_FLOW_MS = 7000;
+   传送带单程时长按「假名数」线性缩放，再乘用户自选速度倍率（state.speed，越大越快）。
+   固定时长下 1 假名词与 12 假名词拿同样的停留时间，长词在无尽模式里几乎必死、
+   短词又过于宽松；按词长给时，难度才落回手速而不是运气。
+   CSS 侧通过 --ty-flow-ms 承接实际时长。 */
+var FLOW_BASE_MS = 3400;      /* 每个词的基础停留 */
+var FLOW_PER_KANA_MS = 1150;  /* 每多一个假名追加的停留 */
+var FLOW_MIN_MS = 4200;       /* 单假名词也不会快到底 */
+var FLOW_MAX_MS = 16000;      /* 超长词不至于占满整屏时间 */
 var SPEED_KEY = 'jlpt-typing-speed';
 var SPEEDS = [0.5, 1.0, 1.2, 1.5, 2.0];
 var TIERS = {
@@ -221,6 +226,17 @@ function esc(s) {
   });
 }
 
+/* 屏幕阅读器播报：全部经 #sr-status 这一个 aria-live 区域输出，避免多处抢读。
+   只在「状态真的变化」时播报（新词 / 收词 / 错字 / 连击里程碑 / 结算），
+   不逐字符播报，否则读屏会淹没在噪音里。 */
+function announce(text) {
+  if (!el.srStatus) return;
+  var next = text || '';
+  /* 文本未变则不动 DOM，避免连续同一个错字把读屏刷成噪音 */
+  if (el.srStatus.textContent === next) return;
+  el.srStatus.textContent = next;
+}
+
 function shuffle(a) {
   var arr = a.slice();
   for (var i = arr.length - 1; i > 0; i--) {
@@ -292,13 +308,24 @@ function renderTyped() {
   el.echo.textContent = state.typed;
 }
 
+/* 当前词的单程停留时长：按假名数线性缩放，再除以速度倍率。
+   例（1.0x）：あ ≈ 4.2s，かな ≈ 7.0s，消费者物价指数 ≈ 16s。 */
+function flowDurationMs(kana) {
+  var n = kanaCount(kana);
+  var ms = FLOW_BASE_MS + FLOW_PER_KANA_MS * Math.max(0, n - 1);
+  if (ms < FLOW_MIN_MS) ms = FLOW_MIN_MS;
+  if (ms > FLOW_MAX_MS) ms = FLOW_MAX_MS;
+  return Math.round(ms / state.speed);
+}
+
 /* 重置动画让下一个词重新从右侧流入。
    CSS 里 .ty-card 的 animation 用 var(--ty-flow-ms) 取时长，
    这里改写变量 + 强制回流后重挂动画。 */
 function restartFlow() {
   var card = el.card;
   if (!card) return;
-  el.app.style.setProperty('--ty-flow-ms', Math.round(BASE_FLOW_MS / state.speed) + 'ms');
+  var kana = state.current ? state.current.k : '';
+  el.app.style.setProperty('--ty-flow-ms', flowDurationMs(kana) + 'ms');
   card.style.animation = 'none';
   void card.offsetWidth;          // 强制回流，确保动画可重入
   card.style.animation = '';      // 回落样式表里的 ty-flow
@@ -308,8 +335,14 @@ function stopFlow() {
   if (el.card) el.card.style.animation = 'none';
 }
 
-/* 取下一个词（队列用尽则重新洗牌，避免与上一词紧邻重复） */
-function nextWord() {
+/* 描述当前词，供 live region 使用 */
+function describeWord(w) {
+  return '题目：' + w.w + '，读音 ' + w.k + '，' + w.m;
+}
+
+/* 取下一个词（队列用尽则重新洗牌，避免与上一词紧邻重复）。
+   silent=true 时不单独播报，交由调用方合成一条完整消息。 */
+function nextWord(silent) {
   if (!state.pool.length) return;
   if (state.qi >= state.queue.length) {
     var last = state.queue[state.queue.length - 1];
@@ -323,6 +356,7 @@ function nextWord() {
   state.typed = '';
   renderWord();
   restartFlow();
+  if (!silent) announce(describeWord(state.current));
 }
 
 /* ------------------------------------------------------------
@@ -366,8 +400,11 @@ function onWrongChar() {
     state.score = Math.max(0, state.score - 5);
     state.combo = 0;
     updateHud();
+    announce('敲错，扣 5 分，连击重置');
+    return;
   }
   // 练习：只做红色反馈，不计分、不断连
+  announce('敲错了');
 }
 
 var flashTimer = 0;
@@ -382,20 +419,27 @@ function flashWrong() {
 
 /* 收词：基础分 = 假名数 × 10；倍率 = 1 + floor(combo / 10) × 0.5（无上限） */
 function onWordComplete() {
+  var done = state.current;              // 先留存，nextWord() 会改写 state.current
   state.combo++;
   if (state.combo > state.maxCombo) state.maxCombo = state.combo;
   state.words++;
 
-  var base = kanaCount(state.current.k) * 10;
+  var base = kanaCount(done.k) * 10;
   var mult = 1 + Math.floor(state.combo / 10) * 0.5;
   state.score += Math.round(base * mult);
 
   Sound.collect();
-  speakWord(state.current.w);   // 收词成功：朗读单词
+  speakWord(done.w);   // 收词成功：朗读单词
   if (state.combo % 10 === 0) Sound.combo();
 
   updateHud();
-  nextWord();
+  var comboNow = state.combo;
+  var wordsNow = state.words;
+  var scoreNow = state.score;
+  nextWord(true);   // 静默换词，下面把「收词结果 + 下一题」合成一条播报
+  announce('正确 ' + done.w + '，收词 ' + wordsNow + '，得分 ' + scoreNow +
+           (comboNow > 0 && comboNow % 10 === 0 ? '，' + comboNow + ' 连击' : '') +
+           '。' + describeWord(state.current));
 }
 
 /* 当前词流出左界（停留过久） */
@@ -517,12 +561,14 @@ function togglePause() {
     el.stage.classList.add('ty-paused');   // CSS animation-play-state: paused，冻结词的停留计时
     el.pausedNote.hidden = false;
     el.btnPause.textContent = '继续 · Space';
+    announce('已暂停');
   } else if (state.screen === 'paused') {
     state.screen = 'playing';
     state.pauseTotal += Date.now() - state.pausedAt;   // 竞技模式暂停同时冻结计时
     el.stage.classList.remove('ty-paused');
     el.pausedNote.hidden = true;
     el.btnPause.textContent = '暂停 · Space';
+    announce('继续');
   }
 }
 
@@ -554,6 +600,9 @@ function endGame(reason) {
   var rec = saveBest(stats);
   renderOver(reason, stats, rec);
   showScreen('over');
+  announce(reason + '。得分 ' + stats.score + '，收词 ' + stats.words +
+           '，正确率 ' + Math.round(stats.accuracy * 100) + '%，' + Math.round(stats.wpm) + ' WPM' +
+           (rec.isRecord ? '，新纪录' : ''));
 }
 
 function computeStats() {
@@ -753,6 +802,7 @@ function onKeyDown(e) {
 
 function cacheDom() {
   el.app = $('typing-app');
+  el.srStatus = $('sr-status');
 
   el.start = $('screen-start');
   el.game = $('screen-game');
@@ -895,7 +945,8 @@ window.TypingGame = {
   handleChar: handleChar,   // 「单个字符输入」唯一入口：只传一个小写字母或 '-'
   Sound: Sound,             // 音效挂载点：填充 key/collect/combo/wrong/tick/over
   state: state,             // 只读用途为主（测试 / 调试）
-  start: startGame
+  start: startGame,
+  flowDurationMs: flowDurationMs   // 暴露给测试：断言按词长给时的口径
 };
 
 if (document.readyState === 'loading') {

@@ -376,11 +376,92 @@ h1, h2, h3, p { margin: 0; }
   .ty-btn:hover, .ty-opt:hover { transform: none; }
 }
 
+
+/* ============================================================
+   选中态：难度档是「量表」而非并列选项，用从左到右的填充暗示 N5 易 → N1 难。
+   其余选项组保持原样（模式 / 速度是真正的并列选项）。
+   ============================================================ */
+.ty-opts-scale .ty-opt {
+  position: relative;
+  overflow: hidden;
+}
+.ty-opts-scale .ty-opt::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 2px;
+  background: var(--ty-line);
+  transition: height .18s ease, background .18s ease;
+}
+.ty-opts-scale .ty-opt.is-active::before {
+  height: 3px;
+  background: var(--ty-accent);
+}
+.ty-field-note {
+  margin-left: 8px;
+  font-size: 11px;
+  letter-spacing: .04em;
+  text-transform: none;
+  color: var(--ty-muted);
+  /* 不叠 opacity：叠加后对比度会掉到 4.27:1，低于 AA 4.5:1 */
+}
+
+/* 只在视觉上保留读音提示的对照层级：罗马音已敲对部分足够亮，
+   未敲部分降到不抢主视觉。此规则只影响色值，不改字号。 */
+
+/* ============================================================
+   无障碍：live region 与「跳过装饰」工具类
+   ============================================================ */
+.ty-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ---------- 窄屏 ---------- */
 @media (max-width: 560px) {
-  .ty-hud { gap: 8px 14px; }
+  .typing-app { padding: 14px 14px 28px; }
+  .ty-hud { gap: 8px 14px; padding: 10px 12px; }
   .ty-hud-v { font-size: 17px; }
   .ty-hud-actions { width: 100%; margin-left: 0; }
   .ty-card { padding: 14px 18px 16px; max-width: 92%; }
-  .ty-opt { min-width: 108px; flex: 1 1 30%; }
+
+  /* 选档屏压缩：小屏上原本 5 个档位会折成 3 行，开始按钮被挤到屏幕外。
+     改用等分网格 + 收敛纵向留白，让首屏能同时看到选项与开始按钮。 */
+  .ty-start { padding-top: 16px; }
+  .ty-title { font-size: clamp(26px, 8vw, 34px); }
+  .ty-lead { margin-top: 6px; }
+  .ty-field { margin-top: 18px; }
+  .ty-field-label { margin-bottom: 8px; }
+  .ty-opts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .ty-opt {
+    min-width: 0;            /* 网格下让列宽说话，避免 min-width 撑破一行 */
+    padding: 9px 10px;
+    font-size: 15px;
+    gap: 1px;
+  }
+  .ty-opt-sub { font-size: 10px; }
+  .ty-best { margin-top: 16px; }
+  .ty-hint { margin-top: 8px; }
+
+  /* 开始按钮吸底：即使档位区再长，主操作也不会被推到屏幕外 */
+  .ty-start { padding-bottom: 8px; }
+  #btn-start {
+    position: sticky;
+    bottom: 8px;
+    width: 100%;
+    margin-top: 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .55), 0 6px 26px rgba(53, 224, 200, .3);
+  }
 }

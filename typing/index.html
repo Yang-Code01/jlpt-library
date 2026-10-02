@@ -9,6 +9,7 @@
 </head>
 <body>
 <div class="typing-app" id="typing-app">
+  <div class="ty-sr" id="sr-status" role="status" aria-live="polite" aria-atomic="true"></div>
 
   <!-- 顶部返回门户导航（手写 crumb，暗色样式，结构对齐 listening/index.html） -->
   <nav class="ty-crumb">
@@ -31,8 +32,8 @@
     <p class="ty-lead">看着假名，敲出它的罗马字读音。敲对即收词，连击越高倍率越高。</p>
 
     <div class="ty-field">
-      <span class="ty-field-label" id="label-tier">难度</span>
-      <div class="ty-opts" id="opt-tier" role="group" aria-labelledby="label-tier">
+      <span class="ty-field-label" id="label-tier">难度 <span class="ty-field-note">N5 最易 → N1 最难</span></span>
+      <div class="ty-opts ty-opts-scale" id="opt-tier" role="group" aria-labelledby="label-tier">
         <button type="button" class="ty-opt" data-tier="n5" aria-pressed="true">N5<span class="ty-opt-sub">346 词</span></button>
         <button type="button" class="ty-opt" data-tier="n4" aria-pressed="false">N4<span class="ty-opt-sub">604 词</span></button>
         <button type="button" class="ty-opt" data-tier="n3" aria-pressed="false">N3<span class="ty-opt-sub">1427 词</span></button>
