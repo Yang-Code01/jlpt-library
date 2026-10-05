@@ -49,10 +49,6 @@ const BANDS = [
   { id: '4k', label: '4k', rankFrom: 2810, rankTo: 3766, sub: '进阶级 957 词' }
 ];
 
-/* 票 03 是贯通骨架：只出每档的第一个单元页，用来验证全局编号与四档边界。
-   票 04 把这里改成 Infinity，门户清单区与单元页一起铺开到 77 个。 */
-const PAGES_PER_BAND = 1;
-
 const PORTAL = 'index.html';
 const MARK_START = '<!-- en:unit-lists:start -->';
 const MARK_END = '<!-- en:unit-lists:end -->';
@@ -206,8 +202,7 @@ function build(csvPath) {
      77 个页面若各自内联整套结构会有 600KB 重复，且后续切片要改 77 处。 */
   const pageUnits = [];
   for (const b of bands) {
-    const n = Math.min(b.units, PAGES_PER_BAND);
-    for (let i = 0; i < n; i++) {
+    for (let i = 0; i < b.units; i++) {
       const no = b.unitFrom + i;
       const w0 = (i * PER_UNIT) + 1;
       const w1 = Math.min((i + 1) * PER_UNIT, b.words);
