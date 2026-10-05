@@ -1,0 +1,276 @@
+/* ============================================================================
+   英语阅读页（正文页 + 篇目页）
+   ----------------------------------------------------------------------------
+   只给 en/reading/**.html 用。版式母题沿用词表单元页：朱线页头、药丸刻度、
+   卡片刻度尺；色相一律取全站令牌（assets/style.css 的 :root），深色模式跟着
+   令牌走，不另写一套。
+   正文是这里的主角：行距与字号只为长文阅读服务，不改站内其它页。
+   页面自带量很少，因为大部分视觉来自 unit.css 的 .en-* 那一层。
+   ========================================================================== */
+
+/* ---------- 页头（词表单元页是 .en-unit > .en-head，这里是 .en-read > .en-head） ---------- */
+.en-read > .en-head,
+.en-read-index > .en-head {
+  margin: 18px 0 14px;
+  padding-top: 14px;
+  border-top: 2px solid var(--accent);
+}
+
+.en-read-head .en-title {
+  font-size: 1.45rem;
+  overflow-wrap: anywhere;
+}
+
+.en-read-head .en-sub {
+  overflow-wrap: anywhere;
+}
+
+.en-read .en-note b.en-oov {
+  color: var(--accent-ink);
+}
+
+/* ---------- 正文 ---------- */
+.en-article {
+  margin: 6px 0 0;
+  color: var(--ink);
+  font-size: 1.02rem;
+  line-height: 1.95;
+}
+
+.en-article p {
+  margin: 0 0 1.05em;
+}
+
+/* 可点词：词表之内的词不打扰阅读（只有悬停时露一点底），超纲词常驻标红。
+   与 tools/en-reading.mjs / reader.js 的判据一致：红 = 词表查不到。 */
+.en-w {
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background .15s;
+}
+
+.en-w:hover {
+  background: var(--surface-2);
+}
+
+.en-w.is-active {
+  background: var(--accent-soft);
+}
+
+.en-w.is-oov {
+  background: var(--accent-soft);
+  box-shadow: inset 0 -1px 0 var(--accent-line);
+  color: var(--accent-ink);
+}
+
+/* ---------- 查义气泡 ---------- */
+.en-pop {
+  position: fixed;
+  z-index: 60;
+  display: none;
+  width: min(320px, calc(100vw - 24px));
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-hover);
+}
+
+.en-pop.is-on {
+  display: block;
+}
+
+.en-pop-top {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.en-pop-word {
+  font-size: 1.12rem;
+  letter-spacing: .01em;
+}
+
+.en-pop-ph {
+  color: var(--muted);
+  font-size: .8rem;
+}
+
+.en-pop-say {
+  margin-left: auto;
+  padding: 3px 10px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--accent-ink);
+  font: inherit;
+  font-size: .72rem;
+  cursor: pointer;
+}
+
+.en-pop-say:hover {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+
+.en-pop-tag {
+  margin: 6px 0 0;
+  color: var(--accent-ink);
+  font-size: .72rem;
+}
+
+.en-pop-tr {
+  margin: 8px 0 0;
+  font-size: .92rem;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.en-pop-def {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: .8rem;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+/* ---------- 页底：盖章 ---------- */
+.en-read-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 26px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-soft);
+}
+
+#enMarkDone.is-done {
+  border-color: var(--green-line);
+  background: var(--green-l);
+  color: var(--green);
+}
+
+.en-foot-tip {
+  color: var(--muted);
+  font-size: .76rem;
+}
+
+/* ---------- 篇目页 ---------- */
+.en-band-block {
+  margin: 22px 0 0;
+}
+
+.en-band-h {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: .98rem;
+}
+
+.en-band-id {
+  color: var(--accent-ink);
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.en-band-count {
+  color: var(--muted);
+  font-size: .76rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.en-band-done {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: .76rem;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.en-band-done.is-full {
+  color: var(--green);
+}
+
+.en-art-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.en-art-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  padding: 9px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-chip);
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color .18s, background .18s;
+}
+
+.en-art-row:hover {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+
+.en-art-title {
+  font-size: .9rem;
+  font-weight: 600;
+}
+
+.en-art-by {
+  grid-column: 1;
+  color: var(--muted);
+  font-size: .76rem;
+}
+
+.en-art-meta {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--muted);
+  font-size: .74rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.en-art-row.is-done {
+  border-color: var(--green-line);
+  background: var(--green-l);
+}
+
+.en-art-row.is-done .en-art-title {
+  color: var(--green);
+}
+
+.en-art-row.is-done .en-art-meta::after {
+  content: " 済";
+  color: var(--green);
+  font-size: .72rem;
+}
+
+@media (max-width: 620px) {
+  .en-article {
+    font-size: .98rem;
+    line-height: 1.85;
+  }
+
+  .en-art-row {
+    grid-template-columns: 1fr;
+  }
+
+  .en-art-meta {
+    grid-column: 1;
+    grid-row: auto;
+    text-align: left;
+  }
+}

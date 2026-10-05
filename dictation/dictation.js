@@ -5,10 +5,103 @@
    - 右栏：词表页签 ＋ 圆形播放键 ＋ 中文释义 ＋ 输入  提交
    - 错词写入本地错词本（localStorage），复习答对即移除
    数据：window.DICTATION_LISTS（words-data.js）
+   语言层：window.DICTATION_CFG（可选，英语侧只设它，不复制本文件逻辑）
    ============================================================ */
 
 (function () {
 'use strict';
+
+/* ===== 语言层覆盖（可选） =====
+   window.DICTATION_CFG 可整体替换与语言相关的默认值。不设时，下面每一条默认值
+   都等于本文件日语侧原有字面值，行为逐字不变。英语侧页面只注入 CFG。
+   可覆盖项：settingsKey / progressKey / wrongbookKey / speechLang / azLocale /
+            azVoiceDefault / voiceMatch(lang) / norm(s) / isAnswer(input, item) /
+            texts（按 key 覆盖 TEXTS 里的任意文案）
+   isAnswer 以 CFG 为 this 调用，故可在里面用 this.norm。                     */
+var CFG = (typeof window !== 'undefined' && window.DICTATION_CFG) || {};
+
+var SPEECH_LANG = CFG.speechLang || 'ja-JP';
+var AZ_LOCALE = CFG.azLocale || 'ja-JP';
+var AZ_VOICE_DEFAULT = CFG.azVoiceDefault || 'ja-JP-NanamiNeural';
+var VOICE_MATCH = CFG.voiceMatch || function (lang) {
+  return !!lang && lang.indexOf(SPEECH_LANG.split('-')[0]) === 0;
+};
+
+/* ===== 文案表 =====
+   值是字符串时直接用；是函数时用调用处的插值参数。CFG.texts 可按 key 覆盖任意
+   一条，未覆盖的落回下面这份日语默认值。                                    */
+var TEXTS = {
+  /* 引擎与播放状态 */
+  engineBrowser: '浏览器语音',
+  statusSynth: function (label) { return '合成中 · ' + label + '…'; },
+  statusFallback: function (label, msg) { return label + ' 失败（' + msg + '）· 已回退浏览器语音'; },
+  statusPlaying: function (label, rate) { return '播放中 · ' + label + ' · ' + rate + '×'; },
+  statusPlayed: function (n, label, rate) { return '已播放 ' + n + ' 次 · ' + label + ' · ' + rate + '×'; },
+  statusIdle: function (label, rate) { return '未播放 · ' + label + ' · ' + rate + '×'; },
+  /* 练习区静态文案 */
+  playCurrent: '播放当前单词',
+  meaningLabel: '中文释义',
+  inputLabel: '输入听到的单词',
+  inputPlaceholder: '在这里输入答案',
+  hint: '提示',
+  submit: '提交答案',
+  kbdReplay: '重播当前单词',
+  kbdSubmit: '提交答案',
+  kbdNext: '进入下一词',
+  /* 当前词状态 */
+  wrEmpty: '提交答案后在此显示本词结果',
+  remain: function (n) { return '还剩 ' + n + ' 个词'; },
+  /* 提交结果 */
+  fbOk: '正确！按 Enter 进入下一词',
+  fbOkFixed: '纠错通过！按 Enter 进入下一词',
+  badgeOk: '一次通过',
+  badgeFixed: '纠错通过',
+  next: '下一词 →',
+  wrYours: '你的输入：',
+  wrErrBadge: function (n) { return '错误 ' + n + ' 次 · 请照写一遍'; },
+  wrongAnswer: function (w, k) { return '拼写错误 · 正确答案：' + w + (k ? '（' + k + '）' : ''); },
+  /* 完成块 */
+  doneReview: '错词复习完成',
+  doneList: '本组练习完成',
+  doneStat: function (done, err) { return '完成 ' + done + ' 词 · 错误 ' + err + ' 次'; },
+  doneAccuracy: function (acc) { return ' · 本次正确率 ' + acc + '%'; },
+  donePerfect: ' · 全对！',
+  reviewWrong: function (n) { return '复习本地错词（' + n + '）'; },
+  again: '再练一遍本表',
+  back: '← 返回词单',
+  /* 词单视图 */
+  cardCount: function (n) { return n + ' 词'; },
+  cardDone: function (n) { return '已练 ' + n; },
+  cardErr: function (n) { return ' · 错 ' + n + ' 次'; },
+  /* 头部 / 侧栏 */
+  reviewTitle: '本地错词复习',
+  reviewSubtitle: function (n) { return n + ' 个错词 · 答对即从错词本移除'; },
+  wrongbook: '错词本',
+  wrongbookThis: function (n) { return '错词本 · 本次 ' + n + ' 词'; },
+  pageTitle: '日语单词听写',
+  listSubtitleSuffix: ' · 答错后拼写正确再进入下一词',
+  independentProgress: ' · 独立进度',
+  finished: '已完成',
+  running: '进行中',
+  /* 当前词表弹窗 */
+  wlSub: function (total, done, group) { return total + ' 词 · 已练 ' + done + ' · 组：' + group; },
+  stDone: '✓ 已练',
+  stCur: '● 当前',
+  /* 语音引擎设置 */
+  vvLoading: '加载声中…',
+  vvEmpty: '（无声线）',
+  vvFail: function (msg) { return '连接失败：' + msg; },
+  testPhrase: 'こんにちは。聴き取り練習のテストです。',
+  testPlaying: '播放中…',
+  testDone: '播放完成',
+  testFail: function (msg) { return '失败：' + msg; }
+};
+function T(key) {
+  var v = (CFG.texts && CFG.texts[key]) || TEXTS[key];
+  if (v == null) return '';
+  if (typeof v === 'function') return v.apply(null, Array.prototype.slice.call(arguments, 1));
+  return v;
+}
 
 var $ = function (id) { return document.getElementById(id); };
 
@@ -32,13 +125,14 @@ var settingsDialog = $('settingsDialog'), wordListDialog = $('wordListDialog');
 function q(sel) { return mainBody.querySelector(sel); }
 
 /* ===== 存储 ===== */
-var SETTINGS_KEY = 'dictation-settings';
-var PROGRESS_KEY = 'dictation-progress-v2';   // { listId: { keys: [], err: n } }
-var WRONGBOOK_KEY = 'dictation-wrongbook';    // [{ w, k, m, p }]
+var SETTINGS_KEY = CFG.settingsKey || 'dictation-settings';
+var PROGRESS_KEY = CFG.progressKey || 'dictation-progress-v2';   // { listId: { keys: [], err: n } }
+var WRONGBOOK_KEY = CFG.wrongbookKey || 'dictation-wrongbook';   // [{ w, k, m, p }]
 
 var settings = Object.assign({
   speed: 0.9, repeats: 2, gap: 0.8,
   showHint: true,          // 默认显示中文释义
+  skipDone: true,          // 练过的词不再出现（英语侧设置里可关；默认即原有行为）
   acceptMode: 'both',      // both | kana | kanji
   orderMode: 'seq',        // seq | shuffle
   engine: 'browser',       // browser | voicevox | azure
@@ -46,7 +140,7 @@ var settings = Object.assign({
   vvSpeaker: null,
   azKey: '',
   azRegion: 'japaneast',
-  azVoice: 'ja-JP-NanamiNeural'
+  azVoice: AZ_VOICE_DEFAULT
 }, JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'));
 
 var progress = JSON.parse(localStorage.getItem(PROGRESS_KEY) || '{}');
@@ -70,12 +164,12 @@ var session = null;
    三选一：browser（Web Speech）/ voicevox（本地引擎）/ azure（云端 Neural TTS）。
    voicevox 与 azure 的合成结果按「引擎+音色+语速+文本」缓存为 blob URL，重播不重复合成。
    任一引擎失败自动回退 browser，保证练习不中断。                              */
-var jpVoice = null;
+var ttsVoice = null;
 function loadVoices() {
   var vs = speechSynthesis.getVoices();
-  jpVoice = vs.find(function (v) { return v.lang === 'ja-JP'; })
-         || vs.find(function (v) { return v.lang && v.lang.indexOf('ja') === 0; })
-         || null;
+  ttsVoice = vs.find(function (v) { return v.lang === SPEECH_LANG; })   // 精确优先
+          || vs.find(function (v) { return VOICE_MATCH(v.lang); })     // 再按规则兜底
+          || null;
 }
 if (typeof speechSynthesis !== 'undefined') {
   if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = loadVoices;
@@ -90,7 +184,7 @@ var azSdkPromise = null;
 function engineLabel() {
   if (settings.engine === 'voicevox') return 'VOICEVOX';
   if (settings.engine === 'azure') return 'Azure';
-  return '浏览器语音';
+  return T('engineBrowser');
 }
 
 function stopPlayback() {
@@ -109,8 +203,8 @@ function clipKey(text) {
 /* --- 浏览器 TTS --- */
 function speakBrowser(text, onEnd) {
   var u = new SpeechSynthesisUtterance(text);
-  u.lang = 'ja-JP';
-  if (jpVoice) u.voice = jpVoice;
+  u.lang = SPEECH_LANG;
+  if (ttsVoice) u.voice = ttsVoice;
   u.rate = settings.speed;
   if (onEnd) { u.onend = onEnd; u.onerror = onEnd; }
   speechSynthesis.speak(u);
@@ -164,7 +258,7 @@ function azSynthesize(text) {
         cfg.speechSynthesisOutputFormat = SDK.SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm;
         var pct = Math.round((settings.speed - 1) * 100);
         var rate = (pct >= 0 ? '+' : '') + pct + '%';
-        var ssml = '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="ja-JP">'
+        var ssml = '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="' + AZ_LOCALE + '">'
           + '<voice name="' + esc(settings.azVoice) + '"><prosody rate="' + rate + '">'
           + esc(text) + '</prosody></voice></speak>';
         var syn = new SDK.SpeechSynthesizer(cfg);
@@ -184,26 +278,26 @@ function azSynthesize(text) {
 /* --- 统一播放：缓存 → 合成 → 连播 --- */
 function playClip(text, timesLeft) {
   if (settings.engine === 'browser') {
-    setPlayStatus('播放中 · 浏览器语音 · ' + settings.speed.toFixed(1) + '×');
+    setPlayStatus(T('statusPlaying', T('engineBrowser'), settings.speed.toFixed(1)));
     speakBrowser(text, function () { repeatNext(text, timesLeft - 1); });
     return;
   }
   var key = clipKey(text);
   if (clipCache[key]) { playUrl(clipCache[key], text, timesLeft); return; }
-  setPlayStatus('合成中 · ' + engineLabel() + '…');
+  setPlayStatus(T('statusSynth', engineLabel()));
   var synth = settings.engine === 'voicevox' ? vvSynthesize(text) : azSynthesize(text);
   synth.then(function (url) {
     clipCache[key] = url;
     playUrl(url, text, timesLeft);
   }).catch(function (err) {
-    setPlayStatus(engineLabel() + ' 失败（' + err.message + '）· 已回退浏览器语音');
+    setPlayStatus(T('statusFallback', engineLabel(), err.message));
     speakBrowser(text, function () { repeatNext(text, timesLeft - 1); });
   });
 }
 function playUrl(url, text, timesLeft) {
   var a = new Audio(url);
   currentAudio = a;
-  setPlayStatus('播放中 · ' + engineLabel() + ' · ' + settings.speed.toFixed(1) + '×');
+  setPlayStatus(T('statusPlaying', engineLabel(), settings.speed.toFixed(1)));
   var done = function () { currentAudio = null; repeatNext(text, timesLeft - 1); };
   a.onended = done;
   a.onerror = done;
@@ -215,7 +309,7 @@ function repeatNext(text, remain) {
   } else {
     var b = mainBody.querySelector('#btnPlay');
     if (b) b.disabled = false;
-    setPlayStatus('已播放 ' + settings.repeats + ' 次 · ' + engineLabel() + ' · ' + settings.speed.toFixed(1) + '×');
+    setPlayStatus(T('statusPlayed', settings.repeats, engineLabel(), settings.speed.toFixed(1)));
   }
 }
 function setPlayStatus(t) {
@@ -246,14 +340,16 @@ function shuffle(a) {
   return a;
 }
 function norm(s) { return (s || '').replace(/[\s\u3000]/g, '').replace(/〜/g, '').replace(/～/g, ''); }
-function wordKey(w) { return norm(w.w) + '|' + norm(w.k); }
+var NORM = CFG.norm || norm;
+function wordKey(w) { return NORM(w.w) + '|' + NORM(w.k); }
 
 function checkAnswer(input, item) {
-  var n = norm(input);
+  if (CFG.isAnswer) return !!CFG.isAnswer(input, item);
+  var n = NORM(input);
   if (!n) return false;
-  if (settings.acceptMode === 'kana') return n === norm(item.k);
-  if (settings.acceptMode === 'kanji') return n === norm(item.w);
-  return n === norm(item.w) || n === norm(item.k);
+  if (settings.acceptMode === 'kana') return n === NORM(item.k);
+  if (settings.acceptMode === 'kanji') return n === NORM(item.w);
+  return n === NORM(item.w) || n === NORM(item.k);
 }
 
 /* ===== 错词本 ===== */
@@ -294,9 +390,9 @@ function renderLists() {
         + '<span class="lc-badge">' + esc(g) + '</span>'
         + '<div class="lc-title">' + esc(l.title) + '</div>'
         + '<p class="lc-desc">' + esc(l.desc || '') + '</p>'
-        + '<div class="lc-count">' + l.words.length + ' 词'
-        + (done > 0 ? ' · <span class="done">已练 ' + done + '</span>' : '')
-        + (p.err > 0 ? ' · 错 ' + p.err + ' 次' : '')
+        + '<div class="lc-count">' + T('cardCount', l.words.length)
+        + (done > 0 ? ' · <span class="done">' + T('cardDone', done) + '</span>' : '')
+        + (p.err > 0 ? T('cardErr', p.err) : '')
         + '</div></button>';
     });
     html += '</div></div>';
@@ -316,7 +412,8 @@ function startList(list) {
   var doneSet = {};
   p.keys.forEach(function (k) { doneSet[k] = true; });
   var rest = list.words.filter(function (w) { return !doneSet[wordKey(w)]; });
-  var queue = rest.length > 0 ? rest.slice() : list.words.slice();  // 全练完则整表重练
+  /* 默认只练没练过的；整表练完再进来则整表重练。skipDone 关掉后每次都整表。 */
+  var queue = (settings.skipDone && rest.length > 0) ? rest.slice() : list.words.slice();
   if (settings.orderMode === 'shuffle') shuffle(queue);
 
   session = {
@@ -360,19 +457,19 @@ function backToLists() {
 function renderChrome() {
   var s = session;
   if (s.mode === 'review') {
-    hdrTitle.textContent = '本地错词复习';
-    hdrSub.textContent = wrongBook.length + ' 个错词 · 答对即从错词本移除';
-    mainTitle.textContent = '本地错词复习';
-    listPill.textContent = '错词本';
-    sideListName.textContent = '错词本 · 本次 ' + s.queue.length + ' 词';
+    hdrTitle.textContent = T('reviewTitle');
+    hdrSub.textContent = T('reviewSubtitle', wrongBook.length);
+    mainTitle.textContent = T('reviewTitle');
+    listPill.textContent = T('wrongbook');
+    sideListName.textContent = T('wrongbookThis', s.queue.length);
   } else {
-    hdrTitle.textContent = '日语单词听写';
-    hdrSub.textContent = s.list.title + ' · 答错后拼写正确再进入下一词';
+    hdrTitle.textContent = T('pageTitle');
+    hdrSub.textContent = s.list.title + T('listSubtitleSuffix');
     mainTitle.textContent = s.list.title;
     var group = window.DICTATION_LISTS.filter(function (l) { return l.group === s.list.group; });
     var gi = group.findIndex(function (l) { return l.id === s.list.id; });
     listPill.textContent = 'List ' + (gi + 1) + ' / ' + group.length;
-    sideListName.textContent = s.list.title + ' · 独立进度';
+    sideListName.textContent = s.list.title + T('independentProgress');
   }
   updateSide();
 }
@@ -381,7 +478,7 @@ function updateSide() {
   var s = session;
   statDone.textContent = s.done;
   statErr.textContent = s.err;
-  sideStatus.textContent = s.finished ? '已完成' : '进行中';
+  sideStatus.textContent = s.finished ? T('finished') : T('running');
   sideStatus.className = 'pill pill-run' + (s.finished ? ' is-done' : '');
 }
 
@@ -413,16 +510,16 @@ function renderTabs() {
 function renderBody() {
   mainBody.innerHTML =
     '<div class="play-row">'
-    + '<button class="play-circle" id="btnPlay" title="播放当前单词 (Tab)">'
+    + '<button class="play-circle" id="btnPlay" title="' + T('playCurrent') + ' (Tab)">'
     + '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M16.5 12a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 16.5 12z"/><path d="M14 3.8v2.06a6.5 6.5 0 0 1 0 12.28v2.06a8.5 8.5 0 0 0 0-16.4z"/></svg>'
     + '</button>'
-    + '<div class="play-meta"><b>播放当前单词</b><span id="playStatus">未播放</span></div>'
+    + '<div class="play-meta"><b>' + T('playCurrent') + '</b><span id="playStatus">' + T('statusIdle', T('engineBrowser'), settings.speed.toFixed(1)) + '</span></div>'
     + '</div>'
-    + '<div class="meaning-box" id="meaningBox"><span class="mb-label">中文释义</span><span class="mb-text" id="meaningText">—</span></div>'
-    + '<label class="input-label" for="answerInput">输入听到的单词</label>'
-    + '<input type="text" id="answerInput" class="answer-input" placeholder="在这里输入答案" autocomplete="off" spellcheck="false">'
-    + '<div class="action-row"><button class="btn-hint" id="btnHint">提示</button><button class="btn-submit" id="btnSubmit">提交答案</button></div>'
-    + '<p class="kbd-hints"><kbd>Tab</kbd> 重播当前单词 <kbd>Enter</kbd> 提交答案</p>'
+    + '<div class="meaning-box" id="meaningBox"><span class="mb-label">' + T('meaningLabel') + '</span><span class="mb-text" id="meaningText">—</span></div>'
+    + '<label class="input-label" for="answerInput">' + T('inputLabel') + '</label>'
+    + '<input type="text" id="answerInput" class="answer-input" placeholder="' + T('inputPlaceholder') + '" autocomplete="off" spellcheck="false">'
+    + '<div class="action-row"><button class="btn-hint" id="btnHint">' + T('hint') + '</button><button class="btn-submit" id="btnSubmit">' + T('submit') + '</button></div>'
+    + '<p class="kbd-hints"><kbd>Tab</kbd> ' + T('kbdReplay') + ' <kbd>Enter</kbd> ' + T('kbdSubmit') + '</p>'
     + '<p class="fb-line" id="fbLine"></p>';
 
   // 重新绑定（元素已重建）
@@ -449,18 +546,18 @@ function renderDone() {
   mainBody.innerHTML =
     '<div class="done-block">'
     + '<div class="db-ico">🎉</div>'
-    + '<h3>' + (s.mode === 'review' ? '错词复习完成' : '本组练习完成') + '</h3>'
-    + '<p>完成 ' + s.done + ' 词 · 错误 ' + s.err + ' 次' + (s.err > 0 ? ' · 本次正确率 ' + acc + '%' : ' · 全对！') + '</p>'
+    + '<h3>' + (s.mode === 'review' ? T('doneReview') : T('doneList')) + '</h3>'
+    + '<p>' + T('doneStat', s.done, s.err) + (s.err > 0 ? T('doneAccuracy', acc) : T('donePerfect')) + '</p>'
     + '<div class="done-actions">'
-    + (wrongBook.length > 0 ? '<button class="hdr-btn back" id="dbReview">复习本地错词（' + wrongBook.length + '）</button>' : '')
-    + (s.mode === 'list' ? '<button class="hdr-btn" id="dbAgain">再练一遍本表</button>' : '')
-    + '<button class="hdr-btn" id="dbBack">← 返回词单</button>'
+    + (wrongBook.length > 0 ? '<button class="hdr-btn back" id="dbReview">' + T('reviewWrong', wrongBook.length) + '</button>' : '')
+    + (s.mode === 'list' ? '<button class="hdr-btn" id="dbAgain">' + T('again') + '</button>' : '')
+    + '<button class="hdr-btn" id="dbBack">' + T('back') + '</button>'
     + '</div></div>';
   var b1 = $('dbReview'), b2 = $('dbAgain'), b3 = $('dbBack');
   if (b1) b1.addEventListener('click', startReview);
   if (b2) b2.addEventListener('click', function () { startList(session.list); });
   b3.addEventListener('click', backToLists);
-  footRemain.textContent = '还剩 0 个词';
+  footRemain.textContent = T('remain', 0);
   footFill.style.width = '100%';
   cntNow.textContent = s.queue.length;
 }
@@ -479,7 +576,7 @@ function loadWord() {
   var item = s.queue[s.idx];
 
   renderBody();
-  setPlayStatus('未播放 · ' + engineLabel() + ' · ' + settings.speed.toFixed(1) + '×');
+  setPlayStatus(T('statusIdle', engineLabel(), settings.speed.toFixed(1)));
   var mb = mainBody.querySelector('#meaningBox');
   var mt = mainBody.querySelector('#meaningText');
   mt.textContent = item.m || '—';
@@ -487,10 +584,10 @@ function loadWord() {
 
   cntNow.textContent = s.idx + 1;
   cntTotal.textContent = s.queue.length;
-  footRemain.textContent = '还剩 ' + (s.queue.length - s.idx) + ' 个词';
+  footRemain.textContent = T('remain', s.queue.length - s.idx);
   footFill.style.width = (s.idx / s.queue.length * 100) + '%';
 
-  wordResult.innerHTML = '<p class="wr-empty">提交答案后在此显示本词结果</p>';
+  wordResult.innerHTML = '<p class="wr-empty">' + T('wrEmpty') + '</p>';
   updateSide();
 
   mainBody.querySelector('#answerInput').focus();
@@ -521,7 +618,7 @@ function submitAnswer() {
     s.done++;
     inp.disabled = true;
     inp.className = 'answer-input is-ok';
-    fb.textContent = (s.wordErr > 0 ? '纠错通过' : '正确') + '！按 Enter 进入下一词';
+    fb.textContent = s.wordErr > 0 ? T('fbOkFixed') : T('fbOk');
     fb.className = 'fb-line ok';
 
     if (s.mode === 'list') {
@@ -533,16 +630,16 @@ function submitAnswer() {
 
     wordResult.innerHTML =
       '<p class="wr-word">' + esc(item.w) + '</p>'
-      + '<p class="wr-kana">' + esc(item.k) + '</p>'
+      + (item.k ? '<p class="wr-kana">' + esc(item.k) + '</p>' : '')
       + '<p class="wr-meaning">' + esc(item.m) + '</p>'
-      + '<span class="wr-badge ok">' + (s.wordErr > 0 ? '纠错通过' : '一次通过') + '</span>';
+      + '<span class="wr-badge ok">' + (s.wordErr > 0 ? T('badgeFixed') : T('badgeOk')) + '</span>';
 
     /* 提交键变为"下一词"，键位提示同步更新 */
-    mainBody.querySelector('#btnSubmit').textContent = '下一词 →';
+    mainBody.querySelector('#btnSubmit').textContent = T('next');
     var hb = mainBody.querySelector('#btnHint');
     if (hb) hb.disabled = true;
     var kh = mainBody.querySelector('.kbd-hints');
-    if (kh) kh.innerHTML = '<kbd>Enter</kbd> 进入下一词';
+    if (kh) kh.innerHTML = '<kbd>Enter</kbd> ' + T('kbdNext');
 
     updateSide();
     renderTabs();
@@ -552,18 +649,18 @@ function submitAnswer() {
     s.err++;
     s.wordErr++;
     inp.className = 'answer-input is-err';
-    fb.textContent = '拼写错误 · 正确答案：' + item.w + '（' + item.k + '）';
+    fb.textContent = T('wrongAnswer', item.w, item.k);
     fb.className = 'fb-line err';
 
     if (s.mode === 'list') { listProg(s.listId).err++; saveProgress(); }
     wbAdd(item);
 
     wordResult.innerHTML =
-      '<p class="wr-yours">你的输入：' + esc(input) + '</p>'
+      '<p class="wr-yours">' + T('wrYours') + esc(input) + '</p>'
       + '<p class="wr-word">' + esc(item.w) + '</p>'
-      + '<p class="wr-kana">' + esc(item.k) + '</p>'
+      + (item.k ? '<p class="wr-kana">' + esc(item.k) + '</p>' : '')
       + '<p class="wr-meaning">' + esc(item.m) + '</p>'
-      + '<span class="wr-badge err">错误 ' + s.wordErr + ' 次 · 请照写一遍</span>';
+      + '<span class="wr-badge err">' + T('wrErrBadge', s.wordErr) + '</span>';
 
     updateSide();
     setTimeout(function () {
@@ -592,12 +689,12 @@ function openWordList() {
   var doneSet = {};
   p.keys.forEach(function (k) { doneSet[k] = true; });
   $('wlTitle').textContent = l.title;
-  $('wlSub').textContent = l.words.length + ' 词 · 已练 ' + Math.min(p.keys.length, l.words.length) + ' · 组：' + l.group;
+  $('wlSub').textContent = T('wlSub', l.words.length, Math.min(p.keys.length, l.words.length), l.group);
   var html = '';
   l.words.forEach(function (w, i) {
     var isCur = session.queue[session.idx] && wordKey(session.queue[session.idx]) === wordKey(w);
-    var st = doneSet[wordKey(w)] ? '<td class="st done">✓ 已练</td>'
-           : isCur ? '<td class="st cur">● 当前</td>'
+    var st = doneSet[wordKey(w)] ? '<td class="st done">' + T('stDone') + '</td>'
+           : isCur ? '<td class="st cur">' + T('stCur') + '</td>'
            : '<td class="st">—</td>';
     html += '<tr' + (isCur ? ' class="is-cur"' : '') + '><td>' + (i + 1) + '</td>'
       + '<td class="w">' + esc(w.w) + '</td><td class="k">' + esc(w.k) + '</td>'
@@ -616,7 +713,7 @@ function engineGroupsVisible() {
 function loadVvSpeakers() {
   var sel = $('setVvSpeaker');
   var base = settings.vvUrl.replace(/\/+$/, '');
-  sel.innerHTML = '<option value="">加载声中…</option>';
+  sel.innerHTML = '<option value="">' + T('vvLoading') + '</option>';
   fetch(base + '/speakers')
     .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(function (list) {
@@ -627,7 +724,7 @@ function loadVvSpeakers() {
             + (sp.styles.length > 1 ? ' · ' + esc(st.name) : '') + '</option>';
         });
       });
-      sel.innerHTML = html || '<option value="">（无声线）</option>';
+      sel.innerHTML = html || '<option value="">' + T('vvEmpty') + '</option>';
       if (settings.vvSpeaker != null && sel.querySelector('option[value="' + settings.vvSpeaker + '"]')) {
         sel.value = String(settings.vvSpeaker);
       } else if (sel.options.length > 0) {
@@ -637,17 +734,17 @@ function loadVvSpeakers() {
       }
     })
     .catch(function (err) {
-      sel.innerHTML = '<option value="">连接失败：' + esc(err.message) + '</option>';
+      sel.innerHTML = '<option value="">' + T('vvFail', esc(err.message)) + '</option>';
     });
 }
 
 function testVoice() {
   var msg = $('testVoiceMsg');
-  msg.textContent = '播放中…';
+  msg.textContent = T('testPlaying');
   stopPlayback();
-  var text = 'こんにちは。聴き取り練習のテストです。';
-  function ok() { msg.textContent = '播放完成'; }
-  function fail(e) { msg.textContent = '失败：' + e.message; }
+  var text = T('testPhrase');
+  function ok() { msg.textContent = T('testDone'); }
+  function fail(e) { msg.textContent = T('testFail', e.message); }
   if (settings.engine === 'browser') { speakBrowser(text, ok); return; }
   var synth = settings.engine === 'voicevox' ? vvSynthesize(text) : azSynthesize(text);
   synth.then(function (url) {
@@ -666,6 +763,8 @@ function syncSettingsUI() {
   $('setGap').value = settings.gap;
   $('setGapVal').textContent = settings.gap.toFixed(1) + 's';
   $('setShowHint').checked = settings.showHint;
+  var sd = $('setSkipDone');   // 只有英语侧有这一项
+  if (sd) sd.checked = settings.skipDone;
   document.querySelectorAll('input[name="acceptMode"]').forEach(function (r) { r.checked = r.value === settings.acceptMode; });
   document.querySelectorAll('input[name="orderMode"]').forEach(function (r) { r.checked = r.value === settings.orderMode; });
   document.querySelectorAll('input[name="engine"]').forEach(function (r) { r.checked = r.value === settings.engine; });
@@ -697,6 +796,8 @@ function bindSettings() {
     var mb = mainBody.querySelector('#meaningBox');
     if (mb) mb.className = 'meaning-box' + (settings.showHint ? '' : ' is-hidden');
   });
+  var sd = $('setSkipDone');   // 只有英语侧有这一项
+  if (sd) sd.addEventListener('change', function () { settings.skipDone = this.checked; saveSettings(); });
   document.querySelectorAll('input[name="acceptMode"]').forEach(function (r) {
     r.addEventListener('change', function () { settings.acceptMode = this.value; saveSettings(); });
   });
@@ -720,7 +821,7 @@ function bindSettings() {
   });
   $('setAzKey').addEventListener('change', function () { settings.azKey = this.value.trim(); saveSettings(); });
   $('setAzRegion').addEventListener('change', function () { settings.azRegion = this.value.trim() || 'japaneast'; saveSettings(); });
-  $('setAzVoice').addEventListener('change', function () { settings.azVoice = this.value.trim() || 'ja-JP-NanamiNeural'; saveSettings(); });
+  $('setAzVoice').addEventListener('change', function () { settings.azVoice = this.value.trim() || AZ_VOICE_DEFAULT; saveSettings(); });
   $('btnTestVoice').addEventListener('click', testVoice);
 }
 

@@ -35,16 +35,33 @@
   function save() {
     try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {}
   }
-  function count() { return Object.keys(data.done).length; }
+  /* 「已看 n 个单元」只数日语：英语词表/阅读页写进同一份 done，混进来
+     会让日语侧面板的数字虚高（英语侧在门户上按前缀单独数）。 */
+  function count() {
+    var n = 0, k;
+    for (k in data.done) {
+      if (Object.prototype.hasOwnProperty.call(data.done, k) && RE_UNIT_JA.test(k)) n++;
+    }
+    return n;
+  }
   function countMod() { return Object.keys(data.mod).length; }
 
   /* ====================== 单元标识 ======================
      key 取路径末三段（级别/分类/文件），与索引页 <a href> 完全一致，
-     因此不受 GitHub Pages 子目录影响。模块 key 再加 "#模块id"。   */
+     因此不受 GitHub Pages 子目录影响。模块 key 再加 "#模块id"。
+
+     两种语言的合法单元页：
+       日语   n5/grammar/01.html
+       英语   en/1k/01.html        （词表，1k–4k 四档）
+       英语   reading/1k/01.html   （阅读，en/reading/1k/01.html 的末三段）
+     英语模块入口页（en/typing/index.html → typing/index.html）只有两段，
+     而档位表（1k–4k）又挡掉了 reading/index.html —— 无需额外的负向断言。 */
+  var RE_UNIT = /^(?:n[1-5]\/[^/]+|en\/(?:1k|2k|3k|4k)|reading\/(?:1k|2k|3k|4k))\/[^/]+\.html$/;
+  var RE_UNIT_JA = /^n[1-5]\/[^/]+\/[^/]+\.html$/;
   function keyOf(p) {
     return String(p || '').split(/[?#]/)[0].split('/').filter(Boolean).slice(-3).join('/');
   }
-  function isUnit(k) { return /^n[1-5]\/[^/]+\/[^/]+\.html$/.test(k); }
+  function isUnit(k) { return RE_UNIT.test(k); }
   function isMod(k) { return /^n[1-5]\/[^/]+\/[^/]+\.html#.+$/.test(k); }
 
   function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -391,10 +408,38 @@
     msg(d, '已清空。');
   }
 
+  /* ====================== 对外接口 ======================
+     英语侧页面（词表 / 阅读）与门户要读写同一份进度，故开四个方法：
+     够用，且不把 data 本身泄出去。全部键都过 keyOf，与日语侧同一套归一化。 */
+  window.LibProgress = {
+    isDone: function (key) { return !!data.done[keyOf(key)]; },
+    markDone: function (key) { data.done[keyOf(key)] = Date.now(); save(); },
+    unmark: function (key) { delete data.done[keyOf(key)]; save(); },
+    /* count(prefix) 数 done 里以 prefix 开头的键；给了 list 就只数清单内的
+       （英语侧的分母来自生成器产出的清单，而不是 done 里的历史累计）。 */
+    count: function (prefix, list) {
+      var n = 0, i, k;
+      prefix = prefix || '';
+      if (list && list.length) {
+        for (i = 0; i < list.length; i++) {
+          k = keyOf(list[i]);
+          if (k.indexOf(prefix) === 0 && data.done[k]) n++;
+        }
+        return n;
+      }
+      for (k in data.done) {
+        if (Object.prototype.hasOwnProperty.call(data.done, k) && k.indexOf(prefix) === 0) n++;
+      }
+      return n;
+    }
+  };
+
   /* ====================== 启动 ====================== */
   function boot() {
     var unitKey = keyOf(location.pathname);
-    if (isUnit(unitKey)) mountUnit(unitKey);
+    // 只有日语单元页挂「済」勾选框：英语页的完成语义不同（词卡页由 50 张卡的
+    // 自评推出来，阅读页自带按钮），它们的页面脚本直接调 LibProgress。
+    if (RE_UNIT_JA.test(unitKey)) mountUnit(unitKey);
     if (document.querySelector('ul.unit-list')) renderIndex();
   }
 

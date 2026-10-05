@@ -1,23 +1,27 @@
-# JLPT Library
+# Language Library
 
-JLPT（日本語能力試験）N1～N5 的日语学习站——学习资料、真题练习、课堂单词。
+日语（JLPT N1～N5）与英语（词频 1k～4k）两条学习路径的离线学习站——学习资料、真题练习、课堂单词、词表背记。
 
 🌐 **在线浏览**：https://Yang-Code01.github.io/jlpt-library/
 
-## 三大模块
+## 模块
 
-门户 `index.html` 是三者统一的入口。
+门户 `index.html` 是所有模块的统一入口，顶部可切换日语 / 英语。
 
 | 模块 | 入口 | 内容 |
 |---|---|---|
 | **学习资料** | `material/index.html` | N5 → N1 的基础知识・语法・词汇，共 168 个单元页；日语内容配振假名注音，每单元附自测 |
 | **真题练习** | `exam/index.html` | 题型专练（按子题型 / 按真题顺序取题）＋ 整卷仿真（155 分钟、听力放最后、只播一次）；已入库 N2 2023.7 / 2023.12 两卷 |
 | **课堂单词** | `jp-vocab/index.html` | 按课堂主题打包的副词词卡，共 7 单元 / 157 张卡；浏览、翻转卡、测验、间隔重复复习四态，词与例文均配音频；「様子の副詞」另有 15 词重点模式 |
+| **英语词表** | `en/1k/01.html` 起 | 按词频分 1k / 2k / 3k / 4k 四档、每 50 词一单元；列表与翻转卡可背，测验与间隔重复复习在同一单元页陆续补齐；数据由 `tools/en-vocab.mjs` 从 ECDICT 生成 |
+| **英语听写** | `en/dictation/index.html` | 与词表单元一一对应的 77 个词单，听英文发音拼写单词（浏览器内置语音，不预生成音频）；每题播放次数 / 中文释义 / 词序可调、错词本可集中复练、「练过的词不再出现」可关；内核与日语听写共用一份 `dictation/dictation.js` |
+| **英语阅读** | `en/reading/index.html` | 30 篇公有领域短文按难度分四档（每档 7–8 篇，每篇 800–2,000 词）；超纲词自动高亮、点词查义（中释 + 英释 + 发音）、读完手动盖章；语料由 `tools/en-reading.mjs` 从 Project Gutenberg 生成 |
+| **英语打字** | `en/typing/index.html` | 按四档词频随机出词，看着单词敲出它本身；练习 / 竞技 60 秒（WPM 与准确率）/ 无尽三模式、五档速度倍率；4k 档混入 37 条固定搭配（连续输入字母，不按空格）；内核与日语打字共用一份 `typing/typing.js` |
 
 ## 目录结构
 
 ```
-├── index.html              ← 门户首页（三模块入口）
+├── index.html              ← 门户首页（统一入口，顶部切日语 / 英语）
 ├── material/
 │   └── index.html          ← 学习资料落地页（168 单元索引）
 ├── assets/
@@ -29,6 +33,16 @@ JLPT（日本語能力試験）N1～N5 的日语学习站——学习资料、�
 │   ├── exam-core.js        ← 判分与进度存储
 │   └── data/N2/            ← 每卷一个数据模块，另有 audio/ 与 manifest.json
 ├── jp-vocab/               ← 课堂单词：vocab.css + vocab.js + gen.js（生成/校验单元页）+ gen-audio.ps1（合成音频）+ 每单元一个子目录（含 data.json 与 audio/）
+├── en/                     ← 英语侧：data/vocab.js（生成物）+ unit.css/unit.js（词表视图层）+ 1k…4k/ 单元页
+│   ├── dictation/          ← 英语听写：cfg.js（语言层覆盖）+ lists.js（由词表现算 77 个词单）+ index.html，内核复用 dictation/dictation.js
+│   ├── reading/            ← 英语阅读：reader.css/reader.js（阅读视图层）+ index.html（篇目）+ 1k…4k/ 30 篇（生成物，附台账 README）
+│   └── typing/             ← 英语打字：cfg.js（语言层覆盖）+ words.js（词池）+ phrases.js（搭配，生成物）+ index.html，内核复用 typing/typing.js
+├── tools/
+│   ├── en-vocab.mjs        ← 英语词表生成器 / 校验器（gen | check）
+│   ├── en-reading.mjs      ← 英语阅读管线（fetch | gen | check）
+│   ├── en-typing.mjs       ← 英语打字固定搭配挖掘（gen | check）
+│   ├── en-accept.mjs       ← 英语侧整合验收（107 项一条命令；不需要 .scratch/，clone 即可跑）
+│   └── encrypt-exam.mjs    ← 真题库加解密
 ├── n1/ … n5/               ← 各等级的学习页面（每级下 basics/ grammar/ vocab/）
 ├── docs/
 │   ├── adr/                ← 架构决策记录
@@ -41,6 +55,84 @@ JLPT（日本語能力試験）N1～N5 的日语学习站——学习资料、�
 
 168 个单元页的分布：N1 39、N2 41、N3 37、N4 27、N5 24。
 
+## 数据来源
+
+英语侧的词表不是手写的，由 `tools/en-vocab.mjs` 从下面的公开词表生成；`en/data/vocab.js`
+与 `en/<档位>/<NN>.html` 都是生成物，**勿手改**。字段用法、选词规则、分档切点与许可声明
+详见 [`en/data/README.md`](./en/data/README.md)。
+
+英语侧的阅读语料由 `tools/en-reading.mjs` 从 Project Gutenberg 抓取、切篇、分档，
+`en/reading/` 下的 30 篇与篇目页都是生成物，**勿手改**；选书门槛、切篇与分档规则、
+许可与复查注意事项详见 [`en/reading/README.md`](./en/reading/README.md)。
+
+| 数据 | 来源 | 许可 | 下载 |
+|---|---|---|---|
+| 词表（词条 / 音标 / 中释 / 英释 / 词频 / 考纲标签） | [ECDICT](https://github.com/skywind3000/ECDICT) | MIT | `ecdict.csv`（65.9 MB） |
+| 阅读语料（30 篇公有领域短文） | [Project Gutenberg](https://www.gutenberg.org/) | 正文已入公有领域 | `pg_catalog.csv`（21.2 MB，选书依据）+ 各书 `pg<书号>.txt` |
+
+源文件校验和：
+
+```
+sha256  ecdict.csv
+1a6947e04785db63613a92e14903cdae7954f7e84860b10e68e5c7cbb3f9c3cf
+```
+
+重新生成（源文件不进仓库，因为 65.9 MB 且可随时下载）：
+
+```bash
+# 1. 下载 ecdict.csv（源文件不进仓库：65.9 MB，且可随时下载）
+node tools/en-vocab.mjs gen --src /path/to/ecdict.csv   # 生成数据、单元页与门户的清单区
+node tools/en-vocab.mjs check --src /path/to/ecdict.csv # 校验：切点、单元数自洽、清单与文件双向一致、幂等
+```
+
+省略 `--src` 时读默认位置（`.scratch/en-module/research/ecdict.csv`，该目录不在仓库里），
+并额外核对源文件校验和。
+词的选定规则：只取纯字母（含 `'` 与 `-`）词形、中文释义非空、词频字段 > 0 的条目，
+按词频升序取前 3,766 个，再切成四档 —— `1k`（1–1000）、`2k`（1001–2000）、
+`3k`（2001–2809）、`4k`（2810–3766）。
+
+阅读语料同理，源文件（下载榜页面与各书正文）不进仓库：
+
+```bash
+node tools/en-reading.mjs fetch   # 抓 Gutenberg 下载榜 → 过内容门槛 → 缓存候选书正文（需要联网，只跑一次）
+node tools/en-reading.mjs gen     # 读缓存：剥头尾 → 切篇 → 分档 → 写 30 篇与门户清单区
+node tools/en-reading.mjs check   # 校验：篇长、分档分明、词典口径、清单与文件双向一致、幂等
+```
+
+⚠️ `fetch` 依赖 Gutenberg 的实时下载榜，**榜单会变**：重跑会得到不同的候选书与篇目。
+线上用的是仓库里已生成的 30 篇，`check` 只比对本地缓存。
+
+英语打字的固定搭配（4k 档）也来自站内 30 篇阅读正文，语料是仓库里已有的文件，
+clone 下来即可复现：
+
+```bash
+node tools/en-typing.mjs gen     # 读 en/reading/ 的 30 篇 → 挖 37 条搭配 → 写 en/typing/phrases.js
+node tools/en-typing.mjs check   # 校验：门槛、形状、重复、字节一致
+```
+
+挖掘口径（词表前 2,000 名内的二元组 / 三元组、次数 ≥ 4 且 PMI ≥ 3.3、功能词与限定词过滤、
+22 条人手剔除、三元组需两侧二元组都够格）详见 [`en/typing/README.md`](./en/typing/README.md)。
+阅读篇目一变，搭配就要重挖。
+
+## 验收
+
+英语侧的 107 项（77 个词表单元 + 30 篇阅读）有一条命令的整合验收：
+
+```bash
+node tools/en-accept.mjs              # 只校验（不依赖 .scratch/，clone 下来就能跑）
+node tools/en-accept.mjs --gen        # 先重跑三个生成器，再校验，并核对「再跑一次字节一致」
+node tools/en-accept.mjs --from-zero --gen   # 更狠：把生成物挪走，从零重产出再逐字节比对
+node tools/en-accept.mjs --src /path/to/ecdict.csv   # 源文件换位置时（--gen 需要源）
+```
+
+它查六件事：三个生成器的 check、107 项齐不齐、**门户与篇目页的清单 ≡ 实际文件（双向，
+无孤儿页、无死链）**、每个页面的本地链接都能打开、`file://` 硬约束（无 `fetch` / ES module，
+数据一律 `<script>` 注入）、许可与台账（数据不入库，来源与校验和写在 README 里）。
+
+更细的交互行为测试（词表翻卡与间隔复习、阅读点词查义、听写拼写、打字计分、
+进度导入导出、跨模块闭环）在开发工作区的 `.scratch/en-module/test/` 下，**不进仓库**
+（那目录被 `.gitignore` 排除）；上面这条命令不依赖它们，克隆者也能自证数据与链接的完整性。
+
 ## 本地预览
 
 任何浏览器直接打开 `index.html` 即可，无构建步骤、无外部依赖（无 CDN、无外链字体），`file://` 下功能完整。
@@ -51,6 +143,17 @@ JLPT（日本語能力試験）N1～N5 的日语学习站——学习资料、�
 注明出处即可使用，但**不可商用**。
 
 课堂单词模块的部分例文引自《新完全掌握 N2 词汇》，仅作个人学习用途。
+
+> 英语词表数据（`en/data/vocab.js`）衍生自 ECDICT，按 **MIT** 许可使用，与上方的
+> CC BY-NC 4.0 不同：署名 ECDICT / skywind3000 即可，不受非商用限制。两套数据
+> 各自单独声明，不互相覆盖。
+
+> 英语阅读的 30 篇正文来自 Project Gutenberg，原文已进入公有领域（Gutenberg 的
+> header / footer 已剥离，不在页面里）；页面内联的超纲词释义与判超纲用的词表一样
+> 衍生自 ECDICT（**MIT**）。
+
+> 英语打字 4k 档的 37 条固定搭配（`en/typing/phrases.js`）是从上述公有领域正文里
+> 统计出来的词组，不额外引入第三方数据，也不受额外许可限制。
 
 ## 贡献
 

@@ -1,6 +1,7 @@
 /* ============================================================
    打字练习 · 游戏内核（假名 → 罗马字）
-   依赖：romaji.js（全局 Romaji.readings / Romaji.match）
+   依赖：romaji.js（全局 Romaji.readings / Romaji.match）。
+         英语侧由 window.TYPING_CFG 的 readings / match 接管，不需要 romaji.js。
    数据：按难度档以 <script src="data/<档>.js"> 动态注入后读全局变量
          （file:// 下 fetch 不可用，故只能走 <script src> 这条硬约束路径）
 
@@ -23,26 +24,51 @@
    ① 常量：难度档 / 模式
    ------------------------------------------------------------ */
 
+/* ------------------------------------------------------------
+   ⓪ 可选语言层覆盖（决策 23）
+   英语侧页面在引入本脚本**之前**设置 window.TYPING_CFG，把语言相关的那一层
+   从常量搬到可配置处。不设时下面每一项都退回日语侧原来的字面值 ——
+   日语侧行为逐字不变，这是本片唯一的真实回归风险。
+     tiers               档位表（默认 n5–n1）
+     defaultTier         初始档位 key（默认 'n5'）
+     modes               模式表（默认 练习 / 竞技 / 无尽）
+     speeds              速度倍率表（默认 [0.5,1,1.2,1.5,2]）
+     bestKey/speedKey/soundKey   三个 localStorage 键
+     speechLang          语音合成语言（默认 'ja-JP'）
+     voiceMatch(lang)    语音挑选规则（默认 ja 开头）
+     readings(word)      期望输入串的候选集合（默认 假名 → 罗马字）
+     match(word, typed)  单字符判定（默认 Romaji.match(word.k, typed)）
+     flowLength(word)    传送带时长按什么计数（默认假名数；英语传字母数）
+     flowBaseMs/flowPerUnitMs/flowMinMs/flowMaxMs
+     srcPrefix           加载失败文案里的路径前缀（默认 'typing/'）
+   ------------------------------------------------------------ */
+var CFG = (typeof window !== 'undefined' && window.TYPING_CFG) || {};
+
 /* 最高分存储 key（独立于 assets/progress.js） */
-var BEST_KEY = 'jlpt-typing-best';
+var BEST_KEY = CFG.bestKey || 'jlpt-typing-best';
 
 /* 竞技模式总时长与「最后告警」区间 */
 var COMP_MS = 60000;
 var COMP_WARN_MS = 3000;
 var TICK_MS = 120;
 
-/* 难度档 = JLPT 等级（N5 最易 → N1 最难），每档独立词表。
-   传送带单程时长按「假名数」线性缩放，再乘用户自选速度倍率（state.speed，越大越快）。
-   固定时长下 1 假名词与 12 假名词拿同样的停留时间，长词在无尽模式里几乎必死、
-   短词又过于宽松；按词长给时，难度才落回手速而不是运气。
+/* 难度档：默认 = JLPT 等级（N5 最易 → N1 最难），每档独立词表。
+   传送带单程时长按「词长单位数」线性缩放，再乘用户自选速度倍率
+   （state.speed，越大越快）。固定时长下 1 假名词与 12 假名词拿同样的停留时间，
+   长词在无尽模式里几乎必死、短词又过于宽松；按词长给时，难度才落回手速
+   而不是运气。「词长单位」默认 = 假名数，英语侧覆盖成字母数。
    CSS 侧通过 --ty-flow-ms 承接实际时长。 */
-var FLOW_BASE_MS = 3400;      /* 每个词的基础停留 */
-var FLOW_PER_KANA_MS = 1150;  /* 每多一个假名追加的停留 */
-var FLOW_MIN_MS = 4200;       /* 单假名词也不会快到底 */
-var FLOW_MAX_MS = 16000;      /* 超长词不至于占满整屏时间 */
-var SPEED_KEY = 'jlpt-typing-speed';
-var SPEEDS = [0.5, 1.0, 1.2, 1.5, 2.0];
-var TIERS = {
+var FLOW_BASE_MS = CFG.flowBaseMs || 3400;          /* 每个词的基础停留 */
+var FLOW_PER_UNIT_MS = CFG.flowPerUnitMs || 1150;   /* 每多一个词长单位追加的停留 */
+var FLOW_MIN_MS = CFG.flowMinMs || 4200;            /* 单单位词也不会快到底 */
+var FLOW_MAX_MS = CFG.flowMaxMs || 16000;           /* 超长词不至于占满整屏时间 */
+var SPEED_KEY = CFG.speedKey || 'jlpt-typing-speed';
+var SPEEDS = CFG.speeds || [0.5, 1.0, 1.2, 1.5, 2.0];
+var DEFAULT_TIER = CFG.defaultTier || 'n5';
+var SPEECH_LANG = CFG.speechLang || 'ja-JP';
+var VOICE_MATCH = CFG.voiceMatch || function (lang) { return /^ja/i.test(lang || ''); };
+var SRC_PREFIX = CFG.srcPrefix || 'typing/';
+var TIERS = CFG.tiers || {
   n5:   { key: 'n5', label: 'N5', src: 'data/n5.js', global: 'TYPING_WORDS_N5' },
   n4:   { key: 'n4', label: 'N4', src: 'data/n4.js', global: 'TYPING_WORDS_N4' },
   n3:   { key: 'n3', label: 'N3', src: 'data/n3.js', global: 'TYPING_WORDS_N3' },
@@ -63,7 +89,7 @@ function saveSpeed(v) {
 }
 
 /* 模式（所有模式均可用 Space 暂停 / 恢复；竞技暂停同时冻结计时） */
-var MODES = {
+var MODES = CFG.modes || {
   practice:    { key: 'practice',    label: '练习', limited: false, pausable: true,
                  failOnWrong: false, failOnMiss: false,
                  tip: '无时限 · 错字只做红色反馈、不计分 · 词流出界自动换下一个 · Space 可暂停 / 恢复' },
@@ -174,12 +200,21 @@ function speakWord(word) {
     var ss = window.speechSynthesis;
     if (typeof ss.cancel === 'function') ss.cancel();
     var u = new SpeechSynthesisUtterance(word);
-    u.lang = 'ja-JP';
+    u.lang = SPEECH_LANG;
     u.rate = 0.9;   // 稍慢，利于跟读
     var voices = (typeof ss.getVoices === 'function') ? ss.getVoices() : [];
+    /* 先要精确语言（ja-JP / en-US），没有再退回前缀匹配 —— 列表里常有
+       en-GB / ja 变体，精确优先才能拿到用户期望的那一个。 */
+    var chosen = null;
     for (var i = 0; i < voices.length; i++) {
-      if (/^ja/i.test(voices[i].lang || '')) { u.voice = voices[i]; break; }
+      if (String(voices[i].lang).toLowerCase() === String(SPEECH_LANG).toLowerCase()) { chosen = voices[i]; break; }
     }
+    if (!chosen) {
+      for (var j = 0; j < voices.length; j++) {
+        if (VOICE_MATCH(voices[j].lang)) { chosen = voices[j]; break; }
+      }
+    }
+    if (chosen) u.voice = chosen;
     ss.speak(u);
   } catch (e) { /* 不支持 / 合成失败：静默忽略 */ }
 }
@@ -273,10 +308,24 @@ function ensureData(tier, done) {
    ⑥ 传送带渲染
    ------------------------------------------------------------ */
 
-/* 从当前词的全部合法罗马字写法里，挑「与已输入串前缀匹配最长」的那条做展示底稿，
+/* 期望输入串的候选集合。默认：假名 → 全部合法罗马字写法（英语侧覆盖成词形本身）。 */
+function readingsOf(word) {
+  if (CFG.readings) return CFG.readings(word) || [];
+  return window.Romaji ? window.Romaji.readings(word ? word.k : '') : [];
+}
+
+/* 判定「已输入串 + 新字符」是否合法。默认走假名 → 罗马字引擎；
+   英语侧用 CFG.match 直接用词形比对（词组把空格去掉）。返回形状同 Romaji.match：
+   { status: 'complete' | 'ok' | 'wrong', expects: [...] }。 */
+function matchTyped(word, cand) {
+  if (CFG.match) return CFG.match(word, cand);
+  return window.Romaji.match(word.k, cand);
+}
+
+/* 从当前词的全部合法写法里，挑「与已输入串前缀匹配最长」的那条做展示底稿，
    这样即使玩家用 si 而不是 shi，提示行的高亮也不会错位。 */
-function bestHint(kana, typed) {
-  var rs = window.Romaji ? window.Romaji.readings(kana) : [];
+function bestHint(word, typed) {
+  var rs = readingsOf(word);
   if (!rs.length) return { text: '', hit: 0 };
   var best = rs[0], bestN = -1;
   for (var i = 0; i < rs.length; i++) {
@@ -301,18 +350,25 @@ function renderWord() {
 
 function renderTyped() {
   if (!state.current) return;
-  var hint = bestHint(state.current.k, state.typed);
+  var hint = bestHint(state.current, state.typed);
   el.romaji.innerHTML =
     '<span class="ty-hit">' + esc(hint.text.slice(0, hint.hit)) + '</span>' +
     '<span class="ty-rest">' + esc(hint.text.slice(hint.hit)) + '</span>';
   el.echo.textContent = state.typed;
 }
 
-/* 当前词的单程停留时长：按假名数线性缩放，再除以速度倍率。
+/* 词长单位数：默认 = 假名数（长音 ー 与促音 っ 均计入，与 gen-words.js 分档口径一致）；
+   英语侧覆盖成字母数。 */
+function flowUnitCount(word) {
+  if (CFG.flowLength) return CFG.flowLength(word) || 0;
+  return kanaCount(word ? word.k : '');
+}
+
+/* 当前词的单程停留时长：按词长单位数线性缩放，再除以速度倍率。
    例（1.0x）：あ ≈ 4.2s，かな ≈ 7.0s，消费者物价指数 ≈ 16s。 */
-function flowDurationMs(kana) {
-  var n = kanaCount(kana);
-  var ms = FLOW_BASE_MS + FLOW_PER_KANA_MS * Math.max(0, n - 1);
+function flowDurationMs(word) {
+  var n = flowUnitCount(word);
+  var ms = FLOW_BASE_MS + FLOW_PER_UNIT_MS * Math.max(0, n - 1);
   if (ms < FLOW_MIN_MS) ms = FLOW_MIN_MS;
   if (ms > FLOW_MAX_MS) ms = FLOW_MAX_MS;
   return Math.round(ms / state.speed);
@@ -324,8 +380,7 @@ function flowDurationMs(kana) {
 function restartFlow() {
   var card = el.card;
   if (!card) return;
-  var kana = state.current ? state.current.k : '';
-  el.app.style.setProperty('--ty-flow-ms', flowDurationMs(kana) + 'ms');
+  el.app.style.setProperty('--ty-flow-ms', flowDurationMs(state.current) + 'ms');
   card.style.animation = 'none';
   void card.offsetWidth;          // 强制回流，确保动画可重入
   card.style.animation = '';      // 回落样式表里的 ty-flow
@@ -370,7 +425,7 @@ function handleChar(ch) {
 
   state.totalKeys++;
   var cand = state.typed + ch;
-  var r = window.Romaji.match(state.current.k, cand);
+  var r = matchTyped(state.current, cand);
 
   if (r.status === 'wrong') {
     onWrongChar();
@@ -502,7 +557,7 @@ function startGame() {
   ensureData(state.tier, function (list) {
     el.btnStart.disabled = false;
     if (!list || !list.length) {
-      setHint('词库加载失败，请确认 typing/data/' + state.tier + '.js 存在。', true);
+      setHint('词库加载失败，请确认 ' + SRC_PREFIX + ((TIERS[state.tier] || {}).src || '') + ' 存在。', true);
       return;
     }
     setHint('');
@@ -924,11 +979,12 @@ function bindAudioUnlock() {
 
 function init() {
   cacheDom();
-  if (!window.Romaji) {
+  /* 日语侧缺 romaji.js 就跑不了；英语侧由 CFG.readings + CFG.match 接管，不需要它。 */
+  if (!window.Romaji && !CFG.readings) {
     setHint('罗马字引擎（romaji.js）未加载，页面无法运行。', true);
     return;
   }
-  state.tier = 'n5';
+  state.tier = DEFAULT_TIER;
   state.speed = loadSpeed();
   state.mode = 'practice';
   bindEvents();
@@ -946,6 +1002,7 @@ window.TypingGame = {
   Sound: Sound,             // 音效挂载点：填充 key/collect/combo/wrong/tick/over
   state: state,             // 只读用途为主（测试 / 调试）
   start: startGame,
+  cfg: CFG,                 // 生效中的语言层覆盖对象（测试断言「不设时为空对象」）
   flowDurationMs: flowDurationMs   // 暴露给测试：断言按词长给时的口径
 };
 

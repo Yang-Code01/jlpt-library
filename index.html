@@ -3,11 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>日语学习资料库 · JLPT Library</title>
-<meta name="description" content="JLPT N5–N1 日语学习资料库：语法词汇单元、N2 真题、听力精听、听写、单词卡、动词变形与打字练习，全部离线可用。">
+<title>日语学习资料库 · Language Library</title>
+<meta name="description" content="日语与英语自学资料库：JLPT N5–N1 语法词汇单元、N2 真题、听力精听、听写、单词卡、动词变形与打字练习，以及按词频档位组织的英语词表，全部离线可用。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23b93e28'/%3E%3Ctext x='16' y='23' font-size='19' font-family='serif' fill='%23ffffff' text-anchor='middle'%3E語%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/theme.js"></script>
+<script>
+  /* 语言开关：与主题同一套路，进 <head> 里先落一次，避免切回英语时闪一下日语。
+     键名 jlpt-lang，默认 ja；只记在浏览器里，不写进 URL —— URL 是书签与深链的
+     身份，不该被语言污染。应用逻辑只写一遍：这里定义，页尾再补齐按钮态。 */
+  (function () {
+    var T = window.PORTAL_LANG = {
+      ja: {
+        t: '日语学习资料库 · Language Library',
+        d: 'JLPT N5–N1 日语学习资料库：语法词汇单元、N2 真题、听力精听、听写、单词卡、动词变形与打字练习，全部离线可用。'
+      },
+      en: {
+        t: '英语词表 · Language Library',
+        d: '英语词频档位词表：3,766 个词分四档、每 50 词一个单元，列表速览、翻转卡自测与间隔复习，全部离线可用。'
+      }
+    };
+    window.portalApplyLang = function (lang, persist) {
+      var l = T[lang] ? lang : 'ja';
+      document.documentElement.setAttribute('data-lang', l);
+      document.title = T[l].t;
+      var m = document.querySelector('meta[name="description"]');
+      if (m) m.setAttribute('content', T[l].d);
+      Array.prototype.forEach.call(document.querySelectorAll('.lang-tabs button'), function (b) {
+        var on = b.getAttribute('data-tab') === l;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      if (persist) { try { localStorage.setItem('jlpt-lang', l); } catch (e) {} }
+      return l;
+    };
+    var init = 'ja';
+    try { if (localStorage.getItem('jlpt-lang') === 'en') init = 'en'; } catch (e) {}
+    document.documentElement.setAttribute('data-lang', init);
+    document.title = T[init].t;
+    window.PORTAL_LANG_INIT = init;
+  })();
+</script>
 <style>
   /* 首页是公共样式之上的独立门户布局，不影响子页面。
      版式母题只有两个：一条细朱线，和一把 N5 → N1 的刻度尺。
@@ -473,6 +509,161 @@
     }
   }
 
+  /* ---------- 语言开关 ----------
+     两套入口 DOM 同时存在，靠 <html data-lang> 显隐：不重建 DOM、不换网址。 */
+  html[data-lang="ja"] .lang-pane[data-pane="en"],
+  html[data-lang="en"] .lang-pane[data-pane="ja"] {
+    display: none;
+  }
+
+  .lang-tabs {
+    margin-left: auto;
+    display: inline-flex;
+    gap: 2px;
+    padding: 3px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
+  }
+
+  .lang-tabs button {
+    appearance: none;
+    border: 0;
+    background: none;
+    border-radius: var(--radius-pill);
+    padding: 5px 14px;
+    font: inherit;
+    font-size: .82rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background .18s, color .18s;
+  }
+
+  .lang-tabs button.on {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .lang-tabs button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ---------- 英语面：四档刻度尺展开的单元清单 ---------- */
+  .en-bands {
+    display: grid;
+    gap: 8px;
+    margin: 14px 0 0;
+  }
+
+  .en-band {
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+  }
+
+  .en-band > summary {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .en-band > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .en-band > summary::after {
+    content: "＋";
+    margin-left: 6px;
+    color: var(--muted);
+    font-size: .84rem;
+  }
+
+  .en-band[open] > summary::after {
+    content: "－";
+  }
+
+  .en-band-id {
+    font-weight: 800;
+    letter-spacing: .04em;
+    color: var(--accent-ink);
+  }
+
+  .en-band-sub {
+    color: var(--muted);
+    font-size: .78rem;
+  }
+
+  .en-band-prog {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: .76rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .en-unit-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+    gap: 6px;
+    margin: 0;
+    padding: 0 12px 12px;
+    list-style: none;
+  }
+
+  .en-unit-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-chip);
+    color: var(--ink);
+    font-size: .84rem;
+    text-decoration: none;
+    transition: border-color .18s, background .18s;
+  }
+
+  .en-unit-row:hover {
+    border-color: var(--accent-line);
+    background: var(--accent-soft);
+  }
+
+  .en-unit-row.is-done {
+    border-color: var(--green-line);
+    background: var(--green-l);
+  }
+
+  .en-u-no {
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .en-u-range {
+    color: var(--muted);
+    font-size: .76rem;
+  }
+
+  .en-unit-row.is-done .en-u-range {
+    color: var(--green);
+  }
+
+  .en-unit-row.is-done::after {
+    content: "済";
+    margin-left: auto;
+    color: var(--green);
+    font-size: .72rem;
+  }
+
+  b[data-en-overall] {
+    color: var(--accent-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .portal-btn,
     .feature-cta,
@@ -490,11 +681,18 @@
   <nav class="portal-nav" aria-label="主导航">
     <a class="portal-brand" href="index.html">
       <span class="portal-brand-mark" aria-hidden="true">語</span>
-      <span>JLPT Library</span>
+      <span>Language Library</span>
     </a>
-    <span class="portal-nav-tag">Personal Japanese Study Space</span>
+    <span class="portal-nav-tag">Personal Study Space</span>
+    <!-- 语言开关：仍然是一个文件、两套入口 DOM，靠 <html data-lang> 显隐；
+         不用 JS 重建 DOM，少一次运行时重构。按钮只切属性，不产生新网址。 -->
+    <div class="lang-tabs" role="tablist" aria-label="语言 / Language">
+      <button type="button" role="tab" data-tab="ja" aria-selected="true" class="on">日本語</button>
+      <button type="button" role="tab" data-tab="en" aria-selected="false">English</button>
+    </div>
   </nav>
 
+  <div class="lang-pane" data-pane="ja">
   <header class="portal-hero">
     <div class="portal-copy">
       <p class="portal-eyebrow">日本語能力試験 / 自学系统</p>
@@ -600,10 +798,357 @@
   </aside>
 
   <footer class="portal-footer">
-    <span>JLPT Library · 为长期学习而做的日语资料库</span>
+    <span>Language Library · 为长期学习而做的日语资料库</span>
     <span>N5 → N1 完整路径 · 168 个单元</span>
   </footer>
+  </div><!-- /日语面 -->
+
+  <!-- ============================ 英语面 ============================
+       版式镜像日语面：一个 feature-block（四站刻度尺 + 展开式单元清单）+ 三
+       个入口行。刻度尺、清单与数字全部由 tools/en-vocab.mjs 写进标记区，
+       不在这里手维护 —— 77 个单元行手工维护必然漂移。 -->
+  <div class="lang-pane" data-pane="en">
+  <header class="portal-hero">
+    <div class="portal-copy">
+      <p class="portal-eyebrow">英语词汇 / 自学系统</p>
+      <h1>每天一点，<em>学成自己的语言。</em></h1>
+      <p class="portal-lede">从 1k 到 4k 词频档位，把词表、听写、打字与阅读放进同一条学习路径。</p>
+      <div class="portal-actions">
+        <a class="portal-btn portal-btn-quiet" href="#en-paths">查看全部入口</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="en-paths" class="entries">
+    <div class="entries-head">
+      <h2>找到最适合你的入口</h2>
+      <p>四个入口，从最高频的一千个词开始。选一档，再选节奏。</p>
+    </div>
+
+    <div class="entry-layout">
+      <!-- en:unit-lists:start -->
+      <!-- 以下区块由 tools/en-vocab.mjs 生成，勿手改；数据变了请重跑生成器 -->
+      <section class="feature-block" aria-labelledby="en-feature-title">
+        <span class="feature-index" aria-hidden="true">01</span>
+        <h3 id="en-feature-title" class="feature-title">词表资料</h3>
+        <p class="feature-lede">按全表词频位次切成四档，每 50 词一个单元。列表速览、翻转卡自测，背满一遍自动盖章。</p>
+
+        <nav class="ruler" aria-label="词频档位">
+          <a class="ruler-station" href="#en-band-1k"><span class="ruler-lv">1k</span><span class="ruler-count">20 单元</span></a>
+          <a class="ruler-station" href="#en-band-2k"><span class="ruler-lv">2k</span><span class="ruler-count">20 单元</span></a>
+          <a class="ruler-station" href="#en-band-3k"><span class="ruler-lv">3k</span><span class="ruler-count">17 单元</span></a>
+          <a class="ruler-station" href="#en-band-4k"><span class="ruler-lv">4k</span><span class="ruler-count">20 单元</span></a>
+        </nav>
+
+        <div class="en-bands" data-en-bands>
+        <details class="en-band" id="en-band-1k" data-en-band="1k">
+          <summary>
+            <span class="en-band-id">1k</span>
+            <span class="en-band-sub">最高频 1,000 词</span>
+            <span class="en-band-prog" data-en-prog>已看 0/20</span>
+          </summary>
+          <ul class="en-unit-list">
+            <li><a class="en-unit-row" href="en/1k/01.html" data-en-key="en/1k/01.html"><span class="en-u-no">01</span><span class="en-u-range">词 1–50</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/02.html" data-en-key="en/1k/02.html"><span class="en-u-no">02</span><span class="en-u-range">词 51–100</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/03.html" data-en-key="en/1k/03.html"><span class="en-u-no">03</span><span class="en-u-range">词 101–150</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/04.html" data-en-key="en/1k/04.html"><span class="en-u-no">04</span><span class="en-u-range">词 151–200</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/05.html" data-en-key="en/1k/05.html"><span class="en-u-no">05</span><span class="en-u-range">词 201–250</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/06.html" data-en-key="en/1k/06.html"><span class="en-u-no">06</span><span class="en-u-range">词 251–300</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/07.html" data-en-key="en/1k/07.html"><span class="en-u-no">07</span><span class="en-u-range">词 301–350</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/08.html" data-en-key="en/1k/08.html"><span class="en-u-no">08</span><span class="en-u-range">词 351–400</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/09.html" data-en-key="en/1k/09.html"><span class="en-u-no">09</span><span class="en-u-range">词 401–450</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/10.html" data-en-key="en/1k/10.html"><span class="en-u-no">10</span><span class="en-u-range">词 451–500</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/11.html" data-en-key="en/1k/11.html"><span class="en-u-no">11</span><span class="en-u-range">词 501–550</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/12.html" data-en-key="en/1k/12.html"><span class="en-u-no">12</span><span class="en-u-range">词 551–600</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/13.html" data-en-key="en/1k/13.html"><span class="en-u-no">13</span><span class="en-u-range">词 601–650</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/14.html" data-en-key="en/1k/14.html"><span class="en-u-no">14</span><span class="en-u-range">词 651–700</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/15.html" data-en-key="en/1k/15.html"><span class="en-u-no">15</span><span class="en-u-range">词 701–750</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/16.html" data-en-key="en/1k/16.html"><span class="en-u-no">16</span><span class="en-u-range">词 751–800</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/17.html" data-en-key="en/1k/17.html"><span class="en-u-no">17</span><span class="en-u-range">词 801–850</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/18.html" data-en-key="en/1k/18.html"><span class="en-u-no">18</span><span class="en-u-range">词 851–900</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/19.html" data-en-key="en/1k/19.html"><span class="en-u-no">19</span><span class="en-u-range">词 901–950</span></a></li>
+            <li><a class="en-unit-row" href="en/1k/20.html" data-en-key="en/1k/20.html"><span class="en-u-no">20</span><span class="en-u-range">词 951–1,000</span></a></li>
+          </ul>
+        </details>
+        <details class="en-band" id="en-band-2k" data-en-band="2k">
+          <summary>
+            <span class="en-band-id">2k</span>
+            <span class="en-band-sub">次高频 1,000 词</span>
+            <span class="en-band-prog" data-en-prog>已看 0/20</span>
+          </summary>
+          <ul class="en-unit-list">
+            <li><a class="en-unit-row" href="en/2k/21.html" data-en-key="en/2k/21.html"><span class="en-u-no">21</span><span class="en-u-range">词 1–50</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/22.html" data-en-key="en/2k/22.html"><span class="en-u-no">22</span><span class="en-u-range">词 51–100</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/23.html" data-en-key="en/2k/23.html"><span class="en-u-no">23</span><span class="en-u-range">词 101–150</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/24.html" data-en-key="en/2k/24.html"><span class="en-u-no">24</span><span class="en-u-range">词 151–200</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/25.html" data-en-key="en/2k/25.html"><span class="en-u-no">25</span><span class="en-u-range">词 201–250</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/26.html" data-en-key="en/2k/26.html"><span class="en-u-no">26</span><span class="en-u-range">词 251–300</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/27.html" data-en-key="en/2k/27.html"><span class="en-u-no">27</span><span class="en-u-range">词 301–350</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/28.html" data-en-key="en/2k/28.html"><span class="en-u-no">28</span><span class="en-u-range">词 351–400</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/29.html" data-en-key="en/2k/29.html"><span class="en-u-no">29</span><span class="en-u-range">词 401–450</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/30.html" data-en-key="en/2k/30.html"><span class="en-u-no">30</span><span class="en-u-range">词 451–500</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/31.html" data-en-key="en/2k/31.html"><span class="en-u-no">31</span><span class="en-u-range">词 501–550</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/32.html" data-en-key="en/2k/32.html"><span class="en-u-no">32</span><span class="en-u-range">词 551–600</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/33.html" data-en-key="en/2k/33.html"><span class="en-u-no">33</span><span class="en-u-range">词 601–650</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/34.html" data-en-key="en/2k/34.html"><span class="en-u-no">34</span><span class="en-u-range">词 651–700</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/35.html" data-en-key="en/2k/35.html"><span class="en-u-no">35</span><span class="en-u-range">词 701–750</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/36.html" data-en-key="en/2k/36.html"><span class="en-u-no">36</span><span class="en-u-range">词 751–800</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/37.html" data-en-key="en/2k/37.html"><span class="en-u-no">37</span><span class="en-u-range">词 801–850</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/38.html" data-en-key="en/2k/38.html"><span class="en-u-no">38</span><span class="en-u-range">词 851–900</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/39.html" data-en-key="en/2k/39.html"><span class="en-u-no">39</span><span class="en-u-range">词 901–950</span></a></li>
+            <li><a class="en-unit-row" href="en/2k/40.html" data-en-key="en/2k/40.html"><span class="en-u-no">40</span><span class="en-u-range">词 951–1,000</span></a></li>
+          </ul>
+        </details>
+        <details class="en-band" id="en-band-3k" data-en-band="3k">
+          <summary>
+            <span class="en-band-id">3k</span>
+            <span class="en-band-sub">常用 809 词</span>
+            <span class="en-band-prog" data-en-prog>已看 0/17</span>
+          </summary>
+          <ul class="en-unit-list">
+            <li><a class="en-unit-row" href="en/3k/41.html" data-en-key="en/3k/41.html"><span class="en-u-no">41</span><span class="en-u-range">词 1–50</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/42.html" data-en-key="en/3k/42.html"><span class="en-u-no">42</span><span class="en-u-range">词 51–100</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/43.html" data-en-key="en/3k/43.html"><span class="en-u-no">43</span><span class="en-u-range">词 101–150</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/44.html" data-en-key="en/3k/44.html"><span class="en-u-no">44</span><span class="en-u-range">词 151–200</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/45.html" data-en-key="en/3k/45.html"><span class="en-u-no">45</span><span class="en-u-range">词 201–250</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/46.html" data-en-key="en/3k/46.html"><span class="en-u-no">46</span><span class="en-u-range">词 251–300</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/47.html" data-en-key="en/3k/47.html"><span class="en-u-no">47</span><span class="en-u-range">词 301–350</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/48.html" data-en-key="en/3k/48.html"><span class="en-u-no">48</span><span class="en-u-range">词 351–400</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/49.html" data-en-key="en/3k/49.html"><span class="en-u-no">49</span><span class="en-u-range">词 401–450</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/50.html" data-en-key="en/3k/50.html"><span class="en-u-no">50</span><span class="en-u-range">词 451–500</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/51.html" data-en-key="en/3k/51.html"><span class="en-u-no">51</span><span class="en-u-range">词 501–550</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/52.html" data-en-key="en/3k/52.html"><span class="en-u-no">52</span><span class="en-u-range">词 551–600</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/53.html" data-en-key="en/3k/53.html"><span class="en-u-no">53</span><span class="en-u-range">词 601–650</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/54.html" data-en-key="en/3k/54.html"><span class="en-u-no">54</span><span class="en-u-range">词 651–700</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/55.html" data-en-key="en/3k/55.html"><span class="en-u-no">55</span><span class="en-u-range">词 701–750</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/56.html" data-en-key="en/3k/56.html"><span class="en-u-no">56</span><span class="en-u-range">词 751–800</span></a></li>
+            <li><a class="en-unit-row" href="en/3k/57.html" data-en-key="en/3k/57.html"><span class="en-u-no">57</span><span class="en-u-range">词 801–809</span></a></li>
+          </ul>
+        </details>
+        <details class="en-band" id="en-band-4k" data-en-band="4k">
+          <summary>
+            <span class="en-band-id">4k</span>
+            <span class="en-band-sub">进阶级 957 词</span>
+            <span class="en-band-prog" data-en-prog>已看 0/20</span>
+          </summary>
+          <ul class="en-unit-list">
+            <li><a class="en-unit-row" href="en/4k/58.html" data-en-key="en/4k/58.html"><span class="en-u-no">58</span><span class="en-u-range">词 1–50</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/59.html" data-en-key="en/4k/59.html"><span class="en-u-no">59</span><span class="en-u-range">词 51–100</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/60.html" data-en-key="en/4k/60.html"><span class="en-u-no">60</span><span class="en-u-range">词 101–150</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/61.html" data-en-key="en/4k/61.html"><span class="en-u-no">61</span><span class="en-u-range">词 151–200</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/62.html" data-en-key="en/4k/62.html"><span class="en-u-no">62</span><span class="en-u-range">词 201–250</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/63.html" data-en-key="en/4k/63.html"><span class="en-u-no">63</span><span class="en-u-range">词 251–300</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/64.html" data-en-key="en/4k/64.html"><span class="en-u-no">64</span><span class="en-u-range">词 301–350</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/65.html" data-en-key="en/4k/65.html"><span class="en-u-no">65</span><span class="en-u-range">词 351–400</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/66.html" data-en-key="en/4k/66.html"><span class="en-u-no">66</span><span class="en-u-range">词 401–450</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/67.html" data-en-key="en/4k/67.html"><span class="en-u-no">67</span><span class="en-u-range">词 451–500</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/68.html" data-en-key="en/4k/68.html"><span class="en-u-no">68</span><span class="en-u-range">词 501–550</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/69.html" data-en-key="en/4k/69.html"><span class="en-u-no">69</span><span class="en-u-range">词 551–600</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/70.html" data-en-key="en/4k/70.html"><span class="en-u-no">70</span><span class="en-u-range">词 601–650</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/71.html" data-en-key="en/4k/71.html"><span class="en-u-no">71</span><span class="en-u-range">词 651–700</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/72.html" data-en-key="en/4k/72.html"><span class="en-u-no">72</span><span class="en-u-range">词 701–750</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/73.html" data-en-key="en/4k/73.html"><span class="en-u-no">73</span><span class="en-u-range">词 751–800</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/74.html" data-en-key="en/4k/74.html"><span class="en-u-no">74</span><span class="en-u-range">词 801–850</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/75.html" data-en-key="en/4k/75.html"><span class="en-u-no">75</span><span class="en-u-range">词 851–900</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/76.html" data-en-key="en/4k/76.html"><span class="en-u-no">76</span><span class="en-u-range">词 901–950</span></a></li>
+            <li><a class="en-unit-row" href="en/4k/77.html" data-en-key="en/4k/77.html"><span class="en-u-no">77</span><span class="en-u-range">词 951–957</span></a></li>
+          </ul>
+        </details>
+        </div>
+
+        <div class="feature-foot">
+          <a class="feature-cta" href="#en-band-1k">开始背词 <span aria-hidden="true">→</span></a>
+          <span class="feature-stats">3,766 词 · 77 单元 · 4 档 · <b data-en-overall>已看 0/77</b></span>
+        </div>
+      </section>
+    <!-- en:unit-lists:end -->
+
+    <!-- en:reading-lists:start -->
+      <!-- 以下区块由 tools/en-reading.mjs 生成，勿手改；数据变了请重跑生成器 -->
+      <section class="feature-block" aria-labelledby="en-reading-title">
+        <span class="feature-index" aria-hidden="true">02</span>
+        <h3 id="en-reading-title" class="feature-title">阅读精读</h3>
+        <p class="feature-lede">公有领域短文按超纲词比例自动分档，篇幅与词表单元相当。点词查义、超纲词高亮，读完手动盖章。</p>
+
+        <nav class="ruler" aria-label="阅读档位">
+          <a class="ruler-station" href="#en-read-1k"><span class="ruler-lv">1k</span><span class="ruler-count">8 篇</span></a>
+          <a class="ruler-station" href="#en-read-2k"><span class="ruler-lv">2k</span><span class="ruler-count">8 篇</span></a>
+          <a class="ruler-station" href="#en-read-3k"><span class="ruler-lv">3k</span><span class="ruler-count">7 篇</span></a>
+          <a class="ruler-station" href="#en-read-4k"><span class="ruler-lv">4k</span><span class="ruler-count">7 篇</span></a>
+        </nav>
+
+        <div class="en-bands" data-en-bands>
+        <details class="en-band" id="en-read-1k" data-en-band="1k">
+          <summary>
+            <span class="en-band-id">1k</span>
+            <span class="en-band-sub">最容易的一段 · 1k 覆盖 69.5%</span>
+            <span class="en-band-prog" data-en-prog>已读 0/8</span>
+          </summary>
+          <ul class="en-unit-list">
+            <li><a class="en-unit-row" href="en/reading/1k/01.html" data-en-key="en/reading/1k/01.html"><span class="en-u-no">01</span><span class="en-u-range">1,473 词 · 1k 75.6%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/1k/02.html" data-en-key="en/reading/1k/02.html"><span class="en-u-no">02</span><span class="en-u-range">1,554 词 · 1k 70.5%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/1k/03.html" data-en-key="en/reading/1k/03.html"><span class="en-u-no">03</span><span class="en-u-range">1,586 词 · 1k 69.5%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/1k/04.html" data-en-key="en/reading/1k/04.html"><span class="en-u-no">04</span><span class="en-u-range">1,601 词 · 1k 69.0%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/1k/05.html" data-en-key="en/reading/1k/05.html"><span class="en-u-no">05</span><span class="en-u-range">1,614 词 · 1k 68.5%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/1k/06.html" data-en-key="en/reading/1k/06.html"><span class="en-u-no">06</span><span class="en-u-range">1,619 词 · 1k 68.1%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/1k/07.html" data-en-key="en/reading/1k/07.html"><span class="en-u-no">07</span><span class="en-u-range">1,600 词 · 1k 67.7%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/1k/08.html" data-en-key="en/reading/1k/08.html"><span class="en-u-no">08</span><span class="en-u-range">1,611 词 · 1k 67.0%</span></a></li>
+          </ul>
+        </details>
+        <details class="en-band" id="en-read-2k" data-en-band="2k">
+          <summary>
+            <span class="en-band-id">2k</span>
+            <span class="en-band-sub">偏易的一段 · 1k 覆盖 66.2%</span>
+            <span class="en-band-prog" data-en-prog>已读 0/8</span>
+          </summary>
+          <ul class="en-unit-list">
+            <li><a class="en-unit-row" href="en/reading/2k/01.html" data-en-key="en/reading/2k/01.html"><span class="en-u-no">01</span><span class="en-u-range">1,290 词 · 1k 67.0%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/2k/02.html" data-en-key="en/reading/2k/02.html"><span class="en-u-no">02</span><span class="en-u-range">1,610 词 · 1k 66.6%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/2k/03.html" data-en-key="en/reading/2k/03.html"><span class="en-u-no">03</span><span class="en-u-range">1,550 词 · 1k 66.1%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/2k/04.html" data-en-key="en/reading/2k/04.html"><span class="en-u-no">04</span><span class="en-u-range">1,576 词 · 1k 65.5%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/2k/05.html" data-en-key="en/reading/2k/05.html"><span class="en-u-no">05</span><span class="en-u-range">1,592 词 · 1k 65.2%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/2k/06.html" data-en-key="en/reading/2k/06.html"><span class="en-u-no">06</span><span class="en-u-range">1,460 词 · 1k 64.9%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/2k/07.html" data-en-key="en/reading/2k/07.html"><span class="en-u-no">07</span><span class="en-u-range">1,617 词 · 1k 67.0%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/2k/08.html" data-en-key="en/reading/2k/08.html"><span class="en-u-no">08</span><span class="en-u-range">1,520 词 · 1k 67.0%</span></a></li>
+          </ul>
+        </details>
+        <details class="en-band" id="en-read-3k" data-en-band="3k">
+          <summary>
+            <span class="en-band-id">3k</span>
+            <span class="en-band-sub">偏难的一段 · 1k 覆盖 63.9%</span>
+            <span class="en-band-prog" data-en-prog>已读 0/7</span>
+          </summary>
+          <ul class="en-unit-list">
+            <li><a class="en-unit-row" href="en/reading/3k/01.html" data-en-key="en/reading/3k/01.html"><span class="en-u-no">01</span><span class="en-u-range">1,611 词 · 1k 64.1%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/3k/02.html" data-en-key="en/reading/3k/02.html"><span class="en-u-no">02</span><span class="en-u-range">1,211 词 · 1k 63.7%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/3k/03.html" data-en-key="en/reading/3k/03.html"><span class="en-u-no">03</span><span class="en-u-range">1,589 词 · 1k 63.1%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/3k/04.html" data-en-key="en/reading/3k/04.html"><span class="en-u-no">04</span><span class="en-u-range">1,612 词 · 1k 62.8%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/3k/05.html" data-en-key="en/reading/3k/05.html"><span class="en-u-no">05</span><span class="en-u-range">1,615 词 · 1k 64.6%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/3k/06.html" data-en-key="en/reading/3k/06.html"><span class="en-u-no">06</span><span class="en-u-range">1,612 词 · 1k 64.6%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/3k/07.html" data-en-key="en/reading/3k/07.html"><span class="en-u-no">07</span><span class="en-u-range">1,609 词 · 1k 64.6%</span></a></li>
+          </ul>
+        </details>
+        <details class="en-band" id="en-read-4k" data-en-band="4k">
+          <summary>
+            <span class="en-band-id">4k</span>
+            <span class="en-band-sub">最难的一段 · 1k 覆盖 60.0%</span>
+            <span class="en-band-prog" data-en-prog>已读 0/7</span>
+          </summary>
+          <ul class="en-unit-list">
+            <li><a class="en-unit-row" href="en/reading/4k/01.html" data-en-key="en/reading/4k/01.html"><span class="en-u-no">01</span><span class="en-u-range">1,612 词 · 1k 62.4%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/4k/02.html" data-en-key="en/reading/4k/02.html"><span class="en-u-no">02</span><span class="en-u-range">1,606 词 · 1k 61.1%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/4k/03.html" data-en-key="en/reading/4k/03.html"><span class="en-u-no">03</span><span class="en-u-range">1,501 词 · 1k 58.6%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/4k/04.html" data-en-key="en/reading/4k/04.html"><span class="en-u-no">04</span><span class="en-u-range">1,554 词 · 1k 50.8%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/4k/05.html" data-en-key="en/reading/4k/05.html"><span class="en-u-no">05</span><span class="en-u-range">1,423 词 · 1k 62.4%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/4k/06.html" data-en-key="en/reading/4k/06.html"><span class="en-u-no">06</span><span class="en-u-range">1,282 词 · 1k 62.4%</span></a></li>
+            <li><a class="en-unit-row" href="en/reading/4k/07.html" data-en-key="en/reading/4k/07.html"><span class="en-u-no">07</span><span class="en-u-range">1,481 词 · 1k 62.4%</span></a></li>
+          </ul>
+        </details>
+        </div>
+
+        <div class="feature-foot">
+          <a class="feature-cta" href="en/reading/index.html">进入阅读 <span aria-hidden="true">→</span></a>
+          <span class="feature-stats">30 篇 · 4 档 · 46,191 词 · 文本来自 Project Gutenberg</span>
+        </div>
+      </section>
+    <!-- en:reading-lists:end -->
+
+      <div class="path-list">
+        <a class="path-row" href="en/dictation/index.html">
+          <span class="row-index" aria-hidden="true">03</span>
+          <span class="row-body">
+            <span class="row-title">听写练习</span>
+            <span class="row-meta">77 个词单 · 英语朗读 · 错词回顾</span>
+          </span>
+          <span class="row-arrow" aria-hidden="true">→</span>
+        </a>
+
+        <a class="path-row" href="en/typing/index.html">
+          <span class="row-index" aria-hidden="true">04</span>
+          <span class="row-body">
+            <span class="row-title">打字练习</span>
+            <span class="row-meta">四档词频 · 60 秒竞速 · WPM 与准确率</span>
+          </span>
+          <span class="row-arrow" aria-hidden="true">→</span>
+        </a>
+
+      </div>
+    </div>
+  </main>
+
+  <aside class="portal-note">
+    <span class="note-mark" aria-hidden="true">済</span>
+    <div>
+      <strong>学习进度会保存在当前浏览器</strong>
+      <p>词表单元背满一遍会自动盖章；日语与英语分开记，互不干扰。</p>
+    </div>
+  </aside>
+
+  <footer class="portal-footer">
+    <span>Language Library · 为长期学习而做的英语资料库</span>
+    <span>1k → 4k 词频档位 · 3,766 个词</span>
+  </footer>
+  </div><!-- /英语面 -->
 </div>
+<script src="assets/progress.js"></script>
+<script>
+  /* ============================ 门户脚本 ============================
+     语言开关 / 刻度尺展开 / 英语侧进度数字。进度脚本只在门户引一次，
+     分母始终来自生成器写出的清单（data-en-key），不是 done 里的历史累计。 */
+  (function () {
+    'use strict';
+
+    var apply = window.portalApplyLang;
+    apply(document.documentElement.getAttribute('data-lang') || 'ja', false);
+
+    Array.prototype.forEach.call(document.querySelectorAll('.lang-tabs button'), function (btn) {
+      btn.addEventListener('click', function () {
+        var lang = btn.getAttribute('data-tab');
+        if (lang === document.documentElement.getAttribute('data-lang')) return;
+        apply(lang, true);
+        window.scrollTo(0, 0);
+        refreshProgress();
+      });
+    });
+
+    /* 刻度尺的落点是「在门户内展开该档单元清单」，不跳页。 */
+    Array.prototype.forEach.call(document.querySelectorAll('a.ruler-station[href^="#en-band-"]'), function (a) {
+      a.addEventListener('click', function () {
+        var d = document.querySelector(a.getAttribute('href'));
+        if (d) d.open = true;
+      });
+    });
+
+    function keysIn(scope) {
+      return Array.prototype.map.call(scope.querySelectorAll('[data-en-key]'), function (a) {
+        return a.getAttribute('data-en-key');
+      });
+    }
+
+    function setText(el, text) { if (el) el.textContent = text; }
+
+    function refreshProgress() {
+      if (!window.LibProgress) return;
+      var all = keysIn(document);
+      if (!all.length) return;
+      setText(document.querySelector('[data-en-overall]'),
+        '已看 ' + window.LibProgress.count('', all) + '/' + all.length);
+      Array.prototype.forEach.call(document.querySelectorAll('.en-band'), function (d) {
+        var ks = keysIn(d);
+        setText(d.querySelector('[data-en-prog]'),
+          '已看 ' + window.LibProgress.count('', ks) + '/' + ks.length);
+        Array.prototype.forEach.call(d.querySelectorAll('[data-en-key]'), function (a) {
+          a.classList.toggle('is-done', window.LibProgress.isDone(a.getAttribute('data-en-key')));
+        });
+      });
+    }
+
+    refreshProgress();
+    /* 从单元页返回可能命中 bfcache，那时 DOM 没重跑，进度会停在旧值。 */
+    window.addEventListener('pageshow', refreshProgress);
+    window.PORTAL_REFRESH_PROGRESS = refreshProgress;
+  })();
+</script>
 <script>
   (function () {
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
