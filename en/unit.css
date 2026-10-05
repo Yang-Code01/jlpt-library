@@ -379,6 +379,171 @@
   color: var(--muted);
 }
 
+/* ---- 通用按钮（测验 / 复习用；列表与卡片不依赖它） ---- */
+.en-btn {
+  padding: 7px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+
+.en-btn:hover {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.en-btn-bad:hover {
+  border-color: var(--red-line);
+  background: var(--red-l);
+  color: var(--red);
+}
+
+.en-btn-quiet {
+  color: var(--muted);
+}
+
+/* ---- 测验：英 → 中四选一 ---- */
+.en-quiz {
+  max-width: 560px;
+  margin: 18px auto 0;
+}
+
+.en-quiz-pos {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 0 10px;
+  font-size: .78rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.en-quiz-tally {
+  color: var(--sumi-5);
+}
+
+.en-quiz-stage {
+  position: relative;
+  padding: 30px 22px 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.en-quiz-word {
+  margin: 6px 0 4px;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+
+.en-quiz-opts {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0 0;
+}
+
+.en-opt {
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: .92rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+
+.en-opt:hover:not(:disabled) {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+}
+
+.en-opt:disabled {
+  cursor: default;
+}
+
+.en-opt.correct {
+  border-color: var(--green-line);
+  background: var(--green-l);
+  color: var(--green);
+  font-weight: 700;
+}
+
+.en-opt.wrong {
+  border-color: var(--red-line);
+  background: var(--red-l);
+  color: var(--red);
+}
+
+.en-quiz-fb {
+  margin: 14px 0 0;
+  font-size: .86rem;
+}
+
+.en-quiz-fb.is-ok {
+  color: var(--green);
+}
+
+.en-quiz-fb.is-bad {
+  color: var(--red);
+}
+
+.en-quiz-foot {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 16px 0 0;
+}
+
+.en-quiz-sum {
+  margin: 8px 0 0;
+  font-size: 1rem;
+}
+
+.en-quiz-tip {
+  margin: 6px 0 0;
+  font-size: .8rem;
+  color: var(--muted);
+}
+
+/* ---- 复习：到期队列，翻面后自评 ---- */
+.en-rev {
+  max-width: 560px;
+  margin: 18px auto 0;
+}
+
+.en-rev .en-card {
+  max-width: none;
+}
+
+.en-rev-ctl {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  margin: 16px 0 0;
+}
+
+.en-rev-left {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: .78rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
 @media (max-width: 620px) {
   .en-row-ph,
   .en-row .en-badges {
@@ -387,5 +552,18 @@
 
   .en-card-face {
     min-height: 240px;
+  }
+
+  .en-quiz-stage {
+    padding: 26px 16px 18px;
+  }
+
+  .en-quiz-word {
+    font-size: 1.6rem;
+  }
+
+  .en-opt,
+  .en-btn {
+    min-height: 44px;
   }
 }
