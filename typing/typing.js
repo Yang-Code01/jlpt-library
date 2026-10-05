@@ -1,6 +1,7 @@
 /* ============================================================
    打字练习 · 游戏内核（假名 → 罗马字）
-   依赖：romaji.js（全局 Romaji.readings / Romaji.match）
+   依赖：romaji.js（全局 Romaji.readings / Romaji.match）。
+         英语侧由 window.TYPING_CFG 的 readings / match 接管，不需要 romaji.js。
    数据：按难度档以 <script src="data/<档>.js"> 动态注入后读全局变量
          （file:// 下 fetch 不可用，故只能走 <script src> 这条硬约束路径）
 
@@ -36,6 +37,7 @@
      speechLang          语音合成语言（默认 'ja-JP'）
      voiceMatch(lang)    语音挑选规则（默认 ja 开头）
      readings(word)      期望输入串的候选集合（默认 假名 → 罗马字）
+     match(word, typed)  单字符判定（默认 Romaji.match(word.k, typed)）
      flowLength(word)    传送带时长按什么计数（默认假名数；英语传字母数）
      flowBaseMs/flowPerUnitMs/flowMinMs/flowMaxMs
      srcPrefix           加载失败文案里的路径前缀（默认 'typing/'）
@@ -201,9 +203,18 @@ function speakWord(word) {
     u.lang = SPEECH_LANG;
     u.rate = 0.9;   // 稍慢，利于跟读
     var voices = (typeof ss.getVoices === 'function') ? ss.getVoices() : [];
+    /* 先要精确语言（ja-JP / en-US），没有再退回前缀匹配 —— 列表里常有
+       en-GB / ja 变体，精确优先才能拿到用户期望的那一个。 */
+    var chosen = null;
     for (var i = 0; i < voices.length; i++) {
-      if (VOICE_MATCH(voices[i].lang)) { u.voice = voices[i]; break; }
+      if (String(voices[i].lang).toLowerCase() === String(SPEECH_LANG).toLowerCase()) { chosen = voices[i]; break; }
     }
+    if (!chosen) {
+      for (var j = 0; j < voices.length; j++) {
+        if (VOICE_MATCH(voices[j].lang)) { chosen = voices[j]; break; }
+      }
+    }
+    if (chosen) u.voice = chosen;
     ss.speak(u);
   } catch (e) { /* 不支持 / 合成失败：静默忽略 */ }
 }
@@ -301,6 +312,14 @@ function ensureData(tier, done) {
 function readingsOf(word) {
   if (CFG.readings) return CFG.readings(word) || [];
   return window.Romaji ? window.Romaji.readings(word ? word.k : '') : [];
+}
+
+/* 判定「已输入串 + 新字符」是否合法。默认走假名 → 罗马字引擎；
+   英语侧用 CFG.match 直接用词形比对（词组把空格去掉）。返回形状同 Romaji.match：
+   { status: 'complete' | 'ok' | 'wrong', expects: [...] }。 */
+function matchTyped(word, cand) {
+  if (CFG.match) return CFG.match(word, cand);
+  return window.Romaji.match(word.k, cand);
 }
 
 /* 从当前词的全部合法写法里，挑「与已输入串前缀匹配最长」的那条做展示底稿，
@@ -406,7 +425,7 @@ function handleChar(ch) {
 
   state.totalKeys++;
   var cand = state.typed + ch;
-  var r = window.Romaji.match(state.current.k, cand);
+  var r = matchTyped(state.current, cand);
 
   if (r.status === 'wrong') {
     onWrongChar();
@@ -960,7 +979,8 @@ function bindAudioUnlock() {
 
 function init() {
   cacheDom();
-  if (!window.Romaji) {
+  /* 日语侧缺 romaji.js 就跑不了；英语侧由 CFG.readings + CFG.match 接管，不需要它。 */
+  if (!window.Romaji && !CFG.readings) {
     setHint('罗马字引擎（romaji.js）未加载，页面无法运行。', true);
     return;
   }

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>英语打字 · Language Library</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23b93e28'/%3E%3Ctext x='16' y='23' font-size='19' font-family='serif' fill='%23ffffff' text-anchor='middle'%3E%E8%AA%9E%3C/text%3E%3C/svg%3E">
+<!-- 与日语打字页同一套暗色街机风：共用 typing/typing.css，不引 ../assets/style.css 与 theme.js -->
+<link rel="stylesheet" href="../../typing/typing.css">
+</head>
+<body>
+<div class="typing-app" id="typing-app">
+  <div class="ty-sr" id="sr-status" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <nav class="ty-crumb">
+    <a href="../../index.html">资料库首页</a>
+    <span class="ty-crumb-sep">／</span>
+    <a href="#" id="crumb-back">英语打字</a>
+  </nav>
+
+  <input class="ty-mobile-input" id="mobile-input" type="text" inputmode="latin"
+         autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false"
+         aria-hidden="true" tabindex="-1">
+
+  <!-- ============ 开始 / 选档屏 ============ -->
+  <section class="ty-screen ty-start" id="screen-start">
+    <p class="ty-eyebrow">ENGLISH WORDS → TYPING</p>
+    <h1 class="ty-title">英语打字</h1>
+    <p class="ty-lead">看着单词敲出它本身，收词越多连击越高。竞技模式 60 秒限时，结算看 WPM 与准确率。</p>
+
+    <div class="ty-field">
+      <span class="ty-field-label" id="label-tier">难度 <span class="ty-field-note">1k 最高频 → 4k 进阶（含固定搭配）</span></span>
+      <div class="ty-opts ty-opts-scale" id="opt-tier" role="group" aria-labelledby="label-tier">
+        <button type="button" class="ty-opt" data-tier="1k" aria-pressed="true">1k<span class="ty-opt-sub">999 词</span></button>
+        <button type="button" class="ty-opt" data-tier="2k" aria-pressed="false">2k<span class="ty-opt-sub">1000 词</span></button>
+        <button type="button" class="ty-opt" data-tier="3k" aria-pressed="false">3k<span class="ty-opt-sub">809 词</span></button>
+        <button type="button" class="ty-opt" data-tier="4k" aria-pressed="false">4k<span class="ty-opt-sub">993 词</span></button>
+      </div>
+      <p class="ty-hint">4k 档含固定搭配（如 “at once”）：连续输入字母，<strong>不要按空格</strong>（空格 = 暂停）。</p>
+    </div>
+
+    <div class="ty-field">
+      <span class="ty-field-label" id="label-mode">模式</span>
+      <div class="ty-opts" id="opt-mode" role="group" aria-labelledby="label-mode">
+        <button type="button" class="ty-opt" data-mode="practice" aria-pressed="true">练习<span class="ty-opt-sub">无时限·可暂停</span></button>
+        <button type="button" class="ty-opt" data-mode="competition" aria-pressed="false">竞技<span class="ty-opt-sub">60 秒计分</span></button>
+        <button type="button" class="ty-opt" data-mode="endless" aria-pressed="false">无尽<span class="ty-opt-sub">错字即终</span></button>
+      </div>
+    </div>
+
+    <div class="ty-field">
+      <span class="ty-field-label" id="label-speed">速度</span>
+      <div class="ty-opts" id="opt-speed" role="group" aria-labelledby="label-speed">
+        <button type="button" class="ty-opt" data-speed="0.5" aria-pressed="false">0.5x<span class="ty-opt-sub">慢</span></button>
+        <button type="button" class="ty-opt" data-speed="1" aria-pressed="true">1.0x<span class="ty-opt-sub">标准</span></button>
+        <button type="button" class="ty-opt" data-speed="1.2" aria-pressed="false">1.2x<span class="ty-opt-sub">稍快</span></button>
+        <button type="button" class="ty-opt" data-speed="1.5" aria-pressed="false">1.5x<span class="ty-opt-sub">快</span></button>
+        <button type="button" class="ty-opt" data-speed="2" aria-pressed="false">2x<span class="ty-opt-sub">极快</span></button>
+      </div>
+    </div>
+
+    <p class="ty-best" id="best-list">本档暂无记录</p>
+    <button type="button" class="ty-btn ty-btn-primary ty-btn-lg" id="btn-start" aria-label="开始英语打字练习">开始</button>
+    <p class="ty-hint" id="start-hint">Space 可开始 / 暂停 / 恢复；也可随时退出重选。</p>
+  </section>
+
+  <!-- ============ 游戏台 ============ -->
+  <section class="ty-screen ty-game" id="screen-game" hidden>
+    <div class="ty-hud">
+      <div class="ty-hud-item"><span class="ty-hud-k">模式</span><span class="ty-hud-v" id="hud-mode">—</span></div>
+      <div class="ty-hud-item"><span class="ty-hud-k">时间</span><span class="ty-hud-v" id="hud-time">∞</span></div>
+      <div class="ty-hud-item"><span class="ty-hud-k">分数</span><span class="ty-hud-v ty-hud-score" id="hud-score">0</span></div>
+      <div class="ty-hud-item"><span class="ty-hud-k">连击</span><span class="ty-hud-v" id="hud-combo">0</span></div>
+      <div class="ty-hud-item"><span class="ty-hud-k">收词</span><span class="ty-hud-v" id="hud-words">0</span></div>
+      <div class="ty-hud-actions">
+        <button type="button" class="ty-btn ty-btn-ghost ty-btn-sound" id="btn-sound" aria-pressed="true" aria-label="音效开关（开）">音效 开</button>
+        <button type="button" class="ty-btn ty-btn-ghost" id="btn-pause" aria-label="暂停或恢复（Space 键）">暂停 · Space</button>
+        <button type="button" class="ty-btn ty-btn-ghost" id="btn-quit" aria-label="退出本局">退出</button>
+      </div>
+    </div>
+
+    <div class="ty-stage" id="stage">
+      <div class="ty-lane" id="lane">
+        <div class="ty-card" id="card">
+          <div class="ty-line ty-line-word" id="ln-word"></div>
+          <div class="ty-line ty-line-romaji">
+            <span class="ty-romaji" id="ln-romaji"></span>
+            <span class="ty-echo" id="ln-echo"></span>
+          </div>
+          <div class="ty-line ty-line-mean" id="ln-mean"></div>
+        </div>
+      </div>
+      <div class="ty-paused-note" id="paused-note" hidden>已暂停</div>
+    </div>
+    <p class="ty-tip" id="game-tip"></p>
+  </section>
+
+  <!-- ============ 结算屏 ============ -->
+  <section class="ty-screen ty-over" id="screen-over" hidden>
+    <h2 class="ty-over-title" id="over-title">结算</h2>
+    <p class="ty-record" id="over-record" hidden>新纪录！</p>
+    <div class="ty-stats" id="over-stats"></div>
+    <div class="ty-over-actions">
+      <button type="button" class="ty-btn ty-btn-primary" id="btn-again" aria-label="再来一局">再来一局</button>
+      <button type="button" class="ty-btn ty-btn-ghost" id="btn-back" aria-label="返回选档">返回选档</button>
+    </div>
+  </section>
+
+  <!-- ============ 退出二次确认 ============ -->
+  <div class="ty-modal" id="quit-modal" hidden>
+    <div class="ty-modal-box" role="dialog" aria-modal="true" aria-labelledby="quit-title">
+      <p class="ty-modal-text" id="quit-title">确定要退出本局吗？本局成绩不会保存。</p>
+      <div class="ty-modal-actions">
+        <button type="button" class="ty-btn ty-btn-danger" id="btn-quit-yes" aria-label="确认退出本局">退出</button>
+        <button type="button" class="ty-btn ty-btn-ghost" id="btn-quit-no" aria-label="继续本局">继续</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 语言层覆盖对象 → 词池（读 en/data/vocab.js）→ 打字内核（日语侧同一份，不引 romaji.js） -->
+<script src="../data/vocab.js"></script>
+<script src="phrases.js"></script>
+<script src="words.js"></script>
+<script src="cfg.js"></script>
+<script src="../../typing/typing.js"></script>
+</body>
+</html>

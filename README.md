@@ -16,6 +16,7 @@
 | **英语词表** | `en/1k/01.html` 起 | 按词频分 1k / 2k / 3k / 4k 四档、每 50 词一单元；列表与翻转卡可背，测验与间隔重复复习在同一单元页陆续补齐；数据由 `tools/en-vocab.mjs` 从 ECDICT 生成 |
 | **英语听写** | `en/dictation/index.html` | 与词表单元一一对应的 77 个词单，听英文发音拼写单词（浏览器内置语音，不预生成音频）；每题播放次数 / 中文释义 / 词序可调、错词本可集中复练、「练过的词不再出现」可关；内核与日语听写共用一份 `dictation/dictation.js` |
 | **英语阅读** | `en/reading/index.html` | 30 篇公有领域短文按难度分四档（每档 7–8 篇，每篇 800–2,000 词）；超纲词自动高亮、点词查义（中释 + 英释 + 发音）、读完手动盖章；语料由 `tools/en-reading.mjs` 从 Project Gutenberg 生成 |
+| **英语打字** | `en/typing/index.html` | 按四档词频随机出词，看着单词敲出它本身；练习 / 竞技 60 秒（WPM 与准确率）/ 无尽三模式、五档速度倍率；4k 档混入 37 条固定搭配（连续输入字母，不按空格）；内核与日语打字共用一份 `typing/typing.js` |
 
 ## 目录结构
 
@@ -34,10 +35,12 @@
 ├── jp-vocab/               ← 课堂单词：vocab.css + vocab.js + gen.js（生成/校验单元页）+ gen-audio.ps1（合成音频）+ 每单元一个子目录（含 data.json 与 audio/）
 ├── en/                     ← 英语侧：data/vocab.js（生成物）+ unit.css/unit.js（词表视图层）+ 1k…4k/ 单元页
 │   ├── dictation/          ← 英语听写：cfg.js（语言层覆盖）+ lists.js（由词表现算 77 个词单）+ index.html，内核复用 dictation/dictation.js
-│   └── reading/            ← 英语阅读：reader.css/reader.js（阅读视图层）+ index.html（篇目）+ 1k…4k/ 30 篇（生成物，附台账 README）
+│   ├── reading/            ← 英语阅读：reader.css/reader.js（阅读视图层）+ index.html（篇目）+ 1k…4k/ 30 篇（生成物，附台账 README）
+│   └── typing/             ← 英语打字：cfg.js（语言层覆盖）+ words.js（词池）+ phrases.js（搭配，生成物）+ index.html，内核复用 typing/typing.js
 ├── tools/
 │   ├── en-vocab.mjs        ← 英语词表生成器 / 校验器（gen | check）
 │   ├── en-reading.mjs      ← 英语阅读管线（fetch | gen | check）
+│   ├── en-typing.mjs       ← 英语打字固定搭配挖掘（gen | check）
 │   └── encrypt-exam.mjs    ← 真题库加解密
 ├── n1/ … n5/               ← 各等级的学习页面（每级下 basics/ grammar/ vocab/）
 ├── docs/
@@ -97,6 +100,18 @@ node tools/en-reading.mjs check   # 校验：篇长、分档分明、词典口�
 
 ⚠️ `fetch` 依赖 Gutenberg 的实时下载榜，**榜单会变**：重跑会得到不同的候选书与篇目。
 线上用的是仓库里已生成的 30 篇，`check` 只比对本地缓存。
+
+英语打字的固定搭配（4k 档）也来自站内 30 篇阅读正文，语料是仓库里已有的文件，
+clone 下来即可复现：
+
+```bash
+node tools/en-typing.mjs gen     # 读 en/reading/ 的 30 篇 → 挖 37 条搭配 → 写 en/typing/phrases.js
+node tools/en-typing.mjs check   # 校验：门槛、形状、重复、字节一致
+```
+
+挖掘口径（词表前 2,000 名内的二元组 / 三元组、次数 ≥ 4 且 PMI ≥ 3.3、功能词与限定词过滤、
+22 条人手剔除、三元组需两侧二元组都够格）详见 [`en/typing/README.md`](./en/typing/README.md)。
+阅读篇目一变，搭配就要重挖。
 ## 本地预览
 
 任何浏览器直接打开 `index.html` 即可，无构建步骤、无外部依赖（无 CDN、无外链字体），`file://` 下功能完整。
@@ -115,6 +130,9 @@ node tools/en-reading.mjs check   # 校验：篇长、分档分明、词典口�
 > 英语阅读的 30 篇正文来自 Project Gutenberg，原文已进入公有领域（Gutenberg 的
 > header / footer 已剥离，不在页面里）；页面内联的超纲词释义与判超纲用的词表一样
 > 衍生自 ECDICT（**MIT**）。
+
+> 英语打字 4k 档的 37 条固定搭配（`en/typing/phrases.js`）是从上述公有领域正文里
+> 统计出来的词组，不额外引入第三方数据，也不受额外许可限制。
 
 ## 贡献
 
