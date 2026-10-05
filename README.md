@@ -4,9 +4,9 @@
 
 🌐 **在线浏览**：https://Yang-Code01.github.io/jlpt-library/
 
-## 三大模块
+## 模块
 
-门户 `index.html` 是三者统一的入口。
+门户 `index.html` 是所有模块的统一入口，顶部可切换日语 / 英语。
 
 | 模块 | 入口 | 内容 |
 |---|---|---|
@@ -14,6 +14,7 @@
 | **真题练习** | `exam/index.html` | 题型专练（按子题型 / 按真题顺序取题）＋ 整卷仿真（155 分钟、听力放最后、只播一次）；已入库 N2 2023.7 / 2023.12 两卷 |
 | **课堂单词** | `jp-vocab/index.html` | 按课堂主题打包的副词词卡，共 7 单元 / 157 张卡；浏览、翻转卡、测验、间隔重复复习四态，词与例文均配音频；「様子の副詞」另有 15 词重点模式 |
 | **英语词表** | `en/1k/01.html` 起 | 按词频分 1k / 2k / 3k / 4k 四档、每 50 词一单元；列表与翻转卡可背，测验与间隔重复复习在同一单元页陆续补齐；数据由 `tools/en-vocab.mjs` 从 ECDICT 生成 |
+| **英语阅读** | `en/reading/index.html` | 30 篇公有领域短文按难度分四档（每档 7–8 篇，每篇 800–2,000 词）；超纲词自动高亮、点词查义（中释 + 英释 + 发音）、读完手动盖章；语料由 `tools/en-reading.mjs` 从 Project Gutenberg 生成 |
 
 ## 目录结构
 
@@ -30,9 +31,11 @@
 │   ├── exam-core.js        ← 判分与进度存储
 │   └── data/N2/            ← 每卷一个数据模块，另有 audio/ 与 manifest.json
 ├── jp-vocab/               ← 课堂单词：vocab.css + vocab.js + gen.js（生成/校验单元页）+ gen-audio.ps1（合成音频）+ 每单元一个子目录（含 data.json 与 audio/）
-├── en/                     ← 英语侧：data/vocab.js（生成物）+ unit.css/unit.js（词表单元页的视图层）+ 1k…4k/ 单元页
+├── en/                     ← 英语侧：data/vocab.js（生成物）+ unit.css/unit.js（词表视图层）+ 1k…4k/ 单元页
+│   └── reading/            ← 英语阅读：reader.css/reader.js（阅读视图层）+ index.html（篇目）+ 1k…4k/ 30 篇（生成物，附台账 README）
 ├── tools/
 │   ├── en-vocab.mjs        ← 英语词表生成器 / 校验器（gen | check）
+│   ├── en-reading.mjs      ← 英语阅读管线（fetch | gen | check）
 │   └── encrypt-exam.mjs    ← 真题库加解密
 ├── n1/ … n5/               ← 各等级的学习页面（每级下 basics/ grammar/ vocab/）
 ├── docs/
@@ -52,9 +55,14 @@
 与 `en/<档位>/<NN>.html` 都是生成物，**勿手改**。字段用法、选词规则、分档切点与许可声明
 详见 [`en/data/README.md`](./en/data/README.md)。
 
+英语侧的阅读语料由 `tools/en-reading.mjs` 从 Project Gutenberg 抓取、切篇、分档，
+`en/reading/` 下的 30 篇与篇目页都是生成物，**勿手改**；选书门槛、切篇与分档规则、
+许可与复查注意事项详见 [`en/reading/README.md`](./en/reading/README.md)。
+
 | 数据 | 来源 | 许可 | 下载 |
 |---|---|---|---|
 | 词表（词条 / 音标 / 中释 / 英释 / 词频 / 考纲标签） | [ECDICT](https://github.com/skywind3000/ECDICT) | MIT | `ecdict.csv`（65.9 MB） |
+| 阅读语料（30 篇公有领域短文） | [Project Gutenberg](https://www.gutenberg.org/) | 正文已入公有领域 | `pg_catalog.csv`（21.2 MB，选书依据）+ 各书 `pg<书号>.txt` |
 
 源文件校验和：
 
@@ -76,6 +84,17 @@ node tools/en-vocab.mjs check --src /path/to/ecdict.csv # 校验：切点、单�
 词的选定规则：只取纯字母（含 `'` 与 `-`）词形、中文释义非空、词频字段 > 0 的条目，
 按词频升序取前 3,766 个，再切成四档 —— `1k`（1–1000）、`2k`（1001–2000）、
 `3k`（2001–2809）、`4k`（2810–3766）。
+
+阅读语料同理，源文件（下载榜页面与各书正文）不进仓库：
+
+```bash
+node tools/en-reading.mjs fetch   # 抓 Gutenberg 下载榜 → 过内容门槛 → 缓存候选书正文（需要联网，只跑一次）
+node tools/en-reading.mjs gen     # 读缓存：剥头尾 → 切篇 → 分档 → 写 30 篇与门户清单区
+node tools/en-reading.mjs check   # 校验：篇长、分档分明、词典口径、清单与文件双向一致、幂等
+```
+
+⚠️ `fetch` 依赖 Gutenberg 的实时下载榜，**榜单会变**：重跑会得到不同的候选书与篇目。
+线上用的是仓库里已生成的 30 篇，`check` 只比对本地缓存。
 ## 本地预览
 
 任何浏览器直接打开 `index.html` 即可，无构建步骤、无外部依赖（无 CDN、无外链字体），`file://` 下功能完整。
@@ -90,6 +109,10 @@ node tools/en-vocab.mjs check --src /path/to/ecdict.csv # 校验：切点、单�
 > 英语词表数据（`en/data/vocab.js`）衍生自 ECDICT，按 **MIT** 许可使用，与上方的
 > CC BY-NC 4.0 不同：署名 ECDICT / skywind3000 即可，不受非商用限制。两套数据
 > 各自单独声明，不互相覆盖。
+
+> 英语阅读的 30 篇正文来自 Project Gutenberg，原文已进入公有领域（Gutenberg 的
+> header / footer 已剥离，不在页面里）；页面内联的超纲词释义与判超纲用的词表一样
+> 衍生自 ECDICT（**MIT**）。
 
 ## 贡献
 

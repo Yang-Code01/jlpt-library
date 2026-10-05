@@ -63,5 +63,8 @@ node tools/en-vocab.mjs gen --src /path/to/ecdict.csv
 
 ## 以后会加什么
 
-阅读语料（Gutenberg）走的是另一条独立管线，生成的文件也落在这个目录下，
-届时本节会一并写明它的来源、许可与剥离规则。
+听写与打字模块不在本目录新建数据文件：英语听写的词单按 77 个单元分组、英语打字按四档取词，
+两者都在运行时读本目录的 `vocab.js`（每条词带 `band` 与 `unit` 字段）。
+
+阅读语料（Gutenberg）走的是另一条独立管线，生成物落在 `en/reading/`，
+来源、筛选门槛、分档规则与许可见 [`en/reading/README.md`](../reading/README.md)。
