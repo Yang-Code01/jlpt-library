@@ -132,6 +132,7 @@ var WRONGBOOK_KEY = CFG.wrongbookKey || 'dictation-wrongbook';   // [{ w, k, m, 
 var settings = Object.assign({
   speed: 0.9, repeats: 2, gap: 0.8,
   showHint: true,          // 默认显示中文释义
+  skipDone: true,          // 练过的词不再出现（英语侧设置里可关；默认即原有行为）
   acceptMode: 'both',      // both | kana | kanji
   orderMode: 'seq',        // seq | shuffle
   engine: 'browser',       // browser | voicevox | azure
@@ -411,7 +412,8 @@ function startList(list) {
   var doneSet = {};
   p.keys.forEach(function (k) { doneSet[k] = true; });
   var rest = list.words.filter(function (w) { return !doneSet[wordKey(w)]; });
-  var queue = rest.length > 0 ? rest.slice() : list.words.slice();  // 全练完则整表重练
+  /* 默认只练没练过的；整表练完再进来则整表重练。skipDone 关掉后每次都整表。 */
+  var queue = (settings.skipDone && rest.length > 0) ? rest.slice() : list.words.slice();
   if (settings.orderMode === 'shuffle') shuffle(queue);
 
   session = {
@@ -761,6 +763,8 @@ function syncSettingsUI() {
   $('setGap').value = settings.gap;
   $('setGapVal').textContent = settings.gap.toFixed(1) + 's';
   $('setShowHint').checked = settings.showHint;
+  var sd = $('setSkipDone');   // 只有英语侧有这一项
+  if (sd) sd.checked = settings.skipDone;
   document.querySelectorAll('input[name="acceptMode"]').forEach(function (r) { r.checked = r.value === settings.acceptMode; });
   document.querySelectorAll('input[name="orderMode"]').forEach(function (r) { r.checked = r.value === settings.orderMode; });
   document.querySelectorAll('input[name="engine"]').forEach(function (r) { r.checked = r.value === settings.engine; });
@@ -792,6 +796,8 @@ function bindSettings() {
     var mb = mainBody.querySelector('#meaningBox');
     if (mb) mb.className = 'meaning-box' + (settings.showHint ? '' : ' is-hidden');
   });
+  var sd = $('setSkipDone');   // 只有英语侧有这一项
+  if (sd) sd.addEventListener('change', function () { settings.skipDone = this.checked; saveSettings(); });
   document.querySelectorAll('input[name="acceptMode"]').forEach(function (r) {
     r.addEventListener('change', function () { settings.acceptMode = this.value; saveSettings(); });
   });

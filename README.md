@@ -14,12 +14,13 @@
 | **真题练习** | `exam/index.html` | 题型专练（按子题型 / 按真题顺序取题）＋ 整卷仿真（155 分钟、听力放最后、只播一次）；已入库 N2 2023.7 / 2023.12 两卷 |
 | **课堂单词** | `jp-vocab/index.html` | 按课堂主题打包的副词词卡，共 7 单元 / 157 张卡；浏览、翻转卡、测验、间隔重复复习四态，词与例文均配音频；「様子の副詞」另有 15 词重点模式 |
 | **英语词表** | `en/1k/01.html` 起 | 按词频分 1k / 2k / 3k / 4k 四档、每 50 词一单元；列表与翻转卡可背，测验与间隔重复复习在同一单元页陆续补齐；数据由 `tools/en-vocab.mjs` 从 ECDICT 生成 |
+| **英语听写** | `en/dictation/index.html` | 与词表单元一一对应的 77 个词单，听英文发音拼写单词（浏览器内置语音，不预生成音频）；每题播放次数 / 中文释义 / 词序可调、错词本可集中复练、「练过的词不再出现」可关；内核与日语听写共用一份 `dictation/dictation.js` |
 | **英语阅读** | `en/reading/index.html` | 30 篇公有领域短文按难度分四档（每档 7–8 篇，每篇 800–2,000 词）；超纲词自动高亮、点词查义（中释 + 英释 + 发音）、读完手动盖章；语料由 `tools/en-reading.mjs` 从 Project Gutenberg 生成 |
 
 ## 目录结构
 
 ```
-├── index.html              ← 门户首页（三模块入口）
+├── index.html              ← 门户首页（统一入口，顶部切日语 / 英语）
 ├── material/
 │   └── index.html          ← 学习资料落地页（168 单元索引）
 ├── assets/
@@ -32,6 +33,7 @@
 │   └── data/N2/            ← 每卷一个数据模块，另有 audio/ 与 manifest.json
 ├── jp-vocab/               ← 课堂单词：vocab.css + vocab.js + gen.js（生成/校验单元页）+ gen-audio.ps1（合成音频）+ 每单元一个子目录（含 data.json 与 audio/）
 ├── en/                     ← 英语侧：data/vocab.js（生成物）+ unit.css/unit.js（词表视图层）+ 1k…4k/ 单元页
+│   ├── dictation/          ← 英语听写：cfg.js（语言层覆盖）+ lists.js（由词表现算 77 个词单）+ index.html，内核复用 dictation/dictation.js
 │   └── reading/            ← 英语阅读：reader.css/reader.js（阅读视图层）+ index.html（篇目）+ 1k…4k/ 30 篇（生成物，附台账 README）
 ├── tools/
 │   ├── en-vocab.mjs        ← 英语词表生成器 / 校验器（gen | check）
