@@ -1,0 +1,391 @@
+/* ============================================================================
+   英语词表单元页
+   ----------------------------------------------------------------------------
+   只给 en/<档位>/<NN>.html 用。版式母题与门户一致：一条朱线、一把刻度尺、
+   一组药丸按钮；色相沿用全站令牌（assets/style.css 的 :root），不另立一套。
+   页面自带的量很少，因为大部分视觉来自 .en-* 这一层。
+   ========================================================================== */
+
+.en-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 18px 20px 64px;
+}
+
+/* ---------- 面包屑：与 listening / typing 的手写 crumb 同形 ---------- */
+.en-crumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: .82rem;
+  color: var(--muted);
+}
+
+.en-crumb a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.en-crumb a:hover {
+  color: var(--accent-ink);
+}
+
+.en-crumb-sep {
+  color: var(--border);
+}
+
+/* ---------- 页头 ---------- */
+.en-unit > .en-head {
+  margin: 18px 0 14px;
+  padding-top: 14px;
+  border-top: 2px solid var(--accent);
+}
+
+.en-eyebrow {
+  margin: 0;
+  color: var(--muted);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.en-title {
+  margin: 6px 0 4px;
+  font-size: 1.6rem;
+  letter-spacing: .01em;
+}
+
+.en-sub {
+  margin: 0;
+  color: var(--muted);
+  font-size: .84rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.en-meters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.en-meter {
+  padding: 4px 11px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: .78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.en-meter.is-full {
+  border-color: var(--green-line);
+  background: var(--green-l);
+  color: var(--green);
+}
+
+.en-note {
+  color: var(--muted);
+  font-size: .78rem;
+}
+
+/* ---------- 视图切换 ---------- */
+.en-tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+}
+
+.en-tabs button {
+  appearance: none;
+  border: 0;
+  background: none;
+  border-radius: var(--radius-pill);
+  padding: 6px 16px;
+  font: inherit;
+  font-size: .84rem;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.en-tabs button.on {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.en-tabs button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- 列表视图 ---------- */
+.en-list {
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.en-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 12px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.en-row:first-child {
+  border-top: 0;
+}
+
+.en-row-no {
+  flex: none;
+  width: 2.4em;
+  color: var(--sumi-5);
+  font-size: .74rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.en-row-word {
+  flex: none;
+  font-weight: 800;
+  letter-spacing: .01em;
+}
+
+.en-row-ph {
+  flex: none;
+  color: var(--muted);
+  font-size: .78rem;
+}
+
+.en-row-tr {
+  flex: 1;
+  min-width: 0;
+  color: var(--ink);
+  font-size: .84rem;
+  overflow-wrap: anywhere;
+}
+
+.en-say {
+  flex: none;
+  appearance: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-chip);
+  background: var(--surface);
+  color: var(--muted);
+  padding: 3px 9px;
+  font: inherit;
+  font-size: .76rem;
+  cursor: pointer;
+  transition: border-color .18s, color .18s, background .18s;
+}
+
+.en-say:hover {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+/* ---------- 徽标 ---------- */
+.en-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.en-badge {
+  padding: 1px 7px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: .68rem;
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+
+.en-badge-tag {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.en-badge-ox {
+  border-color: var(--sumi-5);
+  color: var(--sumi-3);
+}
+
+.en-badge-star {
+  border-color: var(--amber-line);
+  background: var(--amber-l);
+  color: var(--amber);
+  letter-spacing: -.06em;
+}
+
+/* ---------- 卡片视图 ---------- */
+.en-deck {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 16px 0 0;
+}
+
+.en-deck-pos {
+  color: var(--muted);
+  font-size: .78rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 3.6em;
+  text-align: center;
+}
+
+.en-card {
+  flex: 1;
+  max-width: 560px;
+  perspective: 1400px;
+  cursor: pointer;
+}
+
+.en-card-inner {
+  position: relative;
+  transition: transform .5s cubic-bezier(.4, .2, .2, 1);
+  transform-style: preserve-3d;
+}
+
+.en-card.is-flipped .en-card-inner {
+  transform: rotateY(180deg);
+}
+
+.en-card-face {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  min-height: 280px;
+  padding: 26px 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.en-card-back {
+  position: absolute;
+  inset: 0;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow: auto;
+  transform: rotateY(180deg);
+}
+
+.en-card-front .en-word {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: .01em;
+  text-align: center;
+}
+
+.en-card-ph {
+  margin: 0;
+  color: var(--muted);
+  font-size: .92rem;
+}
+
+.en-card-rank {
+  position: absolute;
+  top: 10px;
+  left: 14px;
+  color: var(--sumi-5);
+  font-size: .72rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.en-flip-hint {
+  position: absolute;
+  bottom: 10px;
+  color: var(--sumi-5);
+  font-size: .74rem;
+}
+
+.en-card-back .en-word {
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.en-card-pos {
+  color: var(--accent-ink);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.en-card-tr {
+  margin: 0;
+  font-size: .92rem;
+  line-height: 1.75;
+  white-space: pre-line;
+}
+
+.en-card-def {
+  margin: 6px 0 0;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-soft);
+  color: var(--muted);
+  font-size: .82rem;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+.en-deck-nav {
+  appearance: none;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--muted);
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.en-deck-nav:hover {
+  border-color: var(--accent-line);
+  color: var(--accent-ink);
+}
+
+.en-deck-nav:disabled {
+  opacity: .4;
+  cursor: default;
+}
+
+.en-empty {
+  margin: 24px 0;
+  color: var(--muted);
+}
+
+@media (max-width: 620px) {
+  .en-row-ph,
+  .en-row .en-badges {
+    display: none;
+  }
+
+  .en-card-face {
+    min-height: 240px;
+  }
+}
