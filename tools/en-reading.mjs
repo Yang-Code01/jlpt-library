@@ -612,7 +612,7 @@ ${stations}
         </nav>
 
         <div class="en-bands" data-en-bands>
-${artRows(meta, '')}
+${artRows(meta, 'en/reading/')}
         </div>
 
         <div class="feature-foot">
@@ -1019,6 +1019,20 @@ if (cmd === 'check') {
   for (const p of pageList) {
     const k = p.replace('en/reading/', '');
     if (listHtml.indexOf('data-en-key="' + p + '"') < 0) bad.push('列表页缺少 ' + k);
+  }
+
+  /* 每一行的 href 都必须真的指到那一页
+     （票 09 抓到的真 bug：门户区 artRows 漏了 'en/reading/' 前缀，30 条链接全成 /1k/01.html） */
+  for (const [text, base] of [[REGION, ''], [listHtml, 'en/reading/']]) {
+    const reRow = /<a class="en-(?:unit|art)-row" href="([^"]+)" data-en-key="([^"]+)"/g;
+    let m3;
+    while ((m3 = reRow.exec(text))) {
+      if (base + m3[1] !== m3[2]) {
+        bad.push('行 href 与键不一致：href=' + m3[1] + ' 应写成 ' + m3[2].replace(base, '') + '（基准 ' + (base || '门户根') + '）');
+      } else if (!fs.existsSync(rel(m3[2]))) {
+        bad.push('行 href 不可达：' + m3[2]);
+      }
+    }
   }
   if (portalNext.indexOf(MARK_START) < 0) bad.push('门户缺少阅读清单区标记');
   for (const [href, no] of PATH_ROWS) {

@@ -41,6 +41,7 @@
 │   ├── en-vocab.mjs        ← 英语词表生成器 / 校验器（gen | check）
 │   ├── en-reading.mjs      ← 英语阅读管线（fetch | gen | check）
 │   ├── en-typing.mjs       ← 英语打字固定搭配挖掘（gen | check）
+│   ├── en-accept.mjs       ← 英语侧整合验收（107 项一条命令；不需要 .scratch/，clone 即可跑）
 │   └── encrypt-exam.mjs    ← 真题库加解密
 ├── n1/ … n5/               ← 各等级的学习页面（每级下 basics/ grammar/ vocab/）
 ├── docs/
@@ -112,6 +113,26 @@ node tools/en-typing.mjs check   # 校验：门槛、形状、重复、字节一
 挖掘口径（词表前 2,000 名内的二元组 / 三元组、次数 ≥ 4 且 PMI ≥ 3.3、功能词与限定词过滤、
 22 条人手剔除、三元组需两侧二元组都够格）详见 [`en/typing/README.md`](./en/typing/README.md)。
 阅读篇目一变，搭配就要重挖。
+
+## 验收
+
+英语侧的 107 项（77 个词表单元 + 30 篇阅读）有一条命令的整合验收：
+
+```bash
+node tools/en-accept.mjs              # 只校验（不依赖 .scratch/，clone 下来就能跑）
+node tools/en-accept.mjs --gen        # 先重跑三个生成器，再校验，并核对「再跑一次字节一致」
+node tools/en-accept.mjs --from-zero --gen   # 更狠：把生成物挪走，从零重产出再逐字节比对
+node tools/en-accept.mjs --src /path/to/ecdict.csv   # 源文件换位置时（--gen 需要源）
+```
+
+它查六件事：三个生成器的 check、107 项齐不齐、**门户与篇目页的清单 ≡ 实际文件（双向，
+无孤儿页、无死链）**、每个页面的本地链接都能打开、`file://` 硬约束（无 `fetch` / ES module，
+数据一律 `<script>` 注入）、许可与台账（数据不入库，来源与校验和写在 README 里）。
+
+更细的交互行为测试（词表翻卡与间隔复习、阅读点词查义、听写拼写、打字计分、
+进度导入导出、跨模块闭环）在开发工作区的 `.scratch/en-module/test/` 下，**不进仓库**
+（那目录被 `.gitignore` 排除）；上面这条命令不依赖它们，克隆者也能自证数据与链接的完整性。
+
 ## 本地预览
 
 任何浏览器直接打开 `index.html` 即可，无构建步骤、无外部依赖（无 CDN、无外链字体），`file://` 下功能完整。
