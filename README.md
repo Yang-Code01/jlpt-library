@@ -49,7 +49,8 @@
 ## 数据来源
 
 英语侧的词表不是手写的，由 `tools/en-vocab.mjs` 从下面的公开词表生成；`en/data/vocab.js`
-与 `en/<档位>/<NN>.html` 都是生成物，**勿手改**。
+与 `en/<档位>/<NN>.html` 都是生成物，**勿手改**。字段用法、选词规则、分档切点与许可声明
+详见 [`en/data/README.md`](./en/data/README.md)。
 
 | 数据 | 来源 | 许可 | 下载 |
 |---|---|---|---|
@@ -65,15 +66,16 @@ sha256  ecdict.csv
 重新生成（源文件不进仓库，因为 65.9 MB 且可随时下载）：
 
 ```bash
-# 1. 把 ecdict.csv 放到 .scratch/en-module/research/ 下（或任意位置，用 --src 指定）
-node tools/en-vocab.mjs gen      # 生成数据、单元页与门户的清单区
-node tools/en-vocab.mjs check    # 校验：切点、单元数自洽、清单与文件双向一致、幂等、源文件校验和
+# 1. 下载 ecdict.csv（源文件不进仓库：65.9 MB，且可随时下载）
+node tools/en-vocab.mjs gen --src /path/to/ecdict.csv   # 生成数据、单元页与门户的清单区
+node tools/en-vocab.mjs check --src /path/to/ecdict.csv # 校验：切点、单元数自洽、清单与文件双向一致、幂等
 ```
 
+省略 `--src` 时读默认位置（`.scratch/en-module/research/ecdict.csv`，该目录不在仓库里），
+并额外核对源文件校验和。
 词的选定规则：只取纯字母（含 `'` 与 `-`）词形、中文释义非空、词频字段 > 0 的条目，
 按词频升序取前 3,766 个，再切成四档 —— `1k`（1–1000）、`2k`（1001–2000）、
 `3k`（2001–2809）、`4k`（2810–3766）。
-
 ## 本地预览
 
 任何浏览器直接打开 `index.html` 即可，无构建步骤、无外部依赖（无 CDN、无外链字体），`file://` 下功能完整。
