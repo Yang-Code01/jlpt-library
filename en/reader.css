@@ -8,6 +8,13 @@
    页面自带量很少，因为大部分视觉来自 unit.css 的 .en-* 那一层。
    ========================================================================== */
 
+/* ---------- 双栏工作台容器：突破 .en-wrap 的 860px ----------
+   正文页（.en-read）里 .en-wrap 放宽到 1200px，与 Sample B 一致；
+   词表单元页不受影响（它们不引 reader.css）。 */
+.en-wrap {
+  max-width: 1200px;
+}
+
 /* ---------- 页头（词表单元页是 .en-unit > .en-head，这里是 .en-read > .en-head） ---------- */
 .en-read > .en-head,
 .en-read-index > .en-head {
@@ -29,20 +36,36 @@
   color: var(--accent-ink);
 }
 
-/* ---------- 正文 ---------- */
+/* ---------- 正文 ----------
+   长文阅读三件套：字距带呼吸、段落间留白大于段内、块间弱衔接。
+   段落 1.05em 间隔 + 纸感面底，消「密集墙」感。 */
 .en-article {
   margin: 6px 0 0;
+  padding: 6px 2px 0;
   color: var(--ink);
   font-size: 1.02rem;
-  line-height: 1.95;
+  line-height: 2.0;
 }
 
 .en-article p {
+  margin: 0 0 1.7em;
+}
+
+/* 段内切块（长段句界切）：块间用带间隔的留白而非换行，
+   ⸻ 弱衔接提示「同一段未完」 */
+.en-article .chunk {
+  display: block;
   margin: 0 0 1.05em;
 }
 
-/* 可点词：词表之内的词不打扰阅读（只有悬停时露一点底），超纲词常驻标红。
-   与 tools/en-reading.mjs / reader.js 的判据一致：红 = 词表查不到。 */
+.en-article .chunk:last-child {
+  margin-bottom: 0;
+}
+
+/* 可点词：词表之内的词不打扰阅读（只有悬停时露一点底）。
+   超纲词的三态视觉见下方「精读工作台」区块（票 10）；无 .en-ws 容器的
+   旧结构（如有）回退为常驻标红。与 tools/en-reading.mjs / reader.js 的
+   判据一致：红 = 词表查不到。 */
 .en-w {
   border-radius: 3px;
   cursor: pointer;
@@ -61,6 +84,292 @@
   background: var(--accent-soft);
   box-shadow: inset 0 -1px 0 var(--accent-line);
   color: var(--accent-ink);
+}
+
+/* ---------- 精读工作台（票 10） ----------
+   顶栏工具行 + 双栏（正文左 / 详解栏 sticky 右），窄屏单栏降级。
+   色相全走全站令牌，深色模式跟令牌走。 */
+.en-ws-bar {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 16px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-chip);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.en-ws-bar-title {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: .78rem;
+  letter-spacing: .08em;
+}
+
+.en-ws-oov {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.en-oov-btn {
+  padding: 4px 12px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: .74rem;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+
+.en-oov-btn:hover {
+  border-color: var(--accent-line);
+}
+
+.en-oov-btn.on {
+  border-color: var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+/* 双栏 */
+.en-ws {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(260px, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.en-ws-main {
+  min-width: 0;
+}
+
+.en-ws-side {
+  position: sticky;
+  top: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: calc(100vh - 84px);
+  overflow-y: auto;
+  padding: 2px;
+  scrollbar-width: thin;
+}
+
+/* 超纲词三态：off 无痕 / soft 浅虚线 / full 全标记。
+   is-oov 类始终存在（判据不变），只由 data-oov 控制视觉。 */
+.en-ws[data-oov="off"] .en-w.is-oov {
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+}
+
+.en-ws[data-oov="soft"] .en-w.is-oov {
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  /* 双层提示：虚线 + 底色点缀。accent-line 在深色/护眼底太淡，
+     虚线改用 accent-ink，另加一层极淡的 accent-soft 底色衬底。 */
+  border-bottom: 1.5px dashed var(--accent-ink);
+  background: linear-gradient(to top, var(--accent-soft) 0 28%, transparent 28%);
+}
+
+/* 深色 / 护眼模式：accent-ink 本身对比强，再叠一层半透明同色虚线拉高可见度 */
+html[data-theme="dark"] .en-ws[data-oov="soft"] .en-w.is-oov {
+  border-bottom: 1.5px dashed var(--accent-ink);
+  box-shadow: 0 1px 0 rgba(232, 101, 76, .35);
+}
+
+html[data-theme="eye"] .en-ws[data-oov="soft"] .en-w.is-oov {
+  border-bottom: 1.5px dashed var(--accent-ink);
+  box-shadow: 0 1px 0 rgba(148, 74, 60, .3);
+}
+
+.en-ws[data-oov="full"] .en-w.is-oov {
+  background: var(--accent-soft);
+  box-shadow: inset 0 -1px 0 var(--accent-line);
+  color: var(--accent-ink);
+}
+
+/* 导读卡与段卡 */
+.en-guide {
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-chip);
+  background: var(--surface);
+}
+
+.en-guide h3 {
+  margin: 0 0 8px;
+  color: var(--accent-ink);
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.en-guide p {
+  margin: 0;
+  font-size: .84rem;
+  line-height: 1.9;
+}
+
+.en-pcard {
+  padding: 0;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-chip);
+  background: var(--surface);
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.en-pcard.hit {
+  border-color: var(--accent-line);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+/* 折叠头部：整条可点；箭头用 CSS 画，不引图标库 */
+.en-pcard-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: .76rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.en-pcard-h .no {
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.en-pcard-h .tidy {
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: rotate(45deg);
+  transition: transform .15s;
+}
+
+.en-pcard.open .en-pcard-h .tidy {
+  transform: rotate(225deg);
+}
+
+/* 折叠体：默认收起，.open 展开（不引 <details>，为的是联动可控） */
+.en-pcard-b {
+  display: none;
+  padding: 0 16px 14px;
+}
+
+.en-pcard.open .en-pcard-b {
+  display: block;
+}
+
+.en-pcard h4 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: .76rem;
+  font-weight: 600;
+}
+
+.en-pcard h4 .no {
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
+.en-pcard .tr {
+  margin: 0 0 10px;
+  font-size: .85rem;
+  line-height: 1.9;
+}
+
+.en-pcard .sen {
+  margin: 0 0 8px;
+  font-size: .82rem;
+  line-height: 1.8;
+}
+
+.en-pcard .sen .en {
+  display: block;
+  color: var(--muted);
+  font-size: .78rem;
+  font-style: italic;
+}
+
+.en-pcard .pt {
+  margin: 0;
+  padding-left: 1.2em;
+  font-size: .8rem;
+  line-height: 1.85;
+}
+
+.en-pcard .pt li {
+  margin: 0 0 4px;
+}
+
+.en-pcard-empty {
+  color: var(--muted);
+}
+
+/* 长段句界切块：第 2 块起带 ⸻ 弱衔接 */
+.chunk.cont {
+  position: relative;
+  padding-left: 2.2em;
+}
+
+.chunk.cont::before {
+  content: "⸻";
+  position: absolute;
+  left: .1em;
+  top: .18em;
+  color: var(--accent-line);
+  font-size: .8em;
+  opacity: .8;
+}
+
+/* 段号小标：钉在段首行前，圆形编号；点击展开右栏详解（联动逻辑在 reader.js） */
+.en-pno {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5em;
+  height: 1.5em;
+  margin-right: .5em;
+  padding: 0;
+  border: 1px solid var(--accent-line);
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font: inherit;
+  font-size: .68rem;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: .12em;
+  cursor: pointer;
+  user-select: none;
+  transition: background .15s, color .15s;
+}
+
+.en-pno:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
 }
 
 /* ---------- 查义气泡 ---------- */
@@ -258,6 +567,18 @@
   font-size: .72rem;
 }
 
+@media (max-width: 900px) {
+  .en-ws {
+    grid-template-columns: 1fr;
+  }
+
+  .en-ws-side {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
 @media (max-width: 620px) {
   .en-article {
     font-size: .98rem;
@@ -272,5 +593,9 @@
     grid-column: 1;
     grid-row: auto;
     text-align: left;
+  }
+
+  .en-ws-bar {
+    flex-wrap: wrap;
   }
 }

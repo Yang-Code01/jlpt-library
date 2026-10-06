@@ -239,25 +239,139 @@
     return out + esc(p.slice(last));
   }
 
+  /* ---------- 长段句界切块 ---------- */
+  /* 超过 CHUNK_WORDS 词的段落按句子边界切成 .chunk 块，第 2 块起带 .cont
+     （⸻ 弱衔接，样式见 reader.css）。只影响渲染，不动 payload.paras 数据。 */
+  var CHUNK_WORDS = 55;
+  /* 句界正则：句末标点 + 收尾引号，向前多吞一个可能是缩写/破折号残段的
+     「. + --」边界（Stoker 体里有 clever!--in 这类），避免切丢词。 */
+  var SENT_RE = /[^.!?…]+[.!?…]+[”’"']*(?:--)?(?:\s+|$)|[^.!?…]+$/g;
+  var CHUNK_SEEN = null;   /* 当前篇的小写词形集合 */
+
+  function chunkPara(text, host, no) {
+    var badge = no ? '<button type="button" class="en-pno" data-no="' + no + '" title="查看本段详解">' + no + '</button>' : '';
+    var sentences = [], m, last = 0;
+    SENT_RE.lastIndex = 0;
+    while ((m = SENT_RE.exec(text))) {
+      if (m.index > last) sentences.push(text.slice(last, m.index));  /* 匹配间隙（嵌套引号等）并入前句 */
+      sentences.push(m[0]);
+      last = m.index + m[0].length;
+    }
+    if (last < text.length) sentences.push(text.slice(last));
+    var blocks = [], cur = '', curN = 0, i, n;
+    for (i = 0; i < sentences.length; i++) {
+      n = wordsOf(sentences[i]).length;
+      if (curN > 0 && curN + n > CHUNK_WORDS) { blocks.push(cur); cur = ''; curN = 0; }
+      cur += sentences[i]; curN += n;
+    }
+    if (cur) blocks.push(cur);
+    if (blocks.length < 2) { host.innerHTML = badge + markPara(text, CHUNK_SEEN); return; }
+    for (i = 0; i < blocks.length; i++) {
+      var sp = document.createElement('span');
+      sp.className = 'chunk' + (i ? ' cont' : '');
+      /* 段号小标只钉在段首块开头，续块不重复 */
+      sp.innerHTML = (i === 0 ? badge : '') + markPara(blocks[i], CHUNK_SEEN);
+      host.appendChild(sp);
+    }
+  }
+
+  /* ---------- 超纲词三态开关 ---------- */
+  /* off（无痕）/ soft（浅虚线）/ full（全标记）；默认 soft，用户切档写
+     localStorage（无痕模式静默失败）。data-oov 属性驱动 CSS。 */
+  var OOV_KEY = 'en-reading-oov';
+  var OOV_MODES = ['off', 'soft', 'full'];
+
+  function oovMode() {
+    try {
+      var v = localStorage.getItem(OOV_KEY);
+      return OOV_MODES.indexOf(v) >= 0 ? v : 'soft';
+    } catch (e) { return 'soft'; }
+  }
+
+  function setOovMode(m) {
+    try { localStorage.setItem(OOV_KEY, m); } catch (e) { }
+    var host = main.querySelector('.en-ws');
+    if (host) host.setAttribute('data-oov', m);
+  }
+
   function articleHead(a) {
     /* 标红的是「查得到释义的超纲词」。ECDICT 里完全没收录的超纲词查不到，
-       静默不标（票 06 的四级兜底第 5 步），所以计量写的是**实际标红的个数**，
-       并在下面用一句话交代漏掉了几个，否则数字与页面上的红字对不上。 */
+       静默不标（票 06 的四级兜底第 5 步），所以计量写的是**实际标红的个数**。 */
     var red = Math.max(0, (a.oovTypes || 0) - (a.missing || 0));
-    return '<div class="en-head en-read-head">' +
+    return '<header class="en-head en-read-head">' +
       '<p class="en-eyebrow">英语阅读 · ' + esc(a.band) + ' 档 · 第 ' + pad2(a.no) + ' 篇</p>' +
       '<h1 class="en-title" lang="en">' + esc(a.title) + '</h1>' +
-      '<p class="en-sub">' + esc(a.author) + ' · ' + num(a.words) + ' 词 · 超纲 ' + a.oov + '% · ' +
-        'Gutenberg #' + esc(a.bookId) + '</p>' +
-      '<p class="en-meters">' +
-        '<span class="en-meter">超纲词 ' + red + ' 个</span>' +
-        '<span class="en-meter">1k 覆盖 ' + a.cov1k + '%</span>' +
-        '<span class="en-meter" id="enReadState">未读完</span>' +
-      '</p>' +
-      '<p class="en-note">点任意英文词看中释、英释与发音；<b class="en-oov">标红</b>的词不在四档 3,766 词表内。' +
-        '人名地名之类的专有名词点了不弹。' +
-        (a.missing ? '另有 ' + a.missing + ' 个超纲词在词库里没有条目，点了不弹。' : '') + '</p>' +
-      '</div>';
+      '<p class="en-sub">' + esc(a.author) + ' · ' + num(a.words) + ' 词 · 超纲词 ' + red + ' · ' +
+        'Gutenberg #' + esc(a.bookId) + ' · <span id="enReadState">未读完</span></p>' +
+      '</header>';
+  }
+
+  /* ---------- 工具栏 / 导读 / 段卡 ---------- */
+  function toolbar() {
+    return '<div class="en-ws-bar">' +
+      '<span class="en-ws-bar-title">精读工具</span>' +
+      '<span class="en-ws-oov" role="group" aria-label="超纲词标记">' +
+        '<button type="button" class="en-oov-btn" data-m="off">无痕</button>' +
+        '<button type="button" class="en-oov-btn" data-m="soft">浅标</button>' +
+        '<button type="button" class="en-oov-btn" data-m="full">全标</button>' +
+      '</span>' +
+    '</div>';
+  }
+
+  function guideCard(intro) {
+    return '<section class="en-guide"><h3>篇首导读</h3>' +
+      '<p>' + esc(intro || '本篇暂无导读。') + '</p></section>';
+  }
+
+  /* 段卡：notes.paras[i] = { tr, sen:[{en,zh}], pt:[...] }，三字段都可缺省。 */
+  /* 段卡：默认折叠，点头部展开/收起；由正文联动打开时自动滚到位。 */
+  function noteCard(no, n) {
+    n = n || {};
+    var body = '';
+    if (n.tr) body += '<p class="tr">' + esc(n.tr) + '</p>';
+    var i;
+    if (n.sen && n.sen.length) {
+      for (i = 0; i < n.sen.length; i++) {
+        body += '<p class="sen"><span class="en" lang="en">' + esc(n.sen[i].en) + '</span>' + esc(n.sen[i].zh) + '</p>';
+      }
+    }
+    if (n.pt && n.pt.length) {
+      body += '<ul class="pt">';
+      for (i = 0; i < n.pt.length; i++) body += '<li>' + esc(n.pt[i]) + '</li>';
+      body += '</ul>';
+    }
+    if (!n.tr && !(n.sen && n.sen.length) && !(n.pt && n.pt.length)) {
+      body += '<p class="tr en-pcard-empty">本段暂无详解。</p>';
+    }
+    return '<section class="en-pcard" data-no="' + no + '">' +
+      '<button class="en-pcard-h" type="button" aria-expanded="false">' +
+      '<span class="no">段 ' + no + '</span><span class="tidy" aria-hidden="true"></span></button>' +
+      '<div class="en-pcard-b">' + body + '</div></section>';
+  }
+
+  /* 展开/收起某张段卡；open 缺省 = 切换。返回是否已展开。 */
+  function toggleCard(card, open) {
+    if (!card || !card.classList.contains('en-pcard')) return false;
+    var willOpen = typeof open === 'boolean' ? open : !card.classList.contains('open');
+    card.classList.toggle('open', willOpen);
+    var h = card.querySelector('.en-pcard-h');
+    if (h) h.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    return willOpen;
+  }
+
+  /* 联动打开：展开段卡并让它在右栏内可见（不拽动整页滚动）。 */
+  function openCard(no) {
+    var side = document.getElementById('enSide');
+    if (!side || !no) return;
+    var card = side.querySelector('.en-pcard[data-no="' + no + '"]');
+    if (!card) return;
+    if (card.classList.contains('open')) {
+      /* 已展开 → 再点 = 折叠回去（滚动联动只改高亮，不动开合） */
+      toggleCard(card, false);
+    } else {
+      toggleCard(card, true);
+      if (card.scrollIntoView) card.scrollIntoView({ block: 'nearest' });
+    }
   }
 
   function articleFoot() {
@@ -270,12 +384,71 @@
 
   function renderArticle() {
     var paras = A.paras || [];
-    var seen = lowerSeen(paras);
-    var out = articleHead(A) + '<article class="en-article" id="enArticle" lang="en">';
-    for (var i = 0; i < paras.length; i++) out += '<p>' + markPara(paras[i], seen) + '</p>';
-    out += '</article>' + articleFoot();
+    CHUNK_SEEN = lowerSeen(paras);
+    var notes = A.notes;
+
+    var out = toolbar() +
+      '<div class="en-ws" data-oov="' + oovMode() + '">' +
+      '<div class="en-ws-main">' + articleHead(A) +
+      '<article class="en-article" id="enArticle" lang="en">';
+    var i;
+    for (i = 0; i < paras.length; i++) out += '<p class="en-para" data-no="' + (i + 1) + '"></p>';
+    out += '</article>' + articleFoot() + '</div>';
+
+    /* 右栏：导读 + 段卡（sticky）。无详解时优雅降级，不报错。 */
+    out += '<aside class="en-ws-side" id="enSide">';
+    if (notes) {
+      out += guideCard(notes.intro);
+      for (i = 0; i < (notes.paras || []).length; i++) out += noteCard(i + 1, notes.paras[i]);
+    } else {
+      out += guideCard(null) +
+        '<section class="en-pcard open"><h4><span class="no">逐段详解</span></h4>' +
+        '<p class="tr en-pcard-empty">本篇的逐段详解还在编写中，完成后会自动出现在这里。</p></section>';
+    }
+    out += '</aside></div>';
+
     main.innerHTML = out;
+
+    /* 正文切块渲染（占位后逐段填充） */
+    var ps = main.querySelectorAll('.en-para');
+    for (i = 0; i < paras.length && i < ps.length; i++) chunkPara(paras[i], ps[i], i + 1);
+
     bindArticle();
+  }
+
+  /* 段卡联动：点正文段 → 右栏对应段卡高亮。 */
+  function highlightCard(no) {
+    var side = document.getElementById('enSide');
+    if (!side || !no) return;
+    var cards = side.querySelectorAll('.en-pcard');
+    for (var i = 0; i < cards.length; i++) {
+      cards[i].classList.toggle('hit', cards[i].getAttribute('data-no') === no);
+    }
+  }
+
+  /* 滚动联动：正文段落进入视口 → 段卡高亮（不抢滚动） */
+  function bindScrollSpy() {
+    if (!window.IntersectionObserver) return;
+    var paras = main.querySelectorAll('.en-para');
+    var spy = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting) highlightCard(entries[i].target.getAttribute('data-no'));
+      }
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    for (var i = 0; i < paras.length; i++) spy.observe(paras[i]);
+  }
+
+  /* 段卡点击：展开/收起；展开时高亮自身并同步正文段（若在视口附近） */
+  function bindSideCards() {
+    var side = document.getElementById('enSide');
+    if (!side) return;
+    side.addEventListener('click', function (ev) {
+      var h = ev.target && ev.target.closest ? ev.target.closest('.en-pcard-h') : null;
+      if (!h) return;
+      var card = h.closest('.en-pcard');
+      toggleCard(card);
+      if (card.classList.contains('open')) highlightCard(card.getAttribute('data-no'));
+    });
   }
 
   /* 页级完成：jlpt-progress 的 reading/<档>/<NN>.html（progress.js 会取末三段） */
@@ -307,10 +480,27 @@
       art.addEventListener('click', function (ev) {
         var t = ev.target;
         var span = t && t.closest ? t.closest('.en-w') : null;
-        if (!span) return;
+        if (!span) {
+          /* 段号小标：展开右栏对应段卡并滚到可见；点段落其它空白处同样定位 */
+          var badge = t && t.closest ? t.closest('.en-pno') : null;
+          var para = t && t.closest ? t.closest('.en-para') : null;
+          if (para) { highlightCard(para.getAttribute('data-no')); openCard(para.getAttribute('data-no')); }
+          return;
+        }
         if (span === active) { hidePop(); return; }   /* 再点同一个词 = 收起 */
         hidePop();
         showPop(span);
+      });
+    }
+    /* 超纲词三态按钮 */
+    var group = main.querySelector('.en-ws-oov');
+    if (group) {
+      syncOovBtns();
+      group.addEventListener('click', function (ev) {
+        var b = ev.target && ev.target.closest ? ev.target.closest('.en-oov-btn') : null;
+        if (!b) return;
+        setOovMode(b.getAttribute('data-m'));
+        syncOovBtns();
       });
     }
     /* 点别处、按 Esc 都收起 */
@@ -333,6 +523,16 @@
       });
     }
     syncDone();
+    bindScrollSpy();
+    bindSideCards();
+  }
+
+  function syncOovBtns() {
+    var mode = oovMode();
+    var btns = main.querySelectorAll('.en-oov-btn');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle('on', btns[i].getAttribute('data-m') === mode);
+    }
   }
 
   /* ---------- 篇目页：只做「已读」状态与计数 ---------- */
