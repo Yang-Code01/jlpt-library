@@ -421,6 +421,28 @@ function oovSetOf(article, ctx, gloss) {
   return out.sort();
 }
 
+/* 逐段详解：构建期从 .scratch/en-module/notes/<档>/<NN>.json 读入，内联进 payload。
+   详解是工作产出（不进 git），文件缺失 / 段数不匹配都只是跳过 + 警告，
+   页面右栏优雅降级 —— gen 永不因缺详解而失败。 */
+const NOTES_DIR = '.scratch/en-module/notes';
+function loadNotes(a) {
+  const p = rel(NOTES_DIR + '/' + a.band + '/' + pad(a.no) + '.json');
+  if (!fs.existsSync(p)) return null;
+  let n;
+  try {
+    n = JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch (e) {
+    console.warn('[notes] JSON 解析失败，跳过 ' + a.band + '/' + pad(a.no) + '：' + e.message);
+    return null;
+  }
+  if (!Array.isArray(n.paras) || n.paras.length !== a.paras.length) {
+    console.warn('[notes] 段数不匹配，跳过 ' + a.band + '/' + pad(a.no) +
+      '（正文 ' + a.paras.length + ' 段，详解 ' + (n.paras ? n.paras.length : '无') + ' 段）');
+    return null;
+  }
+  return { intro: String(n.intro || ''), paras: n.paras };
+}
+
 /* --------------------------------- 构建 ---------------------------------- */
 function build() {
   /* 1. 缓存清单 */
@@ -468,12 +490,13 @@ function build() {
   const { pool, picked } = pickArticles(loaded.per, csv.ranks);
   const skipped = loaded.skipped;
 
-  /* 4. 逐篇装配：超纲词典、高亮集、显示用的难度 */
+  /* 4. 逐篇装配：超纲词典、高亮集、显示用的难度、逐段详解 */
   for (const a of picked) {
     const g = buildGloss(a, ctx);
     a.gloss = g.gloss;
     a.oovTypes = g.oovTypes;
     a.unresolved = g.unresolved;
+    a.notes = loadNotes(a);
   }
 
   /* 5. 输出文件 */
@@ -533,8 +556,10 @@ function articlePage(a) {
     oov: +a.oov.toFixed(1),
     oovTypes: a.oovTypes.length,
     missing: a.unresolved.length,
+    hasNotes: !!a.notes,
     paras: a.paras,
-    gloss: a.gloss
+    gloss: a.gloss,
+    notes: a.notes || null
   };
   const desc = '英语阅读 ' + a.band + ' 档第 ' + a.no + ' 篇：《' + a.book.title + '》' +
     '（' + commas(a.words) + ' 词，超纲 ' + (a.oovTypes.length - a.unresolved.length) + ' 词），点词查义、超纲词高亮。';
@@ -565,7 +590,6 @@ function articlePage(a) {
     <noscript><p class="en-empty">本页的点词查义需要 JavaScript；正文可以直接阅读。</p></noscript>
   </main>
 </div>
-
 <script src="../../data/vocab.js"></script>
 <script>window.EN_ARTICLE = ${jsonIn(payload)};</script>
 <script src="../../../assets/progress.js"></script>
