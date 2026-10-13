@@ -1,0 +1,96 @@
+{
+  "title": "体の言葉を使った慣用表現②・その他の慣用表現",
+  "reading": "からだのことばをつかったかんようひょうげんに・そのたのかんようひょうげん",
+  "meaning_cn": "第6章「惯用表达」第2课：与身体相关的惯用表达②·其他惯用表达",
+  "categories": [
+    {
+      "name": "腹",
+      "reading": "はら",
+      "cards": [
+        { "id": "1-1", "word": "腹が立つ／腹を立てる", "speak_word": "腹が立つ、腹を立てる", "kana": "はらがたつ／はらをたてる", "pos": "慣用句", "meaning_cn": "生气、发怒", "example_jp": "店員の対応がとても失礼で腹が立つ。", "example_jp_ruby": "<ruby>店員<rt>てんいん</rt></ruby>の<ruby>対応<rt>たいおう</rt></ruby>がとても<ruby>失礼<rt>しつれい</rt></ruby>で<ruby>腹<rt>はら</rt></ruby>が<ruby>立<rt>た</rt></ruby>つ。", "example_cn": "店员的态度非常失礼，让人很生气。" },
+        { "id": "1-2", "word": "腹が決まる／腹を決める", "speak_word": "腹が決まる、腹を決める", "kana": "はらがきまる／はらをきめる", "pos": "慣用句", "meaning_cn": "下定决心", "example_jp": "悩んでいたが、腹を決めて、転職することにした。", "example_jp_ruby": "<ruby>悩<rt>なや</rt></ruby>んでいたが、<ruby>腹<rt>はら</rt></ruby>を<ruby>決<rt>き</rt></ruby>めて、<ruby>転職<rt>てんしょく</rt></ruby>することにした。", "example_cn": "虽然一直很烦恼，但最终下定决心换工作。" }
+      ]
+    },
+    {
+      "name": "胸",
+      "reading": "むね",
+      "cards": [
+        { "id": "2-1", "word": "胸が一杯になる", "kana": "むねがいっぱいになる", "pos": "慣用句", "meaning_cn": "心中充满（感动等）、百感交集", "example_jp": "故郷の母から励ましの手紙が来て、胸が一杯になった。", "example_jp_ruby": "<ruby>故郷<rt>こきょう</rt></ruby>の<ruby>母<rt>はは</rt></ruby>から<ruby>励<rt>はげ</rt></ruby>ましの<ruby>手紙<rt>てがみ</rt></ruby>が<ruby>来<rt>き</rt></ruby>て、<ruby>胸<rt>むね</rt></ruby>が<ruby>一杯<rt>いっぱい</rt></ruby>になった。", "example_cn": "收到故乡母亲寄来的鼓励信，心里满是感动。" },
+        { "id": "2-2", "word": "胸に納める", "kana": "むねにおさめる", "pos": "慣用句", "meaning_cn": "藏在心里、不对外说", "example_jp": "今、私が話したことはあなた一人の胸に納めておいてほしい。", "example_jp_ruby": "<ruby>今<rt>いま</rt></ruby>、<ruby>私<rt>わたし</rt></ruby>が<ruby>話<rt>はな</rt></ruby>したことはあなた<ruby>一人<rt>ひとり</rt></ruby>の<ruby>胸<rt>むね</rt></ruby>に<ruby>納<rt>おさ</rt></ruby>めておいてほしい。", "example_cn": "我现在说的事，希望你只藏在自己心里。" },
+        { "id": "2-3", "word": "胸を打つ", "kana": "むねをうつ", "pos": "慣用句", "meaning_cn": "打动人心、感人", "example_jp": "人生経験の豊かな人の話は、人の胸を打つ。", "example_jp_ruby": "<ruby>人生経験<rt>じんせいけいけん</rt></ruby>の<ruby>豊<rt>ゆた</rt></ruby>かな<ruby>人<rt>ひと</rt></ruby>の<ruby>話<rt>はなし</rt></ruby>は、<ruby>人<rt>ひと</rt></ruby>の<ruby>胸<rt>むね</rt></ruby>を<ruby>打<rt>う</rt></ruby>つ。", "example_cn": "人生经验丰富的人说的话能打动人心。" },
+        { "id": "2-4", "word": "胸を張る", "kana": "むねをはる", "pos": "慣用句", "meaning_cn": "挺起胸膛、理直气壮", "example_jp": "自分が間違ったことをしていないのであれば、堂々と胸を張っていなさい。", "example_jp_ruby": "<ruby>自分<rt>じぶん</rt></ruby>が<ruby>間違<rt>まちが</rt></ruby>ったことをしていないのであれば、<ruby>堂々<rt>どうどう</rt></ruby>と<ruby>胸<rt>むね</rt></ruby>を<ruby>張<rt>は</rt></ruby>っていなさい。", "example_cn": "如果自己没有做错事，就堂堂正正地挺起胸膛。" }
+      ]
+    },
+    {
+      "name": "足",
+      "reading": "あし",
+      "cards": [
+        { "id": "3-1", "word": "足を運ぶ", "kana": "あしをはこぶ", "pos": "慣用句", "meaning_cn": "特意前往、亲自去", "example_jp": "何度も先生の研究室に足を運んで、研究方法の相談をした。", "example_jp_ruby": "<ruby>何度<rt>なんど</rt></ruby>も<ruby>先生<rt>せんせい</rt></ruby>の<ruby>研究室<rt>けんきゅうしつ</rt></ruby>に<ruby>足<rt>あし</rt></ruby>を<ruby>運<rt>はこ</rt></ruby>んで、<ruby>研究方法<rt>けんきゅうほうほう</rt></ruby>の<ruby>相談<rt>そうだん</rt></ruby>をした。", "example_cn": "多次前往老师的研究室，商量研究方法。" },
+        { "id": "3-2", "word": "足を引っ張る", "kana": "あしをひっぱる", "pos": "慣用句", "meaning_cn": "拖后腿、妨碍", "example_jp": "自分の失敗がチームの足を引っ張ってしまった。", "example_jp_ruby": "<ruby>自分<rt>じぶん</rt></ruby>の<ruby>失敗<rt>しっぱい</rt></ruby>がチームの<ruby>足<rt>あし</rt></ruby>を<ruby>引<rt>ひ</rt></ruby>っ<ruby>張<rt>ぱ</rt></ruby>ってしまった。", "example_cn": "我的失误拖了团队的后腿。" },
+        { "id": "3-3", "word": "足を延ばす", "kana": "あしをのばす", "pos": "慣用句", "meaning_cn": "顺便多走一段、走得更远", "example_jp": "京都に行くなら、もう少し足を延ばして奈良のほうまで行きたい。", "example_jp_ruby": "<ruby>京都<rt>きょうと</rt></ruby>に<ruby>行<rt>い</rt></ruby>くなら、もう<ruby>少<rt>すこ</rt></ruby>し<ruby>足<rt>あし</rt></ruby>を<ruby>延<rt>の</rt></ruby>ばして<ruby>奈良<rt>なら</rt></ruby>のほうまで<ruby>行<rt>い</rt></ruby>きたい。", "example_cn": "去京都的话，想再多走一段，一直到奈良那边。" }
+      ]
+    },
+    {
+      "name": "身",
+      "reading": "み",
+      "cards": [
+        { "id": "4-1", "word": "身が入る", "kana": "みがはいる", "pos": "慣用句", "meaning_cn": "专心投入、起劲", "example_jp": "日本に留学することが決まり、日本語の勉強にますます身が入った。", "example_jp_ruby": "<ruby>日本<rt>にほん</rt></ruby>に<ruby>留学<rt>りゅうがく</rt></ruby>することが<ruby>決<rt>き</rt></ruby>まり、<ruby>日本語<rt>にほんご</rt></ruby>の<ruby>勉強<rt>べんきょう</rt></ruby>にますます<ruby>身<rt>み</rt></ruby>が<ruby>入<rt>はい</rt></ruby>った。", "example_cn": "决定去日本留学后，学日语越来越投入了。" },
+        { "id": "4-2", "word": "身につける", "kana": "みにつける", "pos": "慣用句", "meaning_cn": "掌握、学到；穿戴", "example_jp": "どこに行っても恥ずかしくないマナーを身につけたい。", "example_jp_ruby": "どこに<ruby>行<rt>い</rt></ruby>っても<ruby>恥<rt>は</rt></ruby>ずかしくないマナーを<ruby>身<rt>み</rt></ruby>につけたい。", "example_cn": "我想掌握走到哪里都不丢人的礼仪。" }
+      ]
+    },
+    {
+      "name": "気",
+      "reading": "き",
+      "cards": [
+        { "id": "5-1", "word": "気が合う", "kana": "きがあう", "pos": "慣用句", "meaning_cn": "合得来、投缘", "example_jp": "気が合う友人が集まって、一緒にスキーに行く。", "example_jp_ruby": "<ruby>気<rt>き</rt></ruby>が<ruby>合<rt>あ</rt></ruby>う<ruby>友人<rt>ゆうじん</rt></ruby>が<ruby>集<rt>あつ</rt></ruby>まって、<ruby>一緒<rt>いっしょ</rt></ruby>にスキーに<ruby>行<rt>い</rt></ruby>く。", "example_cn": "投缘的朋友聚在一起去滑雪。" },
+        { "id": "5-2", "word": "気が多い", "kana": "きがおおい", "pos": "慣用句", "meaning_cn": "兴趣多变、见异思迁", "example_jp": "彼は気が多くて、興味を持ったことを何でもやってみようとする。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>気<rt>き</rt></ruby>が<ruby>多<rt>おお</rt></ruby>くて、<ruby>興味<rt>きょうみ</rt></ruby>を<ruby>持<rt>も</rt></ruby>ったことを<ruby>何<rt>なん</rt></ruby>でもやってみようとする。", "example_cn": "他兴趣多变，感兴趣的事什么都想试一试。" },
+        { "id": "5-3", "word": "気が重い", "kana": "きがおもい", "pos": "慣用句", "meaning_cn": "心情沉重、提不起劲", "example_jp": "けんかした友達と会うのは、気が重い。", "example_jp_ruby": "けんかした<ruby>友達<rt>ともだち</rt></ruby>と<ruby>会<rt>あ</rt></ruby>うのは、<ruby>気<rt>き</rt></ruby>が<ruby>重<rt>おも</rt></ruby>い。", "example_cn": "要去见吵过架的朋友，心情很沉重。" },
+        { "id": "5-4", "word": "気が利く", "kana": "きがきく", "pos": "慣用句", "meaning_cn": "机灵、细心周到", "example_jp": "彼はよく気が利くので、何かあるとすぐに気付いてそれに対応する。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>はよく<ruby>気<rt>き</rt></ruby>が<ruby>利<rt>き</rt></ruby>くので、<ruby>何<rt>なに</rt></ruby>かあるとすぐに<ruby>気付<rt>きづ</rt></ruby>いてそれに<ruby>対応<rt>たいおう</rt></ruby>する。", "example_cn": "他很机灵，一有什么情况马上就能察觉并应对。" },
+        { "id": "5-5", "word": "気が進まない", "kana": "きがすすまない", "pos": "慣用句", "meaning_cn": "不起劲、不情愿", "example_jp": "今日は疲れているので、みんなで食事に行くのは気が進まない。", "example_jp_ruby": "<ruby>今日<rt>きょう</rt></ruby>は<ruby>疲<rt>つか</rt></ruby>れているので、みんなで<ruby>食事<rt>しょくじ</rt></ruby>に<ruby>行<rt>い</rt></ruby>くのは<ruby>気<rt>き</rt></ruby>が<ruby>進<rt>すす</rt></ruby>まない。", "example_cn": "今天很累，不太想和大家一起去吃饭。" },
+        { "id": "5-6", "word": "気が済む", "kana": "きがすむ", "pos": "慣用句", "meaning_cn": "心满意足、心里舒坦", "example_jp": "言いたいことを全部言ったら、気が済んだ。", "example_jp_ruby": "<ruby>言<rt>い</rt></ruby>いたいことを<ruby>全部<rt>ぜんぶ</rt></ruby><ruby>言<rt>い</rt></ruby>ったら、<ruby>気<rt>き</rt></ruby>が<ruby>済<rt>す</rt></ruby>んだ。", "example_cn": "把想说的话全都说出来后，心里就舒坦了。" },
+        { "id": "5-7", "word": "気が小さい", "kana": "きがちいさい", "pos": "慣用句", "meaning_cn": "胆小、气量小", "example_jp": "気が小さいので、強く言われると、何も言えなくなってしまう。", "example_jp_ruby": "<ruby>気<rt>き</rt></ruby>が<ruby>小<rt>ちい</rt></ruby>さいので、<ruby>強<rt>つよ</rt></ruby>く<ruby>言<rt>い</rt></ruby>われると、<ruby>何<rt>なに</rt></ruby>も<ruby>言<rt>い</rt></ruby>えなくなってしまう。", "example_cn": "我胆子小，被人严厉地一说就什么都说不出来了。" },
+        { "id": "5-8", "word": "気が散る", "kana": "きがちる", "pos": "慣用句", "meaning_cn": "分心、注意力不集中", "example_jp": "周りでおしゃべりする人がいて、気が散って勉強できない。", "example_jp_ruby": "<ruby>周<rt>まわ</rt></ruby>りでおしゃべりする<ruby>人<rt>ひと</rt></ruby>がいて、<ruby>気<rt>き</rt></ruby>が<ruby>散<rt>ち</rt></ruby>って<ruby>勉強<rt>べんきょう</rt></ruby>できない。", "example_cn": "周围有人在聊天，分心没法学习。" },
+        { "id": "5-9", "word": "気が早い", "kana": "きがはやい", "pos": "慣用句", "meaning_cn": "性急、操之过急", "example_jp": "旅行の一週間前からトランクに荷物を入れておくなんて、気が早い。", "example_jp_ruby": "<ruby>旅行<rt>りょこう</rt></ruby>の<ruby>一週間前<rt>いっしゅうかんまえ</rt></ruby>からトランクに<ruby>荷物<rt>にもつ</rt></ruby>を<ruby>入<rt>い</rt></ruby>れておくなんて、<ruby>気<rt>き</rt></ruby>が<ruby>早<rt>はや</rt></ruby>い。", "example_cn": "旅行前一周就把行李装进箱子，真是太性急了。" },
+        { "id": "5-10", "word": "気が短い", "kana": "きがみじかい", "pos": "慣用句", "meaning_cn": "性子急、没耐心", "example_jp": "父は気が短いので、待たせるとすぐに怒る。", "example_jp_ruby": "<ruby>父<rt>ちち</rt></ruby>は<ruby>気<rt>き</rt></ruby>が<ruby>短<rt>みじか</rt></ruby>いので、<ruby>待<rt>ま</rt></ruby>たせるとすぐに<ruby>怒<rt>おこ</rt></ruby>る。", "example_cn": "父亲性子急，一让他等就马上发火。" },
+        { "id": "5-11", "word": "気が向く", "kana": "きがむく", "pos": "慣用句", "meaning_cn": "有兴致、想做", "example_jp": "今はあまり興味はないけど、気が向いたら読んでみます。", "example_jp_ruby": "<ruby>今<rt>いま</rt></ruby>はあまり<ruby>興味<rt>きょうみ</rt></ruby>はないけど、<ruby>気<rt>き</rt></ruby>が<ruby>向<rt>む</rt></ruby>いたら<ruby>読<rt>よ</rt></ruby>んでみます。", "example_cn": "现在不太感兴趣，等有兴致了再读读看。" },
+        { "id": "5-12", "word": "気に掛かる", "kana": "きにかかる", "pos": "慣用句", "meaning_cn": "挂念、放心不下", "example_jp": "この間から元気のない友達のことが気に掛かっていたので、電話してみた。", "example_jp_ruby": "この<ruby>間<rt>あいだ</rt></ruby>から<ruby>元気<rt>げんき</rt></ruby>のない<ruby>友達<rt>ともだち</rt></ruby>のことが<ruby>気<rt>き</rt></ruby>に<ruby>掛<rt>か</rt></ruby>かっていたので、<ruby>電話<rt>でんわ</rt></ruby>してみた。", "example_cn": "前阵子起就一直挂念着没精神的朋友，于是打了个电话。" },
+        { "id": "5-13", "word": "気に食わない", "kana": "きにくわない", "pos": "慣用句", "meaning_cn": "看不惯、不顺心", "example_jp": "あの客は気に食わないことがあると、いつもすぐに大声で文句を言う。", "example_jp_ruby": "あの<ruby>客<rt>きゃく</rt></ruby>は<ruby>気<rt>き</rt></ruby>に<ruby>食<rt>く</rt></ruby>わないことがあると、いつもすぐに<ruby>大声<rt>おおごえ</rt></ruby>で<ruby>文句<rt>もんく</rt></ruby>を<ruby>言<rt>い</rt></ruby>う。", "example_cn": "那位客人一遇到不顺心的事，总是马上大声抱怨。" },
+        { "id": "5-14", "word": "気にする", "kana": "きにする", "pos": "慣用句", "meaning_cn": "在意、介意", "example_jp": "最近、姉は少し太ってきたことを気にしている。", "example_jp_ruby": "<ruby>最近<rt>さいきん</rt></ruby>、<ruby>姉<rt>あね</rt></ruby>は<ruby>少<rt>すこ</rt></ruby>し<ruby>太<rt>ふと</rt></ruby>ってきたことを<ruby>気<rt>き</rt></ruby>にしている。", "example_cn": "最近姐姐很在意自己稍微胖了一些。" },
+        { "id": "5-15", "word": "気に入る", "kana": "きにいる", "pos": "慣用句", "meaning_cn": "喜欢、中意", "example_jp": "周囲の環境が気に入ったので、ここに引っ越すことにした。", "example_jp_ruby": "<ruby>周囲<rt>しゅうい</rt></ruby>の<ruby>環境<rt>かんきょう</rt></ruby>が<ruby>気<rt>き</rt></ruby>に<ruby>入<rt>い</rt></ruby>ったので、ここに<ruby>引<rt>ひ</rt></ruby>っ<ruby>越<rt>こ</rt></ruby>すことにした。", "example_cn": "因为喜欢周围的环境，所以决定搬到这里。" },
+        { "id": "5-16", "word": "気を落とす", "kana": "きをおとす", "pos": "慣用句", "meaning_cn": "灰心、沮丧", "example_jp": "彼女は先生に怒られて、気を落としているようだ。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>先生<rt>せんせい</rt></ruby>に<ruby>怒<rt>おこ</rt></ruby>られて、<ruby>気<rt>き</rt></ruby>を<ruby>落<rt>お</rt></ruby>としているようだ。", "example_cn": "她被老师批评了，好像很沮丧。" },
+        { "id": "5-17", "word": "気を取られる", "kana": "きをとられる", "pos": "慣用句", "meaning_cn": "被分散注意力、分神", "example_jp": "猫に気を取られて、事故を起こしそうになった。", "example_jp_ruby": "<ruby>猫<rt>ねこ</rt></ruby>に<ruby>気<rt>き</rt></ruby>を<ruby>取<rt>と</rt></ruby>られて、<ruby>事故<rt>じこ</rt></ruby>を<ruby>起<rt>お</rt></ruby>こしそうになった。", "example_cn": "被猫分了神，差点出了事故。" },
+        { "id": "5-18", "word": "気を遣う", "kana": "きをつかう", "pos": "慣用句", "meaning_cn": "费心、顾及他人感受", "example_jp": "クラスメートが元気のない私に気を遣って、いろいろと励ましてくれる。", "example_jp_ruby": "クラスメートが<ruby>元気<rt>げんき</rt></ruby>のない<ruby>私<rt>わたし</rt></ruby>に<ruby>気<rt>き</rt></ruby>を<ruby>遣<rt>つか</rt></ruby>って、いろいろと<ruby>励<rt>はげ</rt></ruby>ましてくれる。", "example_cn": "同学们体贴没精神的我，给了我很多鼓励。" }
+      ]
+    },
+    {
+      "name": "息",
+      "reading": "いき",
+      "cards": [
+        { "id": "6-1", "word": "息が合う", "kana": "いきがあう", "pos": "慣用句", "meaning_cn": "步调一致、配合默契", "example_jp": "双子の兄弟だけあって、ぴったり息が合った演奏をしている。", "example_jp_ruby": "<ruby>双子<rt>ふたご</rt></ruby>の<ruby>兄弟<rt>きょうだい</rt></ruby>だけあって、ぴったり<ruby>息<rt>いき</rt></ruby>が<ruby>合<rt>あ</rt></ruby>った<ruby>演奏<rt>えんそう</rt></ruby>をしている。", "example_cn": "不愧是双胞胎兄弟，演奏配合得十分默契。" },
+        { "id": "6-2", "word": "息が切れる", "kana": "いきがきれる", "pos": "慣用句", "meaning_cn": "喘不过气", "example_jp": "運動不足で、階段を上がっただけで息が切れる。", "example_jp_ruby": "<ruby>運動不足<rt>うんどうぶそく</rt></ruby>で、<ruby>階段<rt>かいだん</rt></ruby>を<ruby>上<rt>あ</rt></ruby>がっただけで<ruby>息<rt>いき</rt></ruby>が<ruby>切<rt>き</rt></ruby>れる。", "example_cn": "因为缺乏运动，只是上个楼梯就喘不过气。" },
+        { "id": "6-3", "word": "息が長い", "kana": "いきがながい", "pos": "慣用句", "meaning_cn": "长久持续、经久不衰", "example_jp": "この国際交流の活動は息が長く、二十年も続いている。", "example_jp_ruby": "この<ruby>国際交流<rt>こくさいこうりゅう</rt></ruby>の<ruby>活動<rt>かつどう</rt></ruby>は<ruby>息<rt>いき</rt></ruby>が<ruby>長<rt>なが</rt></ruby>く、<ruby>二十年<rt>にじゅうねん</rt></ruby>も<ruby>続<rt>つづ</rt></ruby>いている。", "example_cn": "这项国际交流活动持续已久，已经延续了二十年。" }
+      ]
+    },
+    {
+      "name": "心",
+      "reading": "こころ",
+      "cards": [
+        { "id": "7-1", "word": "心が広い", "kana": "こころがひろい", "pos": "慣用句", "meaning_cn": "心胸宽广", "example_jp": "失敗した人にもう一度チャンスをあげるなんて、心が広いですね。", "example_jp_ruby": "<ruby>失敗<rt>しっぱい</rt></ruby>した<ruby>人<rt>ひと</rt></ruby>にもう<ruby>一度<rt>いちど</rt></ruby>チャンスをあげるなんて、<ruby>心<rt>こころ</rt></ruby>が<ruby>広<rt>ひろ</rt></ruby>いですね。", "example_cn": "愿意再给失败的人一次机会，你真是心胸宽广啊。" },
+        { "id": "7-2", "word": "心が狭い", "kana": "こころがせまい", "pos": "慣用句", "meaning_cn": "心胸狭窄", "example_jp": "自分と意見が違ったからといって、彼女を無視するのは、心が狭いと思う。", "example_jp_ruby": "<ruby>自分<rt>じぶん</rt></ruby>と<ruby>意見<rt>いけん</rt></ruby>が<ruby>違<rt>ちが</rt></ruby>ったからといって、<ruby>彼女<rt>かのじょ</rt></ruby>を<ruby>無視<rt>むし</rt></ruby>するのは、<ruby>心<rt>こころ</rt></ruby>が<ruby>狭<rt>せま</rt></ruby>いと<ruby>思<rt>おも</rt></ruby>う。", "example_cn": "只因为意见和自己不同就无视她，我觉得太小心眼了。" },
+        { "id": "7-3", "word": "心を込める", "kana": "こころをこめる", "pos": "慣用句", "meaning_cn": "全心全意、诚心诚意", "example_jp": "大切な人のために心を込めてお弁当を作る。", "example_jp_ruby": "<ruby>大切<rt>たいせつ</rt></ruby>な<ruby>人<rt>ひと</rt></ruby>のために<ruby>心<rt>こころ</rt></ruby>を<ruby>込<rt>こ</rt></ruby>めてお<ruby>弁当<rt>べんとう</rt></ruby>を<ruby>作<rt>つく</rt></ruby>る。", "example_cn": "为重要的人用心做便当。" },
+        { "id": "7-4", "word": "心を痛める", "kana": "こころをいためる", "pos": "慣用句", "meaning_cn": "痛心、忧心", "example_jp": "大地震で家や家族を失った人を見て、心を痛めている。", "example_jp_ruby": "<ruby>大地震<rt>おおじしん</rt></ruby>で<ruby>家<rt>いえ</rt></ruby>や<ruby>家族<rt>かぞく</rt></ruby>を<ruby>失<rt>うしな</rt></ruby>った<ruby>人<rt>ひと</rt></ruby>を<ruby>見<rt>み</rt></ruby>て、<ruby>心<rt>こころ</rt></ruby>を<ruby>痛<rt>いた</rt></ruby>めている。", "example_cn": "看到在大地震中失去家园和家人的人，我很痛心。" }
+      ]
+    },
+    {
+      "name": "その他",
+      "reading": "そのた",
+      "cards": [
+        { "id": "8-1", "word": "名が売れる", "kana": "ながうれる", "pos": "慣用句", "meaning_cn": "出名、有名气", "example_jp": "テレビに出るようになって、少しずつ名が売れてきた。", "example_jp_ruby": "テレビに<ruby>出<rt>で</rt></ruby>るようになって、<ruby>少<rt>すこ</rt></ruby>しずつ<ruby>名<rt>な</rt></ruby>が<ruby>売<rt>う</rt></ruby>れてきた。", "example_cn": "开始上电视以后，渐渐有了名气。" },
+        { "id": "8-2", "word": "力を入れる", "kana": "ちからをいれる", "pos": "慣用句", "meaning_cn": "致力于、下功夫", "example_jp": "漢字があまり読めないので、漢字の勉強に力を入れている。", "example_jp_ruby": "<ruby>漢字<rt>かんじ</rt></ruby>があまり<ruby>読<rt>よ</rt></ruby>めないので、<ruby>漢字<rt>かんじ</rt></ruby>の<ruby>勉強<rt>べんきょう</rt></ruby>に<ruby>力<rt>ちから</rt></ruby>を<ruby>入<rt>い</rt></ruby>れている。", "example_cn": "因为不太认识汉字，所以正在下功夫学习汉字。" },
+        { "id": "8-3", "word": "虫の居所が悪い", "kana": "むしのいどころがわるい", "pos": "慣用句", "meaning_cn": "心情不好、情绪不佳", "example_jp": "兄は虫の居所が悪いのか、私が話しかけても、返事もしない。", "example_jp_ruby": "<ruby>兄<rt>あに</rt></ruby>は<ruby>虫<rt>むし</rt></ruby>の<ruby>居所<rt>いどころ</rt></ruby>が<ruby>悪<rt>わる</rt></ruby>いのか、<ruby>私<rt>わたし</rt></ruby>が<ruby>話<rt>はな</rt></ruby>しかけても、<ruby>返事<rt>へんじ</rt></ruby>もしない。", "example_cn": "哥哥大概心情不好，我跟他说话他也不回应。" },
+        { "id": "8-4", "word": "骨が折れる", "kana": "ほねがおれる", "pos": "慣用句", "meaning_cn": "费劲、吃力", "example_jp": "整理されていない資料の中から必要な資料を探すのは、骨が折れる。", "example_jp_ruby": "<ruby>整理<rt>せいり</rt></ruby>されていない<ruby>資料<rt>しりょう</rt></ruby>の<ruby>中<rt>なか</rt></ruby>から<ruby>必要<rt>ひつよう</rt></ruby>な<ruby>資料<rt>しりょう</rt></ruby>を<ruby>探<rt>さが</rt></ruby>すのは、<ruby>骨<rt>ほね</rt></ruby>が<ruby>折<rt>お</rt></ruby>れる。", "example_cn": "从没整理过的资料里找出需要的资料，真费劲。" },
+        { "id": "8-5", "word": "首になる／首にする", "speak_word": "首になる、首にする", "kana": "くびになる／くびにする", "pos": "慣用句", "meaning_cn": "被解雇／解雇", "example_jp": "不景気で会社の経営が悪化したため、首になった。", "example_jp_ruby": "<ruby>不景気<rt>ふけいき</rt></ruby>で<ruby>会社<rt>かいしゃ</rt></ruby>の<ruby>経営<rt>けいえい</rt></ruby>が<ruby>悪化<rt>あっか</rt></ruby>したため、<ruby>首<rt>くび</rt></ruby>になった。", "example_cn": "由于经济不景气、公司经营恶化，我被解雇了。" }
+      ]
+    }
+  ]
+}
