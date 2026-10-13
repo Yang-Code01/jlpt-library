@@ -572,6 +572,20 @@
     if (card) card.classList.toggle('is-flipped', revFlipped);
   }
 
+  /* ---------- PDF 导出：无论当前在哪个视图，都临时补一份完整列表 ---------- */
+  document.addEventListener('libpdf:before', function () {
+    if (!words.length) return;
+    var box = document.createElement('div');
+    box.className = 'pdf-only';
+    box.id = 'enPrintList';
+    box.innerHTML = listHtml();
+    host.appendChild(box);
+  });
+  document.addEventListener('libpdf:after', function () {
+    var box = document.getElementById('enPrintList');
+    if (box) box.parentNode.removeChild(box);
+  });
+
   /* ---------- 交互 ---------- */
   host.addEventListener('click', function (e) {
     var t = e.target;

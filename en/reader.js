@@ -606,6 +606,42 @@
     return out.sort();
   }
 
+  /* ---------- PDF 导出：文末临时补一份生词表（超纲词，按首次出现顺序） ---------- */
+  function glossHtml() {
+    var els = main ? main.querySelectorAll('.en-article .en-w.is-oov') : [];
+    var seen = {}, rows = '', n = 0;
+    for (var i = 0; i < els.length; i++) {
+      var w = els[i].getAttribute('data-w');
+      if (seen[w]) continue;
+      seen[w] = 1;
+      var e = lookup(w);
+      if (!e) continue;
+      n++;
+      rows += '<div class="g-item"><dt lang="en">' + esc(e.w || w) +
+        (e.ph ? '<small>/' + esc(e.ph) + '/</small>' : '') + '</dt>' +
+        '<dd>' + esc(lines(e.tr).trim()) + '</dd></div>';
+    }
+    if (!n) return '';
+    return '<h2>生词表（超纲词 ' + n + ' 个）</h2><dl>' + rows + '</dl>';
+  }
+
+  document.addEventListener('libpdf:before', function () {
+    if (!main || !A) return;
+    var h = glossHtml();
+    if (!h) return;
+    var box = document.createElement('section');
+    box.className = 'pdf-only en-gloss-print';
+    box.id = 'enGlossPrint';
+    box.innerHTML = h;
+    var art = main.querySelector('.en-article');
+    if (art && art.parentNode) art.parentNode.insertBefore(box, art.nextSibling);
+    else main.appendChild(box);
+  });
+  document.addEventListener('libpdf:after', function () {
+    var box = document.getElementById('enGlossPrint');
+    if (box) box.parentNode.removeChild(box);
+  });
+
   /* ---------- 启动 ---------- */
   loadVoices();
   if (window.speechSynthesis && window.speechSynthesis.addEventListener) {

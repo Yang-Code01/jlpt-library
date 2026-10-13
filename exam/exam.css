@@ -271,3 +271,12 @@
   .opt-note .opt-text { flex: 1 1 auto; min-width: 0; }
   .opt-note .opt-why { flex: 1 1 100%; }
 }
+/* 打印 / PDF：整卷 / 本组全部题（exam-core.js 的 printHTML 生成，挂在 #pdf-root） */
+@media print {
+  #pdf-root .pdf-exam-head h1 { margin: 0 0 4px; }
+  #pdf-root .pdf-exam-head p { margin: 0 0 14px; color: var(--muted); font-size: .9em; }
+  #pdf-root .q-block { margin-bottom: 12px; break-inside: auto; }
+  #pdf-root .q-head, #pdf-root .opts { break-inside: avoid; }
+  #pdf-root .q-passage { break-inside: auto; }
+  #pdf-root .opt.correct .o-idx { background: var(--green); color: #fff; }
+}

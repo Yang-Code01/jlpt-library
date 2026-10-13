@@ -653,6 +653,33 @@ footer a:hover { border-bottom-color: var(--accent); }
 .theme-switch button.on { background: var(--accent); color: var(--on-accent); font-weight: 600; }
 .theme-switch button:not(.on):hover { background: var(--accent-soft); }
 
+/* ====================== PDF 下载（按钮 + 主题菜单） ====================== */
+.theme-switch .ts-sep { width: 1px; align-self: stretch; margin: 2px 2px; background: var(--border); }
+.theme-switch .ts-pdf { color: var(--ink); font-weight: 600; }
+.theme-switch .ts-pdf.is-off { color: var(--muted); opacity: .6; cursor: not-allowed; }
+.pdf-pop {
+  position: absolute; top: calc(100% + 6px); right: 0;
+  min-width: 220px; padding: 8px;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-hover);
+  font-size: .95em;
+}
+.pdf-pop-h { margin: 2px 6px 6px; font-size: .85em; color: var(--muted); }
+.pdf-pop-tip, .pdf-pop-msg { margin: 6px 6px 2px; font-size: .8em; color: var(--muted); line-height: 1.5; }
+.pdf-pop-msg { color: var(--ink); max-width: 240px; }
+.theme-switch .pdf-pop button {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
+  width: 100%; padding: 6px 10px; border-radius: var(--radius-chip);
+  text-align: left; color: var(--ink);
+}
+.theme-switch .pdf-pop button small { color: var(--muted); font-size: .8em; }
+.theme-switch .pdf-pop button.on { background: var(--accent-soft); color: var(--accent-ink); font-weight: 400; }
+.theme-switch .pdf-pop button.on b { color: var(--accent-ink); }
+.theme-switch .pdf-pop button:hover,
+.theme-switch .pdf-pop button:focus-visible { background: var(--accent-soft); outline: none; }
+.pdf-only { display: none; }
+
 /* ====================== 响应式 ====================== */
 @media (max-width: 760px) {
   header.top:has(.hero-stats) { grid-template-columns: 1fr; }
@@ -895,3 +922,78 @@ ul.unit-list li a.is-done::after {
 .exam-card .ec-body h2 { font-size: 18px; margin-bottom: 4px; }
 .exam-card .ec-body p { font-size: 13px; color: var(--muted); margin: 0; }
 .exam-card .ec-go { margin-left: auto; font-size: 20px; color: var(--accent); flex: 0 0 auto; }
+
+/* ====================== 打印 / PDF 导出 ======================
+   由 theme.js 的「下载 PDF」驱动（直接 Ctrl+P 也适用通用规则）。
+   PDF 专用主题以 html[data-pdf] 叠加在 data-theme="light" 之上，只在打印时生效。
+   页脚（标题 · 第 x / y 页）由 theme.js 临时注入 @page 规则。 */
+@media print {
+  html, body {
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    background: var(--paper);
+  }
+  * { box-shadow: none !important; transition: none !important; animation: none !important; }
+  .wrap { padding: 0 !important; max-width: none !important; }
+  .reveal { opacity: 1 !important; transform: none !important; }
+  .pdf-only { display: block !important; }
+
+  /* 导航、外观切换、进度印章等交互件不进 PDF */
+  .theme-switch, .pdf-pop, .pagenav, .crumb,
+  .pg-check, .pg-dock, .pg-dialog, audio, video { display: none !important; }
+
+  /* 只输出 builder 生成的内容（真题整卷） */
+  html.pdf-has-root body > *:not(#pdf-root) { display: none !important; }
+
+  /* 自测：去掉判定状态，答案与解析已由导出流程展开 */
+  .q-result { display: none !important; }
+  ol.options li.is-picked, ol.options li.is-answer, ol.options li.is-wrong {
+    background: var(--surface); border-color: var(--border);
+  }
+  ol.options li.is-answer .opt-num, ol.options li.is-wrong .opt-num {
+    border-color: var(--border); color: var(--muted);
+  }
+  ol.options li.is-wrong .opt-btn { text-decoration: none; }
+  ol.options li:hover .opt-btn { background: none; }
+  details > summary { list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
+
+  /* 分页：标题不落页底，例句 / 题目尽量不被拦腰截断 */
+  h1, h2, h3, h4 { break-after: avoid; }
+  .example, .question-block, details, ol.options, tr, figure { break-inside: avoid; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ---------- PDF 主题：和纸教科书（明朝体 · 白纸朱线） ---------- */
+  html[data-pdf="washi"] {
+    --paper: #fdfcf7; --surface: #fdfcf7; --surface-2: #f6f3ea;
+    --ink: #1a1a1a; --muted: #555; --border: #cfc8b8; --border-soft: #e3ddcf;
+    --accent: #b3261e; --accent-ink: #8f1d17; --accent-soft: #fbefec; --accent-line: #e2b3ae;
+    --green-l: #f4f6f0; --amber-l: #faf5e8; --red-l: #fbf0ee;
+    --top-bg: #fdfcf7; --top-ink: #1a1a1a; --top-muted: #555; --top-line: #b3261e;
+  }
+  html[data-pdf="washi"] body,
+  html[data-pdf="washi"] body * {
+    font-family: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Noto Serif JP", "Noto Serif CJK SC",
+      "Songti SC", "SimSun", serif !important;
+  }
+  html[data-pdf="washi"] h1,
+  html[data-pdf="washi"] h2 { border-bottom: 2px solid var(--accent); padding-bottom: 4px; }
+
+  /* ---------- PDF 主题：紧凑速查（小字号 · 省页数） ---------- */
+  html[data-pdf="compact"] {
+    --paper: #fff; --surface: #fff; --surface-2: #f5f5f5;
+    --ink: #111; --muted: #555; --border: #ccc; --border-soft: #e5e5e5;
+    --accent-soft: #fbeeea;
+    --top-bg: #fff; --top-ink: #111; --top-muted: #555;
+  }
+  html[data-pdf="compact"] body { font-size: 12px; line-height: 1.5; }
+  html[data-pdf="compact"] h1 { font-size: 20px !important; margin: 0 0 4px !important; }
+  html[data-pdf="compact"] h2 { font-size: 16px !important; margin: 8px 0 4px !important; }
+  html[data-pdf="compact"] h3 { font-size: 14px !important; margin: 6px 0 2px !important; }
+  html[data-pdf="compact"] p { margin-top: 2px !important; margin-bottom: 2px !important; }
+  html[data-pdf="compact"] header.top { margin: 0 0 8px !important; padding: 10px 12px !important; }
+  html[data-pdf="compact"] section,
+  html[data-pdf="compact"] .example,
+  html[data-pdf="compact"] details,
+  html[data-pdf="compact"] .card,
+  html[data-pdf="compact"] .question-block { padding: 4px 8px !important; margin: 4px 0 !important; }
+}

@@ -504,3 +504,13 @@ ruby rt{color:var(--muted);font-size:.46em;font-weight:400;line-height:1}
     animation:none!important;
   }
 }
+
+/* 打印 / PDF：一律输出完整词表（跟随当前「全部 / 重点」），隐藏学习交互 */
+@media print{
+  .wrap{display:block!important}
+  .left-rail,#tabs,.study-mode,.toggle-cn,.plays,#card,#quiz,#srs{display:none!important}
+  #browse{display:block!important}
+  #browse .hide{display:revert!important}
+  #browse .card{break-inside:avoid}
+  #browse .cat > div:first-child{break-after:avoid}
+}

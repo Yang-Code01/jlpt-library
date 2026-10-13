@@ -599,3 +599,25 @@ html[data-theme="eye"] .en-ws[data-oov="soft"] .en-w.is-oov {
     flex-wrap: wrap;
   }
 }
+
+/* 打印 / PDF：超纲词保持高亮，文末附生词表（reader.js 在导出时临时生成） */
+@media print {
+  .en-pop, .en-ws-bar, .en-read-foot { display: none !important; }
+  /* 单栏：正文在前，导读与逐段详解（全部展开）随后 */
+  .en-ws { display: block !important; }
+  .en-ws-side { position: static !important; max-height: none !important; overflow: visible !important; margin-top: 20px; }
+  .en-pcard-b { display: block !important; }
+  .en-pcard-h { break-after: avoid; }
+  .en-pcard-h .tidy { display: none; }
+  .en-ws .en-w.is-oov {
+    background: var(--accent-soft) !important; color: var(--accent-ink) !important;
+    border-bottom: 1px solid var(--accent-line) !important;
+  }
+  .en-gloss-print { margin-top: 28px; }
+  .en-gloss-print h2 { font-size: 1.2em; margin: 0 0 10px; }
+  .en-gloss-print dl { margin: 0; }
+  .en-gloss-print .g-item { display: grid; grid-template-columns: 9em 1fr; gap: 2px 12px; padding: 5px 0; border-bottom: 1px solid var(--border-soft); break-inside: avoid; }
+  .en-gloss-print dt { font-weight: 700; }
+  .en-gloss-print dt small { display: block; font-weight: 400; color: var(--muted); }
+  .en-gloss-print dd { margin: 0; white-space: pre-line; }
+}

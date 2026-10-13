@@ -170,8 +170,17 @@ const EXAM = (() => {
     return `文章の（${no}）に入る最もよいものはどれか。`;
   }
 
+  // 听力题在 PDF 里无法放音频：附在线页链接（本地 file:// 打开时退回站点地址）
+  const ONLINE_BASE = "https://Yang-Code01.github.io/jlpt-library/exam/";
+  function onlineUrl() {
+    if (/^https?:$/.test(location.protocol)) return location.href.split("#")[0];
+    return ONLINE_BASE + (location.pathname.split("/").pop() || "index.html");
+  }
+
+  // print：PDF 导出用。只标正确答案（不带用户作答状态），不渲染 <audio>，听力原文直接展开
   function qHTML(q, opts = {}) {
-    const { review = false, audioOnce = false } = opts;
+    const { audioOnce = false, print = false } = opts;
+    const review = opts.review || print;
     const d = cache[examKeyOf(q)];
     const h = [];
     h.push(`<div class="q-head"><span class="q-no">第 ${q.qNo} 题</span><span class="q-tag">${PART_LABEL[q.part]} · 問題${q.problem} · ${q.subType}</span></div>`);
@@ -196,11 +205,14 @@ const EXAM = (() => {
       const lacksStem = !q.prompt && !q.question;
       if (!q.audio) {
         h.push(`<div class="q-nostem">本题听力音频本站暂未收录（数据源未提供），请结合题型说明与选项作答；确认答案后可直接查看解析。</div>`);
+      } else if (print) {
+        const url = onlineUrl();
+        h.push(`<div class="q-nostem">听力音频请在线收听：<a href="${esc(url)}">${esc(url)}</a></div>`);
       } else if (lacksStem) {
         h.push(`<div class="q-nostem">本题为听力题：请先听音频，再从下方 1–4 选项中选出最合适的答案。</div>`);
       }
     }
-    if (q.audio) {
+    if (q.audio && !print) {
       // 区间播放：官方每 Part 一个大文件，靠 audioRange 定位到本题。2023 等已有 per-question 文件的卷无 audioRange，走普通整文件播放。
       const rangeAttr = q.audioRange
         ? ` data-range-start="${q.audioRange[0]}" data-range-end="${q.audioRange[1]}"`
@@ -217,12 +229,12 @@ const EXAM = (() => {
         let cls = "";
         if (review || (S.locked[q.id] && !q.optionsMissing)) {
           if (i + 1 === q.answer) cls = "correct";
-          else if (a === i + 1 || (a && typeof a === "object" && a.q1 === i + 1)) cls = "wrong";
+          else if (!print && (a === i + 1 || (a && typeof a === "object" && a.q1 === i + 1))) cls = "wrong";
         }
         h.push(`<div class="opt ${sel ? "on" : ""} ${cls}" data-idx="${i + 1}"><span class="o-idx">${i + 1}</span><span>${esc(o)}</span></div>`);
       });
       h.push(`</div>`);
-      if (q.subAnswers) {
+      if (q.subAnswers && !print) {
         const a = S.answers[q.id];
         const done = a && a.q1 !== undefined && a.q2 !== undefined;
         h.push(`<div class="q-meta">本题含两个小问：先点选第一问答案，再点选第二问答案，然后点「确认」。${done ? "（已选 2/2）" : ""}</div>`);
@@ -230,10 +242,12 @@ const EXAM = (() => {
       if ((review || S.locked[q.id]) && !q.optionsMissing) {
         const a = S.answers[q.id];
         const c = isCorrect(q, a);
-        const verdict = a === undefined
-          ? `<span class="r-bad">未确认</span>`
-          : (c ? '<span class="r-ok">✓ 回答正确</span>' : '<span class="r-bad">✗ 回答错误</span>');
-        h.push(`<div class="q-verdict">${verdict}　正确答案：<b>${q.subAnswers ? `小问 1 → ${q.subAnswers.q1}，小问 2 → ${q.subAnswers.q2}` : q.answer}</b></div>`);
+        const verdict = print
+          ? ""
+          : a === undefined
+            ? `<span class="r-bad">未确认</span>　`
+            : (c ? '<span class="r-ok">✓ 回答正确</span>　' : '<span class="r-bad">✗ 回答错误</span>　');
+        h.push(`<div class="q-verdict">${verdict}正确答案：<b>${q.subAnswers ? `小问 1 → ${q.subAnswers.q1}，小问 2 → ${q.subAnswers.q2}` : q.answer}</b></div>`);
         if (q.explanation || q.optionNotes) {
           h.push(`<div class="q-explain open"><div class="q-explain-h">解析</div>`);
           if (q.optionNotes && Object.keys(q.optionNotes).length) {
@@ -258,12 +272,22 @@ const EXAM = (() => {
     if (review) {
       const a = S.answers[q.id];
       if (q.optionsMissing) {
-        h.push(`<div class="q-meta">正确答案：<b>${q.answer}</b>${a !== undefined ? "（已核对）" : ""}</div>`);
+        h.push(`<div class="q-meta">正确答案：<b>${q.answer}</b>${a !== undefined && !print ? "（已核对）" : ""}</div>`);
       }
-      if (q.transcript) h.push(`<details class="transcript"><summary style="cursor:pointer;color:var(--muted)">听力原文</summary><div>${esc(q.transcript)}</div></details>`);
+      if (q.transcript) {
+        h.push(print
+          ? `<div class="transcript"><div class="q-explain-h">听力原文</div><div>${esc(q.transcript)}</div></div>`
+          : `<details class="transcript"><summary style="cursor:pointer;color:var(--muted)">听力原文</summary><div>${esc(q.transcript)}</div></details>`);
+      }
       h.push(`<div class="q-meta">${esc(q.source)}</div>`);
     }
     return h.join("");
+  }
+
+  // PDF 导出：整卷 / 本组全部题，题后就地附答案与解析
+  function printHTML(set, title, sub) {
+    return `<div class="pdf-exam-head"><h1>${esc(title)}</h1>${sub ? `<p>${esc(sub)}</p>` : ""}</div>` +
+      set.map(q => `<div class="q-block">${qHTML(q, { print: true })}</div>`).join("");
   }
 
   // 共享会话状态（页面各自驱动）
@@ -334,6 +358,6 @@ const EXAM = (() => {
   return { S, PART_LABEL, PART_ORDER, loadExam, loadIndex, requireUnlock,
            allQuestions, poolOf, poolOfLazy,
            examSet, shuffle,
-           records, isCorrect, scoreSet, esc, mk, examKeyOf, qHTML, canConfirm, pick,
+           records, isCorrect, scoreSet, esc, mk, examKeyOf, qHTML, printHTML, canConfirm, pick,
            resetSession, stopTimer, startTimer, fmtTime, isNarrow };
 })();

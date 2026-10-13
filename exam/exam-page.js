@@ -2,7 +2,7 @@
 (function () {
   "use strict";
   const { S, PART_LABEL, PART_ORDER, loadExam, requireUnlock, examSet, records, isCorrect,
-          scoreSet, qHTML, canConfirm, pick, resetSession, startTimer, stopTimer, fmtTime,
+          scoreSet, qHTML, printHTML, canConfirm, pick, resetSession, startTimer, stopTimer, fmtTime,
           isNarrow, esc } = EXAM;
   const EXAMS = ["2010-07", "2010-12", "2011-07", "2011-12", "2012-07", "2012-12", "2013-07", "2013-12",
                  "2014-07", "2014-12", "2015-07", "2015-12", "2016-07", "2016-12", "2017-07",
@@ -17,6 +17,18 @@
   const state = { screen: "setup", exam: null, year: null, month: null, mode: null, sideOpen: false, meta: null };
   const side = document.getElementById("side");
   const main = document.getElementById("main");
+
+  // PDF 导出：设置屏不出按钮；仿真作答中禁用（交卷后可导出）；宽松作答与复盘时导出整卷
+  const PDF = window.LibPdf;
+  function paperTitle() { return `N2 ${state.exam.slice(0, 4)}.${+state.exam.slice(5, 7)} 整卷`; }
+  if (PDF) PDF.setBuilder(() => printHTML(S.set, paperTitle(), `言语知识 · 读解 · 听力 · 共 ${S.set.length} 题（题后附正确答案与解析）`));
+  function pdfState() {
+    if (!PDF) return;
+    if (state.screen === "setup") return PDF.setState("hidden");
+    PDF.setTitle(paperTitle());
+    if (state.screen === "answer" && state.mode === "sim") PDF.setState("disabled", "仿真作答中不可导出，交卷后可导出整卷 PDF");
+    else PDF.setState("enabled");
+  }
 
   // 进入页面补一个初始状态，浏览器返回键才有"上一屏"可退
   try { history.replaceState({ jlpt: "setup" }, ""); } catch (_) {}
@@ -44,6 +56,7 @@
   }
 
   function renderSetup() {
+    pdfState();
     const years = [...new Set(EXAMS.map(e => +e.slice(0, 4)))].sort();
     const monthsOf = y => EXAMS.filter(e => +e.slice(0, 4) === y).map(e => +e.slice(5, 7)).sort((a, b) => a - b);
     side.innerHTML = `
@@ -155,6 +168,7 @@
 
   function renderAnswer() {
     renderSide();
+    pdfState();
 
     const q = S.set[S.idx];
     main.innerHTML = `
@@ -218,6 +232,7 @@
       score: sc.right, countable: sc.countable, total: sc.countable + sc.nomc,
       nomc: sc.nomc, unanswered: sc.unanswered, auto: !!auto, ts: Date.now() });
     state.screen = "review";
+    pdfState();
     side.innerHTML = `<h4>${state.year}.${month} N2</h4>
       <div class="q-meta" style="font-size:12px">${state.mode === "sim" ? "仿真模式" : "宽松模式"}${auto ? " · 倒计时结束自动交卷" : ""}</div>
       <div style="margin-top:14px"><button class="btn ghost" id="back2">‹ 返回上一层</button></div>`;

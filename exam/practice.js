@@ -2,7 +2,7 @@
 (function () {
   "use strict";
   const { S, PART_LABEL, PART_ORDER, loadIndex, requireUnlock, poolOfLazy, shuffle,
-          records, isCorrect, scoreSet, qHTML, canConfirm, pick,
+          records, isCorrect, scoreSet, qHTML, printHTML, canConfirm, pick,
           resetSession, fmtTime, isNarrow, esc } = EXAM;
   const EXAMS = ["2010-07", "2010-12", "2011-07", "2011-12", "2012-07", "2012-12", "2013-07", "2013-12",
                  "2014-07", "2014-12", "2015-07", "2015-12", "2016-07", "2016-12", "2017-07",
@@ -15,6 +15,18 @@
   const state = { level: "N2", subType: null, tier: 10, custom: null, screen: "setup", sideOpen: false };
   const side = document.getElementById("side");
   const main = document.getElementById("main");
+
+  // PDF 导出：选题屏不出按钮；答题与复盘时导出本组全部题（题后附答案与解析）
+  const PDF = window.LibPdf;
+  function setTitle() { return `${state.level} 题型专练 · ${state.subType} · ${S.set.length} 题`; }
+  if (PDF) PDF.setBuilder(() => printHTML(S.set, setTitle(), "题目随机抽自历年真题，题号与出处见每题；题后附正确答案与解析"));
+  function pdfState() {
+    if (!PDF) return;
+    if (state.screen === "setup") return PDF.setState("hidden");
+    PDF.setTitle(setTitle());
+    PDF.setState("enabled");
+  }
+  pdfState();
 
   // 选题屏只需要 ~13 KB 的题型索引（index-lite.js）：有哪些题型、各多少题。
   // 这份索引是明文常驻的（不含任何题目正文），所以选题屏不需要口令；
@@ -132,6 +144,7 @@
   }
 
   function renderMain() {
+    pdfState();
     if (state.screen !== "answer") {
       if (!state.subType) {
         main.innerHTML = `<div class="q-block"><div class="q-stem">从左侧选择一个子题型，再从下方选题量，开始随机抽题。</div></div>`;
@@ -225,6 +238,7 @@
     const sc = scoreSet(S.set, S.answers);
     records.addPractice(state.subType, S.set.length);
     state.screen = "review";
+    pdfState();
     setupSide();
     main.innerHTML = `
       <div class="score-hero"><div class="sc">${sc.right}<span style="font-size:20px;color:var(--muted)"> / ${sc.countable}</span></div>

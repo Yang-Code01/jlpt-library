@@ -567,3 +567,10 @@
     min-height: 44px;
   }
 }
+
+/* 打印 / PDF：任何视图下都输出完整词表（词 / 音标 / 释义），隐藏视图切换与学习计量 */
+@media print {
+  html.pdf-printing #enView,
+  .en-tabs, .en-meters, .en-say, .en-crumb { display: none !important; }
+  .en-row { break-inside: avoid; }
+}
