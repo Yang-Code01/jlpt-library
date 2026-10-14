@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mattpocock-skills 更新报告 · 2026-10-15</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2129; --border:#2d333b;
+    --text:#e6edf3; --muted:#8b949e; --accent:#58a6ff; --accent2:#d2a8ff;
+    --green:#3fb950; --orange:#d29922; --red:#f85149;
+    --mono:ui-monospace,'Cascadia Code',Consolas,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI','Microsoft YaHei',sans-serif;line-height:1.75;padding:0 0 80px}
+  .wrap{max-width:920px;margin:0 auto;padding:0 28px}
+
+  header{padding:72px 0 44px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,#10151d 0%,var(--bg) 100%)}
+  header .wrap{display:flex;flex-direction:column;gap:14px}
+  .tag{display:inline-block;font-size:12px;letter-spacing:2px;color:var(--accent);border:1px solid var(--accent);padding:3px 12px;border-radius:999px;width:fit-content;font-family:var(--mono)}
+  h1{font-size:34px;font-weight:700;letter-spacing:-0.5px}
+  .sub{color:var(--muted);font-size:15px;max-width:680px}
+  .meta{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:6px}
+
+  nav.toc{position:sticky;top:0;background:rgba(13,17,23,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);z-index:10}
+  nav.toc .wrap{display:flex;gap:4px;overflow-x:auto;padding:10px 28px}
+  nav.toc a{color:var(--muted);text-decoration:none;font-size:13px;padding:5px 12px;border-radius:6px;white-space:nowrap}
+  nav.toc a:hover{color:var(--text);background:var(--panel2)}
+
+  section{padding:56px 0 8px}
+  h2{font-size:24px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+  h2 .num{font-family:var(--mono);font-size:13px;color:var(--accent);border:1px solid var(--border);background:var(--panel);padding:2px 10px;border-radius:6px}
+  .lede{color:var(--muted);font-size:15px;margin-bottom:26px;max-width:760px}
+
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:26px 28px;margin-bottom:18px}
+  .card h3{font-size:17px;margin-bottom:10px;color:var(--accent)}
+  .card p{font-size:14.5px;color:var(--text);margin-bottom:10px}
+  .card p:last-child{margin-bottom:0}
+  code{font-family:var(--mono);font-size:.88em;background:#21262d;color:var(--accent2);padding:2px 6px;border-radius:4px}
+  .pill{display:inline-block;font-size:11px;font-family:var(--mono);padding:2px 10px;border-radius:999px;margin-left:8px;vertical-align:2px}
+  .pill.new{color:var(--green);border:1px solid rgba(63,185,80,.4)}
+  .pill.auto{color:var(--orange);border:1px solid rgba(210,153,34,.4)}
+  .pill.manual{color:var(--accent);border:1px solid rgba(88,166,255,.4)}
+
+  .cmd{font-family:var(--mono);font-size:14px;color:var(--accent);font-weight:600}
+  ul.feat{list-style:none;margin:8px 0 4px}
+  ul.feat li{padding:7px 0 7px 22px;position:relative;font-size:14.5px;border-bottom:1px dashed #21262d}
+  ul.feat li:last-child{border-bottom:none}
+  ul.feat li::before{content:"▸";position:absolute;left:2px;color:var(--accent);font-size:12px;top:9px}
+  ul.feat b{color:var(--text)}
+
+  .quote{border-left:3px solid var(--accent);background:var(--panel2);padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14px;color:var(--muted)}
+  .quote b{color:var(--text)}
+
+  .tpl{background:#0a0e14;border:1px solid var(--border);border-radius:10px;padding:20px 24px;font-family:var(--mono);font-size:13px;line-height:1.9;margin:14px 0;overflow-x:auto}
+  .tpl .k{color:var(--green)}
+  .tpl .c{color:#6e7681}
+  .tpl .f{color:var(--accent)}
+  .tpl .s{color:var(--orange)}
+
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  th{text-align:left;font-size:12px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;padding:10px 14px;border-bottom:2px solid var(--border);font-weight:600}
+  td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+  td:first-child{white-space:nowrap;font-family:var(--mono);color:var(--accent)}
+  tr:last-child td{border-bottom:none}
+
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px 0;font-family:var(--mono);font-size:12.5px}
+  .flow .node{background:var(--panel2);border:1px solid var(--border);padding:7px 13px;border-radius:8px;color:var(--accent)}
+  .flow .node.hot{border-color:var(--accent);background:rgba(88,166,255,.12);color:var(--text)}
+  .flow .arr{color:var(--muted)}
+  .flow .cap{width:100%;color:var(--muted);font-family:inherit;font-size:12px;margin-top:2px}
+
+  .verdict{background:linear-gradient(135deg,rgba(88,166,255,.09),rgba(210,168,255,.07));border:1px solid rgba(88,166,255,.35);border-radius:12px;padding:26px 30px;margin-top:20px}
+  .verdict h3{color:var(--accent2);font-size:16px;margin-bottom:12px}
+  .verdict p{font-size:14.5px;margin-bottom:8px}
+
+  footer{margin-top:70px;padding-top:24px;border-top:1px solid var(--border);color:var(--muted);font-size:12px;font-family:var(--mono)}
+  .anchor{scroll-margin-top:70px}
+</style>
+<style data-wb-shell="1">
+  /* ===== 工作台外壳（顶部细条 + 浮动胶囊 + 页脚返回）：由 tools/research.mjs add-shell 写入，勿手改 =====
+     颜色尽量套用报告自己的令牌，套不到就退到中性半透明灰：浅色报告与深色报告都不违和。 */
+  .wb-shell-bar{display:flex;align-items:center;gap:10px;padding:9px 20px;
+    border-bottom:1px solid var(--rule,var(--border,rgba(127,127,127,.28)));
+    background:var(--card,var(--panel,rgba(127,127,127,.08)));
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;font-size:.78rem;line-height:1.6}
+  .wb-shell-mark{display:grid;place-items:center;flex:none;width:20px;height:20px;border-radius:5px;
+    background:var(--accent,#B4451F);color:#fff;font-size:.72rem;font-weight:700;
+    font-family:Georgia,"Songti SC",serif}
+  .wb-shell-path{color:var(--muted,#6C6A73)}
+  .wb-shell-path b{color:var(--ink,var(--text,inherit));font-weight:600}
+  .wb-shell-back{margin-left:auto;flex:none;color:var(--accent,#B4451F);font-weight:600;text-decoration:none}
+  .wb-shell-back:hover{text-decoration:underline}
+  .wb-shell-float{position:fixed;right:22px;bottom:22px;z-index:50;display:inline-flex;align-items:center;gap:9px;
+    padding:9px 15px;border:1px solid var(--rule-strong,var(--border,rgba(127,127,127,.4)));border-radius:999px;
+    background:var(--card,var(--panel,rgba(127,127,127,.14)));color:var(--ink,var(--text,inherit));
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;font-size:.8rem;font-weight:600;text-decoration:none;
+    box-shadow:0 2px 4px rgba(0,0,0,.06),0 12px 28px -14px rgba(0,0,0,.4)}
+  .wb-shell-float:hover{color:var(--accent,#B4451F);border-color:var(--accent,#B4451F)}
+  .wb-shell-foot{max-width:760px;margin:56px auto 0;padding:22px 24px 0;
+    border-top:2px solid var(--ink,var(--text,currentColor));
+    display:flex;flex-wrap:wrap;align-items:center;gap:14px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;font-size:.8rem;color:var(--muted,#6C6A73)}
+  .wb-shell-foot b{color:var(--ink,var(--text,inherit))}
+  .wb-shell-foot a{margin-left:auto;color:var(--accent,#B4451F);font-weight:600;text-decoration:none}
+  .wb-shell-foot a:hover{text-decoration:underline}
+  @media (max-width:560px){
+    .wb-shell-bar{gap:8px;padding:8px 14px}
+    .wb-shell-float{right:14px;bottom:14px}
+  }
+</style>
+</head>
+<body>
+<!-- wb:shell:bar:start -->
+<div class="wb-shell-bar">
+  <span class="wb-shell-mark" aria-hidden="true">語</span>
+  <span class="wb-shell-path">工作台 › <b>调查报告</b></span>
+  <a class="wb-shell-back" href="../index.html#survey">← 返回报告清单</a>
+</div>
+<!-- wb:shell:bar:end -->
+
+<header>
+  <div class="wrap">
+    <span class="tag">SKILLS UPDATE · 2026-10-15</span>
+    <h1>mattpocock-skills 更新报告</h1>
+    <p class="sub">本地技能库 <code>~/.agents/skills</code>（symlink 至 <code>~/.pi/agent/skills</code>）整体刷新，约 55 个 skill 全量更新。核心是一条完整的 <b>idea → ship</b> 工程主流程，本次重点解读三个新技能：<code>/pr</code>、<code>/implement-spec</code>、<code>/retro</code>。</p>
+    <p class="meta">installed: C:\Users\GG_Bond\.agents\skills → C:\Users\GG_Bond\.pi\agent\skills (symlink)</p>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="wrap">
+    <a href="#overview">总览</a>
+    <a href="#pr">/pr</a>
+    <a href="#implement-spec">/implement-spec</a>
+    <a href="#retro">/retro</a>
+    <a href="#others">其他亮点</a>
+    <a href="#ecosystem">生态位</a>
+    <a href="#verdict">总结</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- ============ 总览 ============ -->
+<section id="overview" class="anchor">
+  <h2><span class="num">00</span>总览：一条 idea → ship 的主流程</h2>
+  <p class="lede">这批 skill 不是零散工具，而是一套有明确设计意图的工程流水线。<code>ask-matt</code> 技能（技能路由器）把整张地图讲得很清楚：</p>
+
+  <div class="flow">
+    <span class="node">/grill-with-docs</span><span class="arr">→</span>
+    <span class="node">/to-spec</span><span class="arr">→</span>
+    <span class="node">/to-tickets</span><span class="arr">→</span>
+    <span class="node hot">/implement-spec</span><span class="arr">→</span>
+    <span class="node hot">/pr</span><span class="arr">→</span>
+    <span class="node hot">/retro</span>
+    <span class="cap">拷问出想法 → 固化为 spec → 拆成带阻塞关系的 ticket → 并行实现 → PR 描述 → 复盘环境</span>
+  </div>
+
+  <div class="card">
+    <h3>本次更新的三个主角，恰好覆盖了主流程的后三段</h3>
+    <ul class="feat">
+      <li><b><span class="cmd">/pr</span></b> — PR 正文的写作模板：最小可视化 + 前后证据 + 合并风险评级。<span class="pill auto">model-invoked</span></li>
+      <li><b><span class="cmd">/implement-spec</span></b> — 把整个 spec 一次性实现：ticket 视为任务图，多 implementer 子代理并行推进。<span class="pill manual">user-invoked</span></li>
+      <li><b><span class="cmd">/retro</span></b> — 对 coding session 做复盘，改进对象是 agent 的<b>环境</b>而非代码本身。<span class="pill manual">user-invoked</span></li>
+    </ul>
+    <p style="margin-top:12px;color:var(--muted)">注意 <code>/pr</code> 是 model-invoked（agent 写 PR 时自动触发），另外两个是 slash command 手动触发。这是有意的分层：写 PR 是高频机械动作交给模型，编排和复盘是人的决策。</p>
+  </div>
+</section>
+
+<!-- ============ /pr ============ -->
+<section id="pr" class="anchor">
+  <h2><span class="num">01</span><span class="cmd">/pr</span> — PR 正文模板<span class="pill new">NEW</span></h2>
+  <p class="lede">写 PR 描述的技能。最大的特色是<b>强制可视化</b>：Summary 不许写成大段散文，必须从一组固定的「图示菜单」里挑最小够用的一种。致谢文件（CREDITS.md）表明它源自 Dex Horthy（HumanLayer）的 <code>show-me</code> 技能，内容几乎逐字移植，只是把目标从「现场讲解」改成了「描述一个 diff」。</p>
+
+  <div class="card">
+    <h3>PR 正文三段式模板</h3>
+    <div class="tpl">
+<span class="f">## Summary</span>
+  <span class="c">&lt;diagram, diff-sketch, or tree&gt;</span>   <span class="c">← 图示，不是散文</span>
+
+<span class="f">## Evidence</span>
+  <span class="k">- Before:</span> <span class="c">&lt;截图/输出/失败的测试&gt;</span>
+  <span class="k">- After:</span>  <span class="c">&lt;截图/输出/通过的测试&gt;</span>   <span class="c">← 前后对照证据</span>
+
+<span class="f">## Merge Danger</span>
+  <span class="s">Door:</span> <span class="c">&lt;one-way | two-way&gt;</span>        <span class="c">← 是否可回滚</span>
+  <span class="s">Blast Radius:</span> <span class="c">&lt;一个词&gt;</span>          <span class="c">← 影响范围</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Summary 的「图示菜单」—— 六种可选表达</h3>
+    <table>
+      <tr><th>形式</th><th>适用场景</th><th>示例</th></tr>
+      <tr><td>pseudocode</td><td>逻辑 / 算法</td><td><code>on(save) if unchanged → return cached</code></td></tr>
+      <tr><td>call tree</td><td>运行时控制流</td><td><code>submitForm → createSession → persistPrompt</code></td></tr>
+      <tr><td>component tree</td><td>UI 结构 / 状态边界</td><td><code>&lt;SessionPage&gt; → &lt;SessionToolbar&gt;</code></td></tr>
+      <tr><td>file tree</td><td>文件职责 / 大重构</td><td><code>src/ ├── commands/ ├── sessions/</code></td></tr>
+      <tr><td>Mermaid</td><td>组件交互 / 数据流</td><td>sequenceDiagram</td></tr>
+      <tr><td>diff</td><td>关键变更点（形状对应主题）</td><td><code>+ &lt;RunSkillButton /&gt;</code></td></tr>
+    </table>
+    <p style="margin-top:10px;color:var(--muted)">原则：每张图紧挨它支持的短文字；只保留回答当前问题所需的调用、文件、状态和边界；「不太可能全用上，别压垮读者」。</p>
+  </div>
+
+  <div class="card">
+    <h3>Evidence 与 Merge Danger 的分级</h3>
+    <ul class="feat">
+      <li><b>Evidence 分级</b>：截图 S-tier（改了视觉就上截图）；可执行证据 A-tier（测试结果 / 控制台输出，用伪代码展示「之前失败、现在通过」的确切测试）。</li>
+      <li><b>Door</b>：单向门 vs 双向门 —— 廉价可回滚的 PR 风险低；涉及破坏性操作或难以逆转决策的是单向门。这是典型的贝索斯「one-way / two-way door」决策框架。</li>
+      <li><b>Blast Radius</b>：一个词概括潜在影响范围 —— 布局偏移、下游破坏、移动端适配等所有可能性。</li>
+    </ul>
+    <div class="quote">点评：它把「PR 描述怎么写」从自由发挥变成<b>格式约束下的工程判断</b>。reviewer 第一眼看到的是图和风险评级，而不是需要自己从散文里提炼的意图 —— 显著降低 review 成本。</div>
+  </div>
+</section>
+
+<!-- ============ /implement-spec ============ -->
+<section id="implement-spec" class="anchor">
+  <h2><span class="num">02</span><span class="cmd">/implement-spec</span> — 整个 spec 一次实现<span class="pill new">NEW</span></h2>
+  <p class="lede">对应旧流程里「逐个 ticket 手动 <code>/implement</code> + 每张 ticket 之间 <code>/clear</code>」的替代方案：当整个 spec 已经通过 <code>/to-spec</code> / <code>/to-tickets</code> 拆解完毕，它把实现工作升级为<b>子代理编排</b>，一次跑完全部 ticket。</p>
+
+  <div class="card">
+    <h3>核心抽象：tickets 是任务图（task graph），不是步骤列表</h3>
+    <p>每张 ticket 声明自己的 <b>blocking edges</b>（阻塞关系）。任意时刻都存在一个<b>frontier</b>：所有前置已完成的、现在就能开工的 ticket 集合。编排的本质就是不断消化 frontier 并随合并推进扩展它。</p>
+    <div class="flow">
+      <span class="node">spec + tickets</span><span class="arr">→</span>
+      <span class="node">integration branch</span><span class="arr">→</span>
+      <span class="node">frontier 并行开工</span><span class="arr">→</span>
+      <span class="node">merger 逐个合并</span><span class="arr">→</span>
+      <span class="node">code-review</span><span class="arr">→</span>
+      <span class="node">PR ready</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>九步流程中的关键设计</h3>
+    <ul class="feat">
+      <li><b>通信靠 context pointers，不靠复制</b>：子代理之间主要传递指向 spec、ticket、research notes、历史 commit 的指针，sparse communication——避免信息重复膨胀。</li>
+      <li><b>exploration subagent（可选）</b>：预先把 ticket 需要的代码库 / 外部文档调研做成 markdown 笔记，<b>存到仓库外的目录</b>供所有后续子代理共用，让 implementer 专注写代码。</li>
+      <li><b>每个 implementer 独立 worktree + 独立分支</b>，开工前确认基于 integration branch（不对则 reset 重定位）；内部驱动 <code>/tdd</code> 逐个红绿循环；完工前先把 integration branch tip 合进自己分支再报告。</li>
+      <li><b>合并由专门的 merger subagent 负责</b>，每次合并可能解锁新的 frontier ticket → 立即派出更多 implementer，最大化并发。</li>
+      <li><b>首个合并后即开 draft PR</b>（空分支开不了 PR），标记为关闭该 spec 及全部 ticket。</li>
+      <li><b>收官</b>：全部 ticket 完成后，对 integration branch 跑一次 <code>/code-review</code>，发现的问题由<b>单个</b> implementer 子代理统一修复；然后 draft PR 转 ready，清理所有 worktree。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>与 <code>/implement</code> 的分工</h3>
+    <table>
+      <tr><th></th><th style="white-space:normal">/implement（逐张票）</th><th style="white-space:normal">/implement-spec（整包编排）</th></tr>
+      <tr><td>驱动方式</td><td>人在主会话逐张驱动，票间 <code>/clear</code></td><td>一次调用，子代理自动编排</td></tr>
+      <tr><td>并发</td><td>串行</td><td>frontier 内所有就绪 ticket 并行</td></tr>
+      <tr><td>隔离</td><td>主会话直接改</td><td>每票独立 worktree + 分支</td></tr>
+      <tr><td>code-review</td><td>每张票各跑一次</td><td>整个 integration branch 跑一次</td></tr>
+      <tr><td>适用</td><td>想亲自控制每一步</td><td>「宁可做编排者，不想逐票驾驶」</td></tr>
+    </table>
+    <div class="quote">点评：这是把「人类逐票驾驶」升级为「agent 当工头」。任务图 + frontier + 独立 worktree + 指针通信，四个约束合起来解决了多代理并行的经典问题——上下文重复、分支冲突、无序抢票。</div>
+  </div>
+</section>
+
+<!-- ============ /retro ============ -->
+<section id="retro" class="anchor">
+  <h2><span class="num">03</span><span class="cmd">/retro</span> — Session 复盘<span class="pill new">NEW</span></h2>
+  <p class="lede">对一次 coding session 做回顾，但产出<b>不是改进代码，而是改进 agent 的工作环境</b>——下次跑得更好。它明确写出「实现 vs 审查」的两阶段认知：实现代理上下文压力最大，审查代理拿到 diff 压力最小，所以<b>编码标准应该由审查方执行</b>，而不是塞进实现方的 AGENTS.md。</p>
+
+  <div class="card">
+    <h3>七个检查类别（按严重度向用户提交建议）</h3>
+    <table>
+      <tr><th>类别</th><th>找什么</th><th>触发信号</th></tr>
+      <tr><td>Navigation</td><td>文件间的隐性依赖，需要加导航指针</td><td>找某个信息花了很久</td></tr>
+      <tr><td>Automated checks</td><td>已存在却没接线 / 静默坏掉的检查；没有任何 guardrail 的仓库本身就是 finding</td><td>agent 犯了机器能拦的错误</td></tr>
+      <tr><td>Coding standards</td><td><b>机械类违规→确定性检查</b>（linter 规则 / pre-commit / CI，默认造检查而不是写规则）；<b>判断类才进 CODING_STANDARDS.md</b>（跨文件一致性、「符合周边风格」）</td><td>reviewer 漏掉了错误</td></tr>
+      <tr><td>Global AGENTS.md</td><td>该下放到 coding standards 或自动化检查的指令</td><td>AGENTS.md 过大（仓库级或全局）</td></tr>
+      <tr><td>Tool economy</td><td>昂贵且可精简的工具调用、token 低效的工具</td><td>出现了昂贵调用</td></tr>
+      <tr><td>No-ops</td><td>不改变 agent 行为的死指令</td><td>steering 文件臃肿</td></tr>
+      <tr><td>Information access</td><td>tee dev server 日志、第三方服务只读权限等</td><td>关键信息 agent 拿不到</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>流程与文件职责</h3>
+    <ul class="feat">
+      <li>先调 <code>/writing-for-agents</code> 拿写作风格，再读 session 日志（用户没指定就复盘当前会话），按严重度排序呈现改进候选。</li>
+      <li><b>AGENTS.md/CLAUDE.md</b>：进每个 agent 的上下文，必须极省，通常只放导航指针。</li>
+      <li><b>CODING_STANDARDS.md</b>：审查时读、实现时不读；超过 1000 行要加指向 docs 的导航指针。</li>
+      <li>先读仓库自己的 check 命令（package.json 的 lint/check 脚本、CI workflow），<b>已存在但没接线的检查本身就是 finding</b>，而不是重新发明一个。</li>
+    </ul>
+    <div class="quote">点评：这条 skill 是整套体系的「飞轮」。别的 skill 改代码，<code>/retro</code> 改环境：机械错误沉淀成确定性检查、判断类错误沉淀成标准、死指令被清除——每次构建后环境变好一点，形成复利。配合 <code>/diagnosing-bugs</code> 的说明（修完 bug 在同一 session 跑 retro 问「什么本可预防它」），闭环更完整。</div>
+  </div>
+</section>
+
+<!-- ============ 其他亮点 ============ -->
+<section id="others" class="anchor">
+  <h2><span class="num">04</span>其他值得说的更新</h2>
+  <p class="lede">除三个主角外，这一批里还有不少成形的设计值得留意：</p>
+
+  <div class="card">
+    <h3><span class="cmd">/wayfinder</span> — 大雾工程的决策地图<span class="pill new">NEW-ish</span></h3>
+    <p>针对「一个 session 装不下、路线完全看不见」的超大工程（绿地项目 / 超大 feature）：在 issue tracker 上铺一张<b>决策 ticket 的共享地图</b>，逐张解决，产出<b>决策而非交付物</b>，直到路线清晰。地图清空后<b>交接而不施工</b>——在 <code>/to-spec</code> 汇入主流程。文档明确警告：直接从地图跳 <code>/implement</code> 会丢掉关联决策。</p>
+  </div>
+
+  <div class="card">
+    <h3><span class="cmd">/to-tickets</span> — tracer-bullet 拆票</h3>
+    <p>把 spec 拆成「曳光弹」ticket，每张声明 blocking edges：本地 tracker 是 <code>.scratch/&lt;feature&gt;/issues/</code> 一票一文件、阻塞关系写在文本里；真实 tracker（GitHub/GitLab）则用原生 blocking link。这正是 <code>/implement-spec</code> 任务图的物料来源。</p>
+  </div>
+
+  <div class="card">
+    <h3><span class="cmd">/triage</span> — 五角色状态机</h3>
+    <p>只 triage <b>不是你自己创建的</b> issue（bug 报告、外部 PR、原始 feature 请求）；<code>/to-tickets</code> 产出的票已经 agent-ready，不再过 triage。五角色：<code>needs-triage → needs-info / ready-for-agent / ready-for-human / wontfix</code>。</p>
+  </div>
+
+  <div class="card">
+    <h3>写作与沟通类</h3>
+    <ul class="feat">
+      <li><b><span class="cmd">/show-me</span></b> — <code>/pr</code> 的上游源头：现场讲解当前话题，同一个「图示菜单」（伪代码/调用树/组件树/文件树/Mermaid/diff）。</li>
+      <li><b><span class="cmd">/unslop</span></b> — 删 AI 味写作模式，保留原意、匹配原语气。</li>
+      <li><b><span class="cmd">/wait-what</span></b> — 「刚才那句没听懂，重讲」：用 ASD-STE100 简化技术英语 + GLOSSARY.md 领域词汇重新 pitch。</li>
+      <li><b><span class="cmd">/teach</span></b> — 跨多次 session 的教学，当前目录作为有状态工作区。</li>
+      <li><b>writing 系列</b>（<code>writing-beats / writing-fragments / writing-shape</code>）+ <code>/writing-for-agents</code>（写 agent 消费文档的参考标准，几乎所有技能的写作底座）。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>交接与循环类</h3>
+    <ul class="feat">
+      <li><b><span class="cmd">/handoff</span></b> — 把当前对话压缩成交接文档（存 OS 临时目录，不进仓库），含「建议技能」清单。</li>
+      <li><b><span class="cmd">/claude-handoff</span></b> — 同上，但直接 <code>claude --bg</code> 拉起后台代理立即接手。</li>
+      <li><b><span class="cmd">/loop-me</span></b> — 针对你想构建的工作流跑 grilling，产出是 workflow spec。</li>
+      <li><b><span class="cmd">/to-questionnaire</span></b> — <code>/grill-me</code> 的反向：卡点在别人脑子里时，替你生成给对方填的问卷。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>基础设施</h3>
+    <ul class="feat">
+      <li><b><span class="cmd">/setup-matt-pocock-skills</span></b> — 一次性配置：issue tracker（GitHub/GitLab/本地 markdown/自定义）、triage 标签、domain docs 布局（单上下文 = 根 GLOSSARY.md + docs/adr/）。本机 <code>C:\ai</code> 已配置为<b>本地 markdown tracker</b> + 默认五标签 + 单上下文。</li>
+      <li><b><span class="cmd">/ask-matt</span></b> — 技能路由器：一张从 idea 到 ship 的完整地图，忘了用哪个技能就问它。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 生态位 ============ -->
+<section id="ecosystem" class="anchor">
+  <h2><span class="num">05</span>在本机的生态位</h2>
+  <div class="card">
+    <ul class="feat">
+      <li>安装位置：<b>C:\Users\GG_Bond\.agents\skills</b>（真实文件），通过符号链接暴露到 <b>C:\Users\GG_Bond\.pi\agent\skills</b>，pi 会话内可直接调用。</li>
+      <li><b>C:\ai</b> 项目已完成 setup：本地 markdown tracker（<code>.scratch/&lt;feature&gt;/</code>）、默认五 triage 标签、根 CONTEXT.md + docs/adr/ 单上下文布局（AGENTS.md 已记录）。</li>
+      <li><code>/grill-me</code> / <code>/grill-with-docs</code> / <code>/triage</code> / <code>/wayfinder</code> / <code>/improve-codebase-architecture</code> 共享同一个内核原语 <b><code>/grilling</code></b>（轮次化提问 + frontier + 推荐答案）。</li>
+      <li>上下文卫生原则：步骤 1–3（grilling → spec → tickets）保持在<b>同一个不间断的上下文窗口</b>；接近 smart zone（约 150k token）就在最近相位边界 <code>/compact</code>。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 总结 ============ -->
+<section id="verdict" class="anchor">
+  <h2><span class="num">06</span>总结</h2>
+  <div class="verdict">
+    <h3>三个新技能补齐了主流程的「出口」和「回路」</h3>
+    <p><b>/pr</b> 把 review 成本压到最低：图示代替散文，证据前后对照，风险一句话定级。</p>
+    <p><b>/implement-spec</b> 把人从逐票驾驶解放成编排者：任务图 + frontier 并发 + 独立 worktree + 指针通信。</p>
+    <p><b>/retro</b> 是唯一的复利来源：不修代码，修环境——机械错误变确定性检查，判断类错误变标准，环境每次构建后更好一点。</p>
+    <p style="color:var(--muted)">合起来看，这批更新让 idea → ship 变成了完整闭环：<b>grill 出想法 → spec → tickets → 并行实现 → 可视化 PR → 复盘环境 → 下次更好</b>。</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    generated 2026-10-15 · sources: C:\Users\GG_Bond\.agents\skills\{pr, implement-spec, retro, ask-matt, show-me, wayfinder, to-tickets, triage, teach, handoff, wait-what, unslop, loop-me, setup-matt-pocock-skills} · model: cn:glm-5.3
+  </div>
+</footer>
+
+</div>
+<!-- wb:shell:foot:start -->
+<div class="wb-shell-foot">
+  <span>这份报告属于 <b>工作台 › 调查报告</b></span>
+  <a href="../index.html#survey">← 返回报告清单</a>
+</div>
+<!-- wb:shell:foot:end -->
+<!-- wb:shell:float:start -->
+<a class="wb-shell-float" href="../index.html#survey">
+  <span class="wb-shell-mark" aria-hidden="true">語</span>
+  <span>返回调查报告</span>
+</a>
+<!-- wb:shell:float:end -->
+</body>
+</html>
