@@ -46,8 +46,8 @@ const DEP = {
   dek: { ok: fs.existsSync(DEK),
     why: '缺 .scratch/jlpt-exam/enc-keys/dek.b64（node tools/encrypt-exam.mjs gen-key）' },
   pass: { ok: !!EXAM_PASS, why: '需要当前真题口令：--exam-pass <口令>' },
-  plain: { ok: fs.existsSync(EXAM_DATA) && fs.readdirSync(EXAM_DATA).some((f) => f.endsWith('.js')),
-    why: '缺 exam/data/N2/*.js 明文卷（须在 exam/ 里跑 node gen-exam-data.js 生成）' },
+  plain: { ok: fs.existsSync(EXAM_DATA) && fs.readdirSync(EXAM_DATA).some((f) => /^\d{4}-\d{2}\.js$/.test(f)),
+    why: '缺 exam/data/N2/2010-07.js 之类的明文卷（须在 exam/ 里跑 node gen-exam-data.js 生成）' },
 };
 
 /* ---------------------------------------------------------------- 清单 */
@@ -76,7 +76,7 @@ function guardNoFetch() {
      dictation/dictation.js 的 fetch 指向本机 VOICEVOX HTTP API，是已知例外。 */
   const ALLOW = new Set(['dictation/dictation.js']);
   const EXTS = ['.html', '.js'];
-  const files = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8', maxBuffer: 1 << 28 })
+  const files = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 28 })
     .split('\0').filter(Boolean)
     .filter((f) => EXTS.some((e) => f.endsWith(e)) && !ALLOW.has(f));
   const bad = [];
@@ -97,7 +97,7 @@ function guardNoFetch() {
 const CHECKS = [
   { fn: guardNoFetch, name: 'file:// 硬约束（无 fetch/XHR）', needs: [] },
   { cmd: ['node', 'tools/research.mjs', 'check'], name: '调查报告清单自洽',   needs: [] },
-  { cmd: ['node', 'tools/check-exam-data.js'],    name: '真题全库审计',       needs: [] },
+  { cmd: ['node', 'tools/check-exam-data.js'],    name: '真题全库审计',       needs: ['plain'] },
   { cmd: ['node', 'jp-vocab/gen.js', 'check'], name: '课堂单词数据',         needs: [] },
   { cmd: ['node', 'tools/en-accept.mjs'],         name: '英语侧整合验收',     needs: ['ecdict'] },
   { cmd: ['node', 'tools/en-typing.mjs', 'check'], name: '英语搭配清单',      needs: [] },
