@@ -1,0 +1,27 @@
+# 统一行尾：仓库里一律 LF，工作区也是 LF（Windows 上不再是 CRLF）。
+#
+# 为什么：生成器（tools/en-*.mjs、jp-vocab/gen.js、tools/research.mjs）都按 LF 产出，
+# 而 core.autocrlf=true 会把检出变成 CRLF，于是「生成物与磁盘不一致」的假失败反复出现
+# （英语侧票 10、jp-vocab check 全红）。把行尾钉在 LF 后，生成 / 校验 / 运行三方一致。
+# 详见 docs/adr/0004-line-endings-lf.md。
+* text=auto eol=lf
+
+# 二进制：不做行尾转换、不做 diff
+*.wav binary
+*.mp3 binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.pdf binary
+*.zip binary
+
+# 生成物：GitHub 折叠 diff（不改构建行为）
+research/*.html linguist-generated
+en/*/*.html    linguist-generated
+jp-vocab/*/index.html linguist-generated
