@@ -1,0 +1,21 @@
+name: check
+
+# 仓库的机械保障（retro 2026-10-15 第 1 条）：
+# 一次跑「逻辑套件 + 静态校验」，克隆仓库就能全绿 —— 需要 .scratch/ 里源材料
+# （ECDICT、真题明文/密钥/口令）的项由 tools/test.mjs 自动 SKIP 并打印原因。
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 逻辑套件 + 静态校验
+        run: node tools/test.mjs

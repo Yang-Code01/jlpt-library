@@ -25,6 +25,34 @@
   var current = getSaved();
   apply(current);
 
+  /* ====================== PDF 下载：配置 ======================
+   * 这一段必须声明在 ready() 之前：ready() 在 document.readyState !== 'loading' 时
+   * 会同步执行回调，回调里调用 pdfMount() → pdfSync()，用到 pdf / PDF_PAGES；
+   * 若声明晚于 ready()，同步路径会读到 undefined 而抛 TypeError。 */
+  var PDF_KEY = 'jp-lib-pdf-theme';
+  /* base：打印时 data-theme 取值；pdf：额外的 data-pdf（PDF 专用主题，令牌见 style.css） */
+  var PDF_THEMES = [
+    { id: 'washi', label: '和纸教科书', note: '明朝体 · 白纸朱线', base: 'light', pdf: 'washi' },
+    { id: 'compact', label: '紧凑速查', note: '小字号 · 省页数', base: 'light', pdf: 'compact' },
+    { id: 'light', label: '浅色', note: '与网页浅色一致', base: 'light' },
+    { id: 'eye', label: '护眼', note: '柔绿底色', base: 'eye' },
+    { id: 'dark', label: '深色', note: '深底浅字 · 适合屏幕', base: 'dark' }
+  ];
+  /* 覆盖范围：学习资料单元页 / 课堂单词单元 / 英语词表单元 / 英语阅读文章 / 真题（由页面自行切换状态）。
+     其余页面（门户、索引、听写、打字）不出按钮。 */
+  var PDF_PAGES = [
+    /\/n[1-5]\/[^/]+\/[^/]+\.html$/,
+    /\/jp-vocab\/[^/]+\/(index\.html)?$/,
+    /\/en\/[1-4]k\/\d+\.html$/,
+    /\/en\/reading\/[1-4]k\/\d+\.html$/
+  ];
+  function pdfCovered() {
+    var p = decodeURIComponent(location.pathname);
+    for (var i = 0; i < PDF_PAGES.length; i++) if (PDF_PAGES[i].test(p)) return true;
+    return false;
+  }
+  var pdf = { state: pdfCovered() ? 'enabled' : 'hidden', msg: '', title: '', builder: null, btn: null, pop: null, busy: false };
+
   function ready(fn) {
     if (document.readyState !== 'loading') { fn(); }
     else { document.addEventListener('DOMContentLoaded', fn); }
@@ -61,31 +89,7 @@
     pdfMount(box);
   });
 
-  /* ====================== PDF 下载 ====================== */
-  var PDF_KEY = 'jp-lib-pdf-theme';
-  /* base：打印时 data-theme 取值；pdf：额外的 data-pdf（PDF 专用主题，令牌见 style.css） */
-  var PDF_THEMES = [
-    { id: 'washi', label: '和纸教科书', note: '明朝体 · 白纸朱线', base: 'light', pdf: 'washi' },
-    { id: 'compact', label: '紧凑速查', note: '小字号 · 省页数', base: 'light', pdf: 'compact' },
-    { id: 'light', label: '浅色', note: '与网页浅色一致', base: 'light' },
-    { id: 'eye', label: '护眼', note: '柔绿底色', base: 'eye' },
-    { id: 'dark', label: '深色', note: '深底浅字 · 适合屏幕', base: 'dark' }
-  ];
-  /* 覆盖范围：学习资料单元页 / 课堂单词单元 / 英语词表单元 / 英语阅读文章 / 真题（由页面自行切换状态）。
-     其余页面（门户、索引、听写、打字）不出按钮。 */
-  var PDF_PAGES = [
-    /\/n[1-5]\/[^/]+\/[^/]+\.html$/,
-    /\/jp-vocab\/[^/]+\/(index\.html)?$/,
-    /\/en\/[1-4]k\/\d+\.html$/,
-    /\/en\/reading\/[1-4]k\/\d+\.html$/
-  ];
-  function pdfCovered() {
-    var p = decodeURIComponent(location.pathname);
-    for (var i = 0; i < PDF_PAGES.length; i++) if (PDF_PAGES[i].test(p)) return true;
-    return false;
-  }
-  var pdf = { state: pdfCovered() ? 'enabled' : 'hidden', msg: '', title: '', builder: null, btn: null, pop: null, busy: false };
-
+  /* ====================== PDF 下载：运行时接口 ====================== */
   window.LibPdf = {
     setState: function (s, msg) {
       pdf.state = s || 'enabled';
