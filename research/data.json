@@ -1,0 +1,22 @@
+{
+  "_note": "调查报告真源：改这里 → node tools/research.mjs gen → node tools/research.mjs check。tags 是受控词表，要新增先在 tags 里登记，否则 check 会报未登记标签。reports 里每条的 file 是 research/ 下的自包含单文件报告，日期是定稿日期。",
+  "tags": ["技能生态", "工具横评", "工程实践", "模型", "环境配置", "学习资料"],
+  "reports": [
+    {
+      "file": "mattpocock-skills-1.3.1.html",
+      "title": "mattpocock/skills v1.3.1 更新说明",
+      "date": "2026-10-15",
+      "tags": ["技能生态"],
+      "summary": "三条收尾技能（pr / implement-spec / retro）加上一批破坏性改名，把技能集串成一条主线；附本机 38 个技能的行动清单。",
+      "source": { "label": "GitHub", "url": "https://github.com/mattpocock/skills" }
+    },
+    {
+      "file": "mattpocock-skills-changelog.html",
+      "title": "mattpocock-skills 更新报告",
+      "date": "2026-10-15",
+      "tags": ["技能生态"],
+      "summary": "按时间线记录上游仓库每一次可见变化，以及其中有几条会影响本机已装的技能。",
+      "source": { "label": "GitHub", "url": "https://github.com/mattpocock/skills" }
+    }
+  ]
+}

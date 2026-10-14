@@ -9,9 +9,11 @@
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/theme.js"></script>
 <script>
-  /* 语言开关：与主题同一套路，进 <head> 里先落一次，避免切回英语时闪一下日语。
-     键名 jlpt-lang，默认 ja；只记在浏览器里，不写进 URL —— URL 是书签与深链的
-     身份，不该被语言污染。应用逻辑只写一遍：这里定义，页尾再补齐按钮态。 */
+  /* 两级导航：一级是「区」（语言学习 / 调查报告），二级是语言（日本語 / English）。
+     两个状态都落在 <html> 上：data-area=study|survey、data-lang=ja|en，标题与描述由
+     这两个属性算出来。与主题同一套路，进 <head> 里先落一次，避免首屏闪错区／闪日语。
+     键名 jlpt-area / jlpt-lang，默认 study / ja；只记在浏览器里，不写进 URL —— URL 是
+     书签与深链的身份，不该被区与语言污染。应用逻辑只写一遍：这里定义，页尾再补按钮态。 */
   (function () {
     var T = window.PORTAL_LANG = {
       ja: {
@@ -23,25 +25,56 @@
         d: '英语词频档位词表：3,766 个词分四档、每 50 词一个单元，列表速览、翻转卡自测与间隔复习，全部离线可用。'
       }
     };
+    /* 调查报告区的标题与描述：报告内容是中文的，与语言开关无关。 */
+    var S = window.PORTAL_SURVEY_META = {
+      t: '调查报告 · 工作台',
+      d: '工作台的调查报告区：AI 技能生态、工具横评、环境复核与工程复盘的离线 HTML 报告，不定期更新，全部离线可用。'
+    };
+    function syncMeta() {
+      var root = document.documentElement;
+      var area = root.getAttribute('data-area') === 'survey' ? 'survey' : 'study';
+      var lang = root.getAttribute('data-lang') === 'en' ? 'en' : 'ja';
+      var meta = area === 'survey' ? S : T[lang];
+      document.title = meta.t;
+      var m = document.querySelector('meta[name="description"]');
+      if (m) m.setAttribute('content', meta.d);
+    }
+    window.portalSyncMeta = syncMeta;
+    window.portalApplyArea = function (area, persist) {
+      var a = area === 'survey' ? 'survey' : 'study';
+      document.documentElement.setAttribute('data-area', a);
+      Array.prototype.forEach.call(document.querySelectorAll('.wb-tabs button'), function (b) {
+        var on = b.getAttribute('data-area-btn') === a;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      syncMeta();
+      if (persist) { try { localStorage.setItem('jlpt-area', a); } catch (e) {} }
+      return a;
+    };
     window.portalApplyLang = function (lang, persist) {
       var l = T[lang] ? lang : 'ja';
       document.documentElement.setAttribute('data-lang', l);
-      document.title = T[l].t;
-      var m = document.querySelector('meta[name="description"]');
-      if (m) m.setAttribute('content', T[l].d);
       Array.prototype.forEach.call(document.querySelectorAll('.lang-tabs button'), function (b) {
         var on = b.getAttribute('data-tab') === l;
         b.classList.toggle('on', on);
         b.setAttribute('aria-selected', on ? 'true' : 'false');
       });
+      syncMeta();
       if (persist) { try { localStorage.setItem('jlpt-lang', l); } catch (e) {} }
       return l;
     };
     var init = 'ja';
     try { if (localStorage.getItem('jlpt-lang') === 'en') init = 'en'; } catch (e) {}
     document.documentElement.setAttribute('data-lang', init);
-    document.title = T[init].t;
+    var initArea = 'study';
+    try { if (localStorage.getItem('jlpt-area') === 'survey') initArea = 'survey'; } catch (e) {}
+    /* 报告页的返回链接指向 index.html#survey：深链必须能把区也带对。 */
+    if (location.hash === '#survey') initArea = 'survey';
+    document.documentElement.setAttribute('data-area', initArea);
+    syncMeta();
     window.PORTAL_LANG_INIT = init;
+    window.PORTAL_AREA_INIT = initArea;
   })();
 </script>
 <style>
@@ -674,6 +707,223 @@
       transition: none;
     }
   }
+  /* ============================ 工作台层：区 ============================
+     门户现在是两个区：语言学习（原日语面 + 英语面，二级用语言开关切）与调查报告
+     （research/ 下的离线报告清单）。一级靠 <html data-area> 显隐，二级语言仍靠
+     <html data-lang>；两层都只切属性，不重建 DOM、也不换网址 —— 与本页原有做法一致。 */
+
+  .wb-tabs {
+    display: flex;
+    gap: 28px;
+    margin-top: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .wb-tabs button {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    margin-bottom: -1px;
+    padding: 10px 2px 12px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    font: inherit;
+    font-size: 1.04rem;
+    font-weight: 700;
+    letter-spacing: .01em;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color .16s, border-color .16s;
+  }
+
+  .wb-tabs button span {
+    font-size: .66rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    opacity: .78;
+  }
+
+  .wb-tabs button.on { color: var(--ink); border-bottom-color: var(--accent); }
+  .wb-tabs button:hover { color: var(--ink); }
+  .wb-tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .wb-pane { padding-top: 30px; }
+
+  html[data-area="study"] .wb-pane[data-area-pane="survey"],
+  html[data-area="survey"] .wb-pane[data-area-pane="study"] {
+    display: none;
+  }
+
+  .wb-lead {
+    max-width: 66ch;
+    margin: 0 0 26px;
+    color: var(--muted);
+    font-size: .9rem;
+    line-height: 1.78;
+  }
+
+  .wb-lead strong { color: var(--ink); }
+
+  /* ---------- 区头：小标题 + 右侧计数 / 二级开关 ---------- */
+  .zone-head {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .zone-head-main {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    flex: 1 1 320px;
+    min-width: 0;
+  }
+
+  .zone-title {
+    margin: 0;
+    font-size: 1.52rem;
+    letter-spacing: .01em;
+  }
+
+  .zone-title .zone-en {
+    margin-left: 9px;
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .zone-sub {
+    max-width: 64ch;
+    margin: 0;
+    color: var(--muted);
+    font-size: .86rem;
+    line-height: 1.72;
+  }
+
+  .zone-aside { display: flex; align-items: center; flex: none; gap: 10px; }
+  .zone-count { color: var(--muted); font-size: .76rem; font-variant-numeric: tabular-nums; }
+  .zone-inline { margin-bottom: 26px; }
+
+  /* ---------- 调查报告清单 ---------- */
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 18px 0 6px;
+    padding: 0 0 14px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .filter-bar .filter-label {
+    margin-right: 4px;
+    color: var(--muted);
+    font-size: .74rem;
+    letter-spacing: .08em;
+  }
+
+  .filter-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 4px 11px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--sumi-3);
+    font: inherit;
+    font-size: .78rem;
+    cursor: pointer;
+    transition: border-color .16s, color .16s, background .16s;
+  }
+
+  .filter-chip .n { color: var(--muted); font-size: .7rem; font-variant-numeric: tabular-nums; }
+  .filter-chip:hover { border-color: var(--muted); color: var(--ink); }
+  .filter-chip.on { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent-ink); }
+  .filter-chip.on .n { color: var(--accent-ink); }
+  .filter-chip[disabled] { opacity: .42; cursor: not-allowed; }
+  .filter-empty { padding: 34px 0; color: var(--muted); font-size: .86rem; }
+
+  .survey-list {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--border-soft);
+  }
+
+  .survey-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr) auto;
+    gap: 20px;
+    padding: 17px 12px 17px 10px;
+    border-bottom: 1px solid var(--border-soft);
+    transition: background .16s;
+  }
+
+  .survey-item:hover { background: var(--surface-2); }
+  .survey-item[hidden] { display: none; }
+
+  .survey-date {
+    padding-top: 4px;
+    color: var(--muted);
+    font-size: .73rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .04em;
+  }
+
+  .survey-title { display: block; font-size: 1.02rem; font-weight: 700; letter-spacing: .01em; }
+  .survey-title a { color: inherit; text-decoration: none; }
+  /* 整行可点：标题里的链接铺满整行（不能用 <a> 包整行，右侧来源链接还要能点），
+     所以右侧来源那一列抬一层。 */
+  .survey-title a::after { content: ""; position: absolute; inset: 0; }
+  .survey-title a:hover { color: var(--accent-ink); }
+
+  .survey-desc {
+    display: block;
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: .84rem;
+    line-height: 1.72;
+  }
+
+  .survey-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+
+  .tag {
+    padding: 2px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-chip);
+    background: var(--surface-2);
+    color: var(--muted);
+    font-size: .69rem;
+  }
+
+  .survey-src {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    padding-top: 4px;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .survey-src .src-main { color: var(--sumi-3); font-size: .74rem; }
+  .survey-src .src-sub { color: var(--muted); font-size: .68rem; font-variant-numeric: tabular-nums; }
+  .survey-src a { color: var(--accent-ink); text-decoration: none; border-bottom: 1px solid var(--accent-line); }
+  .survey-src a:hover { border-bottom-color: var(--accent-ink); }
+
+  @media (max-width: 620px) {
+    .survey-item { grid-template-columns: 74px minmax(0, 1fr); gap: 14px; }
+    .survey-src { grid-column: 2; align-items: flex-start; padding-top: 0; }
+  }
 </style>
 </head>
 <body>
@@ -681,16 +931,34 @@
   <nav class="portal-nav" aria-label="主导航">
     <a class="portal-brand" href="index.html">
       <span class="portal-brand-mark" aria-hidden="true">語</span>
-      <span>Language Library</span>
+      <span>工作台 · Workbench</span>
     </a>
-    <span class="portal-nav-tag">Personal Study Space</span>
-    <!-- 语言开关：仍然是一个文件、两套入口 DOM，靠 <html data-lang> 显隐；
-         不用 JS 重建 DOM，少一次运行时重构。按钮只切属性，不产生新网址。 -->
-    <div class="lang-tabs" role="tablist" aria-label="语言 / Language">
-      <button type="button" role="tab" data-tab="ja" aria-selected="true" class="on">日本語</button>
-      <button type="button" role="tab" data-tab="en" aria-selected="false">English</button>
-    </div>
+    <span class="portal-nav-tag">Personal Workbench</span>
   </nav>
+
+  <!-- 一级导航：区。一个文件两个区，靠 <html data-area> 显隐。 -->
+  <div class="wb-tabs" role="tablist" aria-label="工作台区域">
+    <button type="button" role="tab" data-area-btn="study" aria-selected="true" class="on">语言学习<span>Language Study</span></button>
+    <button type="button" role="tab" data-area-btn="survey" aria-selected="false">调查报告<span>AI Research</span></button>
+  </div>
+
+  <!-- ============================ 区一：语言学习 ============================ -->
+  <div class="wb-pane" data-area-pane="study">
+  <p class="wb-lead"><strong>每天都要碰的那部分。</strong>日语与英语两套练法，各自的难度梯级、进度与复习记录分开记。</p>
+
+  <div class="zone-head zone-inline">
+    <div class="zone-head-main">
+      <h2 class="zone-title">入口<span class="zone-en">Entries</span></h2>
+    </div>
+    <div class="zone-aside">
+      <!-- 语言开关：区里的二级筛选，不是全站开关。仍然是一个文件、两套入口 DOM，
+           靠 <html data-lang> 显隐；不用 JS 重建 DOM，按钮只切属性，不产生新网址。 -->
+      <div class="lang-tabs" role="tablist" aria-label="语言 / Language">
+        <button type="button" role="tab" data-tab="ja" aria-selected="true" class="on">日本語</button>
+        <button type="button" role="tab" data-tab="en" aria-selected="false">English</button>
+      </div>
+    </div>
+  </div>
 
   <div class="lang-pane" data-pane="ja">
   <header class="portal-hero">
@@ -798,7 +1066,7 @@
   </aside>
 
   <footer class="portal-footer">
-    <span>Language Library · 为长期学习而做的日语资料库</span>
+    <span>工作台 · 语言学习（日本語）</span>
     <span>N5 → N1 完整路径 · 168 个单元</span>
   </footer>
   </div><!-- /日语面 -->
@@ -1085,31 +1353,140 @@
   </aside>
 
   <footer class="portal-footer">
-    <span>Language Library · 为长期学习而做的英语资料库</span>
+    <span>工作台 · 语言学习（English）</span>
     <span>1k → 4k 词频档位 · 3,766 个词</span>
   </footer>
   </div><!-- /英语面 -->
+  </div><!-- /语言学习区 -->
+
+  <!-- ============================ 区二：调查报告 ============================
+       每篇是一份自包含的离线 HTML，放在 research/ 下随 git 发布；清单由
+       tools/research.mjs 从 research/data.json 写进标记区，勿手改。 -->
+  <div class="wb-pane" data-area-pane="survey">
+  <p class="wb-lead"><strong>不定期要看的那部分。</strong>AI 主题的独立报告：技能生态、工具横评、环境复核、工程复盘。写完就进 <code>research/</code>，不再散在下载目录里。</p>
+
+  <main id="survey" class="entries">
+<!-- wb:report-list:start -->
+      <div class="zone-head zone-first">
+        <div class="zone-head-main">
+          <h2 class="zone-title">全部报告 <span class="zone-en">Reports</span></h2>
+          <p class="zone-sub">按定稿日期倒序。点标题进报告；标签筛选只影响本页显示。</p>
+        </div>
+        <div class="zone-aside"><span class="zone-count">2 篇</span></div>
+      </div>
+
+      <div class="filter-bar" role="group" aria-label="按标签筛选">
+        <span class="filter-label">标签</span>
+        <button type="button" class="filter-chip on" data-filter="all">全部 <span class="n">2</span></button>
+        <button type="button" class="filter-chip" data-filter="技能生态">技能生态 <span class="n">2</span></button>
+        <button type="button" class="filter-chip" data-filter="工具横评" disabled>工具横评 <span class="n">0</span></button>
+        <button type="button" class="filter-chip" data-filter="工程实践" disabled>工程实践 <span class="n">0</span></button>
+        <button type="button" class="filter-chip" data-filter="模型" disabled>模型 <span class="n">0</span></button>
+        <button type="button" class="filter-chip" data-filter="环境配置" disabled>环境配置 <span class="n">0</span></button>
+        <button type="button" class="filter-chip" data-filter="学习资料" disabled>学习资料 <span class="n">0</span></button>
+      </div>
+
+      <div class="survey-list" id="report-list">
+      <div class="survey-item" data-tags="技能生态">
+        <span class="survey-date">2026-10-15</span>
+        <span>
+          <span class="survey-title"><a href="research/mattpocock-skills-1.3.1.html">mattpocock/skills v1.3.1 更新说明</a></span>
+          <span class="survey-desc">三条收尾技能（pr / implement-spec / retro）加上一批破坏性改名，把技能集串成一条主线；附本机 38 个技能的行动清单。</span>
+          <span class="survey-tags">
+          <span class="tag">技能生态</span>
+          </span>
+        </span>
+        <span class="survey-src">
+          <span class="src-main"><a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener noreferrer">GitHub ↗</a></span>
+          <span class="src-sub">8 章 · 48 KB</span>
+        </span>
+      </div>
+      <div class="survey-item" data-tags="技能生态">
+        <span class="survey-date">2026-10-15</span>
+        <span>
+          <span class="survey-title"><a href="research/mattpocock-skills-changelog.html">mattpocock-skills 更新报告</a></span>
+          <span class="survey-desc">按时间线记录上游仓库每一次可见变化，以及其中有几条会影响本机已装的技能。</span>
+          <span class="survey-tags">
+          <span class="tag">技能生态</span>
+          </span>
+        </span>
+        <span class="survey-src">
+          <span class="src-main"><a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener noreferrer">GitHub ↗</a></span>
+          <span class="src-sub">7 章 · 27 KB</span>
+        </span>
+      </div>
+      </div>
+
+      <p class="filter-empty" id="filter-empty" hidden>这个标签下还没有报告。</p>
+<!-- wb:report-list:end -->
+  </main>
+
+  <footer class="portal-footer">
+    <span>工作台 · 调查报告</span>
+    <span>AI 主题 · 不定期更新 · 全部离线可用</span>
+  </footer>
+  </div><!-- /调查报告区 -->
 </div>
 <script src="assets/progress.js"></script>
 <script>
   /* ============================ 门户脚本 ============================
-     语言开关 / 刻度尺展开 / 英语侧进度数字。进度脚本只在门户引一次，
-     分母始终来自生成器写出的清单（data-en-key），不是 done 里的历史累计。 */
+     区开关 / 语言开关 / 刻度尺展开 / 英语侧进度数字 / 调查报告标签筛选。进度脚本只在门户
+     引一次，分母始终来自生成器写出的清单（data-en-key），不是 done 里的历史累计。 */
   (function () {
     'use strict';
 
     var apply = window.portalApplyLang;
-    apply(document.documentElement.getAttribute('data-lang') || 'ja', false);
+    var applyArea = window.portalApplyArea;
+    var root = document.documentElement;
+    apply(root.getAttribute('data-lang') || 'ja', false);
+    applyArea(root.getAttribute('data-area') || 'study', false);
 
     Array.prototype.forEach.call(document.querySelectorAll('.lang-tabs button'), function (btn) {
       btn.addEventListener('click', function () {
         var lang = btn.getAttribute('data-tab');
-        if (lang === document.documentElement.getAttribute('data-lang')) return;
+        if (lang === root.getAttribute('data-lang')) return;
         apply(lang, true);
         window.scrollTo(0, 0);
         refreshProgress();
       });
     });
+
+    /* 区开关：切区只改属性与标题，两个区的 DOM 都在（一个区也就几十 KB 的清单）。 */
+    Array.prototype.forEach.call(document.querySelectorAll('.wb-tabs button'), function (btn) {
+      btn.addEventListener('click', function () {
+        var area = btn.getAttribute('data-area-btn');
+        if (area === root.getAttribute('data-area')) return;
+        applyArea(area, true);
+        window.scrollTo(0, 0);
+      });
+    });
+
+    /* 调查报告：标签筛选只改本页显示，不写 URL、不记状态。 */
+    (function () {
+      var chips = document.querySelectorAll('.filter-chip');
+      var items = document.querySelectorAll('.survey-item');
+      if (!chips.length || !items.length) return;
+      var empty = document.getElementById('filter-empty');
+      Array.prototype.forEach.call(chips, function (chip) {
+        chip.addEventListener('click', function () {
+          if (chip.disabled) return;
+          var f = chip.getAttribute('data-filter');
+          Array.prototype.forEach.call(chips, function (c) {
+            var on = c === chip;
+            c.classList.toggle('on', on);
+            c.setAttribute('aria-pressed', on ? 'true' : 'false');
+          });
+          var shown = 0;
+          Array.prototype.forEach.call(items, function (it) {
+            var tags = (it.getAttribute('data-tags') || '').split(/\s+/);
+            var hit = f === 'all' || tags.indexOf(f) !== -1;
+            it.hidden = !hit;
+            if (hit) shown++;
+          });
+          if (empty) empty.hidden = shown !== 0;
+        });
+      });
+    })();
 
     /* 刻度尺的落点是「在门户内展开该档单元清单」，不跳页。 */
     Array.prototype.forEach.call(document.querySelectorAll('a.ruler-station[href^="#en-band-"]'), function (a) {
