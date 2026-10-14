@@ -46,6 +46,8 @@
 - 学习进度 key = 路径末三段（`assets/progress.js` 的 `keyOf`）；改目录结构要重新校验「索引 href 集合 ≡ 单元页路径集合」。
 - 报告条目行是 `div` + `.survey-title a::after` 覆盖层，**不能嵌 `<a>`**（浏览器会拆行）。
 - 改完至少跑一次 `node tools/test.mjs`；改 UI 前先备份（见根 `AGENTS.md`）。
+- 改了版面/样式再**看一眼真渲染**：`node .scratch/ui-harness/smoke.mjs`（需要本地装过 Playwright）。
+  没有这步就无法自证「看起来对」——自动化断言只能证明 DOM 对。它同时会抓 JS 异常。
 
 ## 7. 提交
 
