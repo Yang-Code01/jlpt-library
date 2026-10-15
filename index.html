@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>日语学习资料库 · Language Library</title>
+<title>Qingmin Yang · 日语学习资料库</title>
 <meta name="description" content="日语与英语自学资料库：JLPT N5–N1 语法词汇单元、N2 真题、听力精听、听写、单词卡、动词变形与打字练习，以及按词频档位组织的英语词表，全部离线可用。">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23b93e28'/%3E%3Ctext x='16' y='23' font-size='19' font-family='serif' fill='%23ffffff' text-anchor='middle'%3E語%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23b93e28'/%3E%3Ctext x='16' y='20.5' font-size='14' letter-spacing='-0.3' font-family='Georgia,serif' fill='%23ffffff' text-anchor='middle'%3EQY%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/theme.js"></script>
 <script>
@@ -114,8 +114,11 @@
     border-radius: 9px;
     background: var(--accent);
     color: var(--on-accent);
-    font-family: serif;
-    font-size: 1.05rem;
+    /* QY 是两枚拉丁大写（不是汉字）—— 字体栈换成衬线拉丁，字号按 30px 容器实测定
+       （.scratch/icons/probe-mark.mjs：1rem 时文字宽 21.9px，两侧各剩 4px）。
+       报告外壳那枚 20px 的同形标记在 tools/research.mjs 的 SHELL_CSS 里，两处要一起改。 */
+    font-family: Georgia, "Times New Roman", "Songti SC", serif;
+    font-size: 1rem;
     letter-spacing: 0;
   }
 
@@ -930,8 +933,8 @@
 <div class="portal wrap">
   <nav class="portal-nav" aria-label="主导航">
     <a class="portal-brand" href="index.html">
-      <span class="portal-brand-mark" aria-hidden="true">語</span>
-      <span>工作台 · Workbench</span>
+      <span class="portal-brand-mark" aria-hidden="true">QY</span>
+      <span>Qingmin Yang</span>
     </a>
     <span class="portal-nav-tag">Personal Workbench</span>
   </nav>
@@ -1066,7 +1069,7 @@
   </aside>
 
   <footer class="portal-footer">
-    <span>工作台 · 语言学习（日本語）</span>
+    <span>Qingmin Yang · 语言学习（日本語）</span>
     <span>N5 → N1 完整路径 · 168 个单元</span>
   </footer>
   </div><!-- /日语面 -->
@@ -1353,7 +1356,7 @@
   </aside>
 
   <footer class="portal-footer">
-    <span>工作台 · 语言学习（English）</span>
+    <span>Qingmin Yang · 语言学习（English）</span>
     <span>1k → 4k 词频档位 · 3,766 个词</span>
   </footer>
   </div><!-- /英语面 -->
@@ -1412,7 +1415,7 @@
         </span>
         <span class="survey-src">
           <span class="src-main"><a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener noreferrer">GitHub ↗</a></span>
-          <span class="src-sub">7 章 · 27 KB</span>
+          <span class="src-sub">7 章 · 28 KB</span>
         </span>
       </div>
       </div>
@@ -1422,7 +1425,7 @@
   </main>
 
   <footer class="portal-footer">
-    <span>工作台 · 调查报告</span>
+    <span>Qingmin Yang · 调查报告</span>
     <span>AI 主题 · 不定期更新 · 全部离线可用</span>
   </footer>
   </div><!-- /调查报告区 -->

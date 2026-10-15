@@ -545,7 +545,7 @@ function renderDone() {
   var acc = s.done + s.err === 0 ? 100 : Math.round(s.done / (s.done + s.err) * 100);
   mainBody.innerHTML =
     '<div class="done-block">'
-    + '<div class="db-ico">🎉</div>'
+    + '<div class="db-ico"><span class="im im-done" aria-hidden="true"></span></div>'
     + '<h3>' + (s.mode === 'review' ? T('doneReview') : T('doneList')) + '</h3>'
     + '<p>' + T('doneStat', s.done, s.err) + (s.err > 0 ? T('doneAccuracy', acc) : T('donePerfect')) + '</p>'
     + '<div class="done-actions">'

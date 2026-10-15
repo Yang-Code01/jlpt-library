@@ -250,8 +250,10 @@ const SHELL_CSS = `<style data-wb-shell="1">
     background:var(--card,var(--panel,rgba(127,127,127,.08)));
     ${SHELL_FONT};font-size:.78rem;line-height:1.6}
   .wb-shell-mark{display:grid;place-items:center;flex:none;width:20px;height:20px;border-radius:5px;
-    background:var(--accent,#B4451F);color:#fff;font-size:.72rem;font-weight:700;
-    font-family:Georgia,"Songti SC",serif}
+    background:var(--accent,#B4451F);color:#fff;font-size:.7rem;font-weight:700;letter-spacing:-.01em;
+    /* QY 是两枚拉丁大写 —— 字号按 20px 容器实测定（.scratch/icons/probe-mark.mjs）；
+       门户头部那枚 30px 的同形标记在 index.html 的 .portal-brand-mark 里，两处要一起改。 */
+    font-family:Georgia,"Times New Roman","Songti SC",serif}
   .wb-shell-path{color:var(--muted,#6C6A73)}
   .wb-shell-path b{color:var(--ink,var(--text,inherit));font-weight:600}
   .wb-shell-back{margin-left:auto;flex:none;color:var(--accent,#B4451F);font-weight:600;text-decoration:none}
@@ -277,7 +279,7 @@ const SHELL_CSS = `<style data-wb-shell="1">
 
 const SHELL_BAR = `<!-- wb:shell:bar:start -->
 <div class="wb-shell-bar">
-  <span class="wb-shell-mark" aria-hidden="true">語</span>
+  <span class="wb-shell-mark" aria-hidden="true">QY</span>
   <span class="wb-shell-path">工作台 › <b>调查报告</b></span>
   <a class="wb-shell-back" href="${BACK_HREF}">← 返回报告清单</a>
 </div>
@@ -292,7 +294,7 @@ const SHELL_FOOT = `<!-- wb:shell:foot:start -->
 
 const SHELL_FLOAT = `<!-- wb:shell:float:start -->
 <a class="wb-shell-float" href="${BACK_HREF}">
-  <span class="wb-shell-mark" aria-hidden="true">語</span>
+  <span class="wb-shell-mark" aria-hidden="true">QY</span>
   <span>返回调查报告</span>
 </a>
 <!-- wb:shell:float:end -->`;

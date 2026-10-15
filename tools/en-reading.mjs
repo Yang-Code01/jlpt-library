@@ -24,6 +24,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { FAVICON } from './brand.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const rel = (p) => path.join(ROOT, ...p.split('/'));
@@ -108,7 +109,7 @@ function esc(t) {
 /* 内联进 <script> 的 JSON：转义 < 就足以杜绝 </script> 提前收尾。 */
 function jsonIn(x) { return JSON.stringify(x).replace(/</g, '\\u003c'); }
 
-const FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23b93e28'/%3E%3Ctext x='16' y='23' font-size='19' font-family='serif' fill='%23ffffff' text-anchor='middle'%3E%E8%AA%9E%3C/text%3E%3C/svg%3E";
+/* favicon 的唯一定义在 tools/brand.mjs（见那里的注释）。 */
 
 /* ------------------------------- CSV 索引 -------------------------------- */
 /* 一次遍历 ecdict.csv，产出两样东西：
