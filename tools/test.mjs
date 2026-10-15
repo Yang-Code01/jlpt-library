@@ -54,6 +54,7 @@ const DEP = {
 /* needs: 依赖键数组；只列实跑所需的（skip 时逐条打印原因） */
 const SUITES = [
   { f: 'tools/tests/test_area.js',           name: '工作台区状态机',        needs: [] },
+  { f: 'tools/tests/icon-set.js',            name: '图标集 / 品牌标记',      needs: [] },
   { f: 'tools/tests/test_progress.js',       name: '进度脚本',              needs: [] },
   { f: 'tools/tests/test_reading.js',        name: '阅读页',                needs: [] },
   { f: 'tools/tests/test_unit.js',           name: '词表单元页',            needs: [] },

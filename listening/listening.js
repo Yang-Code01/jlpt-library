@@ -119,8 +119,8 @@
           <div id="audio-missing-msg"></div>
           <div class="player-top">
             <button class="play-btn" id="play-btn" ${canPlay ? '' : 'disabled'} title="${isSim && !canPlay ? '模拟模式只能播放一次' : '播放'}">
-              <span class="ico-play">▶</span>
-              <span class="ico-pause">⏸</span>
+              <span class="im im-play ico-play" aria-hidden="true"></span>
+              <span class="im im-pause ico-pause" aria-hidden="true"></span>
             </button>
             <div class="player-info">
               <div class="player-title">問題${q.section} ・ ${q.qNo}番</div>
@@ -132,7 +132,7 @@
             <div class="progress-fill" id="progress-fill" style="width:0%"></div>
           </div>
           <div class="player-controls">
-            <button class="ctrl-btn" id="btn-replay" title="从头播放">⟲ 重播</button>
+            <button class="ctrl-btn" id="btn-replay" title="从头播放"><span class="im im-replay" aria-hidden="true"></span> 重播</button>
             <button class="ctrl-btn" id="btn-back5" title="后退5秒">-5s</button>
             <button class="ctrl-btn" id="btn-fwd5" title="前进5秒">+5s</button>
             <span class="time-display" id="time-display">00:00 / 00:00</span>
@@ -220,7 +220,7 @@
 
         explainHtml = `<div class="explain-box ${showExplain ? '' : 'locked'}">
           <button class="explain-toggle" id="explain-toggle">
-            <span class="et-ico">▶</span>
+            <span class="im im-chev et-ico" aria-hidden="true"></span>
             <span>${showExplain ? '详解' : '详解（答题后展开）'}</span>
           </button>
           <div class="explain-body">

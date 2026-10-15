@@ -59,6 +59,8 @@ ECDICT 源（英语侧三项）、真题 DEK（`.scratch/jlpt-exam/enc-keys/dek.
 ## 四、共享资源与硬约束
 
 - `assets/style.css`（设计令牌：墨 Sumi 体系 + 唯一朱色 accent）、`theme.js`（主题 + PDF 导出按钮）、`progress.js`（学习进度）、`quiz.js`（单元页自测）。
+- **品牌标记（QY）四处同源**：`index.html` 的 `.portal-brand-mark`（30px）+ 同页 favicon data URI + `tools/research.mjs` 的 `SHELL_CSS`/`SHELL_BAR`/`SHELL_FLOAT`（20px）+ 英语侧生成页的 favicon（常量 `tools/brand.mjs`，`en-vocab.mjs` / `en-reading.mjs` import，覆盖 109 页；另有 `en/dictation/index.html`、`en/typing/index.html` 两份手写页自带 favicon）。改报告外壳模板后必须重跑 `node tools/research.mjs add-shell research/*.html`（外壳是写进文件的）；改标记后重跑 `node tools/en-vocab.mjs gen` + `node tools/en-reading.mjs gen`。`tools/tests/icon-set.js` 对全仓 111 个 favicon 逐字节比对兜底。
+- **模块图标只定义一次**：`assets/style.css` 的「线描图标集」标记区（`--ic-*` + `.im` / `.im-*`），新增图标改 `.scratch/icons/gen-icon-css.mjs` 后插入（手写 data URI 必错）；`tools/tests/icon-set.js` 校验用法↔定义、编码、裸声明、品牌标记四处同源与全仓 JS 语法。
 - **`file://` 优先**：浏览器在该协议下拦 `fetch()`，故数据一律内联（`<script type="application/json">` 或 `window.X = {...}`）或相对 `<script src>` 按需加载；**不要改成 fetch**。
 - **无构建步骤、无外部依赖、无 `package.json`**：脚本一律 `node` 直跑，不引 npm 包。
 - 改 UI 前先备份（见根 `AGENTS.md`）；改完 UI 至少跑一次 `node tools/test.mjs`。

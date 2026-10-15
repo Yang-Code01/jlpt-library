@@ -39,7 +39,7 @@ var HAS_EX = DATA.examples !== false;
 function play(id, kind){ try{ new Audio('audio/'+id+'-'+kind+'.wav').play(); }catch(e){} }
 function playBtn(c, kind){
   if(!HAS_AUDIO) return '';
-  return '<button onclick="play(\''+c.id+'\',\''+kind+'\')">▶ '+(kind==='w'?'动词':'例文')+'</button>';
+  return '<button onclick="play(\''+c.id+'\',\''+kind+'\')"><span class="im im-play" aria-hidden="true"></span> '+(kind==='w'?'动词':'例文')+'</button>';
 }
 function audioBtns(c){ return HAS_AUDIO ? playBtn(c,'w') : ''; }
 function exHtml(c){ return HAS_EX ? (c.example_jp_ruby || c.example_jp) : ''; }
