@@ -544,7 +544,7 @@ function build() {
 /* -------------------------------- 页面模板 ------------------------------- */
 function articlePage(a) {
   const key = 'en/reading/' + a.band + '/' + pad(a.no) + '.html';
-  const title = a.book.title + ' · 第 ' + a.no + ' 篇 · 英语阅读 · Language Library';
+  const title = a.book.title + ' · 第 ' + a.no + ' 篇 · 英语阅读 · 个人工作站';
   const payload = {
     id: a.band + '-' + pad(a.no),
     band: a.band,
@@ -671,7 +671,7 @@ ${rows}
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>英语阅读 · 分档短文 · Language Library</title>
+<title>英语阅读 · 分档短文 · 个人工作站</title>
 <meta name="description" content="英语阅读：${meta.count} 篇公有领域短文按超纲词比例分四档，点词查义、超纲词高亮，读完手动盖章。">
 <link rel="icon" href="${FAVICON}">
 <link rel="stylesheet" href="../../assets/style.css">

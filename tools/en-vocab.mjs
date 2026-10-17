@@ -233,7 +233,7 @@ function unitPage(u, bands) {
     throw new Error('单元 ' + u.band + '/' + pad(u.unit) + ' 的位次区间不是数字：' + u.from + '–' + u.to);
   }
   const b = bands.find((x) => x.id === u.band);
-  const title = b.label + ' · ' + pad(u.unit) + ' · 英语词表 · Language Library';
+  const title = b.label + ' · ' + pad(u.unit) + ' · 英语词表 · 个人工作站';
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>

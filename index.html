@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Qingmin Yang · 日语学习资料库</title>
-<meta name="description" content="日语与英语自学资料库：JLPT N5–N1 语法词汇单元、N2 真题、听力精听、听写、单词卡、动词变形与打字练习，以及按词频档位组织的英语词表，全部离线可用。">
+<title>个人工作站 · Personal Workbench</title>
+<meta name="description" content="个人工作站：日语与英语两条自学路径、AI 调查报告与自建工具，全部离线可用。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23b93e28'/%3E%3Ctext x='16' y='20.5' font-size='14' letter-spacing='-0.3' font-family='Georgia,serif' fill='%23ffffff' text-anchor='middle'%3EQY%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/theme.js"></script>
@@ -13,27 +13,31 @@
      两个状态都落在 <html> 上：data-area=study|survey、data-lang=ja|en，标题与描述由
      这两个属性算出来。与主题同一套路，进 <head> 里先落一次，避免首屏闪错区／闪日语。
      键名 jlpt-area / jlpt-lang，默认 study / ja；只记在浏览器里，不写进 URL —— URL 是
-     书签与深链的身份，不该被区与语言污染。应用逻辑只写一遍：这里定义，页尾再补按钮态。 */
+     书签与深链的身份，不该被区与语言污染。应用逻辑只写一遍：这里定义，页尾再补按钮态。
+
+     站名 = 「个人工作站 · Personal Workbench」（全站唯一写法，改这里就够）。标签页标题的
+     规则：默认落点（语言学习区・日本語）用站名全名，其余页面用「页面名 · 个人工作站」——
+     标签页标题超过约 20 个字就开始淡出截断，所以不把中英双名往每个分区里塞。 */
   (function () {
     var T = window.PORTAL_LANG = {
       ja: {
-        t: '日语学习资料库 · Language Library',
-        d: 'JLPT N5–N1 日语学习资料库：语法词汇单元、N2 真题、听力精听、听写、单词卡、动词变形与打字练习，全部离线可用。'
+        t: '个人工作站 · Personal Workbench',
+        d: '个人工作站的语言学习区（日本語）：JLPT N5–N1 语法词汇单元、N2 真题、听力精听、听写、单词卡、动词变形与打字练习，全部离线可用。'
       },
       en: {
-        t: '英语词表 · Language Library',
+        t: '英语词表 · 个人工作站',
         d: '英语词频档位词表：3,766 个词分四档、每 50 词一个单元，列表速览、翻转卡自测与间隔复习，全部离线可用。'
       }
     };
     /* 调查报告区的标题与描述：报告内容是中文的，与语言开关无关。 */
     var S = window.PORTAL_SURVEY_META = {
-      t: '调查报告 · 工作台',
-      d: '工作台的调查报告区：AI 技能生态、工具横评、环境复核与工程复盘的离线 HTML 报告，不定期更新，全部离线可用。'
+      t: '调查报告 · 个人工作站',
+      d: '个人工作站的调查报告区：AI 技能生态、工具横评、环境复核与工程复盘的离线 HTML 报告，不定期更新，全部离线可用。'
     };
     /* 工具开发区的标题与描述：内容是中文的，同样与语言开关无关。 */
     var W = window.PORTAL_TOOLS_META = {
-      t: '工具开发 · 工作台',
-      d: '工作台的工具开发区：自建的 pi 扩展与离线小工具，每个工具一页说明、用法与下载，全部离线可用。'
+      t: '工具开发 · 个人工作站',
+      d: '个人工作站的工具开发区：自建的 pi 扩展与离线小工具，每个工具一页说明、用法与下载，全部离线可用。'
     };
     function syncMeta() {
       var root = document.documentElement;
