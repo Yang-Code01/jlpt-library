@@ -147,7 +147,7 @@ section('A 词池（由 en/data/vocab.js 现算）与页头');
   ok(multiword(pools[3]).every((it) => it.k.indexOf(' ') < 0 && it.m === ''), '词组：k 无空格、无中文释义');
 
   /* 页头与选档按钮 */
-  eq(sb.document.title, '英语打字 · Language Library', '页面标题');
+  eq(sb.document.title, '英语打字 · 个人工作站', '页面标题');
   ok(txt(sb, 'label-tier').indexOf('4k') >= 0, '难度标签提到 4k（固定搭配）');
   const tiers = sb.__doc.querySelectorAll('.ty-opt[data-tier]');
   eq(tiers.length, 4, '四个档位按钮');

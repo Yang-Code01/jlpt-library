@@ -143,7 +143,7 @@ function boot(opts, preset) {
   const { dom } = boot();
   eq(dom.root.getAttribute('data-area'), 'study', '默认 data-area');
   eq(dom.root.getAttribute('data-lang'), 'ja', '默认 data-lang');
-  eq(dom.document.title, '日语学习资料库 · Language Library', '默认标题');
+  eq(dom.document.title, '个人工作站 · Personal Workbench', '默认标题');
   ok(/JLPT N5/.test(dom.metaDesc.getAttribute('content')), '默认描述为日语侧');
   eq(dom.areaBtns[0].classList.contains('on'), true, '默认「语言学习」Tab 高亮');
   eq(dom.areaBtns[1].classList.contains('on'), false, '默认「调查报告」Tab 不高亮');
@@ -155,7 +155,7 @@ function boot(opts, preset) {
   const { dom } = boot();
   dom.areaBtns[1].fire('click');
   eq(dom.root.getAttribute('data-area'), 'survey', '切区后 data-area');
-  eq(dom.document.title, '调查报告 · 工作台', '切区后标题');
+  eq(dom.document.title, '调查报告 · 个人工作站', '切区后标题');
   ok(/AI /.test(dom.metaDesc.getAttribute('content')), '切区后描述为调查报告侧');
   eq(dom.store['jlpt-area'], 'survey', '切区写 jlpt-area');
   eq(dom.areaBtns[1].classList.contains('on'), true, '切区后 Tab 高亮');
@@ -167,7 +167,7 @@ function boot(opts, preset) {
   const { dom } = boot({}, { 'jlpt-area': 'survey', 'jlpt-lang': 'en' });
   eq(dom.root.getAttribute('data-area'), 'survey', '回填区=survey');
   eq(dom.root.getAttribute('data-lang'), 'en', '回填语言=en');
-  eq(dom.document.title, '调查报告 · 工作台', '调查报告区标题与语言无关');
+  eq(dom.document.title, '调查报告 · 个人工作站', '调查报告区标题与语言无关');
   eq(dom.langBtns[1].getAttribute('aria-selected'), 'true', '回填后语言按钮态');
 }
 
@@ -175,7 +175,7 @@ function boot(opts, preset) {
 {
   const { dom } = boot({ hash: '#survey' });
   eq(dom.root.getAttribute('data-area'), 'survey', '#survey 深链落到调查报告区');
-  eq(dom.document.title, '调查报告 · 工作台', '#survey 深链标题');
+  eq(dom.document.title, '调查报告 · 个人工作站', '#survey 深链标题');
 }
 
 /* ---------------- 5. 语言开关只影响语言学习区 ---------------- */
@@ -183,14 +183,14 @@ function boot(opts, preset) {
   const { dom } = boot();
   dom.langBtns[1].fire('click');
   eq(dom.root.getAttribute('data-lang'), 'en', '切英语后 data-lang');
-  eq(dom.document.title, '英语词表 · Language Library', '切英语后标题');
+  eq(dom.document.title, '英语词表 · 个人工作站', '切英语后标题');
   dom.areaBtns[1].fire('click'); // 进调查报告区
   dom.langBtns[0].fire('click'); // 再切日语（区内操作）
   eq(dom.root.getAttribute('data-area'), 'survey', '调查报告区内语言开关不掉区');
-  eq(dom.document.title, '调查报告 · 工作台', '调查报告区内语言开关不改标题');
+  eq(dom.document.title, '调查报告 · 个人工作站', '调查报告区内语言开关不改标题');
   dom.areaBtns[0].fire('click'); // 回语言学习
   eq(dom.root.getAttribute('data-lang'), 'ja', '回到语言学习区仍是切过的日语');
-  eq(dom.document.title, '日语学习资料库 · Language Library', '回区后标题跟语言走');
+  eq(dom.document.title, '个人工作站 · Personal Workbench', '回区后标题跟语言走');
 }
 
 /* ---------------- 6. 标签筛选（调查报告区） ---------------- */
@@ -234,7 +234,7 @@ function boot(opts, preset) {
   const { dom } = boot();
   dom.areaBtns[2].fire('click');
   eq(dom.root.getAttribute('data-area'), 'tools', '切到工具开发区');
-  eq(dom.document.title, '工具开发 · 工作台', '工具开发区标题');
+  eq(dom.document.title, '工具开发 · 个人工作站', '工具开发区标题');
   ok(/工具/.test(dom.metaDesc.getAttribute('content')), '工具开发区描述');
   eq(dom.store['jlpt-area'], 'tools', '切到工具区写 jlpt-area');
   eq(dom.areaBtns[2].classList.contains('on'), true, '工具区 Tab 高亮');

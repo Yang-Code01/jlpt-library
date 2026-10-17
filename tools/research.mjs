@@ -243,7 +243,7 @@ const SHELL_FONT =
   'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif';
 
 const SHELL_CSS = `<style data-wb-shell="1">
-  /* ===== 工作台外壳（顶部细条 + 浮动胶囊 + 页脚返回）：由 tools/research.mjs add-shell 写入，勿手改 =====
+  /* ===== 个人工作站外壳（顶部细条 + 浮动胶囊 + 页脚返回）：由 tools/research.mjs add-shell 写入，勿手改 =====
      颜色尽量套用报告自己的令牌，套不到就退到中性半透明灰：浅色报告与深色报告都不违和。 */
   .wb-shell-bar{display:flex;align-items:center;gap:10px;padding:9px 20px;
     border-bottom:1px solid var(--rule,var(--border,rgba(127,127,127,.28)));
@@ -280,14 +280,14 @@ const SHELL_CSS = `<style data-wb-shell="1">
 const SHELL_BAR = `<!-- wb:shell:bar:start -->
 <div class="wb-shell-bar">
   <span class="wb-shell-mark" aria-hidden="true">QY</span>
-  <span class="wb-shell-path">工作台 › <b>调查报告</b></span>
+  <span class="wb-shell-path">个人工作站 › <b>调查报告</b></span>
   <a class="wb-shell-back" href="${BACK_HREF}">← 返回报告清单</a>
 </div>
 <!-- wb:shell:bar:end -->`;
 
 const SHELL_FOOT = `<!-- wb:shell:foot:start -->
 <div class="wb-shell-foot">
-  <span>这份报告属于 <b>工作台 › 调查报告</b></span>
+  <span>这份报告属于 <b>个人工作站 › 调查报告</b></span>
   <a href="${BACK_HREF}">← 返回报告清单</a>
 </div>
 <!-- wb:shell:foot:end -->`;
