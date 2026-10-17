@@ -241,10 +241,15 @@ section('C 开局出词、收词计分、错字反馈');
   ok(txt(sb, 'sr-status').indexOf('敲错') >= 0, '无障碍播报「敲错了」');
   ok(txt(sb, 'ln-echo').indexOf('') === 0, '输入回显存在');
 
-  /* 敲对前缀：回显 = 已输入，提示行把命中部分标出来 */
-  const pref = String(G.state.current.k).slice(0, 2);
-  G.handleChar(pref.charAt(0)); G.handleChar(pref.charAt(1));
-  eq(txt(sb, 'ln-echo'), pref, '回显 = 已输入前缀');
+  /* 敲对前缀：回显 = 已输入，提示行把命中部分标出来。
+     前缀必须**严格短于**整个词：词池由 shuffle()（Math.random）出词，1k 档里有 23 个 1–2
+     字母的词（a / go / up / me …），敲满就收词、回显被清空成 "" —— 这条断言曾因此偶发变红
+     （约 2% 的跑次，CI 抽到就随机挂）。故先敲完短词换下一个，直到拿到 ≥3 字母的词。 */
+  let key = String(G.state.current.k);
+  while (key.length < 3) { typeCorrect(sb, key.length); key = String(G.state.current.k); }
+  const n = 2;
+  for (let i = 0; i < n; i++) G.handleChar(key.charAt(i));
+  eq(txt(sb, 'ln-echo'), key.slice(0, n), '回显 = 已输入前缀');
   ok($(sb, 'ln-romaji').innerHTML.indexOf('ty-hit') >= 0, '提示行区分已命中 / 待输入');
 }
 

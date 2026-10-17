@@ -40,6 +40,16 @@ const ECDICT = path.join(SCRATCH, 'en-module', 'research', 'ecdict.csv');
 const DEK = process.env.EXAM_DEK_FILE || path.join(SCRATCH, 'jlpt-exam', 'enc-keys', 'dek.b64');
 const EXAM_DATA = path.join(ROOT, 'exam', 'data', 'N2');
 
+/* pi 更新履历报告要找本机的 pi 包：委托给生成器的 probe 子命令，免得两处各写一套探测逻辑 */
+function probePiChangelog() {
+  const r = spawnSync(process.execPath, ['tools/pi-changelog-gen.mjs', 'probe'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    timeout: 30000,
+  });
+  return r.status === 0;
+}
+
 const DEP = {
   ecdict: { ok: fs.existsSync(ECDICT),
     why: '缺 .scratch/en-module/research/ecdict.csv（见 en/README 的「数据来源」）' },
@@ -48,6 +58,8 @@ const DEP = {
   pass: { ok: !!EXAM_PASS, why: '需要当前真题口令：--exam-pass <口令>' },
   plain: { ok: fs.existsSync(EXAM_DATA) && fs.readdirSync(EXAM_DATA).some((f) => /^\d{4}-\d{2}\.js$/.test(f)),
     why: '缺 exam/data/N2/2010-07.js 之类的明文卷（须在 exam/ 里跑 node gen-exam-data.js 生成）' },
+  pi: { ok: probePiChangelog(),
+    why: '本机没装 pi（找不到 @earendil-works/pi-coding-agent/CHANGELOG.md；可用 PI_CHANGELOG=<路径> 指定）' },
 };
 
 /* ---------------------------------------------------------------- 清单 */
@@ -76,10 +88,13 @@ function guardNoFetch() {
   /* file:// 优先：数据加载必须内联 / 相对 <script src>，不得走 fetch / XHR。
      dictation/dictation.js 的 fetch 指向本机 VOICEVOX HTTP API，是已知例外。 */
   const ALLOW = new Set(['dictation/dictation.js']);
+  /* research/ 下的报告是引用他人文本的成品：pi 更新履历里就贴着 `await fetch(catalogUrl)`
+     这种上游代码样例，扫它会因为「如实引用」而假失败。报告本身自包含（research.mjs check
+     保证无外链 css/js），不靠 fetch 取数。 */
   const EXTS = ['.html', '.js'];
-  const files = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 28 })
+  const files = execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 28 })
     .split('\0').filter(Boolean)
-    .filter((f) => EXTS.some((e) => f.endsWith(e)) && !ALLOW.has(f));
+    .filter((f) => EXTS.some((e) => f.endsWith(e)) && !ALLOW.has(f) && !/^research\//.test(f));
   const bad = [];
   for (const f of files) {
     const text = fs.readFileSync(path.join(ROOT, f), 'utf8');
@@ -98,6 +113,7 @@ function guardNoFetch() {
 const CHECKS = [
   { fn: guardNoFetch, name: 'file:// 硬约束（无 fetch/XHR）', needs: [] },
   { cmd: ['node', 'tools/research.mjs', 'check'], name: '调查报告清单自洽',   needs: [] },
+  { cmd: ['node', 'tools/pi-changelog-gen.mjs', 'check'], name: 'pi 更新履历报告', needs: ['pi'] },
   { cmd: ['node', 'tools/check-exam-data.js'],    name: '真题全库审计',       needs: ['plain'] },
   { cmd: ['node', 'jp-vocab/gen.js', 'check'], name: '课堂单词数据',         needs: [] },
   { cmd: ['node', 'tools/en-accept.mjs'],         name: '英语侧整合验收',     needs: ['ecdict'] },
