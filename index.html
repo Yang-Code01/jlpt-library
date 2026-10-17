@@ -30,18 +30,25 @@
       t: '调查报告 · 工作台',
       d: '工作台的调查报告区：AI 技能生态、工具横评、环境复核与工程复盘的离线 HTML 报告，不定期更新，全部离线可用。'
     };
+    /* 工具开发区的标题与描述：内容是中文的，同样与语言开关无关。 */
+    var W = window.PORTAL_TOOLS_META = {
+      t: '工具开发 · 工作台',
+      d: '工作台的工具开发区：自建的 pi 扩展与离线小工具，每个工具一页说明、用法与下载，全部离线可用。'
+    };
     function syncMeta() {
       var root = document.documentElement;
-      var area = root.getAttribute('data-area') === 'survey' ? 'survey' : 'study';
+      var raw = root.getAttribute('data-area');
+      var area = raw === 'survey' || raw === 'tools' ? raw : 'study';
       var lang = root.getAttribute('data-lang') === 'en' ? 'en' : 'ja';
-      var meta = area === 'survey' ? S : T[lang];
+      var meta = area === 'survey' ? S : area === 'tools' ? W : T[lang];
       document.title = meta.t;
       var m = document.querySelector('meta[name="description"]');
       if (m) m.setAttribute('content', meta.d);
     }
     window.portalSyncMeta = syncMeta;
     window.portalApplyArea = function (area, persist) {
-      var a = area === 'survey' ? 'survey' : 'study';
+      var raw = area;
+      var a = raw === 'survey' ? 'survey' : raw === 'tools' ? 'tools' : 'study';
       document.documentElement.setAttribute('data-area', a);
       Array.prototype.forEach.call(document.querySelectorAll('.wb-tabs button'), function (b) {
         var on = b.getAttribute('data-area-btn') === a;
@@ -68,9 +75,13 @@
     try { if (localStorage.getItem('jlpt-lang') === 'en') init = 'en'; } catch (e) {}
     document.documentElement.setAttribute('data-lang', init);
     var initArea = 'study';
-    try { if (localStorage.getItem('jlpt-area') === 'survey') initArea = 'survey'; } catch (e) {}
+    try {
+      var saved = localStorage.getItem('jlpt-area');
+      if (saved === 'survey' || saved === 'tools') initArea = saved;
+    } catch (e) {}
     /* 报告页的返回链接指向 index.html#survey：深链必须能把区也带对。 */
     if (location.hash === '#survey') initArea = 'survey';
+    else if (location.hash === '#tools') initArea = 'tools';
     document.documentElement.setAttribute('data-area', initArea);
     syncMeta();
     window.PORTAL_LANG_INIT = init;
@@ -755,8 +766,11 @@
 
   .wb-pane { padding-top: 30px; }
 
-  html[data-area="study"] .wb-pane[data-area-pane="survey"],
-  html[data-area="survey"] .wb-pane[data-area-pane="study"] {
+  /* 三个区共用一个显隐规则：谁在 data-area 上，就显示谁的 pane。
+     写成 :not() 而不是两两成对，加第四个区时只改这一条。 */
+  html[data-area="study"] .wb-pane:not([data-area-pane="study"]),
+  html[data-area="survey"] .wb-pane:not([data-area-pane="survey"]),
+  html[data-area="tools"] .wb-pane:not([data-area-pane="tools"]) {
     display: none;
   }
 
@@ -872,6 +886,12 @@
   .survey-item:hover { background: var(--surface-2); }
   .survey-item[hidden] { display: none; }
 
+  /* 工具条目复用报告条目的骨架（日期 + 标题 + 右侧动作），只换右侧动作。 */
+  .tool-dl { color: var(--ink); border-bottom: 1px solid var(--accent); text-decoration: none; white-space: nowrap; }
+  .tool-dl .n { color: var(--muted); font-size: .72rem; margin-left: 2px; }
+  .tool-dl:hover { border-bottom-color: transparent; }
+  .tool-dl.off { color: var(--muted); border-bottom: 0; }
+
   .survey-date {
     padding-top: 4px;
     color: var(--muted);
@@ -943,6 +963,7 @@
   <div class="wb-tabs" role="tablist" aria-label="工作台区域">
     <button type="button" role="tab" data-area-btn="study" aria-selected="true" class="on">语言学习<span>Language Study</span></button>
     <button type="button" role="tab" data-area-btn="survey" aria-selected="false">调查报告<span>AI Research</span></button>
+    <button type="button" role="tab" data-area-btn="tools" aria-selected="false">工具开发<span>Toolsmith</span></button>
   </div>
 
   <!-- ============================ 区一：语言学习 ============================ -->
@@ -1445,6 +1466,60 @@
     <span>AI 主题 · 不定期更新 · 全部离线可用</span>
   </footer>
   </div><!-- /调查报告区 -->
+
+  <!-- ============================ 区三：工具开发 ============================
+       清单由 tools/tools.mjs 从 tools-dev/data.json 写进 wb:tool-list 标记区，下载包
+       由 pack 生成在 tools-dev/downloads/。详情页每工具一页，自包含、离线可开。 -->
+  <div class="wb-pane" data-area-pane="tools">
+  <p class="wb-lead"><strong>自己用得上的那部分。</strong>写给自己的小工具也顺手整理出来：装法、用法、能改的地方在详情页，下载包里是完整源码，拿走就能改。</p>
+
+  <main id="tool-pane" class="entries">
+<!-- wb:tool-list:start -->
+      <div class="zone-head zone-first">
+        <div class="zone-head-main">
+          <h2 class="zone-title">全部工具 <span class="zone-en">Tools</span></h2>
+          <p class="zone-sub">按更新日期倒序。点标题进详情页看用法与下载；标签筛选只影响本页显示。</p>
+        </div>
+        <div class="zone-aside"><span class="zone-count">1 个</span></div>
+      </div>
+
+      <div class="filter-bar" role="group" aria-label="按标签筛选工具">
+        <span class="filter-label">标签</span>
+        <button type="button" class="filter-chip on" data-filter="all">全部 <span class="n">1</span></button>
+        <button type="button" class="filter-chip" data-filter="pi 扩展">pi 扩展 <span class="n">1</span></button>
+        <button type="button" class="filter-chip" data-filter="TUI">TUI <span class="n">1</span></button>
+        <button type="button" class="filter-chip" data-filter="网关">网关 <span class="n">1</span></button>
+        <button type="button" class="filter-chip" data-filter="离线脚本" disabled>离线脚本 <span class="n">0</span></button>
+      </div>
+
+      <div class="survey-list" id="tool-list">
+      <div class="survey-item tool-item" data-tags="pi 扩展 TUI 网关">
+        <span class="survey-date">2026-10-18</span>
+        <span>
+          <span class="survey-title"><a href="tools-dev/pi-tui.html">pi-tui-plus：pi 的 TUI 增强包</a></span>
+          <span class="survey-desc">基于 pi-open-tui 的自有分支：Starship 风格 footer、alt+m 可点击的模型选择器（模型 / 思考强度 / 上下文窗口）、网关积分与繁忙度状态行；配置自动降级，非 wb2api 用户也能用。</span>
+          <span class="survey-tags">
+          <span class="tag">pi 扩展</span>
+          <span class="tag">TUI</span>
+          <span class="tag">网关</span>
+          </span>
+        </span>
+        <span class="survey-src">
+          <span class="src-main"><a class="tool-dl" href="tools-dev/downloads/pi-tui-0.4.0.zip" download>↓ 下载 zip <span class="n">273 KB</span></a></span>
+          <span class="src-sub">v0.4.0 · 可用</span>
+        </span>
+      </div>
+      </div>
+
+      <p class="filter-empty" id="tool-empty" hidden>这个标签下还没有工具。</p>
+<!-- wb:tool-list:end -->
+  </main>
+
+  <footer class="portal-footer">
+    <span>Qingmin Yang · 工具开发</span>
+    <span>自建工具 · 源码可下载 · 全部离线可用</span>
+  </footer>
+  </div><!-- /工具开发区 -->
 </div>
 <script src="assets/progress.js"></script>
 <script>
@@ -1480,12 +1555,13 @@
       });
     });
 
-    /* 调查报告：标签筛选只改本页显示，不写 URL、不记状态。 */
-    (function () {
-      var chips = document.querySelectorAll('.filter-chip');
-      var items = document.querySelectorAll('.survey-item');
+    /* 标签筛选：只改本页显示，不写 URL、不记状态。门户里有两处清单（调查报告 /
+       工具开发），各自按容器取元素 —— 用全局选择器两边按钮会互相串台。 */
+    function wireTagFilter(scope, empty) {
+      if (!scope) return;
+      var chips = scope.querySelectorAll('.filter-chip');
+      var items = scope.querySelectorAll('.survey-item');
       if (!chips.length || !items.length) return;
-      var empty = document.getElementById('filter-empty');
       Array.prototype.forEach.call(chips, function (chip) {
         chip.addEventListener('click', function () {
           if (chip.disabled) return;
@@ -1505,7 +1581,9 @@
           if (empty) empty.hidden = shown !== 0;
         });
       });
-    })();
+    }
+    wireTagFilter(document.getElementById('survey'), document.getElementById('filter-empty'));
+    wireTagFilter(document.querySelector('[data-area-pane="tools"]'), document.getElementById('tool-empty'));
 
     /* 刻度尺的落点是「在门户内展开该档单元清单」，不跳页。 */
     Array.prototype.forEach.call(document.querySelectorAll('a.ruler-station[href^="#en-band-"]'), function (a) {
