@@ -66,6 +66,7 @@ const DEP = {
 /* needs: 依赖键数组；只列实跑所需的（skip 时逐条打印原因） */
 const SUITES = [
   { f: 'tools/tests/test_area.js',           name: '工作台区状态机',        needs: [] },
+  { f: 'tools/tests/test_tools_dev.js',     name: '工具开发区（生成/校验/打包）', needs: [] },
   { f: 'tools/tests/icon-set.js',            name: '图标集 / 品牌标记',      needs: [] },
   { f: 'tools/tests/test_progress.js',       name: '进度脚本',              needs: [] },
   { f: 'tools/tests/test_reading.js',        name: '阅读页',                needs: [] },
@@ -113,6 +114,7 @@ function guardNoFetch() {
 const CHECKS = [
   { fn: guardNoFetch, name: 'file:// 硬约束（无 fetch/XHR）', needs: [] },
   { cmd: ['node', 'tools/research.mjs', 'check'], name: '调查报告清单自洽',   needs: [] },
+  { cmd: ['node', 'tools/tools.mjs', 'check'], name: '工具开发清单自洽',   needs: [] },
   { cmd: ['node', 'tools/pi-changelog-gen.mjs', 'check'], name: 'pi 更新履历报告', needs: ['pi'] },
   { cmd: ['node', 'tools/check-exam-data.js'],    name: '真题全库审计',       needs: ['plain'] },
   { cmd: ['node', 'jp-vocab/gen.js', 'check'], name: '课堂单词数据',         needs: [] },
