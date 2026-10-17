@@ -1,0 +1,163 @@
+# pi-open-tui
+
+**English** | [简体中文](./README.zh-CN.md)
+
+A polished terminal interface for the [Pi](https://pi.dev) coding agent. It brings the strongest ideas from pi-haiku, pi-claude-code-tui, and pi-zentui into one configurable extension.
+
+![pi-open-tui preview](https://raw.githubusercontent.com/OldSuns/pi-open-tui/main/assets/preview_dashboard_1.png)
+
+## Highlights
+
+- **Pi header** with model, thinking level, working directory, and useful slash-command hints
+- **Responsive footer** with Git state, detected runtime, context usage, token counts, cost, and extension status
+- **Framed editor** with block, bar, and underline cursor styles
+- **Project awareness** for 50+ runtimes and detailed Git states, including ahead/behind, staged, modified, untracked, stashed, and detached HEAD
+- **Turn telemetry** for TPS, time to first token (TTFT), duration, stalls, tokens, and list-price rate
+- **Thinking peek**: an inline ticker replaces Pi's hidden `Thinking...` label with the tail of the model's reasoning while it works
+- **Interactive settings** through `/open-tui`, available in English and Simplified Chinese
+
+## Requirements
+
+- Pi 1.0 or later
+- A terminal with UTF-8 and color support
+- A [Nerd Font](https://www.nerdfonts.com/font-downloads) for the full icon set (optional; portable Unicode icons are built in)
+
+## Install
+
+Install the extension:
+
+```bash
+pi install npm:pi-open-tui
+```
+
+Or try it for one session:
+
+```bash
+pi -e npm:pi-open-tui
+```
+
+## Font and icons
+
+Download any patched font from the official [Nerd Fonts downloads page](https://www.nerdfonts.com/font-downloads) or [latest GitHub release](https://github.com/ryanoasis/nerd-fonts/releases/latest). Install it, select that font in your terminal profile, and restart the terminal.
+
+The default `auto` mode checks the terminal environment, not the installed font file. It uses Nerd Font icons in interactive UTF-8 TTYs, including terminals running through a runner or subshell. If icons appear as boxes or incorrect symbols, open `/open-tui` and choose one of these modes under **Appearance**:
+
+- `nerd`: force Nerd Font icons after configuring a Nerd Font in the terminal
+- `unicode`: portable Unicode icons (folder, branch, laptop, bulb, plug, hourglass, ...) that render without a patched font; emoji glyphs use the terminal's emoji fallback
+- `ascii`: use plain-text icons with no patched font required
+- `auto`: use Nerd Font icons in interactive UTF-8 TTYs; use portable Unicode icons for SSH sessions (the client terminal controls the font and usually has no Nerd Font); use ASCII for non-interactive output, `TERM=dumb`, or an explicitly non-UTF-8 locale
+
+If the font is installed but `auto` still selects ASCII, choose `nerd` explicitly. In VS Code, Windows Terminal, and similar apps, configure the font in the terminal profile rather than only installing it in the operating system. If your SSH client terminal does ship a Nerd Font and you want the full icon set over SSH, set the mode to `nerd` explicitly.
+
+## Configuration
+
+Run `/open-tui` to open the settings dialog. It provides **General**, **Appearance**, **Footer**, and **Telemetry** tabs. Settings are stored in `~/.pi/agent/open-tui.json`:
+
+```json
+{
+  "enabled": true,
+  "inlineFooter": false,
+  "settingsLanguage": "en",
+  "cursorStyle": "block",
+  "icons": {
+    "mode": "auto"
+  },
+  "footerSegments": {
+    "cwd": true,
+    "hostname": false,
+    "sessionName": false,
+    "gitBranch": true,
+    "gitStatus": true,
+    "gitCommit": false,
+    "runtime": true,
+    "context": true,
+    "tokens": true,
+    "cost": true,
+    "extensionStatuses": true,
+    "capitalizeProviderName": true
+  },
+  "telemetry": {
+    "enabled": true,
+    "tps": true,
+    "ttft": true,
+    "duration": true,
+    "tokens": true,
+    "stalls": true,
+    "cost": true
+  },
+  "thinkingPeek": {
+    "lines": 1
+  }
+}
+```
+
+Key options:
+
+| Option | Values | Notes |
+| --- | --- | --- |
+| `settingsLanguage` | `en`, `zh` | Changes the `/open-tui` interface language |
+| `inlineFooter` | `true`, `false` | Moves the two main Footer rows into the editor's top and bottom borders; defaults to `false`. Extension status rows remain below the editor |
+| `cursorStyle` | `block`, `bar`, `underline` | `bar` and `underline` require terminal cursor-shape support |
+| `icons.mode` | `auto`, `nerd`, `unicode`, `ascii` | Controls footer and telemetry icons |
+| `footerSegments` | Boolean flags | Shows or hides individual footer data |
+| `footerSegments.capitalizeProviderName` | Boolean | Capitalizes the first character of the provider name in the footer; set it to `false` to keep the provider's original casing |
+| `telemetry` | Boolean flags | Enables telemetry and its individual measurements |
+| `thinkingPeek.lines` | `0`, `1`, `2` | Off, one-line, or two-line hidden thinking preview |
+
+`sessionName` appears only when the session has a name. `hostname` shows the short host name (first label of the machine's host name, e.g. `mba` from `mba.example.com`) with a server icon. `gitCommit` shows the short hash and tag in detached HEAD state. Disabling `extensionStatuses` hides the entire extension status line, including MCP status. Each status keeps the colours its extension applied with `ctx.ui.theme.fg()`. A status without colours renders in the muted theme colour.
+
+With `inlineFooter` enabled, the two normal Footer rows are rendered inside the editor frame to save vertical space. The top border places the Git branch on the left and CWD first in the right-hand group; the session title appears on the left too when `sessionName` is enabled. The Header and extension status rows remain separate; narrow terminals truncate lower-priority Footer data first, keeping the right-hand statistics and the border corner.
+
+## Turn telemetry
+
+After each complete agent run, pi-open-tui shows one transient result. Tool-call turns are combined into that result:
+
+```text
+> TPS 42.5 tok/s | ~ TTFT 1.2s | + 29.7s | ↑ 567 | ↓ 1.2k | ! stall 1x / 4.3s | $ $3.60/M
+```
+
+TPS is calculated from all provider-reported assistant output tokens divided by the total generation time across the run. Timing starts at `turn_start` and ends at the assistant `message_end`, so it includes TTFT, hidden reasoning, buffering, and stalls; tool execution between turns is excluded. Runs without output tokens or measurable generation time show `TPS —`.
+
+The `$ / M` value is the model's list-price rate from `usage.cost.total`, not the cumulative session cost shown in the footer. Every telemetry field can be toggled from the **Telemetry** tab.
+
+## Thinking peek
+
+When Pi's **Hide thinking** setting is enabled, pi-open-tui shows a compact ticker in the native hidden thinking block's `Thinking...` position. The `/open-tui` setting offers three modes: **Off**, **1 line**, and **2 lines**.
+
+- while the model is reasoning, the current thinking tail streams by with a spinner (`~ think ⠋ …`);
+- when the answer starts, it settles on a check mark (`~ think ✓`);
+- in 2-line mode, the previous and latest thinking lines share the same text indentation; if the latest line overflows, both rows follow its newest tail as tokens arrive instead of retaining the previous line;
+- after the task settles, the native `Thinking...` label is restored.
+
+```text
+~ think ⠋ previous thought
+          latest thought
+```
+
+The ticker appears only once the model actually streams reasoning, so non-reasoning models never show it. Pi's own Hide thinking toggle controls visibility; changing it takes effect immediately. Each row is truncated by *visible* width, so CJK-wide thinking text cannot overflow. Configure it from **General → Thinking peek** in `/open-tui`, or via `thinkingPeek.lines` in `open-tui.json`.
+
+## Local development
+
+```bash
+npm install
+npm test
+npm run typecheck
+pi -e .
+```
+
+## Acknowledgements
+
+This project builds on several Pi community packages:
+
+- **[pi-haiku](https://github.com/nnocte/pi-haiku)** — two-line footer structure and working timer
+- **[pi-claude-code-tui](https://github.com/Phoobobo/pi-claude-code-tui)** — Pi logo frames and rounded editor border technique
+- **[pi-zentui](https://github.com/lmilojevicc/pi-zentui)** — Starship-style footer segments, runtime detection, session lifecycle, and settings UI pattern
+- **[pi-tps](https://github.com/monotykamary/pi-tps)** — turn timing, stall detection, and conservative TPS measurement
+
+The logo frames are derived from Pi's official install script (`pi.dev/install.sh`). Runtime detection and Git porcelain parsing borrow structure from `pi-zentui`.
+
+Special thanks to the **[LINUX DO](https://linux.do)** community for its support.
+
+## License
+
+[MIT](./LICENSE)

@@ -1,0 +1,109 @@
+{
+  "tools": {
+    "pi-tui": {
+      "version": "0.4.0",
+      "dir": "../pi-tui",
+      "zip": "downloads/pi-tui-0.4.0.zip",
+      "bytes": 276742,
+      "sha256": "95f4505c95448f7539b98d9810d19db00b782300bff5c3cbdff658190f026827",
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "180b1a2890c3587e93096c9b5cd2c0e75b1e4272dd14b441d7b083068d21c3fb"
+        },
+        {
+          "path": "README.md",
+          "sha256": "aeea2e7c256c7b413cb5088ee4cd9a53af77386d92bfc1cc222563f830898081"
+        },
+        {
+          "path": "README.upstream.md",
+          "sha256": "310b497f7380f6bf41f25906f813a50101f143655b78f22bce57850f55ce9237"
+        },
+        {
+          "path": "README.zh-CN.md",
+          "sha256": "6f14e03f122f825caf2f935ad6e40868cbaed2ee2b9b22e1e170d87585332b9b"
+        },
+        {
+          "path": "assets/.gitkeep",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "path": "assets/preview_dashboard_1.png",
+          "sha256": "40262541e7e0c5fae14dda863fe77e0d434e40b25cf538783efec4f27c1caead"
+        },
+        {
+          "path": "extensions/open-tui/config.ts",
+          "sha256": "7247a3ab6e9c2d4afdfa7ffff4a031bd08eee2b1d7a1f47d3d403930680dead4"
+        },
+        {
+          "path": "extensions/open-tui/editor.ts",
+          "sha256": "3d77d5281cd06fcf13b0c9fc3516815e7247c764f05f10ea40916eff60c04b29"
+        },
+        {
+          "path": "extensions/open-tui/footer.ts",
+          "sha256": "e83d84164625e5a766d09f9bd156af8c46f3269c6264de31d25d12e97cedcc6d"
+        },
+        {
+          "path": "extensions/open-tui/git.ts",
+          "sha256": "d29d491bea42463a30fbd925d67350055b57bc4165884a8f45b847e830fc00e4"
+        },
+        {
+          "path": "extensions/open-tui/header.ts",
+          "sha256": "c8edc576a5618f38266a507d63c2017c183cf5b3ec4d971f9a6c8e34e751b64b"
+        },
+        {
+          "path": "extensions/open-tui/icons.ts",
+          "sha256": "63a3875a87531bf2857e343908c521bb9cc6b5b2396ae49fe1f9a1622ad86f5f"
+        },
+        {
+          "path": "extensions/open-tui/index.ts",
+          "sha256": "32b5240fc98b38c3fff78f6448deee9144f57d2f97a2a833f13743d8ac067729"
+        },
+        {
+          "path": "extensions/open-tui/peek.ts",
+          "sha256": "feef968b41b7a883eea55ffc3cf9c1fc8aef6e7f5a93575ecc316bbbc192e562"
+        },
+        {
+          "path": "extensions/open-tui/runtime.ts",
+          "sha256": "c93d8a08e66d7f47231da9a9992751e524ab3963a5d20df4f3bec2737538ab96"
+        },
+        {
+          "path": "extensions/open-tui/session-lifecycle.ts",
+          "sha256": "34af2ddb8a48a789277507866f7d9a63f8a142f155d3a037afc49cd7af28ddf4"
+        },
+        {
+          "path": "extensions/open-tui/settings-command.ts",
+          "sha256": "7cba7d5b531dba994b1eb7aabd1e224b76a90016d87fe5d07f6ea626b5407b75"
+        },
+        {
+          "path": "extensions/open-tui/state.ts",
+          "sha256": "ba3c48b118f76be9a9a69e292c6f4758c88c72ca9c910a7f954a2c7c9e6526eb"
+        },
+        {
+          "path": "extensions/open-tui/telemetry.ts",
+          "sha256": "ad40130d301218fd9c713f026a825e1d9826f76abafff81f871e6f4f6d712da6"
+        },
+        {
+          "path": "extensions/open-tui/utils.ts",
+          "sha256": "52273cdf39a5a089cddaaa9ea1666559a0924f363457be428bfcf8032d9541db"
+        },
+        {
+          "path": "extensions/wb-gateway.ts",
+          "sha256": "c3a0315f3289833d4e19486f7654ae5a29b2a32e53f34f9fc00c1d2966ac831b"
+        },
+        {
+          "path": "extensions/wb-model-picker.ts",
+          "sha256": "b17b734a1955be2a3ee68fba9a5c4f5ecef31aad89377a3e3456621c40f9154b"
+        },
+        {
+          "path": "extensions/wb-stats.ts",
+          "sha256": "1dda91dd41952bbb80713473cc9c1ed3b616f8f0e7226e34f76864bfd069d4c0"
+        },
+        {
+          "path": "package.json",
+          "sha256": "33c0dbc1eb0915d170f84e72d8af315ff6eaf8ed9b5e24ef52ba7a85fba75bf9"
+        }
+      ]
+    }
+  }
+}

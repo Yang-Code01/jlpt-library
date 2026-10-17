@@ -1,0 +1,50 @@
+{
+  "name": "pi-tui-plus",
+  "version": "0.4.0",
+  "description": "pi-open-tui 的自有分支（Starship 风格 footer / 圆角编辑器 / 动画 logo）+ WorkBuddy 风格模型选择器 + 网关统计状态行",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yang-Code01/jlpt-library.git",
+    "directory": "pi-tui"
+  },
+  "keywords": [
+    "pi-package",
+    "pi",
+    "pi-coding-agent",
+    "pi-extension",
+    "tui",
+    "starship"
+  ],
+  "license": "MIT",
+  "files": [
+    "extensions/",
+    "assets/",
+    "README.md",
+    "LICENSE"
+  ],
+  "pi": {
+    "extensions": [
+      "./extensions/open-tui/index.ts",
+      "./extensions/wb-model-picker.ts",
+      "./extensions/wb-stats.ts"
+    ],
+    "image": "https://raw.githubusercontent.com/OldSuns/pi-open-tui/main/assets/preview_dashboard_1.png"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": ">=1.0.0",
+    "@earendil-works/pi-ai": ">=1.0.0",
+    "@earendil-works/pi-tui": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/pi-coding-agent": {
+      "optional": true
+    },
+    "@earendil-works/pi-ai": {
+      "optional": true
+    },
+    "@earendil-works/pi-tui": {
+      "optional": true
+    }
+  }
+}

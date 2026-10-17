@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pi-tui-plus — pi 的 TUI 增强包</title>
+<style>
+  :root{
+    --paper:#FBFAF8; --ink:#17161A; --muted:#6C6A73; --faint:#9C9AA3;
+    --rule:#E4E1DB; --rule-strong:#CFCBC3;
+    --accent:#B4451F; --accent-soft:#F6EDE7;
+    --code-bg:#F2F0EC; --card:#FFFFFF;
+    --ok:#2F6B4F; --ok-soft:#EAF2EC;
+    --mono:"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Songti SC",SimSun,serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#131216; --ink:#EDEAE4; --muted:#A5A2AB; --faint:#7C7A83;
+      --rule:#2B2930; --rule-strong:#3D3A43;
+      --accent:#F08A5D; --accent-soft:#2A1D18;
+      --code-bg:#1C1B20; --card:#191820;
+      --ok:#7FC2A1; --ok-soft:#16211B;
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:16.5px;line-height:1.72;letter-spacing:.005em;
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:52px 26px 100px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+  a:hover{border-bottom-color:var(--accent)}
+
+  header.masthead{border-bottom:2px solid var(--ink);padding-bottom:24px;margin-bottom:30px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+  h1{font-family:var(--serif);font-size:2.15rem;line-height:1.24;margin:0 0 12px;letter-spacing:-.01em}
+  .lead{color:var(--muted);margin:0;max-width:60ch}
+  .metaline{font-family:var(--mono);font-size:12.5px;color:var(--faint);margin-top:18px;display:flex;gap:18px;flex-wrap:wrap}
+  .metaline .pill{color:var(--ok);background:var(--ok-soft);padding:1px 8px;border-radius:999px}
+
+  .dl{
+    display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+    border:1px solid var(--rule-strong);background:var(--card);border-radius:10px;
+    padding:20px 22px;margin:26px 0 38px;
+  }
+  .dl-main{font-family:var(--mono);font-size:13.5px;color:var(--muted)}
+  .dl-main b{display:block;font-family:var(--sans);font-size:1rem;color:var(--ink);margin-bottom:4px}
+  .btn{
+    display:inline-block;background:var(--accent);color:#fff;border:0;border-radius:7px;
+    padding:9px 20px;font-size:.94rem;font-weight:600;white-space:nowrap;
+  }
+  .btn:hover{filter:brightness(1.07)}
+  .dl-note{font-size:.78rem;color:var(--faint);margin-top:6px}
+
+  h2{font-family:var(--serif);font-size:1.32rem;margin:44px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)}
+  h3{font-size:1rem;margin:26px 0 8px}
+  p{margin:10px 0}
+  ul,ol{margin:10px 0;padding-left:1.3em}
+  li{margin:5px 0}
+  code{font-family:var(--mono);font-size:.86em;background:var(--code-bg);padding:1.5px 5px;border-radius:4px}
+  pre{background:var(--code-bg);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.8px;line-height:1.62}
+  pre code{background:none;padding:0;font-size:inherit}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;margin:14px 0}
+  th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:500}
+  td code{white-space:nowrap}
+  .note{border-left:3px solid var(--rule-strong);padding:2px 0 2px 16px;color:var(--muted);font-size:.92rem;margin:18px 0}
+  figure{margin:24px 0}
+  figure img{display:block;width:100%;height:auto;border:1px solid var(--rule-strong);border-radius:10px;background:#0b0b0d}
+  figcaption{font-family:var(--mono);font-size:.79rem;line-height:1.5;color:var(--faint);margin-top:9px}
+  .ok{color:var(--ok)}
+  footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--rule);color:var(--faint);font-size:.82rem;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <div class="kicker">Tool · pi extension pack</div>
+  <h1>pi-tui-plus：pi 的 TUI 增强包</h1>
+  <p class="lead">给 pi 命令行加三样东西：一个说清状态的 footer、一个能直接用鼠标点的模型选择器、一行不占版的网关状态。整套东西是 pi-open-tui 的自有分支，改坏了改回来就在这个包里，不会随上游升级被覆盖。</p>
+  <div class="metaline">
+    <span>v0.4.0</span><span>2026-10-18</span>
+    <span class="pill">可用</span>
+    <span>MIT</span>
+    <span>无 npm 依赖</span>
+  </div>
+</header>
+
+<div class="dl">
+  <div>
+    <div class="dl-main"><b>下载源码包（zip）</b>pi-tui-0.4.0.zip · 含扩展源码、配置样例、README</div>
+    <div class="dl-note">解压即一个目录，不用安装依赖、不用构建。</div>
+  </div>
+  <a class="btn" href="../tools-dev/downloads/pi-tui-0.4.0.zip" download>下载 zip</a>
+</div>
+
+<h2>装了什么</h2>
+<p>三个扩展，一个包：</p>
+<table>
+  <tr><th>扩展</th><th>它做什么</th></tr>
+  <tr>
+    <td><code>open-tui</code></td>
+    <td>Starship 风格的底部信息：目录、分支、模型、思考档位、上下文占用。<b>本分支在模型名后面加了 <code>alt+m 模型</code> 的提示</b>，这是与上游唯一的差别。</td>
+  </tr>
+  <tr>
+    <td><code>wb-model-picker</code></td>
+    <td>按 <code>alt+m</code>（或输入 <code>/pick</code>）弹出选择器：左边模型列表（倍率、标签、当前项打勾），右边详情（说明、消耗速度、繁忙程度、思考强度、上下文窗口）。三项都能改，键盘和鼠标都能用。</td>
+  </tr>
+  <tr>
+    <td><code>wb-stats</code></td>
+    <td>一行状态：本轮 token、积分、上下文占用、网关健康/繁忙账号、tok/s、缓存命中。发布方式是可叠加的扩展状态行，不跟 footer 抢位置。</td>
+  </tr>
+</table>
+<p class="note">后两个只在你用「OpenAI 兼容网关」时才多出额外信息（倍率、积分、上游账号）。<b>其他 provider 自动降级</b>：选择器照常换模型与思考强度，网关相关的列显示为空，不会报错。</p>
+
+<h2>长这样</h2>
+<p>下面三张不是画的示意图，是把包里这三个扩展真跑起来截的：模型表读你自己的 <code>models.json</code>，倍率与说明来自网关 <code>/v1/models</code>、繁忙程度来自 <code>/status</code>，配色用的就是 pi 的 <code>dark</code> 主题。终端宽度 100 列。</p>
+
+<figure>
+  <img src="shots/picker-main.png" alt="模型选择器主界面：左侧模型列表带倍率与打勾，右侧详情显示说明、消耗速度、繁忙程度、思考强度、上下文窗口" width="1818" height="938">
+  <figcaption>① 主界面：左边选模型（图标 + 倍率 + 当前项 ✓），右边是详情 —— 说明、消耗速度、繁忙程度，以及两个能点开的子菜单</figcaption>
+</figure>
+
+<figure>
+  <img src="shots/picker-think.png" alt="思考强度子菜单，列出关/低/高/极致四档，当前高被选中打勾" width="1818" height="938">
+  <figcaption>② 思考强度：只列这个模型真支持的档位（这里是关 / 低 / 高 / 极致），换了模型列表自己就变</figcaption>
+</figure>
+
+<figure>
+  <img src="shots/picker-ctx.png" alt="上下文窗口子菜单，列出 250K/500K/750K/1M，当前 1M 打勾" width="1818" height="938">
+  <figcaption>③ 上下文窗口：按模型上限给出的几档（1M 窗口 → 250K / 500K / 750K / 1M），选完只影响这一个模型，下次开局自动贴回</figcaption>
+</figure>
+
+<p class="note">这三张只拍了选择器。footer 与状态行没拍 —— 它们的内容随会话实时变（目录、分支、token、积分、上游账号数），截一张固定的图反而容易误导，装了看真的一眼就明白。</p>
+
+<h2>怎么用</h2>
+<p>pi 支持把目录直接当包加载。两条路，选一条。</p>
+
+<h3>一、本地目录（自己改着用）</h3>
+<pre><code># 把包放进任意位置，然后把它的绝对路径加到 packages 里
+pi install C:\path\to\pi-tui
+
+# 检查是不是加载了（应当看到 open-tui / wb-model-picker / wb-stats 三个扩展）
+pi -p "只回复两个字：成功"</code></pre>
+<p>也可以不改全局配置，临时挂一次：</p>
+<pre><code>pi -e C:\path\to\pi-tui -p "只回复两个字：成功"</code></pre>
+
+<h3>二、只装其中一部分</h3>
+<p>删 <code>package.json</code> 里 <code>pi.extensions</code> 数组的对应项即可，三行互相独立。<code>wb-model-picker</code> 与 <code>wb-stats</code> 都依赖同目录的 <code>extensions/wb-gateway.ts</code>，别单独拷走其中一个文件。</p>
+
+<h3>要求</h3>
+<ul>
+  <li>pi ≥ 1.0.0（peerDependency，已装 pi 就够了，不需要 <code>npm install</code>）</li>
+  <li>鼠标点击需要 fullscreen 模式：pi 默认 <code>tuiMode: "fullscreen"</code>；若你改成了 <code>regular</code>，键盘仍然可用</li>
+</ul>
+
+<h2>⚠ 不要和上游 pi-open-tui 同时装</h2>
+<p>本包 fork 了上游全部源码，其中 <code>open-tui</code> 那一份是同一个扩展。两个都装 = 同一份东西装两遍，而 pi 既不去重也不同名检查，<b>一条警告都不会报</b>，只会静默错位：</p>
+<table>
+  <tr><th>哪里撞</th><th>同时装会发生什么</th></tr>
+  <tr>
+    <td>footer</td>
+    <td>footer 全局只能有一个：<code>ctx.ui.setFooter()</code> 后调用的会接管前一个并 <code>dispose</code> 掉它（<code>extensions/open-tui/footer.ts:418</code>）。于是界面显示<b>后加载</b>那一版，先加载那版的定时器还在跑却渲染不出来 —— 白耗。两版代码不同时（本分支多一行 <code>alt+m 模型</code> 提示），你会看到提示时有时无。</td>
+  </tr>
+  <tr>
+    <td>命令 <code>/open-tui</code></td>
+    <td>解析是 <code>resolveRegisteredCommands().find(...)</code>，<b>先加载的先得到</b>（pi 的 <code>runner.js:595</code>）。设置面板可能来自另一个版本，无提示。两版都读同一份 <code>~/.pi/agent/open-tui.json</code>，字段还可能对不上。</td>
+  </tr>
+  <tr>
+    <td>快捷键</td>
+    <td>这是 pi 唯一会打诊断的地方（<code>Extension shortcut conflict: … Using …</code>）。但上游一个快捷键都不注册，本包只新增 <code>alt+m</code>，没有重名键 → <b>连这条警告也不会有</b>。</td>
+  </tr>
+</table>
+<p>去重也帮不上忙：pi 只按「同一身份」去重（同名 npm 或同一路径算同一身份），<code>npm:pi-open-tui</code> 与本地路径是两个身份，会各装一份。</p>
+
+<h3>换成这个包</h3>
+<pre><code>pi remove npm:pi-open-tui
+pi install C:\path\to\pi-tui</code></pre>
+
+<h3>只想加选择器、保留上游 footer</h3>
+<p>删掉 <code>package.json</code> 里 <code>pi.extensions</code> 的第一项，只留后两个 —— 这样上游 <code>open-tui</code> 继续出 footer，本包只提供选择器与状态行，两边不重：</p>
+<pre><code>"pi": {
+  "extensions": [
+    "./extensions/wb-model-picker.ts",
+    "./extensions/wb-stats.ts"
+  ]
+}</code></pre>
+<p class="note">这个组合下 footer 里不会有 <code>alt+m 模型</code> 提示（那行在本分支的 <code>open-tui</code> 里）；<code>alt+m</code> 快捷键仍然可用。</p>
+
+<h3>怎么确认现在装了什么</h3>
+<p>看 <code>~/.pi/agent/settings.json</code> 的 <code>packages</code> 数组：出现 <code>npm:pi-open-tui</code> 就说明上游也在。只应该有一条指向 pi-tui（<code>npm:pi-open-tui</code> <b>或</b> 本地目录，不能两个都有）。</p>
+
+<h2>怎么用</h2>
+<table>
+  <tr><th>操作</th><th>效果</th></tr>
+  <tr><td><code>alt+m</code> / <code>/pick</code></td><td>打开选择器</td></tr>
+  <tr><td><code>↑</code> <code>↓</code> / <code>j</code> <code>k</code></td><td>在列表或子菜单里移动</td></tr>
+  <tr><td><code>→</code> / <code>Tab</code> / <code>l</code></td><td>进右栏详情</td></tr>
+  <tr><td><code>←</code> / <code>h</code></td><td>退回左栏；在子菜单里退回详情</td></tr>
+  <tr><td><code>Enter</code></td><td>应用选中项，或展开子菜单</td></tr>
+  <tr><td><code>空格</code></td><td>展开思考强度 / 上下文窗口子菜单</td></tr>
+  <tr><td><code>Esc</code></td><td>关掉选择器（任何层级）</td></tr>
+  <tr><td>鼠标</td><td>滚轮翻列表；单击选中、再点应用；点 <code>✕ 关闭</code> 退出</td></tr>
+  <tr><td><code>/wb2stats</code></td><td>开关那行状态</td></tr>
+  <tr><td><code>/open-tui</code></td><td>上游自带的设置面板（主题、图标、布局等）</td></tr>
+</table>
+<p class="note">为什么不用 <code>ctrl+shift+m</code>：不少终端会把它退化成 Enter，等于替你按了回车。为什么不能接管 <code>/model</code>：那是 pi 内置命令，扩展覆盖不了。</p>
+
+<h3>上下文窗口是怎么切的</h3>
+<p>窗口大小的真源是模型元数据里的 <code>contextWindow</code>。选择器给出 25% / 50% / 75% / 100% 四档（1M 的模型按 50K 量化），选中后用一份改了 <code>contextWindow</code> 的模型副本喂 <code>pi.setModel()</code>，选择记在 <code>~/.pi/agent/pi-tui-plus-state.json</code>，下次开会话自动贴回。这是改动本会话的视图，不动你的 <code>models.json</code>。</p>
+
+<h2>配置</h2>
+<p>全部可选。没有配置文件也能跑：网关地址从 <code>~/.pi/agent/models.json</code> 里第一个带 <code>baseUrl</code> 的 provider 推出来。</p>
+<pre><code>// ~/.pi/agent/pi-tui-plus.json
+{
+  "gateway": {
+    "provider": "wb2api",              // 也可用环境变量 WB2API_PROVIDER
+    "baseUrl": "http://127.0.0.1:7863/v1",  // 覆盖推导出来的地址
+    "logDir": "F:\\docker\\workbuddy2api\\data\\request-logs"
+  }
+}</code></pre>
+<table>
+  <tr><th>环境变量</th><th>作用</th></tr>
+  <tr><td><code>WB2API_PROVIDER</code></td><td>以哪个 provider 为准（默认：当前模型所在 provider）</td></tr>
+  <tr><td><code>WB2API_BASE_URL</code></td><td>覆盖网关地址</td></tr>
+  <tr><td><code>WB2API_LOG_DIR</code></td><td>请求日志目录（积分统计用；没有就只显示网关健康度）</td></tr>
+</table>
+<p class="note">积分优先按本地请求日志算，只统计 <code>user_agent</code> 以 <code>pi</code> 开头的行 —— 同一个人同一台网关下还跑着别的客户端时，不会把它们算进来。</p>
+
+<h2>自己改</h2>
+<table>
+  <tr><th>想改什么</th><th>动手的位置</th></tr>
+  <tr><td>footer 的排列、颜色、图标</td><td><code>extensions/open-tui/footer.ts</code>（上游代码，本分支只加了一行提示）</td></tr>
+  <tr><td>选择器的版式、图标、标签</td><td><code>extensions/wb-model-picker.ts</code>：<code>iconFor()</code> / <code>tagsFor()</code> / <code>render()</code></td></tr>
+  <tr><td>状态行显示哪些段</td><td><code>extensions/wb-stats.ts</code> 的 <code>compose()</code></td></tr>
+  <tr><td>网关探测、积分、路径缩写</td><td><code>extensions/wb-gateway.ts</code>（两个扩展共用这一层）</td></tr>
+</table>
+<p>改完不用构建，重启 pi 即生效（<code>pi</code> 直接执行 <code>.ts</code>）。它跑在 Bun 上，所以能用 TS 语法，但别写 <code>??</code> 与 <code>||</code>/<code>&amp;&amp;</code> 混在一行的表达式 —— 会撞解析错误。</p>
+
+<h2>局限</h2>
+<ul>
+  <li><b>网关字段是私有约定</b>：倍率、繁忙度、积分来自 <code>/v1/models</code> 与 <code>/status</code> 的自定义字段。换别的网关时这些列会空着，不报错。</li>
+  <li><b>积分默认路径是 Windows 的</b>：写在 <code>WB2API_LOG_DIR</code> 的默认值里，别的系统要设一下这个变量。</li>
+  <li><b>上游更新要手动跟</b>：这个包 fork 了 pi-open-tui 的 15 个源文件（约 3700 行），想要上游的新功能得自己 merge；好处是升级不会再把你的改动冲掉。</li>
+  <li><b>上下文档位不是省钱开关</b>：它只改本会话认为的窗口大小，真正要压缩历史请用 <code>/compact</code>。</li>
+</ul>
+
+<footer>
+  <span><a href="../index.html#tools">← 回到工具开发</a></span>
+  <span>Qingmin Yang · MIT</span>
+</footer>
+
+</div>
+</body>
+</html>
