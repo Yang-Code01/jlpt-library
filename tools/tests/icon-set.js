@@ -35,11 +35,23 @@ function section(t) { console.log('\n# ' + t); }
    本地「全绿」、提交后 CI 才红（2026-10-15 真踩过：提交报告后两个守卫同时报假失败）。 */
 const tracked = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard'], { cwd: REPO, encoding: 'utf8' })
   .split('\n').filter(Boolean);
+const toolDirs = (() => {
+  try {
+    const d = JSON.parse(read('tools-dev/data.json'));
+    return (d.tools || [])
+      .map((t) => t.dir && t.dir.replace(/^\.\.[\\/]/, '').split(/[\\/]/).join('/'))
+      .filter(Boolean);
+  } catch { return []; }
+})();
 const isUI = (f) => !/^\.scratch\//.test(f) && !/node_modules\//.test(f) && !/(^|\/)data\//.test(f)
   && !/^tools\/tests\//.test(f)
   // research/ 下的报告是**引用他人文本**的成品（pi / 技能更新履历里就写着 ⏸、🎯 这些字符），
   // 不是我们自己的图标集；扫它会因为「如实引用」而假失败。
   && !/^research\//.test(f)
+  // 工具本体（tools-dev/data.json 里每个工具的 dir）是下载到别处去跑的东西，不是本站页面：
+  // wb2api 的面板 app.js 走 HTTP，里面留着上游自己的 🎉 与我们无关。
+  // （同一套跳过逻辑在 tools/test.mjs 的 fetch 普查里有一份，两处都改才是全绿。）
+  && !toolDirs.some((d) => f === d || f.startsWith(d + '/'))
   && /\.(html|js|mjs|css|json)$/.test(f);
 const UI = tracked.filter(isUI);
 

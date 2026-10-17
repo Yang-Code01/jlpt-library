@@ -16,7 +16,7 @@
  */
 import { readFileSync, writeFileSync, existsSync, statSync, readdirSync, mkdirSync, unlinkSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { join, dirname, relative, sep } from 'node:path';
+import { join, dirname, relative, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pickEol, toEol } from './lib/eol.mjs';
 
@@ -242,6 +242,31 @@ function regionBounds(disk) {
 
 const norm = (s) => s.replace(/\r\n/g, '\n');
 
+/**
+ * 工具版本的真源。默认是 <dir>/package.json 的 version；源码仓库（Go / 自带版本常量、
+ * 不该被塞一个只为凑版本的 package.json）可用 data.json 里的
+ *   "versionFrom": { "file": "src/cmd/server/main.go", "pattern": "appVersion = \"([0-9.]+)" }
+ * 从源码里取，pattern 必须带一个捕获组（版本号）。
+ */
+function sourceVersion(t, dir) {
+  const vf = t.versionFrom;
+  if (!vf || typeof vf !== 'object' || typeof vf.file !== 'string' || typeof vf.pattern !== 'string') {
+    return { error: 'versionFrom 需要 { file, pattern }（两个字符串）' };
+  }
+  const abs = join(dir, vf.file);
+  if (!existsSync(abs)) return { error: `${t.dir}/${vf.file} 不存在（versionFrom.file）` };
+  let re;
+  try {
+    re = new RegExp(vf.pattern);
+  } catch (e) {
+    return { error: `versionFrom.pattern 不是合法正则：${e.message}` };
+  }
+  const m = re.exec(readFileSync(abs, 'utf8'));
+  if (!m) return { error: `${t.dir}/${vf.file} 里匹配不到 versionFrom.pattern（源码改了写法？）` };
+  if (!m[1]) return { error: 'versionFrom.pattern 必须带一个捕获组（版本号）' };
+  return { version: m[1], file: `${t.dir}/${vf.file}` };
+}
+
 function validate(data, disk) {
   if (!data || typeof data !== 'object') return;
   const tags = data.tags || [];
@@ -265,10 +290,25 @@ function validate(data, disk) {
     }
     if (t.page && !existsSync(join(TOOLS_DIR, t.page))) bad(`${at}：详情页 tools-dev/${t.page} 不存在`);
 
+    // 详情页里的下载链接是手写的（不经过 gen），升版后最容易留下一个 404 的旧包名
+    if (t.page && existsSync(join(TOOLS_DIR, t.page))) {
+      const html = readFileSync(join(TOOLS_DIR, t.page), 'utf8');
+      for (const m of html.matchAll(/href="([^"]+\.zip)"/g)) {
+        const abs = join(TOOLS_DIR, normalize(join(dirname(t.page), m[1])));
+        if (!existsSync(abs)) bad(`${at}：详情页 tools-dev/${t.page} 的下载链接 ${m[1]} 指向不存在的文件（升版后忘了改？）`);
+      }
+    }
+
     if (t.dir) {
       const dir = join(TOOLS_DIR, t.dir);
       if (!existsSync(dir)) {
         bad(`${at}：目录 tools-dev/${t.dir} 不存在`);
+      } else if (t.versionFrom) {
+        const v = sourceVersion(t, dir);
+        if (v.error) bad(`${at}：${v.error}`);
+        else if (t.version && v.version !== t.version) {
+          bad(`${at}：data.json 版本 ${t.version} 与 ${v.file} 里的 ${v.version} 不一致`);
+        }
       } else {
         const pkgPath = join(dir, 'package.json');
         if (existsSync(pkgPath)) {
@@ -396,6 +436,18 @@ function cmdPack(ids) {
       process.exit(1);
     }
     const dir = join(TOOLS_DIR, t.dir);
+    // 版本从源码取的工具：先对齐，否则会打出一个版本号撒谎的包
+    if (t.versionFrom) {
+      const v = sourceVersion(t, dir);
+      if (v.error) {
+        console.error(`✗ ${t.id}：${v.error}`);
+        process.exit(1);
+      }
+      if (v.version !== t.version) {
+        console.error(`✗ ${t.id}：data.json 版本 ${t.version} 与 ${v.file} 里的 ${v.version} 不一致`);
+        process.exit(1);
+      }
+    }
     const files = walk(dir);
     const entries = files.map((rel) => ({ path: `${t.id}/${rel}`, data: readFileSync(join(dir, rel)) }));
     const zipBuf = makeZip(entries);
