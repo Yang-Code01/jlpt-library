@@ -4,8 +4,8 @@
       "version": "0.4.0",
       "dir": "../pi-tui",
       "zip": "downloads/pi-tui-0.4.0.zip",
-      "bytes": 279973,
-      "sha256": "26c1c7e4b02201762b21c92b87e0e53f0ff711a1e6fd56b811a97480001b8303",
+      "bytes": 276742,
+      "sha256": "95f4505c95448f7539b98d9810d19db00b782300bff5c3cbdff658190f026827",
       "files": [
         {
           "path": "LICENSE",
@@ -17,11 +17,11 @@
         },
         {
           "path": "README.upstream.md",
-          "sha256": "afa1055b8e1b60335f6ad324e5ccae0d9988292ddcc64ce163eac7d79cd4ae92"
+          "sha256": "310b497f7380f6bf41f25906f813a50101f143655b78f22bce57850f55ce9237"
         },
         {
           "path": "README.zh-CN.md",
-          "sha256": "981ece0b7adbd94087f3fb77c3f4467074cc484607c43008985e1c89d2c37763"
+          "sha256": "6f14e03f122f825caf2f935ad6e40868cbaed2ee2b9b22e1e170d87585332b9b"
         },
         {
           "path": "assets/.gitkeep",
@@ -33,11 +33,11 @@
         },
         {
           "path": "extensions/open-tui/config.ts",
-          "sha256": "b35d0f350e943d2eb56003784bd0238ad303818d03e90d742bc90588f5fa4577"
+          "sha256": "7247a3ab6e9c2d4afdfa7ffff4a031bd08eee2b1d7a1f47d3d403930680dead4"
         },
         {
           "path": "extensions/open-tui/editor.ts",
-          "sha256": "5c85138c7b55bfccadf152be33064e3e4bfd81697a8a9548a192c78e23a451e3"
+          "sha256": "3d77d5281cd06fcf13b0c9fc3516815e7247c764f05f10ea40916eff60c04b29"
         },
         {
           "path": "extensions/open-tui/footer.ts",
@@ -45,7 +45,7 @@
         },
         {
           "path": "extensions/open-tui/git.ts",
-          "sha256": "8a956e961d27b6412f6edbfee120a2a6e72ed8b6ce9f2776fb9080fa018588a0"
+          "sha256": "d29d491bea42463a30fbd925d67350055b57bc4165884a8f45b847e830fc00e4"
         },
         {
           "path": "extensions/open-tui/header.ts",
@@ -53,19 +53,19 @@
         },
         {
           "path": "extensions/open-tui/icons.ts",
-          "sha256": "a269375095da237b64a962bc6c4290bf6bf9eca50b5d0ed3faba46bb06132a88"
+          "sha256": "63a3875a87531bf2857e343908c521bb9cc6b5b2396ae49fe1f9a1622ad86f5f"
         },
         {
           "path": "extensions/open-tui/index.ts",
-          "sha256": "8ca761ffcbc4c8f9e26bb46926990ef103173f5abed25bcfc3140b12b662ece9"
+          "sha256": "32b5240fc98b38c3fff78f6448deee9144f57d2f97a2a833f13743d8ac067729"
         },
         {
           "path": "extensions/open-tui/peek.ts",
-          "sha256": "acf45975ed15376f83e4a40c2094033e8545344511c3408abdd35eff33c681f2"
+          "sha256": "feef968b41b7a883eea55ffc3cf9c1fc8aef6e7f5a93575ecc316bbbc192e562"
         },
         {
           "path": "extensions/open-tui/runtime.ts",
-          "sha256": "d10b218a8d1b6c26a641cf42398108164facef5d12aae1e255e87b9a6869a605"
+          "sha256": "c93d8a08e66d7f47231da9a9992751e524ab3963a5d20df4f3bec2737538ab96"
         },
         {
           "path": "extensions/open-tui/session-lifecycle.ts",
@@ -73,19 +73,19 @@
         },
         {
           "path": "extensions/open-tui/settings-command.ts",
-          "sha256": "50328e39a07c2417ab11205a82fcd45ab8d620847227516b0d70ac54d7a93414"
+          "sha256": "7cba7d5b531dba994b1eb7aabd1e224b76a90016d87fe5d07f6ea626b5407b75"
         },
         {
           "path": "extensions/open-tui/state.ts",
-          "sha256": "e9595cdbf086d7ce6f6ad5c617f59248ae9a84ed12855ed3070802f491870228"
+          "sha256": "ba3c48b118f76be9a9a69e292c6f4758c88c72ca9c910a7f954a2c7c9e6526eb"
         },
         {
           "path": "extensions/open-tui/telemetry.ts",
-          "sha256": "c24059e852a6fd57d1d8dfa3bb45976003b7aaa6545464f8555fbd68ba916c53"
+          "sha256": "ad40130d301218fd9c713f026a825e1d9826f76abafff81f871e6f4f6d712da6"
         },
         {
           "path": "extensions/open-tui/utils.ts",
-          "sha256": "bacd379c5bb67f6b92a09ea627bb3023609e0484d0914f5a73c88d8b0e79a9ae"
+          "sha256": "52273cdf39a5a089cddaaa9ea1666559a0924f363457be428bfcf8032d9541db"
         },
         {
           "path": "extensions/wb-gateway.ts",
