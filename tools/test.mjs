@@ -40,6 +40,16 @@ const ECDICT = path.join(SCRATCH, 'en-module', 'research', 'ecdict.csv');
 const DEK = process.env.EXAM_DEK_FILE || path.join(SCRATCH, 'jlpt-exam', 'enc-keys', 'dek.b64');
 const EXAM_DATA = path.join(ROOT, 'exam', 'data', 'N2');
 
+/* pi 更新履历报告要找本机的 pi 包：委托给生成器的 probe 子命令，免得两处各写一套探测逻辑 */
+function probePiChangelog() {
+  const r = spawnSync(process.execPath, ['tools/pi-changelog-gen.mjs', 'probe'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    timeout: 30000,
+  });
+  return r.status === 0;
+}
+
 const DEP = {
   ecdict: { ok: fs.existsSync(ECDICT),
     why: '缺 .scratch/en-module/research/ecdict.csv（见 en/README 的「数据来源」）' },
@@ -48,6 +58,8 @@ const DEP = {
   pass: { ok: !!EXAM_PASS, why: '需要当前真题口令：--exam-pass <口令>' },
   plain: { ok: fs.existsSync(EXAM_DATA) && fs.readdirSync(EXAM_DATA).some((f) => /^\d{4}-\d{2}\.js$/.test(f)),
     why: '缺 exam/data/N2/2010-07.js 之类的明文卷（须在 exam/ 里跑 node gen-exam-data.js 生成）' },
+  pi: { ok: probePiChangelog(),
+    why: '本机没装 pi（找不到 @earendil-works/pi-coding-agent/CHANGELOG.md；可用 PI_CHANGELOG=<路径> 指定）' },
 };
 
 /* ---------------------------------------------------------------- 清单 */
@@ -98,6 +110,7 @@ function guardNoFetch() {
 const CHECKS = [
   { fn: guardNoFetch, name: 'file:// 硬约束（无 fetch/XHR）', needs: [] },
   { cmd: ['node', 'tools/research.mjs', 'check'], name: '调查报告清单自洽',   needs: [] },
+  { cmd: ['node', 'tools/pi-changelog-gen.mjs', 'check'], name: 'pi 更新履历报告', needs: ['pi'] },
   { cmd: ['node', 'tools/check-exam-data.js'],    name: '真题全库审计',       needs: ['plain'] },
   { cmd: ['node', 'jp-vocab/gen.js', 'check'], name: '课堂单词数据',         needs: [] },
   { cmd: ['node', 'tools/en-accept.mjs'],         name: '英语侧整合验收',     needs: ['ecdict'] },
