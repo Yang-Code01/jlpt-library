@@ -88,10 +88,13 @@ function guardNoFetch() {
   /* file:// 优先：数据加载必须内联 / 相对 <script src>，不得走 fetch / XHR。
      dictation/dictation.js 的 fetch 指向本机 VOICEVOX HTTP API，是已知例外。 */
   const ALLOW = new Set(['dictation/dictation.js']);
+  /* research/ 下的报告是引用他人文本的成品：pi 更新履历里就贴着 `await fetch(catalogUrl)`
+     这种上游代码样例，扫它会因为「如实引用」而假失败。报告本身自包含（research.mjs check
+     保证无外链 css/js），不靠 fetch 取数。 */
   const EXTS = ['.html', '.js'];
-  const files = execFileSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 28 })
+  const files = execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 28 })
     .split('\0').filter(Boolean)
-    .filter((f) => EXTS.some((e) => f.endsWith(e)) && !ALLOW.has(f));
+    .filter((f) => EXTS.some((e) => f.endsWith(e)) && !ALLOW.has(f) && !/^research\//.test(f));
   const bad = [];
   for (const f of files) {
     const text = fs.readFileSync(path.join(ROOT, f), 'utf8');

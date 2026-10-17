@@ -12,6 +12,7 @@
 import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
 import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { norm, pickEol, toEol } from './lib/eol.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DATA_PATH = join(ROOT, 'research/data.json');
@@ -35,7 +36,6 @@ const esc = (s) =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
-const norm = (s) => s.replace(/\r\n/g, '\n');
 const tail = (p) => p.split(/[\\/]/).pop();
 
 function readData() {
@@ -303,9 +303,9 @@ function addShell(file) {
   const abs = file.includes('/') || file.includes('\\') ? file : join(RESEARCH_DIR, file);
   if (!existsSync(abs)) return bad(`找不到报告文件 ${file}`);
   const raw = readFileSync(abs, 'utf8');
-  const eol = /\r\n/.test(raw) ? '\r\n' : '\n';
+  const eol = pickEol(raw);
   // 内部一律用 LF 处理，最后再整体写回原行尾 —— 避免 CRLF 报告被拼成混合行尾。
-  let text = raw.replace(/\r\n/g, '\n');
+  let text = norm(raw);
 
   // 先清掉旧外壳（幂等）
   text = text.replace(/[ \t]*<style data-wb-shell="1">[\s\S]*?<\/style>\r?\n?/g, '');
@@ -356,10 +356,7 @@ if (cmd === 'gen') {
   }
   const next = (() => {
     // 保留 index.html 自己的行尾：仓库里门户是 CRLF，别让生成器把标记区写成混合行尾。
-    const eol = /\r\n/.test(disk) ? '\r\n' : '\n';
-    const rendered = renderRegion(data);
-    const want = eol === '\n' ? rendered : rendered.replace(/\n/g, eol);
-    return disk.slice(0, i) + want + disk.slice(j + LIST_END.length);
+    return disk.slice(0, i) + toEol(renderRegion(data), pickEol(disk)) + disk.slice(j + LIST_END.length);
   })();
   if (next === disk) {
     console.log('报告清单区已是最新，未改动 index.html');

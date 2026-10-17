@@ -21,7 +21,8 @@
 *.pdf binary
 *.zip binary
 
-# 生成物：GitHub 折叠 diff（不改构建行为）
-research/*.html linguist-generated
+# 生成物：GitHub 折叠 diff（不改构建行为）。只标生成器产出的文件 ——
+# 手写报告别标，否则 reviewer 会当成可跳过的文件直接跳过评审。
+research/pi-changelog.html linguist-generated
 en/*/*.html    linguist-generated
 jp-vocab/*/index.html linguist-generated

@@ -19,6 +19,7 @@ import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { norm } from './lib/eol.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = join(HERE, '..');
@@ -1050,7 +1051,6 @@ if (MODE === 'check') {
   const tmpFile = join(tmp, 'pi-changelog.html');
   try {
     finish(tmpFile);
-    const norm = (t) => t.split('\r\n').join('\n');
     const want = norm(readFileSync(tmpFile, 'utf8'));
     if (!existsSync(OUT)) {
       console.error(`✗ 缺 ${OUT.slice(REPO.length + 1)}，跑 node tools/pi-changelog-gen.mjs 生成`);

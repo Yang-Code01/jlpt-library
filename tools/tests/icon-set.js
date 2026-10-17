@@ -27,14 +27,19 @@ function ok(cond, name, extra) {
 }
 function section(t) { console.log('\n# ' + t); }
 
-/* ---------- 待扫文件表（git 跟踪的 UI 源，排除数据、.scratch 与测试源码） ----------
+/* ---------- 待扫文件表（git 跟踪 + 未入库的新文件，排除数据、.scratch 与测试源码） ----------
    为什么排除 tools/tests/：本文件自己就写着禁用符号的字面量与 `<span class="im …>`
    正则，一旦它被 git 跟踪（本套件入库那次），普查就会扫到自己而自报失败。
-   测试源码不是 UI。 */
-const tracked = execFileSync('git', ['ls-files'], { cwd: REPO, encoding: 'utf8' })
+   测试源码不是 UI。
+   为什么带 --others：只扫 tracked 时，新写的文件在 `git add` 前对哨兵是隐形的 ——
+   本地「全绿」、提交后 CI 才红（2026-10-15 真踩过：提交报告后两个守卫同时报假失败）。 */
+const tracked = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard'], { cwd: REPO, encoding: 'utf8' })
   .split('\n').filter(Boolean);
 const isUI = (f) => !/^\.scratch\//.test(f) && !/node_modules\//.test(f) && !/(^|\/)data\//.test(f)
   && !/^tools\/tests\//.test(f)
+  // research/ 下的报告是**引用他人文本**的成品（pi / 技能更新履历里就写着 ⏸、🎯 这些字符），
+  // 不是我们自己的图标集；扫它会因为「如实引用」而假失败。
+  && !/^research\//.test(f)
   && /\.(html|js|mjs|css|json)$/.test(f);
 const UI = tracked.filter(isUI);
 
