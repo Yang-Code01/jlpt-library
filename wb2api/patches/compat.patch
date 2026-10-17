@@ -1,0 +1,3502 @@
+diff --git a/internal/server/handler.go b/internal/server/handler.go
+index 1c96d5f..74fa61b 100644
+--- a/internal/server/handler.go
++++ b/internal/server/handler.go
+@@ -136,6 +136,12 @@ func NewHandler(cfg Config) *Handler {
+ 	}
+ 	h := &Handler{cfg: cfg, mux: http.NewServeMux()}
+ 	h.mux.HandleFunc("POST /v1/chat/completions", h.withAuth(h.chatCompletions))
++	// Responses API 兼容层（responses.go）：同一套账号池/轮转/粘性/用量，
++	// 只多一层协议翻译，供 codex >= 0.125 这类只讲 Responses 的客户端直连。
++	h.mux.HandleFunc("POST /v1/responses", h.withAuth(h.responses))
++	// Anthropic Messages API 兼容层（messages.go）：供 Claude Code 这类只讲
++	// Anthropic 协议的客户端直连，与 responses.go 共用同一套账号池/轮转/粘性/用量。
++	h.mux.HandleFunc("POST /v1/messages", h.withAuth(h.messages))
+ 	h.mux.HandleFunc("GET /v1/models", h.withAuth(h.models))
+ 	h.mux.HandleFunc("GET /status", h.withAuth(h.status))
+ 	h.mux.HandleFunc("GET /healthz", h.healthz)
+@@ -146,8 +152,11 @@ func NewHandler(cfg Config) *Handler {
+ }
+ 
+ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+-	if h.cfg.RequestLog != nil && r.Method == http.MethodPost && r.URL.Path == "/v1/chat/completions" {
+-		trace := &requestTrace{id: reqlog.NewRequestID(), start: time.Now()}
++	// /v1/responses 与 /v1/chat/completions 同待遇：请求指标、脱敏归档、X-Request-Id
++	// 都要覆盖（responses 内部把 requestTrace 透传给 chat 链路，故此处挂上即够）。
++	if h.cfg.RequestLog != nil && r.Method == http.MethodPost &&
++		(r.URL.Path == "/v1/chat/completions" || r.URL.Path == "/v1/responses" || r.URL.Path == "/v1/messages") {
++		trace := &requestTrace{id: reqlog.NewRequestID(), start: time.Now(), path: r.URL.Path}
+ 		if h.loadLive().RecordClientInfo {
+ 			trace.captureClientInfo(r)
+ 		}
+@@ -171,7 +180,13 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+ func (h *Handler) withAuth(next http.HandlerFunc) http.HandlerFunc {
+ 	return func(w http.ResponseWriter, r *http.Request) {
+ 		if !httpauth.VerifyBearer(r, h.loadLive().APIKey) {
+-			writeOpenAIError(w, http.StatusUnauthorized, "invalid_api_key", "missing or invalid API key")
++			// 协议形状随路由走：/v1/messages 面向 Anthropic 客户端（Claude Code），
++			// 它按 error.type 分支给提示，认不了 OpenAI 的 api_error。
++			if r.URL.Path == "/v1/messages" {
++				writeAnthropicError(w, http.StatusUnauthorized, "authentication_error", "missing or invalid API key")
++			} else {
++				writeOpenAIError(w, http.StatusUnauthorized, "invalid_api_key", "missing or invalid API key")
++			}
+ 			return
+ 		}
+ 		next(w, r)
+@@ -1532,3 +1547,4 @@ func (h *Handler) hintOf(kind upstream.ErrKind, body, bareModel string, hasImage
+ 	}
+ 	return upstream.GatewayHint(kind, msg, h.hintContext(bareModel, hasImage))
+ }
++
+diff --git a/internal/server/logging.go b/internal/server/logging.go
+index c6577ba..f7dd27e 100644
+--- a/internal/server/logging.go
++++ b/internal/server/logging.go
+@@ -345,6 +345,9 @@ type requestTrace struct {
+ 	id    string
+ 	start time.Time
+ 	stat  *chatStat
++	// 客户端实际请求的路径（/v1/chat/completions 或 /v1/responses）。
++	// responses 走的就是 chat 链路，若不单独记，归档里两类请求会混成一路。
++	path  string
+ 	// 调用来源，进入 handler 时一次性采集（见 ServeHTTP / captureClientInfo）。
+ 	clientIP  string
+ 	userAgent string
+@@ -396,11 +399,18 @@ func requestTraceFrom(r *http.Request) *requestTrace {
+ 	return tr
+ }
+ 
++func (t *requestTrace) pathForLog() string {
++	if t == nil || strings.TrimSpace(t.path) == "" {
++		return "/v1/chat/completions"
++	}
++	return t.path
++}
++
+ func (t *requestTrace) event(status int) reqlog.Event {
+ 	e := reqlog.Event{
+ 		Time:      t.start,
+ 		RequestID: t.id,
+-		Path:      "/v1/chat/completions",
++		Path:      t.pathForLog(),
+ 		Status:    status,
+ 	}
+ 	duration := time.Since(t.start)
+diff --git a/internal/server/messages.go b/internal/server/messages.go
+new file mode 100644
+index 0000000..0fb12d0
+--- /dev/null
++++ b/internal/server/messages.go
+@@ -0,0 +1,1186 @@
++// Anthropic Messages API 兼容层（POST /v1/messages）。
++//
++// 为什么要有这一层：Claude Code 只讲 Anthropic Messages 协议，而本网关与上游
++// WorkBuddy 都只有 /v1/chat/completions。与 responses.go（Responses -> chat）
++// 完全同构：把翻译搬进网关自身，同一进程、同一套选号/粘性/降温/用量/请求日志。
++//
++// 实现方式刻意选「复用 chat 链路」而不是「复制一份上游调用」：
++//
++//	Messages 请求 --messagesRequestToChat--> chat 请求
++//	             --h.chatCompletions(翻译型 ResponseWriter)--> 上游
++//	上游 chat SSE --messagesStream 逐帧翻译--> Anthropic SSE 事件流
++//
++// 因此 chatCompletions 的轮转、粘性会话、降级提示词、冷却、错误策略、
++// 用量账本、请求归档**全部自动继承**，不存在第二份调度状态需要同步。
++//
++// 协议口径（对照 Claude Code 2.1.289 实测抓包对齐）：
++//   - system 顶层字段 -> chat 的 system 消息（与 chat 的 system 处理一致）；
++//   - content part：text -> text；image(source.type=base64|url) -> image_url；
++//     tool_use -> assistant.tool_calls；tool_result -> role=tool；
++//     thinking / redacted_thinking -> 丢弃（上游非 Claude 模型无 thinking 语义）；
++//   - tools[].input_schema -> chat function.parameters；stop_sequences 不透传
++//     （上游不认）；max_tokens 必须给（Anthropic 必填）。
++//   - 流式事件序：message_start -> content_block_start* -> content_block_delta*
++//     -> content_block_stop* -> message_delta -> message_stop；
++//   - 错误体用 Anthropic 形状 {"type":"error","error":{"type":...,"message":...}}
++//     （Claude Code 按 error.type 分支提示，OpenAI 形状它不认）。
++//
++// 模型名映射（messagesModel）：Claude Code 的 /model 选择器与 unrecognized_model
++// 校验要求形如 claude-sonnet-4-5 的 Anthropic 风格 id，且**原样**发给上游
++// （实测抓包：body 里就是 "model":"claude-sonnet-4-5"，客户端不做任何改写）。
++// 故本层做一次显式映射，把 claude-* 家族别名翻成网关的 cn:* 模型名。
++package server
++
++import (
++	"bytes"
++	crand "crypto/rand"
++	"encoding/hex"
++	"encoding/json"
++	"fmt"
++	"io"
++	"net/http"
++	"sort"
++	"strings"
++	"time"
++)
++
++/* ------------------------------------------------------------------ */
++/* 取值工具（与 responses.go 同名不同实现，避免跨文件耦合）             */
++/* ------------------------------------------------------------------ */
++
++func messagesMap(v any) map[string]any {
++	m, _ := v.(map[string]any)
++	return m
++}
++
++func messagesStr(v any) string {
++	s, _ := v.(string)
++	return s
++}
++
++func messagesBool(v any) bool {
++	b, _ := v.(bool)
++	return b
++}
++
++func messagesNum(v any) float64 {
++	switch n := v.(type) {
++	case float64:
++		return n
++	case float32:
++		return float64(n)
++	case int:
++		return float64(n)
++	case int64:
++		return float64(n)
++	case json.Number:
++		if f, err := n.Float64(); err == nil {
++			return f
++		}
++	}
++	return 0
++}
++
++// newMessagesID 生成 Anthropic 侧对象 id（msg_ / toolu_ / srv_）。形状对齐
++// Anthropic：前缀 + 下划线 + 24 位十六进制。随机源失败退化为时间戳。
++func newMessagesID(prefix string) string {
++	var b [12]byte
++	if _, err := crand.Read(b[:]); err == nil {
++		return prefix + "_" + hex.EncodeToString(b[:])
++	}
++	return fmt.Sprintf("%s_%d", prefix, time.Now().UnixNano())
++}
++
++/* ------------------------------------------------------------------ */
++/* 模型名映射                                                          */
++/* ------------------------------------------------------------------ */
++
++// messagesModelFamilies：Claude Code 会请求的家族别名 -> 网关模型。
++// 值里的占位符 %s 由 messagesPickDefault 之外的具体映射填充；此处只放
++// 「一个家族固定对应一个网关模型」的静态映射。顺序即优先级。
++var messagesModelFamilies = []struct {
++	Prefix string // Anthropic 家族前缀，如 "claude-opus-"
++	Model  string // 目标网关模型（带 cn: 前缀）
++}{
++	// 网关注册模型的一一对应别名（claude-* -> cn:*）。顺序即匹配优先级：
++	// 长/具体的前缀在前，避免 "claude-sonnet-4" 抢走 "claude-sonnet-4-5"。
++	//
++	// 命名口径：别名沿用 Claude Code 认识的家族词（opus/sonnet/haiku/fable），
++	// 使其 /model 选择器与 unrecognized_model 校验都能通过；版本段只是占位，
++	// 真正决定用哪个模型的是这张表。**19 个别名对 19 个模型，一一对应，
++	// 不允许两个别名指向同一模型**（否则 /model 里会出现两个同名行）。
++	// claude-sonnet-4-5 故意不映射：它被 Claude Code 当作默认 sonnet 别名，
++	// 已被 --model 默认值与 ANTHROPIC_DEFAULT_SONNET_MODEL 占用，模型给 sonnet-4-0。
++	{"claude-opus-4-6", "cn:space-bunny"},
++	{"claude-opus-4-5", "cn:deepseek-v4-pro"},
++	{"claude-opus-4-1", "cn:kimi-k3-1"},
++	{"claude-opus-4-0", "cn:hy4-preview"},
++	{"claude-opus-3-5", "cn:glm-5.3"},
++	{"claude-opus-3", "cn:glm-5.2"},
++	{"claude-sonnet-4-0", "cn:glm-5.1"},
++	{"claude-3-7-sonnet", "cn:kimi-k2.8-preview"},
++	{"claude-3-5-sonnet", "cn:kimi-k2.7"},
++	{"claude-3-sonnet", "cn:kimi-k2.6"},
++	{"claude-sonnet-5-5", "cn:minimax-m3"},
++	{"claude-haiku-4-5", "cn:deepseek-v4.1-flash"},
++	{"claude-haiku-4-0", "cn:deepseek-v4-flash"},
++	{"claude-3-5-haiku", "cn:glm-5.3-flash"},
++	{"claude-3-haiku", "cn:glm-5v-turbo"},
++	{"claude-fable-5", "cn:auto"},
++	{"claude-fable-4-5", "cn:hy4-preview-f"},
++	{"claude-fable-4-0", "cn:hy3"},
++	{"claude-fable-3-5", "cn:hy3-x"},
++	// Claude Code 仍会请求的原生家族别名（内部小模型、子 agent 等）。
++	// 这些不占用 /model 列表，故与上面无冲突。
++	{"claude-sonnet-4-5", "cn:glm-5.3"},
++	{"claude-mythos-preview", "cn:auto"},
++}
++
++// messagesModel 把 Claude Code 发来的 Anthropic 模型名翻成网关模型名。
++//
++// 三条规则（按序）：
++//  1. 原样带 cn:/global: 前缀 —— 用户在 Claude Code 里直接选了网关模型
++//     （靠 CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY 从 /v1/models 发现），原样透传；
++//  2. 命中静态家族表 —— 转换；
++//  3. 都没命中且以 claude- 开头 —— 回落到 default（cn:space-bunny）。
++//
++// 绝不返回空串：调用方据此报 400。
++func messagesModel(name string) string {
++	name = strings.TrimSpace(name)
++	if name == "" {
++		return "cn:space-bunny"
++	}
++	if strings.HasPrefix(name, "cn:") || strings.HasPrefix(name, "global:") {
++		return name
++	}
++	lower := strings.ToLower(name)
++	for _, f := range messagesModelFamilies {
++		if strings.HasPrefix(lower, f.Prefix) {
++			return f.Model
++		}
++	}
++	// 家族表按前缀长度倒序匹配会更精确，但当前表内前缀互不为前缀，顺序无关。
++	return "cn:space-bunny"
++}
++
++// messagesIsAnthropicStyle 判断一个 id 是否是 Claude Code 会直接发过来的
++// Anthropic 风格模型名（用于 /v1/models 的 id 合成，见 handler 侧 claudeFacingIDs）。
++func messagesIsAnthropicStyle(name string) bool {
++	n := strings.ToLower(strings.TrimSpace(name))
++	if strings.HasPrefix(n, "cn:") || strings.HasPrefix(n, "global:") {
++		return false
++	}
++	return strings.HasPrefix(n, "claude-")
++}
++
++/* ------------------------------------------------------------------ */
++/* 请求翻译：Messages -> Chat Completions                               */
++/* ------------------------------------------------------------------ */
++
++// messagesPartToChat 把 Anthropic content part 翻译成 chat 的 content part。
++// 返回 nil 表示该 part 无法表达（丢弃）。
++func messagesPartToChat(part any) map[string]any {
++	m := messagesMap(part)
++	if m == nil {
++		if s, ok := part.(string); ok {
++			return map[string]any{"type": "text", "text": s}
++		}
++		return nil
++	}
++	switch messagesStr(m["type"]) {
++	case "text":
++		return map[string]any{"type": "text", "text": messagesStr(m["text"])}
++	case "image":
++		src := messagesMap(m["source"])
++		if src == nil {
++			return nil
++		}
++		var url string
++		switch messagesStr(src["type"]) {
++		case "base64":
++			media := messagesStr(src["media_type"])
++			data := messagesStr(src["data"])
++			if data == "" {
++				return nil
++			}
++			if media == "" {
++				media = "image/png"
++			}
++			url = "data:" + media + ";base64," + data
++		case "url":
++			url = messagesStr(src["url"])
++		}
++		if url == "" {
++			return nil
++		}
++		return map[string]any{"type": "image_url", "image_url": map[string]any{"url": url}}
++	case "document":
++		// Anthropic 的 document（PDF/文本）转成纯文本 part：取 source.text，
++		// 或 base64 原文（多数上游不认 document part，当文本更稳）。
++		src := messagesMap(m["source"])
++		if src == nil {
++			return nil
++		}
++		if t := messagesStr(src["type"]); t == "text" {
++			if s := messagesStr(src["data"]); s != "" {
++				return map[string]any{"type": "text", "text": s}
++			}
++		}
++		return nil
++	}
++	// thinking / redacted_thinking / tool_use / tool_result：不在这里处理
++	// （它们是块级语义，由 messagesMessages 按位置分流）。
++	return nil
++}
++
++// messagesContentToChat 把 Anthropic 的 content（裸字符串或 part 数组）转成
++// chat 的 content。单段文本退化成裸字符串（对上游兼容性最好）。
++//
++// tool_result 块需要特殊处理：它表达的是「工具返回结果」，必须变成
++// role=tool 消息而不是文本 part。故本函数返回 (content, toolResults)：
++// 调用方把 toolResults 单独追加成 role=tool 消息。
++func messagesContentToChat(content any) (any, []map[string]any) {
++	if content == nil {
++		return "", nil
++	}
++	if s, ok := content.(string); ok {
++		return s, nil
++	}
++	list, ok := content.([]any)
++	if !ok {
++		return fmt.Sprint(content), nil
++	}
++	parts := make([]any, 0, len(list))
++	toolResults := make([]map[string]any, 0)
++	for _, raw := range list {
++		p := messagesMap(raw)
++		if p == nil {
++			if s, ok := raw.(string); ok {
++				parts = append(parts, map[string]any{"type": "text", "text": s})
++			}
++			continue
++		}
++		switch messagesStr(p["type"]) {
++		case "tool_use":
++			// assistant 侧的调用，由 messagesMessages 统一并入 tool_calls。
++		case "tool_result":
++			id := messagesStr(p["tool_use_id"])
++			if id == "" {
++				continue
++			}
++			body, _ := messagesContentToChat(p["content"])
++			text := messagesTextOf(body)
++			toolResults = append(toolResults, map[string]any{
++				"role":         "tool",
++				"tool_call_id": id,
++				"content":      text,
++			})
++		default:
++			if c := messagesPartToChat(p); c != nil {
++				parts = append(parts, c)
++			}
++		}
++	}
++	if len(parts) == 0 {
++		return "", toolResults
++	}
++	if len(parts) == 1 {
++		if m, ok := parts[0].(map[string]any); ok && messagesStr(m["type"]) == "text" {
++			return m["text"], toolResults
++		}
++	}
++	return parts, toolResults
++}
++
++// messagesTextOf 把任意 content 形状压成一段纯文本（给 role=tool 用）。
++func messagesTextOf(content any) string {
++	switch v := content.(type) {
++	case nil:
++		return ""
++	case string:
++		return v
++	case []any:
++		out := make([]string, 0, len(v))
++		for _, raw := range v {
++			m := messagesMap(raw)
++			if m == nil {
++				if s, ok := raw.(string); ok {
++					out = append(out, s)
++				}
++				continue
++			}
++			if t := messagesStr(m["text"]); t != "" {
++				out = append(out, t)
++			}
++		}
++		return strings.Join(out, "\n")
++	}
++	if raw, err := json.Marshal(content); err == nil {
++		return string(raw)
++	}
++	return fmt.Sprint(content)
++}
++
++// messagesAppendToolCall 把一条 tool_use 并入 messages：能并入上一条带
++// tool_calls 的 assistant 消息就并入（并行调用必须同条），否则新起一条。
++func messagesAppendToolCall(msgs []any, id, name, args string) []any {
++	entry := map[string]any{
++		"id":   id,
++		"type": "function",
++		"function": map[string]any{
++			"name":      name,
++			"arguments": args,
++		},
++	}
++	if len(msgs) > 0 {
++		if last, ok := msgs[len(msgs)-1].(map[string]any); ok && messagesStr(last["role"]) == "assistant" {
++			if prev, ok := last["tool_calls"].([]any); ok {
++				last["tool_calls"] = append(prev, entry)
++				return msgs
++			}
++			// 上一条 assistant 是纯文本 + 本条是工具调用：仍并入同一条，
++			// 否则上游会看到「assistant 文本」后紧跟「assistant 工具调用」两条
++			// 连续 assistant，某些上游会拒。
++			if last["tool_calls"] == nil && last["content"] != nil {
++				last["tool_calls"] = []any{entry}
++				return msgs
++			}
++		}
++	}
++	return append(msgs, map[string]any{
++		"role":       "assistant",
++		"content":    nil,
++		"tool_calls": []any{entry},
++	})
++}
++
++// messagesMessages 把 Anthropic 的 system + messages 翻译成 chat 的 messages。
++func messagesMessages(body map[string]any) []any {
++	msgs := []any{}
++
++	// 顶层 system：Anthropic 允许 content 是字符串或 block 数组。
++	if sys := body["system"]; sys != nil {
++		content, _ := messagesContentToChat(sys)
++		if text := messagesTextOf(content); text != "" {
++			msgs = append(msgs, map[string]any{"role": "system", "content": text})
++		}
++	}
++
++	list, _ := body["messages"].([]any)
++	for _, raw := range list {
++		m := messagesMap(raw)
++		if m == nil {
++			continue
++		}
++		role := messagesStr(m["role"])
++		content, toolResults := messagesContentToChat(m["content"])
++
++		// 工具结果先落（它们在 messages 里排在 user 侧，chat 也是 role=tool）。
++		for _, tr := range toolResults {
++			msgs = append(msgs, tr)
++		}
++
++		// assistant 侧可能带 tool_use 块：并入 tool_calls。
++		if calls := messagesToolUses(m["content"]); len(calls) > 0 {
++			for _, c := range calls {
++				msgs = messagesAppendToolCall(msgs, c.id, c.name, c.args)
++			}
++			// 若同时有文本（text + tool_use 混合），把文本补进刚并入的那条。
++			if text := messagesTextOf(content); text != "" {
++				if last, ok := msgs[len(msgs)-1].(map[string]any); ok && messagesStr(last["role"]) == "assistant" {
++					if s, _ := last["content"].(string); s == "" {
++						last["content"] = text
++					}
++				}
++			}
++			continue
++		}
++
++		// 注意：图片/文档 part 压不成纯文本（messagesTextOf 会返回空串），
++		// 但 content 数组本身非空 —— 此时必须透传 part 数组，
++		// 否则纯图片消息会被整条丢掉。
++		if text := messagesTextOf(content); text != "" {
++			msgs = append(msgs, map[string]any{"role": role, "content": text})
++		} else if parts, ok := content.([]any); ok && len(parts) > 0 {
++			msgs = append(msgs, map[string]any{"role": role, "content": parts})
++		}
++	}
++	return msgs
++}
++
++type messagesToolUse struct {
++	id   string
++	name string
++	args string
++}
++
++// messagesToolUses 从一个 message 的 content 里抽出所有 tool_use 块。
++func messagesToolUses(content any) []messagesToolUse {
++	list, ok := content.([]any)
++	if !ok {
++		return nil
++	}
++	out := make([]messagesToolUse, 0)
++	for _, raw := range list {
++		p := messagesMap(raw)
++		if p == nil || messagesStr(p["type"]) != "tool_use" {
++			continue
++		}
++		id := messagesStr(p["id"])
++		if id == "" {
++			id = newMessagesID("toolu")
++		}
++		name := messagesStr(p["name"])
++		if name == "" {
++			continue
++		}
++		var args string
++		switch v := p["input"].(type) {
++		case string:
++			args = v
++		case nil:
++			args = "{}"
++		default:
++			if raw, err := json.Marshal(v); err == nil {
++				args = string(raw)
++			} else {
++				args = "{}"
++			}
++		}
++		if strings.TrimSpace(args) == "" {
++			args = "{}"
++		}
++		out = append(out, messagesToolUse{id: id, name: name, args: args})
++	}
++	return out
++}
++
++// messagesToolsToChat 把 Anthropic tools 翻译成 chat tools。
++// Anthropic tool: {"name":...,"description":...,"input_schema":{...}}
++// chat function:  {"type":"function","function":{name,description,parameters}}
++func messagesToolsToChat(tools any) []any {
++	list, _ := tools.([]any)
++	out := make([]any, 0, len(list))
++	for _, raw := range list {
++		t := messagesMap(raw)
++		if t == nil {
++			continue
++		}
++		name := messagesStr(t["name"])
++		if name == "" {
++			continue
++		}
++		params := t["input_schema"]
++		if params == nil {
++			params = map[string]any{"type": "object", "properties": map[string]any{}}
++		}
++		out = append(out, map[string]any{
++			"type": "function",
++			"function": map[string]any{
++				"name":        name,
++				"description": messagesStr(t["description"]),
++				"parameters":  params,
++			},
++		})
++	}
++	return out
++}
++
++// messagesToolChoiceToChat 翻译 tool_choice。
++// Anthropic: {"type":"auto"|"any"|"tool","name":...}  或缺省
++// chat:       "auto"|"required" 或 {"type":"function","function":{"name":...}}
++func messagesToolChoiceToChat(tc any, toolNames map[string]bool) any {
++	m := messagesMap(tc)
++	if m == nil {
++		return nil
++	}
++	switch messagesStr(m["type"]) {
++	case "auto":
++		return "auto"
++	case "any":
++		return "required"
++	case "none":
++		return "none"
++	case "tool":
++		name := messagesStr(m["name"])
++		if name == "" {
++			return "auto"
++		}
++		if !toolNames[name] {
++			return "auto" // 指定了不存在的工具：退让为 auto，避免上游报错
++		}
++		return map[string]any{"type": "function", "function": map[string]any{"name": name}}
++	}
++	return "auto"
++}
++
++// messagesRequestToChat 把 Anthropic 请求体整体翻译成 chat/completions 请求体。
++func messagesRequestToChat(body map[string]any) (map[string]any, string) {
++	chat := map[string]any{
++		"model":    messagesModel(messagesStr(body["model"])),
++		"messages": messagesMessages(body),
++	}
++	if v, ok := body["stream"].(bool); ok {
++		chat["stream"] = v
++	} else {
++		chat["stream"] = true
++	}
++
++	if tools := messagesToolsToChat(body["tools"]); len(tools) > 0 {
++		names := make(map[string]bool, len(tools))
++		for _, raw := range tools {
++			if fn := messagesMap(messagesMap(raw)["function"]); fn != nil {
++				names[messagesStr(fn["name"])] = true
++			}
++		}
++		chat["tools"] = tools
++		if choice := messagesToolChoiceToChat(body["tool_choice"], names); choice != nil {
++			chat["tool_choice"] = choice
++		}
++	}
++
++	// max_tokens：Anthropic 必填。缺省给一个足够大的值，别让 0 传给上游。
++	maxOut := messagesNum(body["max_tokens"])
++	if maxOut <= 0 {
++		maxOut = 32000
++	}
++	chat["max_tokens"] = int(maxOut)
++
++	return chat, messagesStr(chat["model"])
++}
++
++/* ------------------------------------------------------------------ */
++/* 响应翻译：Chat -> Anthropic Messages                                */
++/* ------------------------------------------------------------------ */
++
++// messagesUsage 把 chat usage 映射成 Anthropic 形状。
++// Anthropic: {"input_tokens":N,"output_tokens":M}（可带 cache_* 字段）
++func messagesUsage(u any) map[string]any {
++	m := messagesMap(u)
++	in := messagesNum(m["prompt_tokens"])
++	if in == 0 {
++		in = messagesNum(m["input_tokens"])
++	}
++	outTok := messagesNum(m["completion_tokens"])
++	if outTok == 0 {
++		outTok = messagesNum(m["output_tokens"])
++	}
++	res := map[string]any{
++		"input_tokens":  int(in),
++		"output_tokens": int(outTok),
++	}
++	if cached := messagesNum(messagesMap(m["prompt_tokens_details"])["cached_tokens"]); cached > 0 {
++		res["cache_read_input_tokens"] = int(cached)
++	}
++	return res
++}
++
++// messagesStopReason 把 chat finish_reason 映射成 Anthropic stop_reason。
++// Anthropic 取值：end_turn / max_tokens / stop_sequence / tool_use
++func messagesStopReason(fr string) string {
++	switch fr {
++	case "length", "max_tokens":
++		return "max_tokens"
++	case "tool_calls", "function_call":
++		return "tool_use"
++	case "stop", "end_turn", "eos":
++		return "end_turn"
++	}
++	return "end_turn"
++}
++
++// messagesBlocksFromChatMessage 把 chat 的 message（非流式 choices[0].message）
++// 转成 Anthropic content blocks。
++func messagesBlocksFromChatMessage(msg map[string]any) []any {
++	blocks := make([]any, 0, 2)
++	text := messagesStr(msg["content"])
++	if text == "" && msg["content"] != nil {
++		text = messagesTextOf(msg["content"])
++	}
++	if text != "" {
++		blocks = append(blocks, map[string]any{"type": "text", "text": text})
++	}
++	calls, _ := msg["tool_calls"].([]any)
++	for _, raw := range calls {
++		tc := messagesMap(raw)
++		if tc == nil {
++			continue
++		}
++		fn := messagesMap(tc["function"])
++		name := messagesStr(fn["name"])
++		if name == "" {
++			name = messagesStr(tc["name"])
++		}
++		if name == "" {
++			continue
++		}
++		args := messagesStr(fn["arguments"])
++		if strings.TrimSpace(args) == "" {
++			args = "{}"
++		}
++		var input any
++		if err := json.Unmarshal([]byte(args), &input); err != nil {
++			// 上游偶尔返回非法 JSON：包一层 string，别让整个响应失败。
++			input = map[string]any{"_raw": args}
++		}
++		blocks = append(blocks, map[string]any{
++			"type":  "tool_use",
++			"id":    messagesStr(tc["id"]),
++			"name":  name,
++			"input": input,
++		})
++	}
++	if len(blocks) == 0 {
++		// Anthropic 允许空 content，但客户端可能显示空白：给一个空 text 更安全。
++		blocks = append(blocks, map[string]any{"type": "text", "text": ""})
++	}
++	return blocks
++}
++
++// messagesFirstChoiceMessage 取 choices[0].message（非流式聚合响应）。
++func messagesFirstChoiceMessage(resp map[string]any) map[string]any {
++	choices, ok := resp["choices"].([]any)
++	if !ok || len(choices) == 0 {
++		return nil
++	}
++	return messagesMap(messagesMap(choices[0])["message"])
++}
++
++// messagesFirstChoiceFinish 取 choices[0].finish_reason（非流式）。
++func messagesFirstChoiceFinish(resp map[string]any) string {
++	choices, ok := resp["choices"].([]any)
++	if !ok || len(choices) == 0 {
++		return ""
++	}
++	return messagesStr(messagesMap(choices[0])["finish_reason"])
++}
++
++/* ------------------------------------------------------------------ */
++/* 流式翻译：chat SSE -> Anthropic 事件流                              */
++/* ------------------------------------------------------------------ */
++
++// messagesToolCall 是流式 tool_calls 的累积状态（参数分片拼接）。
++type messagesToolCall struct {
++	ID   string
++	Name string
++	Args strings.Builder
++}
++
++// Anthropic 流式事件序号：从 0 开始，逐事件 +1。
++type messagesStream struct {
++	w       http.ResponseWriter
++	flusher http.Flusher
++	id      string
++	model   string // 发给客户端的模型名（Anthropic 风格，不是网关名）
++	seq     int
++
++	textOpen bool
++	text     strings.Builder
++
++	callsOpen  bool
++	calls      map[int]*messagesToolCall
++	callOrder  []int
++	callBlocks map[int]int // tool index -> Anthropic content block index
++
++	usage   any
++	finish  string
++	stopRsn string
++	started bool
++	done    bool
++	buf     []byte
++}
++
++func newMessagesStream(w http.ResponseWriter, fl http.Flusher, id, model string) *messagesStream {
++	return &messagesStream{
++		w:          w,
++		flusher:    fl,
++		id:         id,
++		model:      model,
++		calls:      map[int]*messagesToolCall{},
++		callBlocks: map[int]int{},
++	}
++}
++
++// event 写一帧 Anthropic SSE（event: <type> + data: <payload>），并立即 flush。
++func (s *messagesStream) event(typ string, fields map[string]any) {
++	payload := make(map[string]any, len(fields)+1)
++	payload["type"] = typ
++	for k, v := range fields {
++		payload[k] = v
++	}
++	raw, err := json.Marshal(payload)
++	if err != nil {
++		return
++	}
++	if _, err := fmt.Fprintf(s.w, "event: %s\ndata: %s\n\n", typ, raw); err != nil {
++		return
++	}
++	if s.flusher != nil {
++		s.flusher.Flush()
++	}
++}
++
++// start 发出 message_start（此时 content 为空、usage.input_tokens 先占位）。
++func (s *messagesStream) start() {
++	s.started = true
++	s.event("message_start", map[string]any{
++		"message": map[string]any{
++			"id":            s.id,
++			"type":          "message",
++			"role":          "assistant",
++			"model":         s.model,
++			"content":       []any{},
++			"stop_reason":   nil,
++			"stop_sequence": nil,
++			"usage":         messagesUsage(nil),
++		},
++	})
++}
++
++// feed 累积字节流并按行切分。
++func (s *messagesStream) feed(p []byte) {
++	s.buf = append(s.buf, p...)
++	for {
++		i := bytes.IndexByte(s.buf, '\n')
++		if i < 0 {
++			return
++		}
++		line := strings.TrimRight(string(s.buf[:i]), "\r")
++		n := copy(s.buf, s.buf[i+1:])
++		s.buf = s.buf[:n]
++		s.line(line)
++	}
++}
++
++// line 处理一行 SSE：只认 data: 帧。
++func (s *messagesStream) line(line string) {
++	if line == "" || strings.HasPrefix(line, ":") || !strings.HasPrefix(line, "data:") {
++		return
++	}
++	data := strings.TrimSpace(line[len("data:"):])
++	if data == "" || data == "[DONE]" {
++		return
++	}
++	var obj map[string]any
++	if err := json.Unmarshal([]byte(data), &obj); err != nil {
++		return
++	}
++	if e, ok := obj["error"].(map[string]any); ok {
++		s.event("error", map[string]any{
++			"error": map[string]any{
++				"type":    messagesStr(e["type"]),
++				"message": messagesStr(e["message"]),
++			},
++		})
++		return
++	}
++	s.chunk(obj)
++}
++
++// chunk 处理一个 chat completion chunk。
++func (s *messagesStream) chunk(obj map[string]any) {
++	if u, ok := obj["usage"]; ok && u != nil {
++		s.usage = u
++	}
++	choices, ok := obj["choices"].([]any)
++	if !ok || len(choices) == 0 {
++		return
++	}
++	choice := messagesMap(choices[0])
++	if choice == nil {
++		return
++	}
++	if d := messagesMap(choice["delta"]); d != nil {
++		s.delta(d)
++	}
++	if m := messagesMap(choice["message"]); m != nil {
++		s.delta(m)
++	}
++	if fr := messagesStr(choice["finish_reason"]); fr != "" {
++		s.finish = fr
++		s.stopRsn = messagesStopReason(fr)
++	}
++}
++
++// openTextBlock 在首个文本 delta 之前开一个 text content block。
++func (s *messagesStream) openTextBlock() int {
++	if s.textOpen {
++		return 0
++	}
++	s.textOpen = true
++	s.event("content_block_start", map[string]any{
++		"index":          0,
++		"content_block":  map[string]any{"type": "text", "text": ""},
++	})
++	return 0
++}
++
++// openToolBlock 为一个流式 tool_call 开一个 tool_use content block。
++// Anthropic 要求 tool_use block 以 input:{} 开始，再用 input_json_delta 累积。
++func (s *messagesStream) openToolBlock(toolIdx int) int {
++	blk, ok := s.callBlocks[toolIdx]
++	if ok {
++		return blk
++	}
++	// text block 在 0；工具块依次排在后面。
++	next := 0
++	if s.textOpen {
++		next = 1
++	}
++	for _, existing := range s.callBlocks {
++		if existing+1 > next {
++			next = existing + 1
++		}
++	}
++	s.callBlocks[toolIdx] = next
++	call := s.calls[toolIdx]
++	if call == nil {
++		call = &messagesToolCall{}
++		s.calls[toolIdx] = call
++	}
++	if call.ID == "" {
++		call.ID = newMessagesID("toolu")
++	}
++	s.event("content_block_start", map[string]any{
++		"index": next,
++		"content_block": map[string]any{
++			"type":  "tool_use",
++			"id":    call.ID,
++			"name":  call.Name,
++			"input": map[string]any{},
++		},
++	})
++	return next
++}
++
++// delta 处理增量：文本 / 工具调用分片。
++func (s *messagesStream) delta(d map[string]any) {
++	if text := messagesStr(d["content"]); text != "" {
++		idx := s.openTextBlock()
++		s.text.WriteString(text)
++		s.event("content_block_delta", map[string]any{
++			"index": idx,
++			"delta": map[string]any{"type": "text_delta", "text": text},
++		})
++	}
++	calls, ok := d["tool_calls"].([]any)
++	if !ok {
++		return
++	}
++	for _, raw := range calls {
++		tc := messagesMap(raw)
++		if tc == nil {
++			continue
++		}
++		idx := len(s.calls)
++		if v, ok := tc["index"]; ok {
++			idx = int(messagesNum(v))
++		}
++		entry := s.calls[idx]
++		if entry == nil {
++			entry = &messagesToolCall{}
++			s.calls[idx] = entry
++			s.callOrder = append(s.callOrder, idx)
++		}
++		if id := messagesStr(tc["id"]); id != "" {
++			entry.ID = id
++		}
++		fn := messagesMap(tc["function"])
++		if name := messagesStr(fn["name"]); name != "" {
++			switch {
++			case entry.Name == "":
++				entry.Name = name
++			case name != entry.Name && !strings.HasSuffix(entry.Name, name):
++				entry.Name += name
++			}
++		}
++		if args := messagesStr(fn["arguments"]); args != "" {
++			blk := s.openToolBlock(idx)
++			entry.Args.WriteString(args)
++			s.event("content_block_delta", map[string]any{
++				"index": blk,
++				"delta": map[string]any{"type": "input_json_delta", "partial_json": args},
++			})
++		}
++	}
++}
++
++// finalize 收尾：关掉所有开着的 block，再发 message_delta + message_stop。
++// 幂等。
++func (s *messagesStream) finalize() {
++	if s.done {
++		return
++	}
++	s.done = true
++	if !s.started {
++		// 上游一个数据帧都没给：至少把 message_start/message_stop 补齐，
++		// 否则客户端挂在"流没结束"上。
++		s.start()
++	}
++
++	if s.textOpen {
++		s.event("content_block_stop", map[string]any{"index": 0})
++	}
++	keys := make([]int, 0, len(s.callBlocks))
++	for k := range s.callBlocks {
++		keys = append(keys, k)
++	}
++	sort.Ints(keys)
++	for _, toolIdx := range keys {
++		s.event("content_block_stop", map[string]any{"index": s.callBlocks[toolIdx]})
++	}
++
++	stop := s.stopRsn
++	if stop == "" {
++		// 没收到 finish_reason：若开了工具块就是 tool_use，否则 end_turn。
++		if len(s.callBlocks) > 0 {
++			stop = "tool_use"
++		} else {
++			stop = "end_turn"
++		}
++	}
++	s.event("message_delta", map[string]any{
++		"delta": map[string]any{
++			"stop_reason":   stop,
++			"stop_sequence": nil,
++		},
++		"usage": messagesUsage(s.usage),
++	})
++	s.event("message_stop", map[string]any{})
++}
++
++/* ------------------------------------------------------------------ */
++/* HTTP 层                                                             */
++/* ------------------------------------------------------------------ */
++
++// messagesWriter 是交给内部 chatCompletions 的「翻译型 ResponseWriter」。
++//
++// 三条路径（与 responsesWriter 同构）：
++//   - chat 写 text/event-stream（流式）→ 起 messagesStream，逐帧翻译 + flush；
++//   - chat 写 application/json（非流式成功）→ 缓冲，结束后整体转成 Message；
++//   - chat 写非 200（调度/上游错误）→ 翻译成 Anthropic 错误形状后透出。
++type messagesWriter struct {
++	real    http.ResponseWriter
++	flusher http.Flusher
++	model   string // 发给客户端的模型名（Anthropic 风格）
++	id      string
++
++	hdr         http.Header
++	status      int
++	wroteHeader bool
++
++	stream      *messagesStream
++	started     bool
++	jsonBuf     bytes.Buffer
++	passthrough bool
++	done        bool
++}
++
++func newMessagesWriter(w http.ResponseWriter, model string) *messagesWriter {
++	fl, _ := w.(http.Flusher)
++	return &messagesWriter{
++		real: w,
++		// 客户端听的是 Anthropic 事件流，但真实发出去的模型名是网关模型；
++		// 这里用 Anthropic 风格名（modelEcho）回显，避免客户端做目录校验。
++		flusher: fl,
++		model:   model,
++		id:      newMessagesID("msg"),
++		hdr:     http.Header{},
++	}
++}
++
++func (s *messagesWriter) Header() http.Header { return s.hdr }
++
++func (s *messagesWriter) WriteHeader(code int) {
++	if s.wroteHeader {
++		return
++	}
++	s.wroteHeader = true
++	s.status = code
++	if code == http.StatusOK {
++		return
++	}
++	// 非 200：把 chat 的 OpenAI 形状错误翻成 Anthropic 形状后再透出。
++	s.passthrough = true
++	dst := s.real.Header()
++	for k, vv := range s.hdr {
++		dst[k] = vv
++	}
++	s.real.WriteHeader(code)
++}
++
++func (s *messagesWriter) Write(p []byte) (int, error) {
++	if s.passthrough {
++		return s.real.Write(p)
++	}
++	if s.started {
++		s.stream.feed(p)
++		return len(p), nil
++	}
++	if strings.Contains(s.hdr.Get("Content-Type"), "text/event-stream") {
++		s.startStream()
++		s.stream.feed(p)
++		return len(p), nil
++	}
++	s.jsonBuf.Write(p)
++	return len(p), nil
++}
++
++func (s *messagesWriter) Flush() {
++	if s.flusher != nil {
++		s.flusher.Flush()
++	}
++}
++
++// startStream 切换到 Anthropic 事件流：设定客户端可见的头，再发 message_start。
++func (s *messagesWriter) startStream() {
++	s.started = true
++	dst := s.real.Header()
++	dst.Set("Content-Type", "text/event-stream; charset=utf-8")
++	dst.Set("Cache-Control", "no-cache, no-transform")
++	dst.Set("Connection", "keep-alive")
++	dst.Set("X-Accel-Buffering", "no")
++	// Anthropic SDK 会读这两个头做请求识别；缺了不影响，但给了更规范。
++	dst.Set("anthropic-version", "2023-06-01")
++	s.real.WriteHeader(http.StatusOK)
++	s.stream = newMessagesStream(s.real, s.flusher, s.id, s.model)
++	s.stream.start()
++}
++
++// writeAnthropicError 按 Anthropic 错误形状输出。
++func writeAnthropicError(w http.ResponseWriter, status int, errType, msg string) {
++	writeJSON(w, status, map[string]any{
++		"type": "error",
++		"error": map[string]any{
++			"type":    errType,
++			"message": msg,
++		},
++	})
++}
++
++// messagesErrorType 把 OpenAI 风格 error.type 映射到 Anthropic 的 error.type。
++// Anthropic 认识的取值：invalid_request_error / authentication_error /
++// permission_error / not_found_error / rate_limit_error / api_error /
++// overloaded_error。
++func messagesErrorType(openAIType string, status int) string {
++	switch openAIType {
++	case "invalid_request_error", "invalid_request":
++		return "invalid_request_error"
++	case "authentication_error":
++		return "authentication_error"
++	case "permission_error":
++		return "permission_error"
++	case "not_found_error":
++		return "not_found_error"
++	case "rate_limit_error", "rate_limit_exceeded":
++		return "rate_limit_error"
++	case "overloaded_error":
++		return "overloaded_error"
++	}
++	switch {
++	case status == http.StatusTooManyRequests:
++		return "rate_limit_error"
++	case status == http.StatusUnauthorized:
++		return "authentication_error"
++	case status == http.StatusNotFound:
++		return "not_found_error"
++	case status == http.StatusBadRequest:
++		return "invalid_request_error"
++	}
++	return "api_error"
++}
++
++// finish 在内部 chat 调用返回后调用。
++func (s *messagesWriter) finish() {
++	if s.done || s.passthrough {
++		return
++	}
++	s.done = true
++
++	if s.started {
++		s.stream.finalize()
++		return
++	}
++
++	if s.jsonBuf.Len() > 0 {
++		var chatResp map[string]any
++		if err := json.Unmarshal(s.jsonBuf.Bytes(), &chatResp); err != nil {
++			writeAnthropicError(s.real, http.StatusBadGateway, "api_error",
++				"upstream returned invalid JSON: "+err.Error())
++			return
++		}
++		blocks := messagesBlocksFromChatMessage(messagesFirstChoiceMessage(chatResp))
++		stop := messagesStopReason(messagesFirstChoiceFinish(chatResp))
++		body := map[string]any{
++			"id":            s.id,
++			"type":          "message",
++			"role":          "assistant",
++			"model":         s.model,
++			"content":       blocks,
++			"stop_reason":   stop,
++			"stop_sequence": nil,
++			"usage":         messagesUsage(chatResp["usage"]),
++		}
++		raw, err := json.Marshal(body)
++		if err != nil {
++			writeAnthropicError(s.real, http.StatusBadGateway, "api_error", err.Error())
++			return
++		}
++		s.real.Header().Set("Content-Type", "application/json")
++		s.real.WriteHeader(http.StatusOK)
++		_, _ = s.real.Write(raw)
++		return
++	}
++
++	writeAnthropicError(s.real, http.StatusServiceUnavailable, "overloaded_error",
++		"all accounts are temporarily unavailable, please retry later")
++}
++
++// messages 是 POST /v1/messages 的入口：翻译请求 -> 复用 chat 链路 -> 翻译响应。
++func (h *Handler) messages(w http.ResponseWriter, r *http.Request) {
++	raw, err := io.ReadAll(r.Body)
++	if err != nil {
++		writeAnthropicError(w, http.StatusBadRequest, "invalid_request_error", "read body: "+err.Error())
++		return
++	}
++	var body map[string]any
++	if err := json.Unmarshal(raw, &body); err != nil {
++		writeAnthropicError(w, http.StatusBadRequest, "invalid_request_error", "invalid JSON body: "+err.Error())
++		return
++	}
++	chat, model := messagesRequestToChat(body)
++	if msgs, _ := chat["messages"].([]any); len(msgs) == 0 {
++		writeAnthropicError(w, http.StatusBadRequest, "invalid_request_error", "no messages after conversion")
++		return
++	}
++	chatRaw, err := json.Marshal(chat)
++	if err != nil {
++		writeAnthropicError(w, http.StatusBadRequest, "invalid_request_error", "encode chat request: "+err.Error())
++		return
++	}
++
++	// 回显给客户端的模型名：用客户端发来的原名（Anthropic 风格），
++	// 而非网关名 —— Claude Code 会拿它跟自己的目录比对。
++	echoModel := messagesStr(body["model"])
++	if echoModel == "" {
++		echoModel = model
++	}
++
++	// 复用 chat 链路：只换 body 与 URL（URL 仅为语义标识，此处直调 handler 不重路由），
++	// 其余（鉴权已完成、requestTrace 挂在 context 上）原样带着走。
++	sub := r.Clone(r.Context())
++	sub.Body = io.NopCloser(bytes.NewReader(chatRaw))
++	sub.ContentLength = int64(len(chatRaw))
++	sub.URL.Path = "/v1/chat/completions"
++
++	shim := newMessagesWriter(w, echoModel)
++	defer shim.finish()
++	h.chatCompletions(shim, sub)
++}
++
++
++
++
++
++
++
+diff --git a/internal/server/messages_test.go b/internal/server/messages_test.go
+new file mode 100644
+index 0000000..5c6e384
+--- /dev/null
++++ b/internal/server/messages_test.go
+@@ -0,0 +1,671 @@
++package server
++
++import (
++	"encoding/json"
++	"io"
++	"net/http"
++	"net/http/httptest"
++	"strings"
++	"testing"
++
++	"github.com/linguo2625469/workbuddy2api-panel/internal/auth"
++	"github.com/linguo2625469/workbuddy2api-panel/internal/upstream"
++)
++
++// capturedUpstream 记录上游真正收到的 chat 请求（与 responses_test 共用类型）。
++type capturedMessagesUpstream struct {
++	path string
++	body map[string]any
++}
++
++func newCapturingMessagesUpstream(t *testing.T, sse string, cap *capturedMessagesUpstream) *upstream.Client {
++	t.Helper()
++	return &upstream.Client{
++		HTTP: &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
++			cap.path = r.URL.Path
++			raw, _ := io.ReadAll(r.Body)
++			_ = json.Unmarshal(raw, &cap.body)
++			return &http.Response{
++				StatusCode: 200,
++				Header:     http.Header{"Content-Type": []string{"text/event-stream"}},
++				Body:       io.NopCloser(strings.NewReader(sse)),
++			}, nil
++		})},
++		ChatBaseCN:    "https://fake.example",
++		BillingBaseCN: "https://fake.example",
++	}
++}
++
++// parseMessagesSSE 把 /v1/messages 的输出拆成 (event, payload) 列表。
++func parseMessagesSSE(t *testing.T, raw string) []struct {
++	Type string
++	Obj  map[string]any
++} {
++	t.Helper()
++	type ev = struct {
++		Type string
++		Obj  map[string]any
++	}
++	out := []ev{}
++	for _, block := range strings.Split(raw, "\n\n") {
++		typ, data := "", ""
++		for _, line := range strings.Split(strings.TrimSpace(block), "\n") {
++			switch {
++			case strings.HasPrefix(line, "event:"):
++				typ = strings.TrimSpace(strings.TrimPrefix(line, "event:"))
++			case strings.HasPrefix(line, "data:"):
++				data = strings.TrimSpace(strings.TrimPrefix(line, "data:"))
++			}
++		}
++		if data == "" || data == "[DONE]" {
++			continue
++		}
++		var obj map[string]any
++		if err := json.Unmarshal([]byte(data), &obj); err != nil {
++			t.Fatalf("bad SSE payload %q: %v", data, err)
++		}
++		if typ == "" {
++			typ, _ = obj["type"].(string)
++		}
++		out = append(out, ev{Type: typ, Obj: obj})
++	}
++	return out
++}
++
++func messagesHandler(t *testing.T, up *upstream.Client) *Handler {
++	t.Helper()
++	p := testPoolWith(&auth.Auth{UID: "u1", AccessToken: "at1", ExpiresAt: 9999999999})
++	return NewHandler(Config{Pool: p, Upstream: up})
++}
++
++func postMessages(t *testing.T, h *Handler, body string) *httptest.ResponseRecorder {
++	t.Helper()
++	rec := httptest.NewRecorder()
++	h.ServeHTTP(rec, httptest.NewRequest("POST", "/v1/messages", strings.NewReader(body)))
++	return rec
++}
++
++/* ------------------------------ 模型名映射 ------------------------------ */
++
++func TestMessagesModel(t *testing.T) {
++	cases := []struct{ in, want string }{
++		{"claude-opus-4-6", "cn:space-bunny"},
++		{"claude-opus-4-5", "cn:deepseek-v4-pro"},
++		{"claude-opus-4-1", "cn:kimi-k3-1"},
++		{"claude-opus-3-5", "cn:glm-5.3"},
++		{"claude-sonnet-4-0", "cn:glm-5.1"},
++		{"claude-sonnet-5-5", "cn:minimax-m3"},
++		{"claude-3-5-haiku", "cn:glm-5.3-flash"},
++		{"claude-haiku-4-5", "cn:deepseek-v4.1-flash"},
++		{"claude-fable-5", "cn:auto"},
++		{"claude-fable-4-5", "cn:hy4-preview-f"},
++		{"claude-fable-4-0", "cn:hy3"},
++		// Claude Code 默认 sonnet 别名：不在 /model 列表里，保留原生映射。
++		{"claude-sonnet-4-5", "cn:glm-5.3"},
++		// 用户直接选了网关模型（靠 discovery 从 /v1/models 发现）：原样透传。
++		{"cn:space-bunny", "cn:space-bunny"},
++		{"cn:glm-5.3", "cn:glm-5.3"},
++		{"global:some-model", "global:some-model"},
++		// 未收录的 claude-*：回落到默认，不报错。
++		{"claude-mystery-9", "cn:space-bunny"},
++		// 非 Anthropic 风格的裸名：也回落默认（客户端原样发，上游不认裸名）。
++		{"gpt-4o", "cn:space-bunny"},
++		// 空：给默认，不返回空串。
++		{"", "cn:space-bunny"},
++	}
++	for _, c := range cases {
++		if got := messagesModel(c.in); got != c.want {
++			t.Errorf("messagesModel(%q) = %q, want %q", c.in, got, c.want)
++		}
++	}
++}
++
++func TestMessagesIsAnthropicStyle(t *testing.T) {
++	if messagesIsAnthropicStyle("cn:space-bunny") {
++		t.Error("cn: 前缀不该被判为 Anthropic 风格")
++	}
++	if !messagesIsAnthropicStyle("claude-sonnet-4-5") {
++		t.Error("claude-* 应判为 Anthropic 风格")
++	}
++}
++
++/* ------------------------------ 请求翻译 ------------------------------ */
++
++func TestMessagesRequestToChatBasics(t *testing.T) {
++	body := map[string]any{
++		"model":      "claude-sonnet-4-5",
++		"max_tokens": 1024,
++		"system":     "你是助手",
++		"messages": []any{
++			map[string]any{
++				"role": "user",
++				"content": []any{
++					map[string]any{"type": "text", "text": "你好"},
++				},
++			},
++		},
++	}
++	chat, model := messagesRequestToChat(body)
++	if model != "cn:glm-5.3" {
++		t.Errorf("model = %q", model)
++	}
++	if got := chat["max_tokens"]; got != 1024 {
++		t.Errorf("max_tokens = %v (%T), want 1024", got, got)
++	}
++	if v, _ := chat["stream"].(bool); !v {
++		t.Error("缺省应为流式")
++	}
++	msgs, _ := chat["messages"].([]any)
++	if len(msgs) != 2 {
++		t.Fatalf("messages = %d, want 2 (system + user)", len(msgs))
++	}
++	first := messagesMap(msgs[0])
++	if messagesStr(first["role"]) != "system" || first["content"] != "你是助手" {
++		t.Errorf("system 消息不对: %#v", first)
++	}
++	second := messagesMap(msgs[1])
++	if messagesStr(second["role"]) != "user" || second["content"] != "你好" {
++		t.Errorf("user 消息不对: %#v", second)
++	}
++}
++
++// max_tokens 缺省时不能给 0（上游会拒），也不能给 nil。
++func TestMessagesMaxTokensDefaulted(t *testing.T) {
++	chat, _ := messagesRequestToChat(map[string]any{
++		"model":    "claude-sonnet-4-5",
++		"messages": []any{map[string]any{"role": "user", "content": "hi"}},
++	})
++	if got, _ := chat["max_tokens"].(int); got <= 0 {
++		t.Errorf("max_tokens 应为正数兜底值, got %v", chat["max_tokens"])
++	}
++}
++
++func TestMessagesToolUseBecomesToolCalls(t *testing.T) {
++	body := map[string]any{
++		"model":      "claude-sonnet-4-5",
++		"max_tokens": 512,
++		"messages": []any{
++			map[string]any{
++				"role": "user",
++				"content": []any{
++					map[string]any{"type": "text", "text": "查天气"},
++				},
++			},
++			map[string]any{
++				"role": "assistant",
++				"content": []any{
++					map[string]any{
++						"type":  "tool_use",
++						"id":    "toolu_abc",
++						"name":  "get_weather",
++						"input": map[string]any{"city": "北京"},
++					},
++				},
++			},
++			map[string]any{
++				"role": "user",
++				"content": []any{
++					map[string]any{
++						"type":        "tool_result",
++						"tool_use_id": "toolu_abc",
++						"content":     "晴 25C",
++					},
++				},
++			},
++		},
++	}
++	chat, _ := messagesRequestToChat(body)
++	msgs, _ := chat["messages"].([]any)
++	if len(msgs) != 3 {
++		t.Fatalf("messages = %d, want 3 (user / assistant+tool_calls / tool)", len(msgs))
++	}
++	asst := messagesMap(msgs[1])
++	if messagesStr(asst["role"]) != "assistant" {
++		t.Fatalf("第 2 条应为 assistant, got %v", messagesStr(asst["role"]))
++	}
++	calls, ok := asst["tool_calls"].([]any)
++	if !ok || len(calls) != 1 {
++		t.Fatalf("tool_calls 不对: %#v", asst["tool_calls"])
++	}
++	fn := messagesMap(messagesMap(calls[0])["function"])
++	if messagesStr(fn["name"]) != "get_weather" {
++		t.Errorf("tool name = %v", messagesStr(fn["name"]))
++	}
++	if !strings.Contains(messagesStr(fn["arguments"]), "北京") {
++		t.Errorf("tool arguments 应含 input: %v", messagesStr(fn["arguments"]))
++	}
++	tool := messagesMap(msgs[2])
++	if messagesStr(tool["role"]) != "tool" || messagesStr(tool["tool_call_id"]) != "toolu_abc" {
++		t.Errorf("tool_result 映射不对: %#v", tool)
++	}
++	if tool["content"] != "晴 25C" {
++		t.Errorf("tool content = %v", tool["content"])
++	}
++}
++
++// 并行工具调用必须落在同一条 assistant 消息里（上游按消息聚合）。
++func TestMessagesParallelToolUseMerged(t *testing.T) {
++	body := map[string]any{
++		"model": "claude-sonnet-4-5",
++		"messages": []any{
++			map[string]any{
++				"role": "assistant",
++				"content": []any{
++					map[string]any{"type": "tool_use", "id": "t1", "name": "a", "input": map[string]any{}},
++					map[string]any{"type": "tool_use", "id": "t2", "name": "b", "input": map[string]any{}},
++				},
++			},
++		},
++	}
++	chat, _ := messagesRequestToChat(body)
++	msgs, _ := chat["messages"].([]any)
++	if len(msgs) != 1 {
++		t.Fatalf("并行 tool_use 应并成 1 条 assistant，实际 %d 条", len(msgs))
++	}
++	calls, _ := messagesMap(msgs[0])["tool_calls"].([]any)
++	if len(calls) != 2 {
++		t.Errorf("tool_calls = %d, want 2", len(calls))
++	}
++}
++
++// thinking 块应被丢弃（上游非 Claude 模型无 thinking 语义），且不产生空消息。
++func TestMessagesThinkingDropped(t *testing.T) {
++	body := map[string]any{
++		"model": "claude-sonnet-4-5",
++		"messages": []any{
++			map[string]any{
++				"role": "assistant",
++				"content": []any{
++					map[string]any{"type": "thinking", "thinking": "让我想想", "signature": "sig"},
++					map[string]any{"type": "text", "text": "答案"},
++				},
++			},
++		},
++	}
++	chat, _ := messagesRequestToChat(body)
++	msgs, _ := chat["messages"].([]any)
++	if len(msgs) != 1 {
++		t.Fatalf("thinking 应被丢弃，只剩 1 条文本消息，实际 %d", len(msgs))
++	}
++	if messagesMap(msgs[0])["content"] != "答案" {
++		t.Errorf("content = %v", messagesMap(msgs[0])["content"])
++	}
++}
++
++func TestMessagesToolsToChat(t *testing.T) {
++	chat, _ := messagesRequestToChat(map[string]any{
++		"model": "claude-sonnet-4-5",
++		"messages": []any{map[string]any{
++			"role": "user", "content": "hi",
++		}},
++		"tools": []any{
++			map[string]any{
++				"name":         "get_weather",
++				"description":  "查天气",
++				"input_schema": map[string]any{"type": "object", "properties": map[string]any{"city": map[string]any{"type": "string"}}},
++			},
++		},
++		"tool_choice": map[string]any{"type": "any"},
++	})
++	tools, _ := chat["tools"].([]any)
++	if len(tools) != 1 {
++		t.Fatalf("tools = %d, want 1", len(tools))
++	}
++	fn := messagesMap(messagesMap(tools[0])["function"])
++	if messagesStr(fn["name"]) != "get_weather" {
++		t.Errorf("name = %v", messagesStr(fn["name"]))
++	}
++	params := messagesMap(fn["parameters"])
++	if messagesStr(params["type"]) != "object" {
++		t.Errorf("input_schema 应映射到 parameters: %#v", fn["parameters"])
++	}
++	if chat["tool_choice"] != "required" {
++		t.Errorf("tool_choice any -> required, got %v", chat["tool_choice"])
++	}
++}
++
++func TestMessagesImageBase64(t *testing.T) {
++	chat, _ := messagesRequestToChat(map[string]any{
++		"model": "claude-sonnet-4-5",
++		"messages": []any{map[string]any{
++			"role": "user",
++			"content": []any{
++				map[string]any{"type": "image", "source": map[string]any{
++					"type": "base64", "media_type": "image/png", "data": "iVBORw0KGgo=",
++				}},
++			},
++		}},
++	})
++	msgs, _ := chat["messages"].([]any)
++	parts, ok := messagesMap(msgs[0])["content"].([]any)
++	if !ok || len(parts) != 1 {
++		t.Fatalf("content 应为 part 数组: %#v", messagesMap(msgs[0])["content"])
++	}
++	img := messagesMap(parts[0])
++	if messagesStr(img["type"]) != "image_url" {
++		t.Fatalf("type = %v", messagesStr(img["type"]))
++	}
++	url := messagesStr(messagesMap(img["image_url"])["url"])
++	if !strings.HasPrefix(url, "data:image/png;base64,") {
++		t.Errorf("base64 应转成 data URL, got %q", url)
++	}
++}
++
++/* ------------------------------ 端到端：流式 ------------------------------ */
++
++func TestMessagesStreamingText(t *testing.T) {
++	sse := strings.Join([]string{
++		`data: {"choices":[{"delta":{"content":"你"}}]}`,
++		`data: {"choices":[{"delta":{"content":"好"}}]}`,
++		`data: {"choices":[{"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":10,"completion_tokens":2}}`,
++		`data: [DONE]`,
++	}, "\n\n")
++	cap := &capturedMessagesUpstream{}
++	h := messagesHandler(t, newCapturingMessagesUpstream(t, sse, cap))
++	rec := postMessages(t, h, `{"model":"claude-sonnet-4-5","max_tokens":64,"messages":[{"role":"user","content":"hi"}],"stream":true}`)
++
++	if rec.Code != 200 {
++		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
++	}
++	if ct := rec.Header().Get("Content-Type"); !strings.Contains(ct, "text/event-stream") {
++		t.Errorf("Content-Type = %q", ct)
++	}
++	if !strings.HasSuffix(cap.path, "/chat/completions") {
++		t.Errorf("上游路径 = %q（应复用 chat 链路）", cap.path)
++	}
++
++	events := parseMessagesSSE(t, rec.Body.String())
++	types := make([]string, 0, len(events))
++	for _, e := range events {
++		types = append(types, e.Type)
++	}
++	want := []string{
++		"message_start",
++		"content_block_start", "content_block_delta", "content_block_delta",
++		"content_block_stop", "message_delta", "message_stop",
++	}
++	if len(types) != len(want) {
++		t.Fatalf("事件序 = %v, want %v", types, want)
++	}
++	for i := range want {
++		if types[i] != want[i] {
++			t.Fatalf("事件序 = %v, want %v", types, want)
++		}
++	}
++
++	// 文本内容拼接正确
++	var text strings.Builder
++	for _, e := range events {
++		if e.Type == "content_block_delta" {
++			if d := messagesMap(e.Obj["delta"]); messagesStr(d["type"]) == "text_delta" {
++				text.WriteString(messagesStr(d["text"]))
++			}
++		}
++	}
++	if text.String() != "你好" {
++		t.Errorf("文本 = %q, want 你好", text.String())
++	}
++
++	// message_delta 带上正确的 stop_reason 与 usage
++	last := events[len(events)-2].Obj
++	if d := messagesMap(last["delta"]); messagesStr(d["stop_reason"]) != "end_turn" {
++		t.Errorf("stop_reason = %v", messagesStr(d["stop_reason"]))
++	}
++	u := messagesMap(last["usage"])
++	if v, _ := u["input_tokens"].(float64); v != 10 {
++		t.Errorf("input_tokens = %v, want 10", u["input_tokens"])
++	}
++	if v, _ := u["output_tokens"].(float64); v != 2 {
++		t.Errorf("output_tokens = %v, want 2", u["output_tokens"])
++	}
++
++	// message_start 的 model 应回显客户端发来的 Anthropic 风格名
++	start := messagesMap(events[0].Obj["message"])
++	if messagesStr(start["model"]) != "claude-sonnet-4-5" {
++		t.Errorf("message_start.model = %q, want claude-sonnet-4-5（回显客户端原名）", messagesStr(start["model"]))
++	}
++	if messagesStr(start["id"]) == "" {
++		t.Error("message_start 缺 id")
++	}
++}
++
++func TestMessagesStreamingToolUse(t *testing.T) {
++	sse := strings.Join([]string{
++		`data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call_1","function":{"name":"get_weather","arguments":""}}]}}]}`,
++		`data: {"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\"city\":"}}]}}]}`,
++		`data: {"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\"北京\"}"}}]}}]}`,
++		`data: {"choices":[{"delta":{},"finish_reason":"tool_calls"}]}`,
++		`data: [DONE]`,
++	}, "\n\n")
++	cap := &capturedMessagesUpstream{}
++	h := messagesHandler(t, newCapturingMessagesUpstream(t, sse, cap))
++	rec := postMessages(t, h, `{"model":"claude-sonnet-4-5","max_tokens":64,"messages":[{"role":"user","content":"hi"}],"stream":true}`)
++	if rec.Code != 200 {
++		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
++	}
++	events := parseMessagesSSE(t, rec.Body.String())
++
++	var partial strings.Builder
++	sawToolStart := false
++	stopReason := ""
++	for _, e := range events {
++		switch e.Type {
++		case "content_block_start":
++			if messagesStr(messagesMap(e.Obj["content_block"])["type"]) == "tool_use" {
++				sawToolStart = true
++			}
++		case "content_block_delta":
++			if d := messagesMap(e.Obj["delta"]); messagesStr(d["type"]) == "input_json_delta" {
++				partial.WriteString(messagesStr(d["partial_json"]))
++			}
++		case "message_delta":
++			stopReason = messagesStr(messagesMap(e.Obj["delta"])["stop_reason"])
++		}
++	}
++	if !sawToolStart {
++		t.Error("缺 content_block_start(tool_use)")
++	}
++	if got := partial.String(); got != `{"city":"北京"}` {
++		t.Errorf("参数分片拼接 = %q", got)
++	}
++	if stopReason != "tool_use" {
++		t.Errorf("stop_reason = %q, want tool_use", stopReason)
++	}
++}
++
++// 上游一个数据帧都不给时，也必须补齐 message_start/message_stop，
++// 否则客户端挂在「流没结束」上。
++func TestMessagesStreamingEmptyUpstreamStillCloses(t *testing.T) {
++	cap := &capturedMessagesUpstream{}
++	h := messagesHandler(t, newCapturingMessagesUpstream(t, "data: [DONE]\n\n", cap))
++	rec := postMessages(t, h, `{"model":"claude-sonnet-4-5","max_tokens":64,"messages":[{"role":"user","content":"hi"}],"stream":true}`)
++	events := parseMessagesSSE(t, rec.Body.String())
++	if len(events) < 2 {
++		t.Fatalf("事件数 = %d, want >=2", len(events))
++	}
++	if events[0].Type != "message_start" {
++		t.Errorf("首事件 = %q, want message_start", events[0].Type)
++	}
++	if events[len(events)-1].Type != "message_stop" {
++		t.Errorf("末事件 = %q, want message_stop", events[len(events)-1].Type)
++	}
++}
++
++
++/* ------------------------------ 端到端：非流式 ------------------------------ */
++
++// 非流式客户端：网关内部走 upstream.Aggregate 聚合上游 SSE，所以 fake 上游
++// 仍要返回 SSE 帧，聚合后 chatCompletions 才写出 application/json。
++func TestMessagesNonStreaming(t *testing.T) {
++	sse := "data: {\"id\":\"c1\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"PONG\"}}]}\n\n" +
++		"data: {\"id\":\"c1\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]," +
++		"\"usage\":{\"prompt_tokens\":7,\"completion_tokens\":3}}\n\n" +
++		"data: [DONE]\n\n"
++	up := newFakeUpstream(t, func(string) (int, string, bool) { return 200, sse, true })
++	h := messagesHandler(t, up)
++	rec := postMessages(t, h, `{"model":"claude-sonnet-4-5","max_tokens":64,"messages":[{"role":"user","content":"hi"}],"stream":false}`)
++
++	if rec.Code != 200 {
++		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
++	}
++	var got map[string]any
++	if err := json.Unmarshal(rec.Body.Bytes(), &got); err != nil {
++		t.Fatalf("响应不是 JSON: %v (%s)", err, rec.Body.String())
++	}
++	if messagesStr(got["type"]) != "message" {
++		t.Errorf("type = %v, want message", got["type"])
++	}
++	if messagesStr(got["role"]) != "assistant" {
++		t.Errorf("role = %v", got["role"])
++	}
++	// 回显客户端发来的 Anthropic 风格名，而非网关名。
++	if messagesStr(got["model"]) != "claude-sonnet-4-5" {
++		t.Errorf("model = %v（应回显 Anthropic 风格名）", got["model"])
++	}
++	if messagesStr(got["stop_reason"]) != "end_turn" {
++		t.Errorf("stop_reason = %v", got["stop_reason"])
++	}
++	blocks, _ := got["content"].([]any)
++	if len(blocks) != 1 {
++		t.Fatalf("content blocks = %d, want 1", len(blocks))
++	}
++	if messagesStr(messagesMap(blocks[0])["text"]) != "PONG" {
++		t.Errorf("text = %v", messagesMap(blocks[0])["text"])
++	}
++	u := messagesMap(got["usage"])
++	if v, _ := u["input_tokens"].(float64); v != 7 {
++		t.Errorf("input_tokens = %v, want 7", u["input_tokens"])
++	}
++	if v, _ := u["output_tokens"].(float64); v != 3 {
++		t.Errorf("output_tokens = %v, want 3", u["output_tokens"])
++	}
++}
++
++// 非流式响应里的 tool_calls 要还原成 Anthropic 的 tool_use block，input 必须是对象。
++func TestMessagesNonStreamingToolUse(t *testing.T) {
++	sse := "data: {\"id\":\"c1\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\"," +
++		"\"tool_calls\":[{\"index\":0,\"id\":\"call_9\",\"type\":\"function\"," +
++		"\"function\":{\"name\":\"get_weather\",\"arguments\":\"{\\\"city\\\":\\\"北京\\\"}\"}}]}}]}\n\n" +
++		"data: {\"id\":\"c1\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"tool_calls\"}]," +
++		"\"usage\":{\"prompt_tokens\":5,\"completion_tokens\":4}}\n\n" +
++		"data: [DONE]\n\n"
++	up := newFakeUpstream(t, func(string) (int, string, bool) { return 200, sse, true })
++	h := messagesHandler(t, up)
++	rec := postMessages(t, h, `{"model":"claude-sonnet-4-5","max_tokens":64,"messages":[{"role":"user","content":"hi"}],"stream":false}`)
++	if rec.Code != 200 {
++		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
++	}
++	var got map[string]any
++	if err := json.Unmarshal(rec.Body.Bytes(), &got); err != nil {
++		t.Fatalf("响应不是 JSON: %v (%s)", err, rec.Body.String())
++	}
++	blocks, _ := got["content"].([]any)
++	if len(blocks) != 1 {
++		t.Fatalf("blocks = %d, want 1（%s）", len(blocks), rec.Body.String())
++	}
++	b := messagesMap(blocks[0])
++	if messagesStr(b["type"]) != "tool_use" {
++		t.Fatalf("type = %v, want tool_use", messagesStr(b["type"]))
++	}
++	if messagesStr(b["id"]) != "call_9" {
++		t.Errorf("id = %v", messagesStr(b["id"]))
++	}
++	if messagesStr(b["name"]) != "get_weather" {
++		t.Errorf("name = %v", messagesStr(b["name"]))
++	}
++	input := messagesMap(b["input"])
++	if messagesStr(input["city"]) != "北京" {
++		t.Errorf("input 应是解析后的对象: %#v", b["input"])
++	}
++	if messagesStr(got["stop_reason"]) != "tool_use" {
++		t.Errorf("stop_reason = %v, want tool_use", got["stop_reason"])
++	}
++}
++/* ------------------------------ 错误与边界 ------------------------------ */
++
++func TestMessagesInvalidJSON(t *testing.T) {
++	cap := &capturedMessagesUpstream{}
++	h := messagesHandler(t, newCapturingMessagesUpstream(t, "", cap))
++	rec := postMessages(t, h, `{not json`)
++	if rec.Code != http.StatusBadRequest {
++		t.Fatalf("status = %d, want 400", rec.Code)
++	}
++	var got map[string]any
++	_ = json.Unmarshal(rec.Body.Bytes(), &got)
++	if messagesStr(got["type"]) != "error" {
++		t.Errorf("应返回 Anthropic 错误形状, got %#v", got)
++	}
++	if messagesStr(messagesMap(got["error"])["type"]) != "invalid_request_error" {
++		t.Errorf("error.type = %v", messagesMap(got["error"])["type"])
++	}
++}
++
++// 鉴权失败：Claude Code 认 Anthropic 的 authentication_error。
++func TestMessagesUnauthenticated(t *testing.T) {
++	cap := &capturedMessagesUpstream{}
++	up := newCapturingMessagesUpstream(t, "", cap)
++	p := testPoolWith(&auth.Auth{UID: "u1", AccessToken: "at1", ExpiresAt: 9999999999})
++	h := NewHandler(Config{Pool: p, Upstream: up, APIKey: "secret"})
++	rec := httptest.NewRecorder()
++	h.ServeHTTP(rec, httptest.NewRequest("POST", "/v1/messages", strings.NewReader(`{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":"hi"}]}`)))
++	if rec.Code != http.StatusUnauthorized {
++		t.Fatalf("status = %d, want 401", rec.Code)
++	}
++	var got map[string]any
++	_ = json.Unmarshal(rec.Body.Bytes(), &got)
++	if messagesStr(got["type"]) != "error" {
++		t.Errorf("应返回 Anthropic 错误形状, got %#v", got)
++	}
++	if messagesStr(messagesMap(got["error"])["type"]) != "authentication_error" {
++		t.Errorf("error.type = %v, want authentication_error", messagesMap(got["error"])["type"])
++	}
++}
++
++// messages 路由必须与 chat/responses 同待遇：进请求日志归档。
++func TestMessagesRouteRegistered(t *testing.T) {
++	cap := &capturedMessagesUpstream{}
++	h := messagesHandler(t, newCapturingMessagesUpstream(t, "data: [DONE]\n\n", cap))
++	rec := postMessages(t, h, `{"model":"claude-sonnet-4-5","max_tokens":8,"messages":[{"role":"user","content":"hi"}]}`)
++	// 路由不存在时 ServeMux 返回 404；注册后应走到 chat 链路。
++	if rec.Code == http.StatusNotFound {
++		t.Fatal("/v1/messages 路由未注册")
++	}
++}
++
++
++
++
++
++
++
++
++// /model 列表里的别名必须与网关模型一一对应：两个别名指向同一模型，
++// 会在选择器里显示成两行同名条目（用户可见的 bug）。这张表同时锁住
++// 「不重复」和「覆盖全部已注册模型」两个不变量。
++func TestMessagesModelMappingIsOneToOne(t *testing.T) {
++	// 客户端 settings.json 里 modelPicker.options 用的别名（即会出现在
++	// /model 列表里的那批）。claude-sonnet-4-5 / claude-mythos-preview 不在其中：
++	// 前者是 Claude Code 内建默认 sonnet，后者是它自己会请求的预览名。
++	pickerAliases := []string{
++		"claude-opus-4-6", "claude-opus-4-5", "claude-opus-4-1", "claude-opus-4-0",
++		"claude-opus-3-5", "claude-opus-3",
++		"claude-sonnet-4-0", "claude-sonnet-5-5",
++		"claude-3-7-sonnet", "claude-3-5-sonnet", "claude-3-sonnet",
++		"claude-haiku-4-5", "claude-haiku-4-0", "claude-3-5-haiku", "claude-3-haiku",
++		"claude-fable-5", "claude-fable-4-5", "claude-fable-4-0", "claude-fable-3-5",
++	}
++	seenModel := map[string]string{}
++	for _, alias := range pickerAliases {
++		model := messagesModel(alias)
++		if prev, dup := seenModel[model]; dup {
++			t.Errorf("别名 %q 与 %q 都映射到 %s —— /model 里会出现两行同名", prev, alias, model)
++			continue
++		}
++		seenModel[model] = alias
++	}
++	// 网关注册模型数应与别名数一致（多一个少一个都说明有模型没接到 /model）。
++	if len(seenModel) != len(pickerAliases) {
++		t.Errorf("映射到 %d 个不同模型，别名有 %d 个", len(seenModel), len(pickerAliases))
++	}
++}
++
+diff --git a/internal/server/responses.go b/internal/server/responses.go
+new file mode 100644
+index 0000000..4c6e9f9
+--- /dev/null
++++ b/internal/server/responses.go
+@@ -0,0 +1,1038 @@
++// Responses API 兼容层（POST /v1/responses）。
++//
++// 为什么要有这一层：codex >= 0.125 只讲 Responses 协议，而本网关与上游 WorkBuddy
++// 都只有 /v1/chat/completions。历史方案是在网关前面串一个独立进程做协议桥
++// （cn-bridge: responses <-> chat），多一个进程、多一份故障点、多一次部署。
++// 这里把翻译搬进网关自身：同一进程、同一套选号/粘性/降温/用量/请求日志，
++// 对外同时提供两条协议。
++//
++// 实现方式刻意选「复用 chat 链路」而不是「复制一份上游调用」：
++//
++//	Responses 请求 --responsesRequestToChat--> chat 请求
++//	            --h.chatCompletions(翻译型 ResponseWriter)--> 上游
++//	上游 chat SSE --responsesWriter 逐帧翻译--> Responses 事件流
++//
++// 因此 chatCompletions 的轮转、粘性会话、降级提示词、冷却、错误策略、
++// 用量账本、请求归档**全部自动继承**，不存在第二份调度状态需要同步、
++// 也不会出现「chat 路由修了、responses 路由没修」这类漂移。
++//
++// 协议口径（与已验证可用的 Node 桥逐条对齐）：
++//   - 不发送上游不认的字段：reasoning_effort / stream_options / tools[].strict；
++//   - 长度字段用 max_tokens（上游不认 max_output_tokens / max_completion_tokens）；
++//   - developer 角色降级为 system（上游不支持 developer）；
++//   - custom 工具（如 apply_patch）表达成「单参数 input」的 function 工具；
++//   - 流式事件序：response.created → output_item.added → output_text.delta*
++//     → output_item.done* → response.completed；
++//   - 推理内容（reasoning_content / thinking）不上行：codex 0.160 对这种
++//     「没有 reasoning item 的纯文本流」是宽容的，而乱发 reasoning 事件会
++//     产生 "ReasoningSummaryDelta without active item" 噪音（Node 桥实测）。
++package server
++
++import (
++	"bytes"
++	crand "crypto/rand"
++	"encoding/hex"
++	"encoding/json"
++	"fmt"
++	"io"
++	"net/http"
++	"sort"
++	"strings"
++	"time"
++)
++
++/* ------------------------------------------------------------------ */
++/* 取值工具                                                             */
++/* ------------------------------------------------------------------ */
++
++// Responses 请求体来自外部客户端，字段缺失/类型错位一律当「没给」，不报错——
++// 与「宁可少发不可错发」的取向一致（多余字段会被上游拒绝）。
++func responsesMap(v any) map[string]any {
++	m, _ := v.(map[string]any)
++	return m
++}
++
++func responsesStr(v any) string {
++	s, _ := v.(string)
++	return s
++}
++
++func responsesBool(v any) bool {
++	b, _ := v.(bool)
++	return b
++}
++
++// responsesNum 把 JSON 数字（float64）与 Go 侧整数统一成 float64；其余为 0。
++func responsesNum(v any) float64 {
++	switch n := v.(type) {
++	case float64:
++		return n
++	case float32:
++		return float64(n)
++	case int:
++		return float64(n)
++	case int64:
++		return float64(n)
++	case json.Number:
++		if f, err := n.Float64(); err == nil {
++			return f
++		}
++	}
++	return 0
++}
++
++// newResponsesID 生成 Responses 侧对象 id（resp_ / msg_ / fc_ / call_）。
++// 形状对齐 OpenAI：前缀 + 下划线 + 随机十六进制。随机源失败时退化为时间戳。
++func newResponsesID(prefix string) string {
++	var b [10]byte
++	if _, err := crand.Read(b[:]); err == nil {
++		return prefix + "_" + hex.EncodeToString(b[:])
++	}
++	return fmt.Sprintf("%s_%d", prefix, time.Now().UnixNano())
++}
++
++/* ------------------------------------------------------------------ */
++/* 请求翻译：Responses -> Chat Completions                              */
++/* ------------------------------------------------------------------ */
++
++// responsesPartToChat 把 Responses 的 content part 翻译成 chat 的 content part。
++// 返回 nil 表示该 part 无法表达（丢弃）。
++func responsesPartToChat(part any) map[string]any {
++	if s, ok := part.(string); ok {
++		return map[string]any{"type": "text", "text": s}
++	}
++	m := responsesMap(part)
++	if m == nil {
++		return nil
++	}
++	switch responsesStr(m["type"]) {
++	case "input_text", "output_text", "text", "summary_text":
++		return map[string]any{"type": "text", "text": responsesStr(m["text"])}
++	case "refusal":
++		return map[string]any{"type": "text", "text": responsesStr(m["refusal"])}
++	case "input_image":
++		url := responsesStr(m["image_url"])
++		if url == "" {
++			url = responsesStr(m["url"])
++		}
++		fileID := responsesStr(m["file_id"])
++		if url == "" && fileID == "" {
++			return nil
++		}
++		if url == "" {
++			url = fileID
++		}
++		imageURL := map[string]any{"url": url}
++		if d := responsesStr(m["detail"]); d != "" {
++			imageURL["detail"] = d
++		}
++		return map[string]any{"type": "image_url", "image_url": imageURL}
++	case "input_audio":
++		audioURL := responsesStr(m["audio_url"])
++		if audioURL == "" {
++			return nil
++		}
++		return map[string]any{"type": "input_audio", "input_audio": map[string]any{"data": audioURL, "format": "wav"}}
++	}
++	return nil
++}
++
++// responsesContentToChat 把 Responses 的 content（裸字符串或 part 数组）转成 chat 的 content。
++// 单段文本退化成裸字符串：对上游的兼容性最好。
++func responsesContentToChat(content any) any {
++	if content == nil {
++		return ""
++	}
++	if s, ok := content.(string); ok {
++		return s
++	}
++	list, ok := content.([]any)
++	if !ok {
++		return fmt.Sprint(content)
++	}
++	parts := make([]any, 0, len(list))
++	for _, p := range list {
++		if c := responsesPartToChat(p); c != nil {
++			parts = append(parts, c)
++		}
++	}
++	if len(parts) == 0 {
++		return ""
++	}
++	if len(parts) == 1 {
++		if m, ok := parts[0].(map[string]any); ok && responsesStr(m["type"]) == "text" {
++			return m["text"]
++		}
++	}
++	return parts
++}
++
++// responsesOutputToText 把工具输出（function_call_output.output）压成一段文本。
++func responsesOutputToText(output any) string {
++	if output == nil {
++		return ""
++	}
++	if s, ok := output.(string); ok {
++		return s
++	}
++	if list, ok := output.([]any); ok {
++		parts := make([]string, 0, len(list))
++		for _, o := range list {
++			switch v := o.(type) {
++			case string:
++				parts = append(parts, v)
++			case map[string]any:
++				if t := responsesStr(v["text"]); t != "" {
++					parts = append(parts, t)
++					continue
++				}
++				switch responsesStr(v["type"]) {
++				case "input_image", "encrypted_content":
++					parts = append(parts, "[image]")
++					continue
++				}
++				if raw, err := json.Marshal(v); err == nil {
++					parts = append(parts, string(raw))
++				}
++			default:
++				if raw, err := json.Marshal(v); err == nil {
++					parts = append(parts, string(raw))
++				}
++			}
++		}
++		return strings.Join(parts, "\n")
++	}
++	raw, err := json.Marshal(output)
++	if err != nil {
++		return fmt.Sprint(output)
++	}
++	return string(raw)
++}
++
++// responsesAppendToolCall 把一条 function_call 追加到 messages：能并入上一条
++// 带 tool_calls 的 assistant 消息就并入，否则新起一条 assistant 消息。
++// 并行工具调用（codex 常见）必须并进同一条 assistant 消息，上游按消息聚合。
++func responsesAppendToolCall(msgs []any, callID, name, args string) []any {
++	entry := map[string]any{
++		"id":   callID,
++		"type": "function",
++		"function": map[string]any{
++			"name":      name,
++			"arguments": args,
++		},
++	}
++	if len(msgs) > 0 {
++		if last, ok := msgs[len(msgs)-1].(map[string]any); ok && responsesStr(last["role"]) == "assistant" {
++			if prev, ok := last["tool_calls"].([]any); ok {
++				last["tool_calls"] = append(prev, entry)
++				return msgs
++			}
++		}
++	}
++	// content: null —— 与参考实现同口径（assistant + tool_calls 不带文本时
++	// 用 null 而不是空串，上游对两者的处理不一致）。
++	return append(msgs, map[string]any{
++		"role":       "assistant",
++		"content":    nil,
++		"tool_calls": []any{entry},
++	})
++}
++
++// responsesMergeable 判断两条相邻消息能否合并：同角色、都是裸文本 content、都不带 tool_calls。
++// Responses 的 input 常把同一条 user 消息拆成多个 message item，逐条透传会让上游
++// 以为有多轮，合并后语义更接近原意。
++//
++// 两条**必须**排除的情形：
++//   - 带 tool_calls 的 assistant 消息：并入会把并行调用与后续结果错位；
++//   - role=tool 的消息：每条只对应用一个 tool_call_id，合并即丢 id
++//     （codex 并行工具调用必然产生连续的多条 function_call_output）。
++//   - role=assistant 的**纯文本**歷史消息：合并会让上游把多轮回答看成一条。
++func responsesMergeable(a, b map[string]any) bool {
++	role := responsesStr(a["role"])
++	if role != responsesStr(b["role"]) {
++		return false
++	}
++	if role == "tool" || a["tool_call_id"] != nil || b["tool_call_id"] != nil {
++		return false
++	}
++	if role == "assistant" {
++		return false
++	}
++	if a["tool_calls"] != nil || b["tool_calls"] != nil {
++		return false
++	}
++	_, aText := a["content"].(string)
++	_, bText := b["content"].(string)
++	return aText && bText
++}
++
++// responsesMessages 把 Responses 的 instructions + input 翻译成 chat 的 messages。
++func responsesMessages(body map[string]any) []any {
++	msgs := []any{}
++	push := func(m map[string]any) {
++		if m == nil {
++			return
++		}
++		if len(msgs) > 0 {
++			if last, ok := msgs[len(msgs)-1].(map[string]any); ok && responsesMergeable(last, m) {
++				l, _ := last["content"].(string)
++				c, _ := m["content"].(string)
++				switch {
++				case l != "" && c != "":
++					last["content"] = l + "\n\n" + c
++				default:
++					last["content"] = l + c
++				}
++				return
++			}
++		}
++		msgs = append(msgs, m)
++	}
++
++	if ins := responsesStr(body["instructions"]); strings.TrimSpace(ins) != "" {
++		push(map[string]any{"role": "system", "content": ins})
++	}
++
++	input := body["input"]
++	items := []any{}
++	switch v := input.(type) {
++	case string:
++		items = append(items, v)
++	case []any:
++		items = append(items, v...)
++	case map[string]any:
++		items = append(items, v)
++	}
++
++	for _, raw := range items {
++		if s, ok := raw.(string); ok {
++			push(map[string]any{"role": "user", "content": s})
++			continue
++		}
++		item := responsesMap(raw)
++		if item == nil {
++			continue
++		}
++		switch responsesStr(item["type"]) {
++		case "message", "agent_message":
++			role := responsesStr(item["role"])
++			if role == "" {
++				role = "user"
++			}
++			if role == "developer" {
++				role = "system" // 上游不支持 developer 角色
++			}
++			push(map[string]any{"role": role, "content": responsesContentToChat(item["content"])})
++		case "function_call":
++			id := responsesStr(item["call_id"])
++			if id == "" {
++				id = responsesStr(item["id"])
++			}
++			if id == "" {
++				id = newResponsesID("call")
++			}
++			msgs = responsesAppendToolCall(msgs, id, responsesStr(item["name"]), responsesStr(item["arguments"]))
++		case "custom_tool_call":
++			id := responsesStr(item["call_id"])
++			if id == "" {
++				id = responsesStr(item["id"])
++			}
++			if id == "" {
++				id = newResponsesID("call")
++			}
++			args := responsesStr(item["input"])
++			if args == "" {
++				if raw, err := json.Marshal(item["input"]); err == nil {
++					args = string(raw)
++				}
++			}
++			msgs = responsesAppendToolCall(msgs, id, responsesStr(item["name"]), args)
++		case "function_call_output", "custom_tool_call_output":
++			id := responsesStr(item["call_id"])
++			if id == "" {
++				id = responsesStr(item["id"])
++			}
++			push(map[string]any{"role": "tool", "tool_call_id": id, "content": responsesOutputToText(item["output"])})
++		default:
++			// reasoning / web_search_call / image_generation_call / local_shell_call 等
++			// chat 协议无法表达的历史 item：安静跳过（codex 会把上一轮的这些 item 回传）。
++		}
++	}
++	return msgs
++}
++
++// responsesToolsToChat 把 Responses 的 tools 翻译成 chat 的 tools，并回填 kind：
++// 工具名 -> 原始类型（"function" / "custom"），供响应侧还原 item 形状。
++func responsesToolsToChat(tools any, kind map[string]string) []any {
++	list, _ := tools.([]any)
++	out := make([]any, 0, len(list))
++	for _, raw := range list {
++		t := responsesMap(raw)
++		if t == nil {
++			continue
++		}
++		name := responsesStr(t["name"])
++		typ := responsesStr(t["type"])
++		if name == "" || typ == "" {
++			continue
++		}
++		switch typ {
++		case "function":
++			params := t["parameters"]
++			if params == nil {
++				params = map[string]any{"type": "object", "properties": map[string]any{}}
++			}
++			kind[name] = "function"
++			out = append(out, map[string]any{
++				"type": "function",
++				"function": map[string]any{
++					"name":        name,
++					"description": responsesStr(t["description"]),
++					"parameters":  params,
++					// strict 不透传：上游不认（参考实现同结论）。
++				},
++			})
++		case "custom":
++			// chat 协议没有 custom 工具，退化成一个「单参数 input」的 function：
++			// 上游模型照样能调用，响应侧再按 kind 还原。
++			desc := strings.TrimSpace(responsesStr(t["description"]) + "\n\n(该工具接收一个名为 input 的原始字符串参数。)")
++			kind[name] = "custom"
++			out = append(out, map[string]any{
++				"type": "function",
++				"function": map[string]any{
++					"name":        name,
++					"description": desc,
++					"parameters": map[string]any{
++						"type": "object",
++						"properties": map[string]any{
++							"input": map[string]any{"type": "string", "description": "工具原始输入内容"},
++						},
++						"required": []any{"input"},
++					},
++				},
++			})
++		default:
++			// web_search / local_shell / mcp 等 chat 无法表达的工具类型：丢弃。
++		}
++	}
++	return out
++}
++
++// responsesToolChoiceToChat 翻译 tool_choice；nil 表示不带该字段。
++func responsesToolChoiceToChat(tc any, kind map[string]string) any {
++	if tc == nil {
++		return nil
++	}
++	if s, ok := tc.(string); ok {
++		return s
++	}
++	m := responsesMap(tc)
++	if m == nil {
++		return "auto"
++	}
++	switch responsesStr(m["type"]) {
++	case "function", "custom":
++		name := responsesStr(m["name"])
++		if name != "" {
++			if _, ok := kind[name]; !ok {
++				return nil // 指定了不存在的工具：不带，避免上游报错
++			}
++		}
++		return map[string]any{"type": "function", "function": map[string]any{"name": name}}
++	case "allowed_tools":
++		return "auto"
++	}
++	return "auto"
++}
++
++// responsesRequestToChat 把 Responses 请求体整体翻译成 chat/completions 请求体。
++func responsesRequestToChat(body map[string]any) (map[string]any, map[string]string) {
++	kind := map[string]string{}
++	chat := map[string]any{
++		"model":    body["model"],
++		"messages": responsesMessages(body),
++	}
++	// 默认流式：codex 一律 stream=true，缺省成流式更贴合调用方预期。
++	if v, ok := body["stream"].(bool); ok {
++		chat["stream"] = v
++	} else {
++		chat["stream"] = true
++	}
++
++	if tools := responsesToolsToChat(body["tools"], kind); len(tools) > 0 {
++		chat["tools"] = tools
++		if choice := responsesToolChoiceToChat(body["tool_choice"], kind); choice != nil {
++			chat["tool_choice"] = choice
++		}
++		if v, ok := body["parallel_tool_calls"].(bool); ok {
++			chat["parallel_tool_calls"] = v
++		}
++	}
++
++	maxOut := responsesNum(body["max_output_tokens"])
++	if maxOut == 0 {
++		maxOut = responsesNum(body["max_tokens"])
++	}
++	if maxOut > 0 {
++		chat["max_tokens"] = int(maxOut)
++	}
++
++	// json_schema 结构化输出：尽力而为地降级成 chat 的 json_object。
++	if text := responsesMap(body["text"]); text != nil {
++		if format := responsesMap(text["format"]); format != nil && responsesStr(format["type"]) == "json_schema" {
++			chat["response_format"] = map[string]any{"type": "json_object"}
++		}
++	}
++
++	return chat, kind
++}
++
++/* ------------------------------------------------------------------ */
++/* 响应翻译：Chat -> Responses                                          */
++/* ------------------------------------------------------------------ */
++
++// responsesUsage 把 chat 的 usage 映射成 Responses 的 usage 形状。
++func responsesUsage(u any) map[string]any {
++	m := responsesMap(u)
++	prompt := responsesNum(m["prompt_tokens"])
++	if prompt == 0 {
++		prompt = responsesNum(m["input_tokens"])
++	}
++	completion := responsesNum(m["completion_tokens"])
++	if completion == 0 {
++		completion = responsesNum(m["output_tokens"])
++	}
++	cached := responsesNum(responsesMap(m["prompt_tokens_details"])["cached_tokens"])
++	reasoning := responsesNum(responsesMap(m["completion_tokens_details"])["reasoning_tokens"])
++	total := responsesNum(m["total_tokens"])
++	if total == 0 {
++		total = prompt + completion
++	}
++	return map[string]any{
++		"input_tokens":          int(prompt),
++		"input_tokens_details":  map[string]any{"cached_tokens": int(cached)},
++		"output_tokens":         int(completion),
++		"output_tokens_details": map[string]any{"reasoning_tokens": int(reasoning)},
++		"total_tokens":          int(total),
++	}
++}
++
++// responsesEnvelope 组装 Response 对象（非流式响应体 与 流式 response.created /
++// response.completed 的 response 字段共用同一形状）。
++func responsesEnvelope(id, model string, items []any, usage any, status string) map[string]any {
++	if items == nil {
++		items = []any{}
++	}
++	return map[string]any{
++		"id":                  id,
++		"object":              "response",
++		"created_at":          time.Now().Unix(),
++		"status":              status,
++		"model":               model,
++		"output":              items,
++		"usage":               responsesUsage(usage),
++		"parallel_tool_calls": true,
++		"tool_choice":         "auto",
++		"tools":               []any{},
++	}
++}
++
++// responsesItemsFromChatMessage 把 chat 的 message（非流式 choices[0].message）
++// 转成 Responses 的 output items。
++func responsesItemsFromChatMessage(msg map[string]any, kind map[string]string) []any {
++	items := []any{}
++	text := responsesStr(msg["content"])
++	if text == "" && msg["content"] != nil {
++		text = responsesOutputToText(msg["content"])
++	}
++	if text != "" {
++		items = append(items, map[string]any{
++			"type":    "message",
++			"id":      newResponsesID("msg"),
++			"role":    "assistant",
++			"content": []any{map[string]any{"type": "output_text", "text": text}},
++		})
++	}
++	if calls, ok := msg["tool_calls"].([]any); ok {
++		for _, raw := range calls {
++			tc := responsesMap(raw)
++			if tc == nil {
++				continue
++			}
++			fn := responsesMap(tc["function"])
++			name := responsesStr(fn["name"])
++			if name == "" {
++				name = responsesStr(tc["name"])
++			}
++			args := responsesStr(fn["arguments"])
++			if args == "" {
++				args = responsesStr(tc["arguments"])
++			}
++			callID := responsesStr(tc["id"])
++			if callID == "" {
++				callID = newResponsesID("call")
++			}
++			items = append(items, map[string]any{
++				"type":      "function_call",
++				"id":        newResponsesID("fc"),
++				"name":      name,
++				"call_id":   callID,
++				"arguments": args,
++			})
++		}
++	}
++	return items
++}
++
++// responsesFirstChoiceMessage 取 choices[0].message（非流式聚合响应）。
++func responsesFirstChoiceMessage(resp map[string]any) map[string]any {
++	choices, ok := resp["choices"].([]any)
++	if !ok || len(choices) == 0 {
++		return nil
++	}
++	return responsesMap(responsesMap(choices[0])["message"])
++}
++
++/* ------------------------------------------------------------------ */
++/* 流式翻译：chat SSE -> Responses 事件流                                */
++/* ------------------------------------------------------------------ */
++
++// responsesToolCall 是流式 tool_calls 的累积状态（参数分片拼接）。
++type responsesToolCall struct {
++	ID   string
++	Name string
++	Args strings.Builder
++}
++
++// responsesStream 把上游 chat SSE 帧实时翻译成 Responses 事件。
++type responsesStream struct {
++	w       http.ResponseWriter
++	flusher http.Flusher
++	id      string
++	model   string
++	seq     int
++
++	msgID       string
++	textStarted bool
++	text        strings.Builder
++	calls       map[int]*responsesToolCall
++	callOrder   []int
++	usage       any
++	finish      string
++	finished    bool
++	buf         []byte
++}
++
++func newResponsesStream(w http.ResponseWriter, fl http.Flusher, id, model string) *responsesStream {
++	return &responsesStream{
++		w:       w,
++		flusher: fl,
++		id:      id,
++		model:   model,
++		msgID:   newResponsesID("msg"),
++		calls:   map[int]*responsesToolCall{},
++	}
++}
++
++// event 写一帧 Responses SSE（event: <type> + data: <payload>），并立即 flush。
++func (s *responsesStream) event(typ string, fields map[string]any) {
++	s.seq++
++	payload := make(map[string]any, len(fields)+2)
++	payload["type"] = typ
++	payload["sequence_number"] = s.seq
++	for k, v := range fields {
++		payload[k] = v
++	}
++	raw, err := json.Marshal(payload)
++	if err != nil {
++		return
++	}
++	if _, err := fmt.Fprintf(s.w, "event: %s\ndata: %s\n\n", typ, raw); err != nil {
++		return
++	}
++	if s.flusher != nil {
++		s.flusher.Flush()
++	}
++}
++
++// start 发出流的首帧 response.created（此时 output 为空、状态 in_progress）。
++func (s *responsesStream) start() {
++	s.event("response.created", map[string]any{
++		"response": map[string]any{
++			"id":         s.id,
++			"object":     "response",
++			"created_at": time.Now().Unix(),
++			"status":     "in_progress",
++			"model":      s.model,
++			"output":     []any{},
++		},
++	})
++}
++
++// feed 累积字节流并按行切分（SSE 以 \n 分行，帧内不含裸换行）。
++func (s *responsesStream) feed(p []byte) {
++	s.buf = append(s.buf, p...)
++	for {
++		i := bytes.IndexByte(s.buf, '\n')
++		if i < 0 {
++			return
++		}
++		line := strings.TrimRight(string(s.buf[:i]), "\r")
++		// 显式 copy（而不是 append(s.buf[:0], rest...)）：源与目标重叠时语义最清楚。
++		n := copy(s.buf, s.buf[i+1:])
++		s.buf = s.buf[:n]
++		s.line(line)
++	}
++}
++
++// line 处理一行 SSE：只认 data: 帧，注释/其它行忽略。
++func (s *responsesStream) line(line string) {
++	if line == "" || strings.HasPrefix(line, ":") || !strings.HasPrefix(line, "data:") {
++		return
++	}
++	data := strings.TrimSpace(line[len("data:"):])
++	if data == "" || data == "[DONE]" {
++		return
++	}
++	var obj map[string]any
++	if err := json.Unmarshal([]byte(data), &obj); err != nil {
++		return // 非 JSON 帧（如上游心跳/纯文本）：忽略，不影响已翻译内容
++	}
++	if e, ok := obj["error"].(map[string]any); ok {
++		// 上游中途错误帧（限流/审核/型号不可用）：按 Responses 规约发 error 事件。
++		// 不在此终止：内容可能已部分下发，末尾仍发 response.completed，让客户端
++		// 无论如何都能正常收尾（不会卡在"流没结束"的超时上）。
++		s.event("error", map[string]any{
++			"code":    responsesStr(e["code"]),
++			"message": responsesStr(e["message"]),
++			"param":   nil,
++		})
++		return
++	}
++	s.chunk(obj)
++}
++
++// chunk 处理一个 chat completion chunk。
++func (s *responsesStream) chunk(obj map[string]any) {
++	if u, ok := obj["usage"]; ok && u != nil {
++		s.usage = u
++	}
++	choices, ok := obj["choices"].([]any)
++	if !ok || len(choices) == 0 {
++		return
++	}
++	choice := responsesMap(choices[0])
++	if choice == nil {
++		return
++	}
++	if d := responsesMap(choice["delta"]); d != nil {
++		s.delta(d)
++	}
++	if m := responsesMap(choice["message"]); m != nil {
++		s.delta(m)
++	}
++	if fr := responsesStr(choice["finish_reason"]); fr != "" {
++		s.finish = fr
++	}
++}
++
++// delta 处理增量：文本 / 工具调用分片。
++func (s *responsesStream) delta(d map[string]any) {
++	if text := responsesStr(d["content"]); text != "" {
++		if !s.textStarted {
++			// codex 要求 delta 之前先有 active item，否则每帧都往 stderr 刷
++			// "OutputTextDelta without active item"（噪音，不影响结果）。
++			s.event("response.output_item.added", map[string]any{
++				"output_index": 0,
++				"item": map[string]any{
++					"type":    "message",
++					"id":      s.msgID,
++					"role":    "assistant",
++					"content": []any{},
++				},
++			})
++		}
++		s.textStarted = true
++		s.text.WriteString(text)
++		s.event("response.output_text.delta", map[string]any{
++			"item_id":       s.msgID,
++			"output_index":  0,
++			"content_index": 0,
++			"delta":         text,
++		})
++	}
++	calls, ok := d["tool_calls"].([]any)
++	if !ok {
++		return
++	}
++	for _, raw := range calls {
++		tc := responsesMap(raw)
++		if tc == nil {
++			continue
++		}
++		idx := len(s.calls)
++		if v, ok := tc["index"]; ok {
++			idx = int(responsesNum(v))
++		}
++		entry := s.calls[idx]
++		if entry == nil {
++			entry = &responsesToolCall{}
++			s.calls[idx] = entry
++			s.callOrder = append(s.callOrder, idx)
++		}
++		if id := responsesStr(tc["id"]); id != "" {
++			entry.ID = id
++		}
++		fn := responsesMap(tc["function"])
++		if name := responsesStr(fn["name"]); name != "" {
++			// 工具名可能被上游切成多片，且中间片可能与已累积内容重叠（"get_weather"
++			// 分片成 "get_" + "weather"），只在后缀不匹配时拼接。
++			switch {
++			case entry.Name == "":
++				entry.Name = name
++			case name != entry.Name && !strings.HasSuffix(entry.Name, name):
++				entry.Name += name
++			}
++		}
++		if args := responsesStr(fn["arguments"]); args != "" {
++			entry.Args.WriteString(args)
++		}
++	}
++}
++
++// finalize 收尾：output_item.done* + response.completed。幂等。
++func (s *responsesStream) finalize() {
++	if s.finished {
++		return
++	}
++	s.finished = true
++
++	items := []any{}
++	out := 0
++	if s.textStarted {
++		item := map[string]any{
++			"type":    "message",
++			"id":      s.msgID,
++			"role":    "assistant",
++			"content": []any{map[string]any{"type": "output_text", "text": s.text.String()}},
++		}
++		items = append(items, item)
++		s.event("response.output_item.done", map[string]any{"output_index": out, "item": item})
++		out++
++	}
++
++	sort.Ints(s.callOrder)
++	for _, idx := range s.callOrder {
++		call := s.calls[idx]
++		if call == nil || call.Name == "" {
++			continue
++		}
++		callID := call.ID
++		if callID == "" {
++			callID = newResponsesID("call")
++		}
++		args := call.Args.String()
++		if strings.TrimSpace(args) == "" {
++			args = "{}"
++		}
++		item := map[string]any{
++			"type":      "function_call",
++			"id":        newResponsesID("fc"),
++			"name":      call.Name,
++			"call_id":   callID,
++			"arguments": args,
++		}
++		items = append(items, item)
++		s.event("response.output_item.done", map[string]any{"output_index": out, "item": item})
++		out++
++	}
++
++	s.event("response.completed", map[string]any{
++		"response": responsesEnvelope(s.id, s.model, items, s.usage, "completed"),
++	})
++}
++
++/* ------------------------------------------------------------------ */
++/* HTTP 层                                                              */
++/* ------------------------------------------------------------------ */
++
++// responsesWriter 是交给内部 chatCompletions 的「翻译型 ResponseWriter」：
++// chat 侧以为自己在对客户端写 chat 协议，实际每一帧都被翻译成 Responses 协议。
++//
++// 三条路径：
++//   - chat 写 text/event-stream（流式）→ 起 responsesStream，逐帧翻译 + flush；
++//   - chat 写 application/json（非流式成功）→ 缓冲，结束后整体转成 Response 对象；
++//   - chat 写非 200（调度/上游错误）→ 原样透出状态与错误体（已是 OpenAI 形状，
++//     codex 能直接展示 message，不必再包一层）。
++type responsesWriter struct {
++	real    http.ResponseWriter
++	flusher http.Flusher
++	kind    map[string]string
++	model   string
++	id      string
++
++	hdr         http.Header
++	status      int
++	wroteHeader bool
++
++	stream      *responsesStream
++	started     bool
++	jsonBuf     bytes.Buffer
++	passthrough bool
++	done        bool
++}
++
++func newResponsesWriter(w http.ResponseWriter, kind map[string]string, model string) *responsesWriter {
++	fl, _ := w.(http.Flusher)
++	return &responsesWriter{
++		real:    w,
++		flusher: fl,
++		kind:    kind,
++		model:   model,
++		id:      newResponsesID("resp"),
++		hdr:     http.Header{},
++	}
++}
++
++func (s *responsesWriter) Header() http.Header { return s.hdr }
++
++func (s *responsesWriter) WriteHeader(code int) {
++	if s.wroteHeader {
++		return
++	}
++	s.wroteHeader = true
++	s.status = code
++	if code == http.StatusOK {
++		return // 200 的具体形态（SSE / JSON）在首次 Write 时按 Content-Type 判定
++	}
++	s.passthrough = true
++	dst := s.real.Header()
++	for k, vv := range s.hdr {
++		dst[k] = vv
++	}
++	s.real.WriteHeader(code)
++}
++
++func (s *responsesWriter) Write(p []byte) (int, error) {
++	if s.passthrough {
++		return s.real.Write(p)
++	}
++	if s.started {
++		s.stream.feed(p)
++		return len(p), nil
++	}
++	if strings.Contains(s.hdr.Get("Content-Type"), "text/event-stream") {
++		s.startStream()
++		s.stream.feed(p)
++		return len(p), nil
++	}
++	s.jsonBuf.Write(p)
++	return len(p), nil
++}
++
++func (s *responsesWriter) Flush() {
++	if s.flusher != nil {
++		s.flusher.Flush()
++	}
++}
++
++// startStream 切换到 Responses 事件流：设定客户端可见的头，再发 response.created。
++func (s *responsesWriter) startStream() {
++	s.started = true
++	dst := s.real.Header()
++	// 不照抄 chat 侧的 Content-Type（text/event-stream 不带 charset），
++	// 也没有必要把 X-Accel-Buffering 之类逐条复制：这是网关对外的协议。
++	dst.Set("Content-Type", "text/event-stream; charset=utf-8")
++	dst.Set("Cache-Control", "no-cache, no-transform")
++	dst.Set("Connection", "keep-alive")
++	dst.Set("X-Accel-Buffering", "no")
++	s.real.WriteHeader(http.StatusOK)
++	s.stream = newResponsesStream(s.real, s.flusher, s.id, s.model)
++	s.stream.start()
++}
++
++// finish 在内部 chat 调用返回后调用：补齐非流式转换或流式收尾。
++func (s *responsesWriter) finish() {
++	if s.done || s.passthrough {
++		return
++	}
++	s.done = true
++
++	if s.started {
++		s.stream.finalize()
++		return
++	}
++
++	if s.jsonBuf.Len() > 0 {
++		var chatResp map[string]any
++		if err := json.Unmarshal(s.jsonBuf.Bytes(), &chatResp); err != nil {
++			s.writeError(http.StatusBadGateway, "upstream_parse", "upstream returned invalid JSON: "+err.Error())
++			return
++		}
++		items := responsesItemsFromChatMessage(responsesFirstChoiceMessage(chatResp), s.kind)
++		env := responsesEnvelope(s.id, s.model, items, chatResp["usage"], "completed")
++		raw, err := json.Marshal(env)
++		if err != nil {
++			s.writeError(http.StatusBadGateway, "upstream_parse", err.Error())
++			return
++		}
++		s.real.Header().Set("Content-Type", "application/json")
++		s.real.WriteHeader(http.StatusOK)
++		_, _ = s.real.Write(raw)
++		return
++	}
++
++	// chat 链路既没给状态也没给内容（理论上不会发生）：按不可用收尾。
++	s.writeError(http.StatusServiceUnavailable, "no_healthy_account",
++		"all accounts are temporarily unavailable, please retry later")
++}
++
++func (s *responsesWriter) writeError(status int, code, msg string) {
++	raw, _ := json.Marshal(map[string]any{
++		"error": map[string]any{"message": msg, "type": "api_error", "code": code},
++	})
++	s.real.Header().Set("Content-Type", "application/json")
++	s.real.WriteHeader(status)
++	_, _ = s.real.Write(raw)
++}
++
++// responses 是 POST /v1/responses 的入口：翻译请求 → 复用 chat 链路 → 翻译响应。
++func (h *Handler) responses(w http.ResponseWriter, r *http.Request) {
++	raw, err := io.ReadAll(r.Body)
++	if err != nil {
++		writeOpenAIError(w, http.StatusBadRequest, "invalid_request", "read body: "+err.Error())
++		return
++	}
++	var body map[string]any
++	if err := json.Unmarshal(raw, &body); err != nil {
++		writeOpenAIError(w, http.StatusBadRequest, "invalid_request", "invalid JSON body: "+err.Error())
++		return
++	}
++	chat, kind := responsesRequestToChat(body)
++	if msgs, _ := chat["messages"].([]any); len(msgs) == 0 {
++		writeOpenAIError(w, http.StatusBadRequest, "invalid_request", "no messages after conversion")
++		return
++	}
++	model := responsesStr(chat["model"])
++	if model == "" {
++		writeOpenAIError(w, http.StatusBadRequest, "invalid_request", "missing model")
++		return
++	}
++	chatRaw, err := json.Marshal(chat)
++	if err != nil {
++		writeOpenAIError(w, http.StatusBadRequest, "invalid_request", "encode chat request: "+err.Error())
++		return
++	}
++
++	// 复用 chat 链路：只换 body 与 URL（URL 仅为语义标识，此处直调 handler 不重路由），
++	// 其余（鉴权已完成、requestTrace 挂在 context 上）原样带着走，
++	// 于是选号轮转 / 粘性 / 冷却 / 降级 / 用量 / 请求归档全部照旧生效。
++	sub := r.Clone(r.Context())
++	sub.Body = io.NopCloser(bytes.NewReader(chatRaw))
++	sub.ContentLength = int64(len(chatRaw))
++	sub.URL.Path = "/v1/chat/completions"
++
++	shim := newResponsesWriter(w, kind, model)
++	defer shim.finish()
++	h.chatCompletions(shim, sub)
++}
+diff --git a/internal/server/responses_test.go b/internal/server/responses_test.go
+new file mode 100644
+index 0000000..9b92410
+--- /dev/null
++++ b/internal/server/responses_test.go
+@@ -0,0 +1,498 @@
++package server
++
++import (
++	"encoding/json"
++	"io"
++	"net/http"
++	"net/http/httptest"
++	"strings"
++	"testing"
++
++	"github.com/linguo2625469/workbuddy2api-panel/internal/auth"
++	"github.com/linguo2625469/workbuddy2api-panel/internal/upstream"
++)
++
++// capturedUpstream 记录上游真正收到的 chat 请求（用于断言「responses 请求被正确翻译」）。
++type capturedUpstream struct {
++	path string
++	body map[string]any
++}
++
++func newCapturingUpstream(t *testing.T, sse string, cap *capturedUpstream) *upstream.Client {
++	t.Helper()
++	return &upstream.Client{
++		HTTP: &http.Client{Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
++			cap.path = r.URL.Path
++			raw, _ := io.ReadAll(r.Body)
++			_ = json.Unmarshal(raw, &cap.body)
++			return &http.Response{
++				StatusCode: 200,
++				Header:     http.Header{"Content-Type": []string{"text/event-stream"}},
++				Body:       io.NopCloser(strings.NewReader(sse)),
++			}, nil
++		})},
++		ChatBaseCN:    "https://fake.example",
++		BillingBaseCN: "https://fake.example",
++	}
++}
++
++// parseResponsesSSE 把 /v1/responses 的输出拆成事件对象列表。
++func parseResponsesSSE(t *testing.T, raw string) []map[string]any {
++	t.Helper()
++	out := []map[string]any{}
++	for _, block := range strings.Split(raw, "\n\n") {
++		data := ""
++		for _, line := range strings.Split(strings.TrimSpace(block), "\n") {
++			if strings.HasPrefix(line, "data:") {
++				data = strings.TrimSpace(strings.TrimPrefix(line, "data:"))
++			}
++		}
++		if data == "" || data == "[DONE]" {
++			continue
++		}
++		var obj map[string]any
++		if err := json.Unmarshal([]byte(data), &obj); err != nil {
++			t.Fatalf("bad SSE payload %q: %v", data, err)
++		}
++		out = append(out, obj)
++	}
++	return out
++}
++
++func responsesHandler(t *testing.T, up *upstream.Client) *Handler {
++	t.Helper()
++	p := testPoolWith(&auth.Auth{UID: "u1", AccessToken: "at1", ExpiresAt: 9999999999})
++	return NewHandler(Config{Pool: p, Upstream: up})
++}
++
++func postResponses(t *testing.T, h *Handler, body string) *httptest.ResponseRecorder {
++	t.Helper()
++	rec := httptest.NewRecorder()
++	h.ServeHTTP(rec, httptest.NewRequest("POST", "/v1/responses", strings.NewReader(body)))
++	return rec
++}
++
++/* ------------------------------ 请求翻译 ------------------------------ */
++
++func TestResponsesRequestToChat(t *testing.T) {
++	body := map[string]any{
++		"model":             "glm-5.2",
++		"instructions":      "你是助手",
++		"max_output_tokens": float64(1234),
++		"input": []any{
++			map[string]any{"type": "message", "role": "user", "content": []any{
++				map[string]any{"type": "input_text", "text": "第一段"},
++			}},
++			map[string]any{"type": "message", "role": "user", "content": []any{
++				map[string]any{"type": "input_text", "text": "第二段"},
++			}},
++			map[string]any{"type": "reasoning", "id": "rs_1", "summary": []any{}},
++			map[string]any{"type": "function_call", "call_id": "call_a", "name": "shell", "arguments": "{\"cmd\":\"ls\"}"},
++			map[string]any{"type": "function_call", "call_id": "call_b", "name": "shell", "arguments": "{\"cmd\":\"pwd\"}"},
++			map[string]any{"type": "function_call_output", "call_id": "call_a", "output": "a.txt"},
++			map[string]any{"type": "function_call_output", "call_id": "call_b", "output": []any{
++				map[string]any{"type": "input_text", "text": "/home"},
++			}},
++		},
++		"tools": []any{
++			map[string]any{"type": "function", "name": "shell", "description": "run", "parameters": map[string]any{"type": "object"}, "strict": true},
++			map[string]any{"type": "custom", "name": "apply_patch", "description": "patch"},
++			map[string]any{"type": "web_search"},
++		},
++		"tool_choice": map[string]any{"type": "function", "name": "shell"},
++		"text": map[string]any{"format": map[string]any{
++			"type": "json_schema", "name": "x", "schema": map[string]any{"type": "object"},
++		}},
++	}
++
++	chat, kind := responsesRequestToChat(body)
++
++	if chat["stream"] != true {
++		t.Errorf("stream default = %v, want true", chat["stream"])
++	}
++	if chat["max_tokens"] != 1234 {
++		t.Errorf("max_tokens = %v, want 1234 (上游只认 max_tokens)", chat["max_tokens"])
++	}
++	if _, has := chat["reasoning_effort"]; has {
++		t.Errorf("reasoning_effort 不应出现在 chat 请求里")
++	}
++	if rf, _ := chat["response_format"].(map[string]any); responsesStr(rf["type"]) != "json_object" {
++		t.Errorf("json_schema 应降级为 json_object，得到 %v", chat["response_format"])
++	}
++
++	msgs, _ := chat["messages"].([]any)
++	wantRoles := []string{"system", "user", "assistant", "tool", "tool"}
++	if len(msgs) != len(wantRoles) {
++		t.Fatalf("messages len = %d want %d: %s", len(msgs), len(wantRoles), dump(chat["messages"]))
++	}
++	for i, want := range wantRoles {
++		if got := responsesStr(msgs[i].(map[string]any)["role"]); got != want {
++			t.Errorf("messages[%d].role = %q want %q", i, got, want)
++		}
++	}
++	// 相邻同角色纯文本合并（Responses 常把一条 user 消息拆成多个 item）。
++	if got := responsesStr(msgs[1].(map[string]any)["content"]); got != "第一段\n\n第二段" {
++		t.Errorf("合并后的 user content = %q", got)
++	}
++	// 并行工具调用必须并进同一条 assistant 消息。
++	calls, _ := msgs[2].(map[string]any)["tool_calls"].([]any)
++	if len(calls) != 2 {
++		t.Errorf("tool_calls = %d want 2 (并行调用须同一条 assistant 消息)", len(calls))
++	}
++	if msgs[2].(map[string]any)["content"] != nil {
++		t.Errorf("assistant(tool_calls) 的 content 应为 null")
++	}
++	// tool 消息绝不能合并：各自绑自己的 tool_call_id。
++	if got := responsesStr(msgs[3].(map[string]any)["tool_call_id"]); got != "call_a" {
++		t.Errorf("messages[3].tool_call_id = %q want call_a", got)
++	}
++	if got := responsesStr(msgs[4].(map[string]any)["tool_call_id"]); got != "call_b" {
++		t.Errorf("messages[4].tool_call_id = %q want call_b", got)
++	}
++	if got := responsesStr(msgs[4].(map[string]any)["content"]); got != "/home" {
++		t.Errorf("tool 输出解析 = %q want /home", got)
++	}
++
++	// 工具：function 透传（strict 剥离）、custom 降级成单参数 input、web_search 丢弃。
++	tools, _ := chat["tools"].([]any)
++	if len(tools) != 2 {
++		t.Fatalf("tools = %d want 2: %s", len(tools), dump(chat["tools"]))
++	}
++	fn := tools[0].(map[string]any)["function"].(map[string]any)
++	if _, has := fn["strict"]; has {
++		t.Errorf("strict 不应透传给上游")
++	}
++	if kind["shell"] != "function" || kind["apply_patch"] != "custom" {
++		t.Errorf("kind = %v", kind)
++	}
++	patch := tools[1].(map[string]any)["function"].(map[string]any)
++	props := patch["parameters"].(map[string]any)["properties"].(map[string]any)
++	if _, has := props["input"]; !has {
++		t.Errorf("custom 工具应降级成单参数 input: %v", patch["parameters"])
++	}
++	if tc, _ := chat["tool_choice"].(map[string]any); responsesStr(tc["type"]) != "function" {
++		t.Errorf("tool_choice = %v", chat["tool_choice"])
++	}
++}
++
++func TestResponsesRequestToChatDeveloperAndCustomCall(t *testing.T) {
++	chat, _ := responsesRequestToChat(map[string]any{
++		"model": "glm-5.2",
++		"input": []any{
++			map[string]any{"type": "message", "role": "developer", "content": "规则"},
++			map[string]any{"type": "custom_tool_call", "call_id": "call_c", "name": "apply_patch", "input": "*** Begin Patch"},
++			map[string]any{"type": "custom_tool_call_output", "call_id": "call_c", "output": "done"},
++			"裸字符串输入",
++		},
++	})
++	msgs, _ := chat["messages"].([]any)
++	if len(msgs) != 4 {
++		t.Fatalf("messages = %s", dump(chat["messages"]))
++	}
++	// developer 降级为 system（上游不支持 developer 角色）。
++	if got := responsesStr(msgs[0].(map[string]any)["role"]); got != "system" {
++		t.Errorf("developer 应降级为 system，得到 %q", got)
++	}
++	// custom_tool_call 也进 assistant.tool_calls，custom_tool_call_output 进 tool。
++	calls, _ := msgs[1].(map[string]any)["tool_calls"].([]any)
++	if len(calls) != 1 {
++		t.Fatalf("custom_tool_call 未翻译: %s", dump(msgs[1]))
++	}
++	if got := responsesStr(msgs[2].(map[string]any)["role"]); got != "tool" {
++		t.Errorf("custom_tool_call_output 应转 tool，得到 %q", got)
++	}
++	if got := responsesStr(msgs[3].(map[string]any)["content"]); got != "裸字符串输入" {
++		t.Errorf("裸字符串 input 应成为 user 文本，得到 %q", got)
++	}
++}
++
++/* ------------------------------ 端到端：流式 ------------------------------ */
++
++func TestResponsesStreamEndToEnd(t *testing.T) {
++	cap := &capturedUpstream{}
++	h := responsesHandler(t, newCapturingUpstream(t, sseOK, cap))
++
++	rec := postResponses(t, h, `{"model":"glm-5.2","stream":true,"instructions":"sys",
++		"input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"你好"}]}],
++		"max_output_tokens":64}`)
++
++	if rec.Code != http.StatusOK {
++		t.Fatalf("code = %d body = %s", rec.Code, rec.Body.String())
++	}
++	if ct := rec.Header().Get("Content-Type"); !strings.HasPrefix(ct, "text/event-stream") {
++		t.Errorf("Content-Type = %q, want text/event-stream", ct)
++	}
++	events := parseResponsesSSE(t, rec.Body.String())
++	types := make([]string, 0, len(events))
++	for _, e := range events {
++		types = append(types, responsesStr(e["type"]))
++	}
++	want := []string{
++		"response.created",
++		"response.output_item.added",
++		"response.output_text.delta",
++		"response.output_item.done",
++		"response.completed",
++	}
++	if strings.Join(types, ",") != strings.Join(want, ",") {
++		t.Fatalf("事件序 = %v want %v", types, want)
++	}
++	for i, e := range events {
++		if got := int(responsesNum(e["sequence_number"])); got != i+1 {
++			t.Errorf("events[%d].sequence_number = %d want %d", i, got, i+1)
++		}
++	}
++	if got := responsesStr(events[2]["delta"]); got != "你好" {
++		t.Errorf("delta = %q want 你好", got)
++	}
++	if id := responsesStr(events[0]["response"].(map[string]any)["id"]); id == "" {
++		t.Errorf("response.created 缺 id")
++	}
++	done := events[3]["item"].(map[string]any)
++	if responsesStr(done["type"]) != "message" || responsesStr(done["role"]) != "assistant" {
++		t.Errorf("output_item.done = %s", dump(done))
++	}
++	envelope := events[4]["response"].(map[string]any)
++	if responsesStr(envelope["status"]) != "completed" {
++		t.Errorf("status = %v", envelope["status"])
++	}
++	out, _ := envelope["output"].([]any)
++	if len(out) != 1 {
++		t.Fatalf("output = %s", dump(envelope["output"]))
++	}
++	content, _ := out[0].(map[string]any)["content"].([]any)
++	if got := responsesStr(responsesMap(content[0])["text"]); got != "你好" {
++		t.Errorf("output text = %q want 你好", got)
++	}
++	usage := envelope["usage"].(map[string]any)
++	if responsesNum(usage["input_tokens"]) != 1 || responsesNum(usage["output_tokens"]) != 1 || responsesNum(usage["total_tokens"]) != 2 {
++		t.Errorf("usage = %s", dump(usage))
++	}
++
++	// 上游必须收到的是「翻译后的 chat 请求」。
++	if !strings.HasSuffix(cap.path, "/chat/completions") {
++		t.Errorf("上游 path = %q", cap.path)
++	}
++	if cap.body["model"] != "glm-5.2" || cap.body["stream"] != true {
++		t.Errorf("上游 body = %s", dump(cap.body))
++	}
++	if cap.body["max_tokens"] != float64(64) {
++		t.Errorf("上游 max_tokens = %v", cap.body["max_tokens"])
++	}
++	upMsgs, _ := cap.body["messages"].([]any)
++	if len(upMsgs) != 2 || responsesStr(upMsgs[0].(map[string]any)["role"]) != "system" {
++		t.Errorf("上游 messages = %s", dump(cap.body["messages"]))
++	}
++}
++
++func TestResponsesStreamToolCall(t *testing.T) {
++	// 上游把工具参数分两片下发（真实 WorkBuddy 上游会保留首帧的工具名、累加 arguments，
++	// 所以这里只断言参数累加与 item 形状；「工具名跨帧分片」的拼接逻辑用下面
++	// TestResponsesToolNameSpansFrames 直接喂 responsesStream 验证）。
++	sse := "data: {\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"call_1\",\"type\":\"function\",\"function\":{\"name\":\"get_weather\",\"arguments\":\"{\\\"city\\\"\"}}]}}]}\n\n" +
++		"data: {\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\":\\\"北京\\\"}\"}}]}}]}\n\n" +
++		"data: {\"choices\":[{\"index\":0,\"finish_reason\":\"tool_calls\"}],\"usage\":{\"prompt_tokens\":3,\"completion_tokens\":2,\"total_tokens\":5}}\n\n" +
++		"data: [DONE]\n\n"
++
++	cap := &capturedUpstream{}
++	h := responsesHandler(t, newCapturingUpstream(t, sse, cap))
++	rec := postResponses(t, h, `{"model":"glm-5.2","input":"天气如何"}`)
++
++	events := parseResponsesSSE(t, rec.Body.String())
++	if len(events) != 3 {
++		t.Fatalf("事件 = %s", dump(events))
++	}
++	if responsesStr(events[0]["type"]) != "response.created" || responsesStr(events[1]["type"]) != "response.output_item.done" {
++		t.Fatalf("事件序 = %s", dump(events))
++	}
++	item := events[1]["item"].(map[string]any)
++	if responsesStr(item["type"]) != "function_call" {
++		t.Fatalf("item = %s", dump(item))
++	}
++	if got := responsesStr(item["name"]); got != "get_weather" {
++		t.Errorf("工具名 = %q want get_weather", got)
++	}
++	if got := responsesStr(item["call_id"]); got != "call_1" {
++		t.Errorf("call_id = %q want call_1", got)
++	}
++	if got := responsesStr(item["arguments"]); got != `{"city":"北京"}` {
++		t.Errorf("arguments = %q（应跨帧累加）", got)
++	}
++	// 无文本时必须**不**发 output_item.added（codex 只对「没有 active item 的
++	// text delta」报警；纯工具调用流没有文本 delta，就不该凭空开 message item）。
++	for _, e := range events {
++		if responsesStr(e["type"]) == "response.output_item.added" {
++			t.Errorf("纯工具调用流不应出现 output_item.added: %s", dump(e))
++		}
++	}
++	env := events[2]["response"].(map[string]any)
++	out, _ := env["output"].([]any)
++	if len(out) != 1 || responsesStr(out[0].(map[string]any)["type"]) != "function_call" {
++		t.Errorf("output = %s", dump(env["output"]))
++	}
++}
++
++// TestResponsesToolNameSpansFrames 验证工具名跨帧分片的拼接（含上游重复整名的情形）。
++func TestResponsesToolNameSpansFrames(t *testing.T) {
++	s := newResponsesStream(httptest.NewRecorder(), nil, "resp_1", "glm-5.2")
++	s.start()
++	s.feed([]byte("data: {\"choices\":[{\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"call_1\",\"function\":{\"name\":\"get_\"}}]}}]}\n\n"))
++	s.feed([]byte("data: {\"choices\":[{\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"name\":\"weather\"}}]}}]}\n\n"))
++	s.feed([]byte("data: {\"choices\":[{\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"name\":\"get_weather\"}}]}}]}\n\n"))
++	s.finalize()
++	call := s.calls[0]
++	if call == nil {
++		t.Fatalf("未累积工具调用")
++	}
++	if call.Name != "get_weather" {
++		t.Errorf("工具名 = %q want get_weather", call.Name)
++	}
++}
++
++/* ------------------------------ 端到端：非流式 ------------------------------ */
++
++func TestResponsesNonStreamEndToEnd(t *testing.T) {
++	cap := &capturedUpstream{}
++	h := responsesHandler(t, newCapturingUpstream(t, sseOK, cap))
++	rec := postResponses(t, h, `{"model":"glm-5.2","stream":false,"input":"你好"}`)
++
++	if rec.Code != http.StatusOK {
++		t.Fatalf("code = %d body = %s", rec.Code, rec.Body.String())
++	}
++	if ct := rec.Header().Get("Content-Type"); !strings.HasPrefix(ct, "application/json") {
++		t.Errorf("Content-Type = %q want application/json", ct)
++	}
++	var env map[string]any
++	if err := json.Unmarshal(rec.Body.Bytes(), &env); err != nil {
++		t.Fatalf("响应不是 JSON: %v body=%s", err, rec.Body.String())
++	}
++	if responsesStr(env["object"]) != "response" || responsesStr(env["status"]) != "completed" {
++		t.Errorf("envelope = %s", dump(env))
++	}
++	out, _ := env["output"].([]any)
++	if len(out) != 1 || responsesStr(out[0].(map[string]any)["type"]) != "message" {
++		t.Fatalf("output = %s", dump(env["output"]))
++	}
++	content, _ := out[0].(map[string]any)["content"].([]any)
++	if got := responsesStr(responsesMap(content[0])["text"]); got != "你好" {
++		t.Errorf("text = %q", got)
++	}
++	// 注意：网关对上游**总是**用流式，客户端要非流式时由 Aggregate 在网关侧聚合，
++	// 所以上游收到的 stream 恒为 true；客户端形状只体现在回给它的响应体上。
++	if cap.body["stream"] != true {
++		t.Errorf("上游 stream = %v want true（网关总是流式拉上游）", cap.body["stream"])
++	}
++}
++
++/* ------------------------------ 错误路径 ------------------------------ */
++
++func TestResponsesBadRequests(t *testing.T) {
++	h := responsesHandler(t, newFakeUpstream(t, func(string) (int, string, bool) { return 200, sseOK, true }))
++	cases := []struct{ name, body string }{
++		{"非法 JSON", `{`},
++		{"缺 model", `{"input":"hi"}`},
++		{"缺 input", `{"model":"glm-5.2"}`},
++		{"空 input 数组", `{"model":"glm-5.2","input":[]}`},
++	}
++	for _, c := range cases {
++		rec := postResponses(t, h, c.body)
++		if rec.Code != http.StatusBadRequest {
++			t.Errorf("%s: code = %d want 400 body=%s", c.name, rec.Code, rec.Body.String())
++		}
++		var body map[string]any
++		if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
++			t.Errorf("%s: 错误体不是 JSON: %s", c.name, rec.Body.String())
++			continue
++		}
++		if _, has := body["error"]; !has {
++			t.Errorf("%s: 错误体缺 error 字段: %s", c.name, rec.Body.String())
++		}
++	}
++}
++
++func TestResponsesUpstreamErrorPassthrough(t *testing.T) {
++	// 上游整体不可用：chat 链路最终 writeOpenAIError 一个非 200，
++	// shim 必须原样透出（codex 靠 error.message 展示原因），不能包成 200。
++	h := responsesHandler(t, newFakeUpstream(t, func(string) (int, string, bool) {
++		return 403, `{"error":{"code":"11140","message":"request illegal"}}`, false
++	}))
++	rec := postResponses(t, h, `{"model":"glm-5.2","input":"你好"}`)
++	if rec.Code == http.StatusOK {
++		t.Fatalf("上游失败却回 200: %s", rec.Body.String())
++	}
++	if ct := rec.Header().Get("Content-Type"); !strings.HasPrefix(ct, "application/json") {
++		t.Errorf("Content-Type = %q", ct)
++	}
++	var body map[string]any
++	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
++		t.Fatalf("错误体不是 JSON: %s", rec.Body.String())
++	}
++	if _, has := body["error"]; !has {
++		t.Errorf("错误体缺 error: %s", rec.Body.String())
++	}
++}
++
++func TestResponsesEmptyStreamStillCompletes(t *testing.T) {
++	// 上游 200 但空流：StreamHint 会写 error 帧 + [DONE]。翻译层应透出 error 事件，
++	// 并且仍然给 response.completed（否则客户端会一直等流结束而超时）。
++	h := responsesHandler(t, newFakeUpstream(t, func(string) (int, string, bool) { return 200, "", true }))
++	rec := postResponses(t, h, `{"model":"glm-5.2","input":"你好"}`)
++	events := parseResponsesSSE(t, rec.Body.String())
++	var sawError, sawCompleted bool
++	for _, e := range events {
++		switch responsesStr(e["type"]) {
++		case "error":
++			sawError = true
++		case "response.completed":
++			sawCompleted = true
++		}
++	}
++	if !sawError || !sawCompleted {
++		t.Errorf("空流应给出 error + response.completed，实际 %s", dump(events))
++	}
++}
++
++/* ------------------------------ 纯函数 ------------------------------ */
++
++func TestResponsesMergeableRejectsToolMessages(t *testing.T) {
++	toolA := map[string]any{"role": "tool", "tool_call_id": "a", "content": "x"}
++	toolB := map[string]any{"role": "tool", "tool_call_id": "b", "content": "y"}
++	if responsesMergeable(toolA, toolB) {
++		t.Errorf("role=tool 的消息不可合并（tool_call_id 会丢）")
++	}
++	u1 := map[string]any{"role": "user", "content": "a"}
++	u2 := map[string]any{"role": "user", "content": "b"}
++	if !responsesMergeable(u1, u2) {
++		t.Errorf("相邻同角色纯文本 user 应可合并")
++	}
++	a1 := map[string]any{"role": "assistant", "content": "a"}
++	a2 := map[string]any{"role": "assistant", "content": "b"}
++	if responsesMergeable(a1, a2) {
++		t.Errorf("assistant 文本不可合并（会把多轮回答压成一条）")
++	}
++}
++
++func TestResponsesStreamDispatch(t *testing.T) {
++	// 一帧一行地喂（含跨行残留）：验证 feed 的行切分与工具参数累积。
++	s := newResponsesStream(httptest.NewRecorder(), nil, "resp_1", "glm-5.2")
++	s.start()
++	s.feed([]byte("data: {\"choices\":[{\"delta\":{\"content\":\"你\"}}]}\n"))
++	s.feed([]byte("data: {\"choices\":[{\"delta\":{\"content\":\"好\"}}]}\n\ndata: [DO"))
++	s.feed([]byte("NE]\n\n"))
++	s.finalize()
++	if s.text.String() != "你好" {
++		t.Errorf("文本累积 = %q", s.text.String())
++	}
++	if !s.finished {
++		t.Errorf("finalize 未置 finished")
++	}
++	s.finalize() // 幂等：不应 panic / 重复发帧
++}
++
++func dump(v any) string {
++	raw, err := json.Marshal(v)
++	if err != nil {
++		return "?"
++	}
++	return string(raw)
++}
