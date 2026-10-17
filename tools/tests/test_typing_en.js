@@ -241,10 +241,13 @@ section('C 开局出词、收词计分、错字反馈');
   ok(txt(sb, 'sr-status').indexOf('敲错') >= 0, '无障碍播报「敲错了」');
   ok(txt(sb, 'ln-echo').indexOf('') === 0, '输入回显存在');
 
-  /* 敲对前缀：回显 = 已输入，提示行把命中部分标出来 */
-  const pref = String(G.state.current.k).slice(0, 2);
-  G.handleChar(pref.charAt(0)); G.handleChar(pref.charAt(1));
-  eq(txt(sb, 'ln-echo'), pref, '回显 = 已输入前缀');
+  /* 敲对前缀：回显 = 已输入，提示行把命中部分标出来。
+     前缀必须**严格短于**整个词：词池用 shuffle()（Math.random）洗牌，如果首词是 "up" / "go"
+     这种两字母词，敲满两下就收词了，回显被重置成空串 —— 这条断言曾因此偶发变红（CI 抽到就随机挂）。 */
+  const key = String(G.state.current.k);
+  const n = Math.min(2, key.length - 1);
+  for (let i = 0; i < n; i++) G.handleChar(key.charAt(i));
+  eq(txt(sb, 'ln-echo'), key.slice(0, n), '回显 = 已输入前缀');
   ok($(sb, 'ln-romaji').innerHTML.indexOf('ty-hit') >= 0, '提示行区分已命中 / 待输入');
 }
 
