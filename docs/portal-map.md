@@ -41,11 +41,13 @@
 | `en/` | 英语侧（词表单元 / 阅读 / 搭配） | `.scratch` 里的 ECDICT / Gutenberg 缓存（**不入库**） | `tools/en-vocab.mjs`、`en-reading.mjs`、`en-typing.mjs` | `node tools/en-accept.mjs` |
 | `research/` | 调查报告 | `research/data.json` | `node tools/research.mjs gen` | `node tools/research.mjs check` |
 | `pi-tui/` | pi 的 TUI 增强包 `pi-tui-plus`（pi-open-tui 自有分支：footer + 模型选择器 + 网关状态） | 自身源码（15+3 个 ts，无依赖） | 无（pi 直接加载目录） | `node tools/tools.mjs check`（版本 / 包 / 清单一致） |
+| `wb2api/` | WorkBuddy2API 部署包（额度转 OpenAI / Anthropic 网关：源码 + 兼容层补丁，`compose up -d --build` 现场编译），详情页 `tools-dev/wb2api.html` | 上游 `linguo2625469/workbuddy2api-panel` rev `6b31db6` + 兼容层（`src/internal/server/{responses,messages}.go`） | 无生成器（`src/` 与 `patches/` 手工更新，步骤见包内 `UPSTREAM.md`） | `node tools/tools.mjs check`（版本从 `src/cmd/server/main.go` 的 `appVersion` 取，见 `versionFrom`） |
 | `tools-dev/` + `tools/tools.mjs` | 工具开发区的清单与下载 | `tools-dev/data.json` + `tools-dev/<page>.html` | `node tools/tools.mjs gen`、`pack <id>` | `node tools/tools.mjs check` |
 | `research/pi-changelog.html` | pi 更新履历报告（报告区里的一篇） | 本机已装 pi 的 `CHANGELOG.md`（**不在仓库里**） | `node tools/pi-changelog-gen.mjs` | `node tools/pi-changelog-gen.mjs check` |
 
 细节：
 - **真题库是「明文源 → 密文发布」管线**：`exam/data/N2/<卷>.js` → `encrypt` → `exam/data/N2/enc/*.js`（**唯一入库形态**）；运行时 `exam/exam-lock.js` 用 WebCrypto 解密（PBKDF2→KEK→DEK→HKDF→AES-GCM→inflate）。`exam/data/N2/index-lite.js` 是明文常驻例外（只有卷/题型/题数）。**部署只能经 git，绝不能整目录上传**（明文仍躺在工作区）。
+- **工具区**：`tools-dev/data.json` 是清单真源；版本默认取 `<dir>/package.json`，源码仓库（Go 之类）用 `"versionFrom": {file, pattern}` 从源码常量取（`wb2api` 取 `src/cmd/server/main.go` 的 `appVersion`）。`check` 还会抓两件易漏的事：改了源码没重新 `pack`、详情页里手写的下载链接指向不存在的 zip（升版后最容易原地 404）。
 - **调查报告**：`research/data.json` 是清单真源；报告 HTML 必须自包含（无外链 css/js，可 `file://` 直开）并带三对 `wb:shell:*` 外壳标记（`tools/research.mjs add-shell`）。
 - **pi 更新履历报告是生成物**：`research/pi-changelog.html` 由 `tools/pi-changelog-gen.mjs` 从本机装的 pi 那个 600 KB 的 `CHANGELOG.md` 生成（3131 条原文全部内联），再自动补 `add-shell`。**别手改这个 HTML** —— 改分期文案 / 本机卡片改生成器里的 `ERAS` / `LOCAL` 常量后重跑；`check` 子命令会重跑一遍并与仓库里的成品比对，不一致就报第一次分叉的行号。找不到 pi 包时 `check` 退出 2，`tools/test.mjs` 据此标 SKIP（克隆仓库没有 pi，属正常）。
 - `listener/audio/` 是**空目录且无任何引用**（疑似残留）。

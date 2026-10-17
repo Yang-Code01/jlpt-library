@@ -1,0 +1,43 @@
+# 部署这套网关用的 compose 文件（不是上游源码里那份；上游那份是 `src/docker-compose.yml`）。
+#
+# 使用顺序：
+#   1. cp config.example.json config.json   # 然后把 api_key 改成你自己的一串随机值
+#   2. docker compose up -d --build         # 首次会拉 golang:1.23-alpine + alpine:3.20 并编译
+#
+# 包里的镜像是**从 ./src 现场编译**出来的，不带预构建 tar：
+#   · 好处：编出来就是本机架构（Apple Silicon 上也能跑原生 arm64，不用 Rosetta 模拟）
+#   · 前提：构建机要能拉到下面两个基础镜像。拉不动时见 README「拉不到基础镜像」一节。
+#
+# 端口默认只绑本机回环（127.0.0.1），局域网内其它机器访问不到。
+# 要让同一局域网里的手机/另一台电脑访问：WB2A_BIND=0.0.0.0 docker compose up -d
+# 此时**必须**已经设好非空 api_key（留空 = 完全不鉴权）。
+
+services:
+  wb2api:
+    build:
+      # 上游源码 + 兼容层，都在 src/ 里（Dockerfile 也在那儿）
+      context: ./src
+    # 打出来的镜像名；以后重建会覆盖同一个 tag（compose 认不出代码变了，要 --build）
+    image: workbuddy2api-panel:1.13.0
+    container_name: workbuddy2api
+    restart: unless-stopped
+    # 镜像里的进程以 app 用户（uid 10001）运行。Linux 上如果 auths/ 写入报
+    # permission denied，把 PUID/PGID 改成宿主机的 `id -u` / `id -g`。
+    # Windows + Docker Desktop 的 bind mount 不存在这个问题，保持默认即可。
+    user: "${PUID:-10001}:${PGID:-10001}"
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "${WB2A_BIND:-127.0.0.1}:7863:7863"
+    volumes:
+      - ./auths:/app/auths
+      - ./data:/app/data
+      # config.json 必须先在宿主机上存在（上面第 1 步）。
+      # 缺失时 Docker 会把挂载点创建成目录，容器随即启动失败。
+      # 不加 :ro —— 面板「配置」页要把改动写回这个文件。
+      - ./config.json:/app/config.json
+    # 健康检查用镜像自带的（Dockerfile 里 HEALTHCHECK 打 /healthz），这里不重复声明：
+    # 两份写在不同处必然慢慢跑偏。
+    # 注意 /healthz 在「池子里没有可用账号」时返回 503（设计如此），所以刚部署完、
+    # 还没加账号时 docker compose ps 会显示 (unhealthy)，加一个账号就自动转 (healthy)。
+    # 想看状态：docker compose ps / docker inspect。
