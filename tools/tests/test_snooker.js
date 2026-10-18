@@ -207,9 +207,43 @@ console.log(JSON.stringify({
     if (eNI && eNI.matches && eNI.matches.length) {
       const g2 = T.geometry(T.buildTree(eNI), 7);
       ok(g2.rows === 32 && g2.cols.length === 6, '北爱（64 强起）32 行 × 6 轮', g2.rows + 'x' + g2.cols.length);
-      ok(g2.finalCenter === 16, '北爱决赛落在正中（16）', String(g2.finalCenter));
-      ok(g2.inferred > 0 && g2.linked === 0, '未开赛站全靠虚线配对', g2.linked + '/' + g2.inferred);
+      ok(g2.cols.every((c) => c.trusted), '北爱每列场次 × span = 行数（列容量自洽）',
+        g2.cols.map((c) => c.n + '/' + c.span).join(','));
+      /* 赛周里陆续出比分会让实线从 0 往上长，所以这里只锁与快照无关的不变式；
+         「只挂一个事实孩子时不偏半格」另用合成签表钉死（下面 D 段）。 */
+      ok(g2.finalCenter === g2.rows / 2, '北爱决赛落在正中（' + g2.rows / 2 + '）', String(g2.finalCenter));
+      ok(g2.inferred > 0, '未出胜者的场次仍画虚线', g2.inferred + '/' + (g2.nodes.length - 1));
+      ok(g2.orphans === 0, '没有落不下位置的场次', String(g2.orphans));
       ok(!/NaN/.test(T.render(eNI, { fromId: 7, dir: 'v' })), '北爱纵向渲染无 NaN');
+    }
+
+    /* ---- D2. 半格回归：父场只挂上一个事实孩子时，位置不能偏半格 ----
+       2026-10-18 快照就是这个形态（首轮 32 场里刚打完 1 场，其余待定）：
+       父场只拿「已挂上的那个孩子」取中心 → 每层偏 0.5 行 → 决赛中心落到 16.5、
+       整棵树上半格。合成一张 4/2/1 的小签表把它钉死，不依赖快照。 */
+    {
+      const mm = (r, p1, p2, s1, s2) => ({
+        r: r, p1: p1 ? { n: p1 } : null, p2: p2 ? { n: p2 } : null,
+        s1: s1 == null ? null : s1, s2: s2 == null ? null : s2,
+        ses: [], day: '', st: s1 == null ? 'sched' : 'done'
+      });
+      const synth = {
+        rounds: [{ id: 7, n: 4, played: 1 }, { id: 8, n: 2, played: 0 }, { id: 9, n: 1, played: 0 }],
+        matches: [
+          mm(7, null, null, null, null), mm(7, null, null, null, null),
+          mm(7, 'A', 'B', 4, 2), mm(7, null, null, null, null),      /* 只有第 3 场打完 */
+          mm(8, null, null, null, null),
+          mm(8, 'A', null, null, null),                             /* 胜者 A 已进父场，另一个待定 */
+          mm(9, null, null, null, null)
+        ]
+      };
+      const g3 = T.geometry(T.buildTree(synth), 7);
+      ok(g3.rows === 4 && g3.cols.length === 3, '合成签表 4 行 × 3 轮', g3.rows + 'x' + g3.cols.length);
+      ok(g3.cols.every((c) => c.trusted), '合成签表每列容量自洽',
+        g3.cols.map((c) => c.n + '/' + c.span).join(','));
+      ok(g3.cols[1].nodes[1].mid === 3, '只挂一个事实孩子时父场仍居中（3）', String(g3.cols[1].nodes[1].mid));
+      ok(g3.finalCenter === 2, '合成签表决赛落在正中（2）', String(g3.finalCenter));
+      ok(g3.linked === 1, '只有一条事实边画实线', String(g3.linked));
     }
   }
 }
