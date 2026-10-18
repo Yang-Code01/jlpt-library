@@ -1,4 +1,4 @@
-name: snooker
+name: 斯诺克数据快照
 
 # 斯诺克信息区的数据管道（每天一次）：
 #   抓 snooker.org 的两年滚动排名 / 本赛季赛历 / 已完赛冠军 → 写 assets/snooker-data.js
