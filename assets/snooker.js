@@ -152,32 +152,29 @@
   }
   card += railHtml(live || next) + footHtml(live || next) + '</div>';
 
-  /* ---- 赛季轨道：一根竖线串起「最近完赛 → 今天 → 接下来」----
-     指针靠近哪一站，那一站放大（邻居按距离渐次放大），右侧详情跟着换；
-     按住可在轨道上拖动，松手吸附最近一站；↑↓ 也能切。默认露出前后各 5 站 + 今天。 */
+  /* ---- 赛季轨道：一根竖线串起全部 22 站，指针靠近放大、右侧详情联动 ----
+     以前只渲染「今天前后各 4 站」，窗口外写成不可点的「更早的 N 站」，那 14 站等于没有信息；
+     现在全展开（容器自己滚），每一站都能点开看赛程与天梯图。 */
   var order = CAL.slice().sort(function (a, b) { return a.s < b.s ? -1 : 1; });
-  var at = live ? order.indexOf(live) : order.filter(function (e) { return e.e < today; }).length;
-  /* 窄屏一列放不下 11 站（详情会被推到看不到的地方），前后各收成 3 站 */
-  var side = window.innerWidth && window.innerWidth < 700 ? 3 : 4;
-  var from = Math.max(0, at - side), to = Math.min(order.length, at + side + 1);
-  var view = order.slice(from, to);
 
   function stState(e) { return e.e < today ? 'done' : (e.s <= today && today <= e.e ? 'live' : 'fut'); }
 
   var track = '<div class="snk-trk-wrap">' +
-    '<div class="snk-trk" id="snk-trk" tabindex="0" aria-label="赛季轨道：指针扫过或上下方向键切换，按住可拖动">' +
-      '<span class="snk-trk-cur" id="snk-trk-cur" aria-hidden="true"></span>' +
-      (from > 0 ? '<div class="snk-fade">更早的 ' + from + ' 站</div>' : '') +
-      view.map(function (e, i) {
+    '<div class="snk-trk" id="snk-trk" tabindex="0" aria-label="赛季轨道：点击某站查看该站详情，上下方向键逐站浏览">' +
+
+      order.map(function (e, i) {
         return '<div class="snk-st ' + stState(e) + '" data-i="' + i + '">' +
           '<span class="st-dot"></span>' +
-          '<span class="st-tx"><b>' + esc(nameOf(e)) + '</b><em>' + md(e.s) + '–' + md(e.e) + ' · ' + esc(e.city) + '</em></span>' +
+          '<span class="st-tx"><b>' + esc(nameOf(e)) + '</b><em>' + md(e.s) + '–' + md(e.e) +
+            ' · ' + esc(e.city_cn || e.city) + '</em></span>' +
         '</div>';
       }).join('') +
-      (to < order.length ? '<div class="snk-fade b">更远的 ' + (order.length - to) + ' 站</div>' : '') +
     '</div>' +
     '<aside class="snk-det" id="snk-det"></aside>' +
-  '</div>';
+  '</div>' +
+  /* 通栏块：天梯图与赛程表放不进 240px 轨道 + 880px 详情列里，
+     8 张卡一行要 ~1100px，32 张要横滚 —— 所以跑到栅格下面独占一行。 */
+  '<div class="snk-wide" id="snk-wide"></div>';
 
   html += card + track + '</div>';
 
@@ -223,18 +220,128 @@
   (function () {
     var trk = host.querySelector('#snk-trk');
     var det = host.querySelector('#snk-det');
-    var cur = host.querySelector('#snk-trk-cur');
+    var wide = host.querySelector('#snk-wide');
     if (!trk || !det) return;
     var nodes = [].slice.call(trk.querySelectorAll('.snk-st'));
     var R = 104, K = 0.62;
-    var sel = Math.max(0, view.map(stState).indexOf('live'));
-    /* 休赛期没有 live：默认停在「最近一个已结束的站」，而不是窗口第一站 */
-    if (stState(view[sel]) !== 'live') {
-      view.forEach(function (e, i) { if (stState(e) === 'done') sel = i; });
+    /* 默认停在「进行中」那站；休赛期停在最近一个已结束的站 */
+    var sel = 0;
+    order.forEach(function (e, i) { if (stState(e) === 'done') sel = i; });
+    if (live) sel = Math.max(0, order.indexOf(live));
+
+    /* ---- 天梯图：调用 assets/snooker-tree.js（纯函数，返回 HTML 片段） ---- */
+    var TREE = window.SnookerTree || null;
+
+    /* 起点轮：优先 64 强（用户定的默认），其次 32 强 / 16 强，再退到最深的「8 场以上」轮。
+       轮次 id 逐站变，只能从 cn 反推，不能写死。 */
+    function treeFrom(e) {
+      var rs = e.rounds || [], want = ['64 强', '32 强', '16 强'], w, i;
+      for (w = 0; w < want.length; w++) {
+        for (i = 0; i < rs.length; i++) if (rs[i].cn === want[w] && rs[i].n) return rs[i].id;
+      }
+      var deep = null;
+      for (i = 0; i < rs.length; i++) if (rs[i].n >= 8 && (!deep || rs[i].n > deep.n)) deep = rs[i];
+      if (deep) return deep.id;
+      return rs.length ? rs[0].id : null;
+    }
+
+    function nilOrMoney(n) { return n === null || n === undefined ? '<span class="nil">—</span>' : money(n); }
+
+    /* 奖金三格：冠军 / 亚军 读 roundinfo，总奖金读人工表（缺就 —，不编） */
+    function purseHtml(e) {
+      var p = e.purse || {};
+      var win = (p.win === null || p.win === undefined) ? (e.prize || null) : p.win;
+      /* 总奖金来自手工表；p.fundFrom 有值 = 本站本赛季还没开打，数值沿用上届 → 加 ≈ 并说明 */
+      var approx = p.fundFrom
+        ? '<u class="snk-approx" title="数值取自 ' + esc(p.fundFrom) + ' 赛季，本站本赛季的奖金尚未公布">≈</u>'
+        : '';
+      var fundTitle = p.fundFrom ? ' title="上届（' + esc(p.fundFrom) + '）数值"' : '';
+      return '<dl class="snk-purse">' +
+        '<div><dt>冠军</dt><dd>' + nilOrMoney(win) + '</dd></div>' +
+        '<div><dt>亚军</dt><dd>' + nilOrMoney(p.run) + '</dd></div>' +
+        '<div><dt>总奖金</dt><dd' + fundTitle + '>' + approx + nilOrMoney(p.fund) + '</dd></div>' +
+      '</dl>' +
+      (p.fundFrom ? '<p class="snk-purse-note">≈ 上届数值（本站本赛季奖金尚未公布）</p>' : '');
+    }
+
+    function treeDir() { return TREE ? TREE.prefDir() : 'v'; }
+    function treeBody(e, dir) {
+      if (!TREE) return '<p class="tn-note">天梯图脚本没加载。</p>';
+      /* 树在详情列里，宽度不等于页宽：把可用宽度交进去，让 8 行那站刚好一屏放得下 */
+      var avail = wide ? wide.clientWidth : 0;
+      return TREE.render(e, { fromId: treeFrom(e), dir: dir, avail: avail });
+    }
+    function treeBlock(e) {
+      if (!e.matches || !e.matches.length) return '';
+      var dir = treeDir();
+      return '<div class="snk-treepane">' +
+        '<div class="snk-tree-bar">' +
+          '<span class="cap">天梯图</span>' +
+          '<span class="snk-seg" id="snk-dir">' +
+            '<button type="button" data-dir="v" aria-pressed="' + (dir === 'v') + '">↓ 纵向 轮次自上而下</button>' +
+            '<button type="button" data-dir="h" aria-pressed="' + (dir === 'h') + '">→ 横向 轮次自左向右</button>' +
+          '</span>' +
+        '</div>' +
+        '<div id="snk-tree-body">' + treeBody(e, dir) + '</div>' +
+      '</div>';
+    }
+
+    /* ---- 赛程表：一行一节，按北京时间的日子分组；当地时刻交给 Intl ---- */
+    function utcDate(s) {
+      var d = new Date(String(s).replace(' ', 'T'));
+      return isNaN(d.getTime()) ? null : d;
+    }
+    function bjShift(d) { return new Date(d.getTime() + 8 * 3600 * 1000); }
+    function localHH(s, tz) {
+      var d = utcDate(s);
+      if (!d) return '';
+      try {
+        return new Intl.DateTimeFormat('zh-CN', { timeZone: tz || 'Europe/London', hour: '2-digit', minute: '2-digit', hour12: false }).format(d);
+      } catch (err) { return ''; }
+    }
+    function schHtml(e) {
+      var ms = e.matches || [], rows = [], i, j;
+      for (i = 0; i < ms.length; i++) {
+        var ses = ms[i].ses || [];
+        for (j = 0; j < ses.length; j++) rows.push({ t: ses[j], m: ms[i], part: ses.length > 1 ? j + 1 : 0 });
+      }
+      if (!rows.length) return '';
+      rows.sort(function (a, b) { return a.t < b.t ? -1 : 1; });
+      var cn = {};
+      (e.rounds || []).forEach(function (r) { cn[r.id] = r.cn; });
+      var days = [], cur = '';
+      rows.forEach(function (r) {
+        var d = utcDate(r.t); if (!d) return;
+        var b = bjShift(d);
+        var day = b.getUTCFullYear() + '-' + pad(b.getUTCMonth() + 1) + '-' + pad(b.getUTCDate());
+        if (day !== cur) { cur = day; days.push({ day: day, items: [] }); }
+        days[days.length - 1].items.push(r);
+      });
+      if (!days.length) return '';
+      var nm = function (p) { return (p && p.n) ? (NAMES[p.n] || p.n) : '待定'; };
+      var out = '<div class="snk-sch"><div class="t">赛程 · 北京时间（小字为比赛地时间）</div>';
+      days.forEach(function (g) {
+        out += '<div class="day"><div class="dh">' + md(g.day) + ' 周' + wd(g.day) + '</div><div>' +
+          g.items.map(function (r) {
+            var b = bjShift(utcDate(r.t));
+            var hh = pad(b.getUTCHours()) + ':' + pad(b.getUTCMinutes());
+            var lo = localHH(r.t, e.tz);
+            var m = r.m, done = m.s1 !== null && m.s2 !== null;
+            return '<div class="sl">' +
+              '<span class="t2">' + hh + '</span>' +
+              '<span class="rnd">' + esc(cn[m.r] || '') + (r.part ? ' 第' + r.part + '节' : '') + '</span>' +
+              '<span class="nm">' + esc(nm(m.p1)) + '</span><span class="vs">v</span>' +
+              '<span class="nm">' + esc(nm(m.p2)) + '</span>' +
+              (done ? '<b>' + m.s1 + '–' + m.s2 + '</b>' : '') +
+              (lo ? '<span class="t2">当地 ' + esc(lo) + '</span>' : '') +
+            '</div>';
+          }).join('') + '</div></div>';
+      });
+      return out + '</div>';
     }
 
     function detHtml(i) {
-      var e = view[i], st = stState(e), w = e.winner, pv = order[order.indexOf(e) - 1], rs, k, out;
+      var e = order[i], st = stState(e), w = e.winner, pv = order[order.indexOf(e) - 1], rs, k, out;
       out = '<div class="snk-det-main"><div class="snk-det-top">' +
         (st === 'done' ? '<span class="snk-bge">已结束</span>' :
          st === 'live' ? '<span class="snk-bge live">进行中 · 第 ' + (gap(e.s, today) + 1) + '/' + span(e) + ' 天</span>' :
@@ -242,10 +349,12 @@
         '<span class="snk-bge">' + (e.level === 'invitational' ? '邀请赛' : '排名赛') + '</span></div>' +
         '<h3 class="snk-det-t">' + esc(nameOf(e)) + '</h3><span class="snk-det-en">' + esc(e.en) + '</span>' +
         '<dl class="snk-kv">' +
-          '<dt>地点</dt><dd>' + esc(e.city) + (e.nat_cn ? ' · ' + esc(e.nat_cn) : '') + '</dd>' +
-          '<dt>赛期</dt><dd>' + e.s + ' → ' + e.e + '（' + span(e) + ' 天）</dd>' +
-          '<dt>奖金</dt><dd>' + (e.prize ? money(e.prize) : '—') + (e.field ? ' · ' + e.field + ' 人参赛' : '') + '</dd>' +
-        '</dl></div>';
+          '<dt>地点</dt><dd>' + esc(e.city_cn || e.city) +
+            (e.city_cn && e.city ? ' <span class="snk-cityen">' + esc(e.city) + '</span>' : '') +
+            (e.nat_cn ? ' · ' + esc(e.nat_cn) : '') + '</dd>' +
+          '<dt>赛期</dt><dd>' + e.s + ' → ' + e.e + '（' + span(e) + ' 天）' +
+            (e.field ? ' · ' + e.field + ' 人参赛' : '') + '</dd>' +
+        '</dl>' + purseHtml(e) + '</div>';
 
       out += '<div class="snk-det-bot">';
       if (st === 'done') {
@@ -273,17 +382,61 @@
             }).join('') + '</ol></div>';
         }
       } else {
+        /* 还没有对阵页快照的站：别说「未出 / 待定」两个词叠在一起，直接把「什么时候会有」讲清 */
         out += '<div class="snk-win"><span class="k">' + (pv && pv.winner ? '上一站冠军' : '签表') + '</span>' +
-          '<span class="v">' + (pv && pv.winner ? esc(pv.winner.cn || pv.winner.en) + '（' + esc(nameOf(pv)) + '）' : '未出') + '</span>' +
-          '<span class="r">' + (pv && pv.winner ? '站末 ' + pv.e : '待定') + '</span></div>';
+          '<span class="v">' + (pv && pv.winner ? esc(pv.winner.cn || pv.winner.en) + '（' + esc(nameOf(pv)) + '）' : '未公布') + '</span>' +
+          '<span class="r">' + (pv && pv.winner ? '站末 ' + pv.e : '开赛 ' + (e.s || '')) + '</span></div>';
       }
-      return out + '<div class="snk-hint">指针扫过即预览 · 按住可拖动 · <kbd>↑</kbd><kbd>↓</kbd> 切换</div></div>';
+      return out + '</div>';
+    }
+
+    /* 通栏：天梯图 + 赛程（一行一节，按北京时间的日子分组） */
+    function wideHtml(i) {
+      var e = order[i];
+      /* 还没开赛、或者这一站的结构不适合对阵树（冠军联赛是小组循环）：别留一块空白 */
+      if (!e.matches || !e.matches.length) {
+        return '<div class="snk-wide-in"><p class="snk-wide-empty">' +
+          (stState(e) === 'fut'
+            ? '本站还没开赛 —— 签表与天梯图在开赛前一周开始抓取（还有 ' + Math.max(0, gap(today, e.s)) + ' 天）。'
+            : '本站的对阵页还没抓到（下一轮抓取会补上）。') +
+          '</p></div>';
+      }
+      return '<div class="snk-wide-in">' + treeBlock(e) + schHtml(e) +
+        '<div class="snk-hint">指针悬停在轨道上看摘要 · 点击切换 · <kbd>↑</kbd><kbd>↓</kbd> 逐站翻</div></div>';
     }
 
     function paint(i) {
       sel = i;
       det.innerHTML = detHtml(i);
-      nodes.forEach(function (n, k) { n.classList.toggle('sel', k === i); });
+      wide.innerHTML = wideHtml(i);
+      nodes.forEach(function (n, k) {
+        n.classList.toggle('sel', k === i);
+        var d = n.querySelector('.st-dot');
+        if (d) d.style.transform = k === i ? 'scale(1.45)' : '';
+      });
+      /* 方向开关：只重渲树体，不动整个详情区（否则拖拽/滚动状态会被抹掉） */
+      var seg = wide.querySelector('#snk-dir');
+      if (seg && TREE) {
+        var btns = [].slice.call(seg.querySelectorAll('button'));
+        btns.forEach(function (b) {
+          b.addEventListener('click', function () {
+            var d = TREE.setDir(b.getAttribute('data-dir'));
+            btns.forEach(function (x) { x.setAttribute('aria-pressed', String(x.getAttribute('data-dir') === d)); });
+            var body = wide.querySelector('#snk-tree-body');
+            if (body) body.innerHTML = treeBody(order[sel], d);
+          });
+        });
+      }
+    }
+
+    /* 轨道现在装 22 站，选中的那站要自己滚进可视区 */
+    function reveal(i) {
+      var n = nodes[i];
+      if (!n || !trk.clientHeight) return;
+      var top = n.offsetTop, h = n.offsetHeight, ch = trk.clientHeight;
+      if (top < trk.scrollTop || top + h > trk.scrollTop + ch) {
+        trk.scrollTop = Math.max(0, Math.round(top - ch / 2 + h / 2));
+      }
     }
 
     /* 距离衰减：scale = 1 + K·(1-d/R)²，越远越小 */
@@ -302,55 +455,110 @@
       nodes.forEach(function (n) {
         n.querySelector('.st-dot').style.transform = '';
         n.classList.remove('near');
+        n.classList.remove('hov');
       });
     }
 
     /* 「已过去」那段轨道涂实：末个已结束站的圆心 */
     function paintPast() {
       var last = -1;
-      view.forEach(function (e, i) { if (stState(e) === 'done') last = i; });
+      order.forEach(function (e, i) { if (stState(e) === 'done') last = i; });
       if (last < 0) { trk.style.setProperty('--past', '0px'); return; }
       var n = nodes[last];
       trk.style.setProperty('--past', (n.offsetTop + n.offsetHeight / 2 - 14) + 'px');
     }
 
-    var dragging = false;
-    function relY(ev) { return ev.clientY - trk.getBoundingClientRect().top; }
+    /* ---------------- 指针：只高亮 + 摘要气泡，绝不切内容 ----------------
+       以前是 pointermove 直接 paint()，从页面顶部走到天梯图必然扫过轨道 → 内容乱跳；
+       滚轮在轨道上滚也会切站。现在只有「点击 / Enter / ↑↓」才切，
+       指针只负责：圆点磁吸放大、行底色、右侧浮出一张摘要卡。 */
+    var peek = null;
+    function peekEl() {
+      if (peek) return peek;
+      if (!document.body) return null;
+      peek = document.createElement('div');
+      peek.className = 'snk-peek';
+      peek.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(peek);
+      return peek;
+    }
+    function showPeek(i, row) {
+      var el = peekEl();
+      if (!el) return;
+      var e = order[i];
+      var p = e.purse || {};
+      var win = (p.win === null || p.win === undefined) ? (e.prize || null) : p.win;
+      var st = stState(e);
+      el.innerHTML = '<b>' + esc(e.cn || e.en) + '</b>' +
+        '<span class="k">' + esc(e.s) + (e.s === e.e ? '' : ' → ' + esc(e.e)) +
+          (e.city_cn || e.city ? ' · ' + esc(e.city_cn || e.city) : '') + '</span>' +
+        '<div class="money"><i>冠军 ' + nilOrMoney(win) + '</i><i>总 ' + (p.fundFrom ? '≈' : '') + nilOrMoney(p.fund) + '</i></div>' +
+        '<div class="k">' + (st === 'done' ? '已结束' : st === 'live' ? '进行中' : '还有 ' + Math.max(0, gap(today, e.s)) + ' 天') +
+          ' · 点击查看天梯图</div>';
+      el.classList.add('on');
+      var r = row.getBoundingClientRect();
+      var w = el.offsetWidth || 236, h = el.offsetHeight || 88;
+      var x, y;
+      var below = false;
+      if (window.innerWidth < 900) {   /* 窄屏轨道占满一行：气泡放到行的下面，箭头朝上 */
+        x = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+        y = Math.min(window.innerHeight - h - 8, r.bottom + 8);
+        below = true;
+      } else {
+        x = r.right + 12;
+        if (x + w > window.innerWidth - 8) { x = Math.max(8, r.left - w - 12); below = false; }
+        y = Math.min(window.innerHeight - h - 8, Math.max(8, r.top - 4));
+      }
+      el.classList.toggle('below', below);   /* 下方气泡：箭头朝上 */
+      el.style.left = Math.round(x) + 'px';
+      el.style.top = Math.round(y) + 'px';
+      /* 箭头尖端对准这一行的垂直中心 */
+      el.style.setProperty('--ay', Math.round(r.top + r.height / 2 - y - 5) + 'px');
+    }
+    function hidePeek() { if (peek) peek.classList.remove('on'); }
+
     function move(ev) {
-      var y = relY(ev);
-      cur.style.top = y + 'px';
-      var i = sizes(y);
-      if (i !== sel) paint(i);
+      var row = ev.target && ev.target.closest ? ev.target.closest('.snk-st') : null;
+      if (!row) return;
+      var i = nodes.indexOf(row);
+      if (i < 0) return;
+      nodes.forEach(function (n) { n.classList.toggle('hov', n === row); });
+      sizes(row.offsetTop + row.offsetHeight / 2);   /* 圆点磁吸：纯视觉，不影响选中 */
+      showPeek(i, row);
     }
     trk.addEventListener('pointermove', move);
-    trk.addEventListener('pointerdown', function (ev) {
-      dragging = true; trk.classList.add('drag');
-      if (trk.setPointerCapture) { try { trk.setPointerCapture(ev.pointerId); } catch (err) {} }
-      move(ev);
-    });
-    trk.addEventListener('pointerup', function (ev) {
-      dragging = false; trk.classList.remove('drag');
-      if (trk.releasePointerCapture) { try { trk.releasePointerCapture(ev.pointerId); } catch (err) {} }
-    });
     trk.addEventListener('pointerleave', function () {
-      if (dragging) return;
       plain();
+      hidePeek();
       var n = nodes[sel];
-      sizes(n.offsetTop + n.offsetHeight / 2);
+      if (n) sizes(n.offsetTop + n.offsetHeight / 2);
+      var d = n && n.querySelector('.st-dot');
+      if (d) d.style.transform = 'scale(1.45)';
     });
-    trk.addEventListener('keydown', function (ev) {
-      if (ev.key !== 'ArrowDown' && ev.key !== 'ArrowUp') return;
-      ev.preventDefault();
-      var i = Math.max(0, Math.min(nodes.length - 1, sel + (ev.key === 'ArrowDown' ? 1 : -1)));
+    /* 滚轮只是滚列表：气泡跟着收起来，免得停在半空 */
+    trk.addEventListener('wheel', hidePeek, { passive: true });
+    trk.addEventListener('click', function (ev) {
+      var row = ev.target && ev.target.closest ? ev.target.closest('.snk-st') : null;
+      if (!row) return;
+      var i = nodes.indexOf(row);
+      if (i < 0 || i === sel) return;
       plain();
       paint(i);
-      var n = nodes[i];
-      cur.style.top = (n.offsetTop + n.offsetHeight / 2) + 'px';
-      cur.style.opacity = '.22';
+      reveal(i);
+      hidePeek();   /* 轨道会滚一下，气泡留在原地会跟行脱开；指针再动一下就回来 */
+    });
+    trk.addEventListener('keydown', function (ev) {
+      if (ev.key !== 'ArrowDown' && ev.key !== 'ArrowUp' && ev.key !== 'Enter') return;
+      ev.preventDefault();
+      var step = ev.key === 'ArrowDown' ? 1 : (ev.key === 'ArrowUp' ? -1 : 0);
+      var i = step ? Math.max(0, Math.min(nodes.length - 1, sel + step)) : sel;
+      if (i !== sel) { plain(); paint(i); }
+      reveal(i);
     });
 
     paintPast();
     paint(sel);
+    reveal(sel);
     /* 首屏让「今天」那格略放大，暗示可交互 */
     var ln = nodes[sel] && nodes[sel].querySelector('.st-dot');
     if (ln) ln.style.transform = 'scale(1.45)';

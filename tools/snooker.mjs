@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 /*
- * 斯诺克信息区数据生成器：抓 snooker.org 的排名 + 赛历 + 冠军 → 写 assets/snooker-data.js
+ * 斯诺克信息区数据生成器：抓 snooker.org 的排名 + 赛历 + 冠军 + 单站对阵 → 写 assets/snooker-data.js
  *
  *   node tools/snooker.mjs                  # 抓 → 数据有变才写文件（无变则原样退出 0）
- *   node tools/snooker.mjs --check          # 只比对不写；有漂移退出 1（给 CI 用）
+ *   node tools/snooker.mjs --check          # 只比对不写；有漂移 / 校验不过退出 1（给 CI 用）
  *   node tools/snooker.mjs --local <file>   # 用本地已存的页面代替联网（离线调试 / 单测）
- *   --local-cal <f> --local-fin <f>          # 同上，分别替换赛历页 / 冠军页
+ *   --local-cal <f> --local-fin <f> --local-ev <f>    # 同上，分别替换赛历页 / 冠军页 / 单站对阵页
+ *   --out <f>    只给 --check 用：把「本次要写入的产物」导到该文件，便于与入库文件逐字比（不写它）
+ *   --ev <id>=<f>     （可重复）把一份对阵页喂给指定场次 id，供离线一次跑多站
+ *   --ev-dir <dir>    目录下 2548-xxx.html 这样的文件按文件名前缀的 id 全部喂进来
  *   node tools/snooker.mjs --local <f> --stdout      # 打印生成的 JS，不落盘
  *   --min <n>   少于 n 行排名视为抓坏并中止（默认：线上 100，--local 1）
  *
@@ -13,28 +16,44 @@
  * 会被 CORS 拦死；<script src> 不受此限，所以数据以 window.SNOOKER = {...} 注入。
  * 抓取只发生在构建/CI 这一侧，页面自身不联网。
  *
- * 三个上游（都是同一家的静态 HTML 表格）：
+ * 四个上游（都是同一家的静态 HTML 表格）：
  *   template=31  两年滚动排名（128 人）
  *   template=2   本赛季赛历（62 行，含资格赛 / Q Tour / 女子 / 元老；本站只取 Main 正赛）
  *   template=7   已结束各站的冠军与比分
+ *   event=<id>   单站对阵：轮次表头 + 场级行（「几点 谁 vs 谁」/ 父子对阵 / 冠军与亚军奖金）
+ *
+ * ⚠️ 已结束的单站页里，`scheduled` 单元格会被上游撤掉、换成 wst.tv 战报链接，
+ *    也就是开赛时间在赛后就查不到了 —— 只有赛中抓过才留得下。这正是「赛后冻结」
+ *    （frozen）与「赛周内 10 分钟一抓」这套策略的理由。
+ *
+ * 抓多少、留多少：
+ *   已结束站 ≈2 KB/站（只冻 Last 16 起的 15 场），全季 ≈44 KB；全冻 128 场会是 330 KB，
+ *   file:// 首屏太重。天梯图 / 冠军路径 / 历史回看用 15 场就够。
+ *
  * 赛历/冠军抓不到不算致命（页面退化成「只有排名」），排名抓不到才算失败。
  */
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
+import { join, dirname, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'assets/snooker-data.js');
+/* 只给 --check 用的输出路径（接外部产物的套件用；不接就是写入路径）。 */
+const OUT_ARG = '--out';
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
 const URL_RANK = 'https://www.snooker.org/res/index.asp?template=31';
 const URL_CAL = 'https://www.snooker.org/res/index.asp?template=2';
 const URL_FIN = 'https://www.snooker.org/res/index.asp?template=7';
 /* snooker.org 直连可能撞 Cloudflare 人机校验；calengoo 每天从它的数据生成一份 ICS 镜像，作降级源 */
 const URL_ICS = 'http://calengoo.de/snooker/snooker.ics';
-/* 单站对阵页：比分之外还给了轮次分组（Round 1 / Quarterfinals / Final…）与每场开赛时间，
-   进度图要的「打到第几轮、每轮几场、当天排哪一轮」都从这里来。 */
+/* 单站对阵页：比分之外还给了轮次分组（Round 1 / Quarterfinals / Final…）与每场开赛时间。
+   进度图要的「打到第几轮、每轮几场、当天排哪一轮」，天梯图要的「每场几点 谁 vs 谁」都从这里来。 */
 const URL_EVENT = (id) => `https://www.snooker.org/res/index.asp?event=${id}`;
 const SEASON_LABEL = '2026/27';
+/* 总奖金表：上游（赛历页 / 对阵页 / help 页 / api.snooker.org）都不给总奖金，只能人工维护 */
+const FUND_JSON = join(ROOT, 'tools/snooker-prize-fund.json');
+/* 赛历页的 prize 列实测是**冠军**奖金（上海站 £210,000 与该站 Final 的 roundinfo 逐字一致），
+   不是总奖金。所以 purse.win 以 Final 的 roundinfo 为权威来源，purse.fund 另查人工表。 */
 
 /* 球员中文名：不做机翻，查不到就回退英文 */
 const CN_NAME = {
@@ -92,8 +111,37 @@ const CN_EVENT = {
   'World Championship': '世锦赛',
 };
 
+/* 城市中文名：与上面几张表同风格，人工维护、增量补。
+   查不到回退英文原文（不 exit 1，只在 --check 时报 warning 列出未覆盖的城市）。 */
+const CITY_CN = {
+  Belfast: '贝尔法斯特', Shanghai: '上海', Wuhan: '武汉', 'Hong Kong': '香港',
+  Berlin: '柏林', Leicester: '莱斯特', Sheffield: '谢菲尔德', London: '伦敦',
+  Cheltenham: '切尔滕纳姆', Brentwood: '布伦特伍德', Llandudno: '兰迪德诺',
+  Telford: '特尔福德', York: '约克', Blackpool: '布莱克浦', Manchester: '曼彻斯特',
+  Edinburgh: '爱丁堡', Taiyuan: '太原', Shenzhen: '深圳', Nanjing: '南京', Yushan: '玉山',
+  Milton: '米尔顿凯恩斯', Wolverhampton: '伍尔弗汉普顿',
+};
+
+/* 城市 → IANA 时区。消费方一律用 Intl.DateTimeFormat 按 IANA 名算，
+   这样英国夏令时由运行时处理 —— 这里绝不自己加减小时。
+   未命中的城市回退 Europe/London（斯诺克绝大多数站都在英国）。 */
+const TZ = {
+  Belfast: 'Europe/London', Shanghai: 'Asia/Shanghai', Wuhan: 'Asia/Shanghai',
+  'Hong Kong': 'Asia/Hong_Kong', Berlin: 'Europe/Berlin',
+  Leicester: 'Europe/London', Sheffield: 'Europe/London', London: 'Europe/London',
+  Cheltenham: 'Europe/London', Brentwood: 'Europe/London', Llandudno: 'Europe/London',
+  Telford: 'Europe/London', York: 'Europe/London', Blackpool: 'Europe/London',
+  Manchester: 'Europe/London', Edinburgh: 'Europe/London',
+  Taiyuan: 'Asia/Shanghai', Shenzhen: 'Asia/Shanghai', Nanjing: 'Asia/Shanghai', Yushan: 'Asia/Shanghai',
+  Milton: 'Europe/London', Wolverhampton: 'Europe/London',
+};
+const TZ_FALLBACK = 'Europe/London';
+
 /* ---------------- 通用 ---------------- */
-const ENT = { '&nbsp;': ' ', '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" };
+const ENT = {
+  '&nbsp;': ' ', '&pound;': '£', '&euro;': '€', '&amp;': '&', '&lt;': '<', '&gt;': '>',
+  '&quot;': '"', '&apos;': "'", '&#39;': "'", '&#8216;': "'", '&#8217;': "'", '&hellip;': '…',
+};
 function text(html) {
   return String(html)
     .replace(/<[^>]*>/g, '')
@@ -185,45 +233,6 @@ function pickEvents(rows) {
   return out;
 }
 
-/* ---------------- 单站对阵页：轮次 → 场次 / 比分 / 日期 ----------------
-   返回按时间顺序（首轮→决赛）的数组；只有日期能确定时才带 s/e，未排期的轮次留空。 */
-const ROUND_CN = { 'Quarterfinals': '8 强', 'Semifinals': '半决赛', 'Final': '决赛' };
-function parseRounds(html) {
-  const t = html.match(/<table[^>]*class="display matches"[^>]*>[\s\S]*?<\/table>/);
-  if (!t) return [];
-  const out = [];
-  let cur = null;
-  for (const tr of t[0].match(/<tr[\s\S]*?<\/tr>/g) || []) {
-    const head = tr.match(/<a name="r\d+"><\/a>\s*<span class="round">([^<]+)<\/span>/);
-    if (head) {
-      cur = { en: head[1].trim(), bo: parseInt((tr.match(/Best of (\d+)/) || [])[1], 10) || 0, n: 0, played: 0, ds: [] };
-      out.push(cur);
-      continue;
-    }
-    if (!cur) continue;
-    const tds = tr.match(/<td[^>]*>/g) || [];
-    if (tds.length < 6) continue;
-    cur.n++;
-    const d = tr.match(/\d{4}-\d{2}-\d{2}/);
-    if (d) cur.ds.push(d[0]);
-    const sc = tr.match(/class="score[^"]*"[^>]*>([\s\S]*?)<\/td>/);
-    if (sc && /\d/.test(sc[1].replace(/<[^>]*>/g, ''))) cur.played++;
-  }
-  return out.reverse().map((r) => {
-    const ds = r.ds.sort();
-    const left = r.n * 2;   /* 本轮场数 ×2 = 打完这轮的参赛人数（64 场 → 128 强） */
-    return {
-      en: r.en,
-      cn: ROUND_CN[r.en] || (left >= 16 ? left + ' 强' : r.en),
-      bo: r.bo,
-      n: r.n,
-      played: r.played,
-      s: ds.length ? ds[0] : '',
-      e: ds.length ? ds[ds.length - 1] : '',
-    };
-  }).filter((r) => r.n > 0);
-}
-
 /* ---------------- template=7：已结束各站的冠军 ---------------- */
 function parseFinals(html) {
   const map = new Map();
@@ -292,6 +301,303 @@ function parseIcs(txt) {
   return [...byName.values()];
 }
 
+/* ---------------- 单站对阵页：场次 → 轮次 → 奖金三格 ----------------
+   ⚠️ 一页里有两张同 class 的表（正赛表 + 资格赛表），而且**正赛场级行不在轮次表头所在的那张表里**：
+   正赛轮次表头（<thead> 里的 r15…r7）之后紧跟的是资格赛的行，`</table>` 在正赛场次之前就闭合了。
+   所以表头只取第一张 class="display matches" 表，场次全页按 `<tr class="gradeA` 扫
+   （页面自己的表头行是 `<tr>` 而不是 gradeA，不会混进来），两个游标各自独立。 */
+const ROUND_CN = { 'Quarterfinals': '8 强', 'Semifinals': '半决赛', 'Final': '决赛' };
+
+/* 一格比分 → 数字；空/非数字返回 null */
+function scoreNum(raw) {
+  const t = String(raw || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+  return /^\d+$/.test(t) ? parseInt(t, 10) : null;
+}
+
+/* 一个场级行（<tr class="gradeA …>）→ 一场比赛 */
+function parseMatch(tr) {
+  const src = String(tr);
+  const r = parseInt((/\bround(\d+)\b/.exec(src) || [])[1], 10) || 0;
+  /* 两侧球员：class 含 player 的 <td>，要排除 h2h（历史交手）那一格 */
+  const ps = [...src.matchAll(/<td([^>]*)>([\s\S]*?)<\/td>/gi)]
+    .filter((m) => {
+      const cls = cellClass(m[1]);
+      return cls.includes('player') && !cls.includes('h2h');
+    })
+    .map((m) => {
+      const a = /<a\b[^>]*href="\/res\/index\.asp\?player=(\d+)[^>]*\btitle="([^"]*)"/i.exec(m[2]);
+      /* 少数行的 title 带国籍后缀（"Elliot Slessor, England"），取逗号前那段。
+         待定的格子是 <em>To be decided</em>，没有 <a> → n 与 id 都是 null。 */
+      const name = a ? a[2].split(',')[0].trim() : '';
+      return name ? { n: name, id: parseInt(a[1], 10) } : { n: null, id: null };
+    });
+  /* 完赛场次的比分格 class 带双空格（class="score  first-score"），所以只判子串 */
+  const f = /class="[^"]*first-score[^"]*"[^>]*>([\s\S]*?)<\/td>/i.exec(src);
+  const l = /class="[^"]*last-score[^"]*"[^>]*>([\s\S]*?)<\/td>/i.exec(src);
+  const s1 = f ? scoreNum(f[1]) : null;
+  const s2 = l ? scoreNum(l[1]) : null;
+  const done = s1 !== null && s2 !== null;
+  /* 每节 UTC 时间：<span class="scheduled" data-localtime-format="…">2026-10-18 12:00:00Z</span>，
+     同一天第二场用 class="session"。已结束的场次上游会撤掉这个格，抓不到了。 */
+  const ses = [...src.matchAll(/class="(?:scheduled|session)"[^>]*data-localtime-format[^>]*>([^<]*)</g)]
+    .map((m) => m[1].trim()).filter(Boolean);
+  /* 只有日期没时刻：<td class="scheduled editcell" title="Sat 24 Oct">Sat 24 Oct</td> */
+  const dc = /<td[^>]*class="[^"]*scheduled[^"]*editcell[^"]*"[^>]*title="([^"]*)"/i.exec(src);
+  return {
+    r,
+    p1: ps[0] || { n: null, id: null },
+    p2: ps[1] || { n: null, id: null },
+    s1: done ? s1 : null,        /* 未打完必须同时缺，不能一个有一个没有 */
+    s2: done ? s2 : null,
+    ses,
+    day: dc && dc[1].replace(/&nbsp;/g, ' ').trim() ? dc[1].replace(/&nbsp;/g, ' ').trim() : '',
+    st: done ? 'done' : (ses.length ? 'fut' : 'tbd'),
+  };
+}
+
+/* 单站对阵页 → { rounds, matches }
+   rounds 在旧结构（en/cn/bo/n/played/s/e）之上加 id（轮次锚点）与 prize（roundinfo 原文）。 */
+function parseEvent(html) {
+  const src = String(html);
+  /* 轮次表头全页扫：正赛与资格赛各在一张同 class 的表里（NI 站 r15…r7 在第一张、r2/r1 在第二张），
+     一页 8 个轮次各出现一次表头，按 id 去重就是全集。
+     ⚠️ 一页两张 `class="display matches"` 表，而且正赛场级行不在轮次表头那张表里 ——
+     `</table>` 在正赛场次之前就闭合了（r15 表头之后紧跟的是资格赛的行）。
+     所以场次必须全页扫，两个游标各自独立，不能只取第一张表。 */
+  const heads = [...src.matchAll(/<a name="r(\d+)"><\/a>\s*<span class="round">([^<]*)<\/span>([\s\S]*?)<\/div>/g)]
+    .map((m) => ({ id: parseInt(m[1], 10), en: text(m[2]), info: text(m[3]) }));
+  const ids = new Set(heads.map((h) => h.id));
+  /* 场次全页扫 gradeA 行（页面自己的表头行是 <tr> 而非 gradeA，不会混进来）。 */
+  const matches = [...src.match(/<tr class="gradeA[\s\S]*?<\/tr>/g)].map(parseMatch);
+
+  /* 场次 → 轮次统计 */
+  const stat = new Map();
+  for (const m of matches) {
+    if (!m.r) continue;
+    let s = stat.get(m.r);
+    if (!s) { s = { n: 0, played: 0, ds: [] }; stat.set(m.r, s); }
+    s.n++;
+    if (m.st === 'done') s.played++;
+    for (const t of m.ses) {
+      const d = /\d{4}-\d{2}-\d{2}/.exec(t);
+      if (d) s.ds.push(d[0]);
+    }
+  }
+  /* 同 id 的表头会出现多次（冠军联赛的小组赛 42 个小组共用 `r19`），按 id 去重，
+     否则轮次列表会长出 42 个同名「Group」，轮次阶梯也就废了。 */
+  const seen = new Set();
+  const uniqHeads = heads.filter((h) => (seen.has(h.id) ? false : (seen.add(h.id), true)));
+  const rounds = uniqHeads
+    .map((h) => {
+      const s = stat.get(h.id) || { n: 0, played: 0, ds: [] };
+      const ds = s.ds.sort();
+      const left = s.n * 2;   /* 本轮场数 ×2 = 打完这轮的参赛人数（32 场 → 64 强） */
+      /* roundinfo 写了 "Last N" 就用它：轮次英文名不可靠（NI 站的 Round 2 是 Last 32，
+         上海站的 Round 2 是 Last 16），优先级高于「场数×2」推断。 */
+      const lm = /Last\s+(\d+)/i.exec(h.info);
+      const lastN = lm ? parseInt(lm[1], 10) : 0;
+      return {
+        id: h.id,
+        en: h.en,
+        cn: lastN >= 4 ? lastN + ' 强' : (ROUND_CN[h.en] || (left >= 16 ? left + ' 强' : h.en)),
+        bo: parseInt((/Best of\s+(\d+)/.exec(h.info) || [])[1], 10) || 0,
+        n: s.n,
+        played: s.played,
+        s: ds.length ? ds[0] : '',
+        e: ds.length ? ds[ds.length - 1] : '',
+        prize: h.info,   /* roundinfo 原文，如 "(Best of 17; Winner: £210,000; Runner-up: £105,000)" */
+      };
+    })
+    .filter((r) => r.n > 0)
+    .sort((a, b) => a.id - b.id);   /* 按 id 升序 = 时间顺序（首轮 → 决赛；15=Final 最大，排在最后） */
+  return { rounds, matches };
+}
+
+/* Last 16 轮次的 id：取最后一个「场数 n === 8」的轮次（不硬编码轮次 id —— 15/14/13 稳定，
+   但 Last 16 及更浅的 id 逐站变化）。更浅的轮次（n = 4/2/1）自然都在它之后。 */
+function last16Id(rounds) {
+  const cands = (rounds || []).filter((r) => r.n === 8).map((r) => r.id);
+  return cands.length ? Math.max(...cands) : 0;
+}
+
+/* 总奖金：查 tools/snooker-prize-fund.json。键优先 event id，退回英文站名；
+   值可为数字或 { value, from, src }。查不到 null（页面显示 —）。 */
+function fundLookup(ev) {
+  const t = fundTable || {};
+  const raw = t[String(ev.id)] != null ? t[String(ev.id)]
+    : (t[ev.en] != null ? t[ev.en] : null);
+  if (raw == null) return null;
+  if (typeof raw === 'number') return { value: raw, from: null, src: null };
+  if (typeof raw.value !== 'number') return null;
+  return { value: raw.value, from: raw.from || null, src: raw.src || null };
+}
+let fundTable = {};
+function loadFund() {
+  if (!existsSync(FUND_JSON)) { warn('总奖金表不存在（' + FUND_JSON + '），purse.fund 全为 null'); return; }
+  try {
+    const raw = JSON.parse(readFileSync(FUND_JSON, 'utf8'));
+    if (raw && typeof raw === 'object' && !Array.isArray(raw)) fundTable = raw;
+    else warn('总奖金表格式不对（应为 { 英文站名: 金额 }），purse.fund 全为 null');
+  } catch (e) {
+    warn('总奖金表读取失败：' + e.message + '（purse.fund 全为 null）');
+  }
+}
+
+/* 奖金三格：冠军/亚军取该站 Final 轮次的 roundinfo 原文，总奖金查人工表。
+   找 Final 用「场数 n === 1」而不是轮次名 —— 英文名不一定叫 Final（有的站写 Championship Match）。 */
+function purseOf(ev, rounds) {
+  /* ⚠️ 必须先「只按场数 n === 1」找一轮，再拿轮次名当回退 ——
+     不能写成 find(r => r.n === 1 || /final/i.test(r.en))：那会先命中 "Quarterfinals"
+     （名字里含 final），于是冠军/亚军奖金会取到八张赫那轮的 "Losers receive £…" 而全变 null。
+     拿不到轮次名也不能救场时（有的站最后一轮不叫 Final），才退回名字匹配。 */
+  const fin = (rounds || []).find((r) => r.n === 1) ||
+    (rounds || []).find((r) => /final/i.test(r.en)) || null;
+  const info = String((fin && fin.prize) || '');
+  const money = (re) => {
+    const m = re.exec(info);
+    return m ? parseInt(m[1].replace(/[^\d]/g, ''), 10) : null;
+  };
+  const win = money(/Winner:\s*[£$€]?\s*([\d,]+)/i);
+  const run = money(/Runner-up:\s*[£$€]?\s*([\d,]+)/i);
+  /* 手工表：先按 event id 查（同名站只有 id 能区分），再退回英文站名。
+     值是数字 = 本赛季口径；是 { value, from } = 沿用上届，页面加 ≈ 并说明。 */
+  const hit = fundLookup(ev);
+  const fund = hit ? hit.value : null;
+  const missing = [];
+  if (win == null) missing.push('冠军奖金');
+  if (run == null) missing.push('亚军奖金');
+  if (fund == null) missing.push('总奖金（tools/snooker-prize-fund.json 里没有 "' + (ev.id || ev.en) + '"）');
+  if (missing.length) warn(ev.en + ' 缺 ' + missing.join(' / '));
+  return { win, run, fund, fundFrom: hit ? hit.from : null };
+}
+
+/* 把一次抓取并进事件对象：轮次 + 场次 + 奖金三格。抛错时调用方负责沿用上次快照。 */
+function applyEvent(ev, html) {
+  const parsed = parseEvent(html);
+  if (!parsed.rounds.length) throw new Error('对阵页没解析出轮次');
+  if (!parsed.matches.length) throw new Error('对阵页没解析出场次');
+  ev.rounds = parsed.rounds;
+  ev.purse = purseOf(ev, parsed.rounds);
+  /* 已结束站只留最后 15 场（8+4+2+1；全冻 128 场会让数据文件涨到 330 KB）。
+     以前用 last16Id(rounds) 取一个阈值 id 再 filter(m.r >= cut)，遇到「轮次 id 不连续」的站会破：
+     冠军联赛（组赛 253 场）一场没裁、中国公开赛多留 2 场。改成从决赛往回收整轮。 */
+  const cut = todayIso() > ev.e;
+  ev.matches = cut ? cutFrozenMatches(parsed.matches) : parsed.matches;
+  if (cut) {
+    const keep = new Set(ev.matches.map((m) => m.r));
+    ev.rounds = (ev.rounds || []).filter((r) => keep.has(r.id));
+  }
+}
+
+/* 冻结裁剪：只留「16 强及以后」的场次（8+4+2+1 = 15 场）。
+   不能按轮次 id 或页面顺序切（各站行顺序不同），也不能只按「场数 ≤8」筛 ——
+   中国公开赛 / 武汉 / 深圳都有 2 场的**外卡轮**，场数虽小却在这条链条之外。
+   所以从决赛轮出发，用「本轮胜者出现在已保留的场次里」反复收敛：
+   决赛 ← 半决赛 ← 8 强 ← 16 强，外卡轮没人连得上，自然被丢。 */
+function cutFrozenMatches(matches) {
+  const by = new Map();
+  for (const m of matches) {
+    if (!by.has(m.r)) by.set(m.r, []);
+    by.get(m.r).push(m);
+  }
+  const nm = (x) => String((x && x.n) || '').trim().toLowerCase();
+  const playersOf = (ms) => {
+    const set = new Set();
+    for (const m of ms) { set.add(nm(m.p1)); set.add(nm(m.p2)); }
+    set.delete('');
+    return set;
+  };
+  const winnersOf = (ms) => {
+    const set = new Set();
+    for (const m of ms) {
+      if (m.s1 === null || m.s1 === undefined || m.s2 === null || m.s2 === undefined) continue;
+      if (m.s1 > m.s2) set.add(nm(m.p1));
+      else if (m.s2 > m.s1) set.add(nm(m.p2));
+    }
+    set.delete('');
+    return set;
+  };
+  /* 候选：场数 ≤ 8 的轮（当场最多 15 场）。决赛轮 = 场数为 1 的那一轮。 */
+  const cand = [...by.entries()].filter(([, ms]) => ms.length <= 8);
+  const finId = (cand.find(([, ms]) => ms.length === 1) || [])[0];
+  if (finId === undefined) return matches.slice(-15);   /* 没有决赛行（数据不全）：兜底 */
+  /* 从决赛往外一层层数（depth 0 = 决赛），只留最近的四轮，凑够 15 场为止。
+     用「层」而不是「场数」决定谁留下：上海站 24 强（8 场）的胜者也能连到 16 强，
+     但它比 16 强更浅，该丢的是它；中国公开赛的外卡轮同理。 */
+  const depth = new Map([[finId, 0]]);
+  let frontier = [finId];
+  for (let d = 0; frontier.length; d++) {
+    const seen = playersOf(frontier.flatMap((id) => by.get(id)));
+    const next = [];
+    for (const [id, ms] of cand) {
+      if (depth.has(id)) continue;
+      if ([...winnersOf(ms)].some((x) => seen.has(x))) { depth.set(id, d + 1); next.push(id); }
+    }
+    frontier = next;
+  }
+  const keep = new Set();
+  let total = 0;
+  for (const [id] of [...depth].sort((a, b) => a[1] - b[1])) {
+    const n = by.get(id).length;
+    if (total + n > 15) break;
+    keep.add(id);
+    total += n;
+  }
+  const out = matches.filter((m) => keep.has(m.r));
+  return out.length ? out : matches.slice(-15);
+}
+
+/* ---------------- 抓取状态机 ---------------- */
+const HOUR = 3600 * 1000;
+
+function todayIso() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/* 该站是否已冻结：过了结束日，且 Final 双人齐备、有比分。
+   必须带 Final 判据 —— 世锦赛这类跨夜决赛（结束日当天还比不完）会按日期被提前冻死，
+   冠军比分就永久缺失了。 */
+function frozen(e) {
+  if (!e || !e.e || !(todayIso() > e.e)) return false;
+  const fin = (e.rounds || []).find((r) => r.n === 1);
+  const finId = fin ? fin.id : 15;   /* 决赛永远是 n === 1；id 找不到时退回固定值 15 */
+  const ms = (e.matches || []).filter((m) => m.r === finId);
+  return ms.length > 0 && ms.every((m) => m.st === 'done' && m.p1.n && m.p2.n);
+}
+
+/* 该站多久抓一次：赛周内 10min（要留住开赛时间）；距开赛 ≤7 天 6h；其余 24h。
+   CI 每 10 分钟一轮，合起来约 300 次/天，比每轮全量抓（432 次/天）省。 */
+/* 这一站多久该抓一次（分层）。三个坑：
+ *  ① 已结束的站不能「按全局 updated 算间隔」—— 赛季进行中数据文件每几分钟就写一次，
+ *     全局 updated 永远是新的，于是历史站永远轮不到；所以已结束的站改成「每天一次」，
+ *     抓到就冻结（frozen()），冻结后不再进来。
+ *  ② 赛程还很远的站（>7 天）返回 Infinity，即「不抓」——开赛前一周才可能有签表。
+ *  ③ Infinity 不能被 due() 当成「没抓过」而放行。 */
+function dueAt(e) {
+  const today = todayIso();
+  if (e.s <= today && today <= e.e) return 10 * 60 * 1000;
+  const d = Date.parse(e.s + 'T00:00:00Z') - Date.parse(today + 'T00:00:00Z');
+  if (d > 7 * 24 * HOUR) return Infinity;
+  if (d > 0) return 6 * HOUR;
+  return 24 * HOUR;
+}
+
+/* 把「这次抓到的时间」按抓取频率向下取整（10 分钟 / 6 小时 / 1 天一个桶）。
+   为什么取整：fetchedAt 会进数据文件、也会参与「内容变没变」的比对，若存精确时刻，
+   同一份内容每抓一次就得多提交一次；取整后同一个桶里重复抓取不会产生 diff。
+   Infinity（赛程还远，不抓）不需要时间戳。 */
+function fetchBucket(now, want) {
+  if (!want || want === Infinity) return null;
+  return new Date(Math.floor(now / want) * want).toISOString();
+}
+
+/* 距上次抓够 want 的间隔了吗（没给上次时间 = 第一次，抓） */
+function due(now, want, lastFetchedAt) {
+  if (!want || want === Infinity) return false;
+  if (!lastFetchedAt || Number.isNaN(lastFetchedAt)) return true;
+  return now - lastFetchedAt >= want;
+}
+
 /* ---------------- 组装 ---------------- */
 function toEvents(rows, finals) {
   const today = new Date().toISOString().slice(0, 10);
@@ -304,28 +610,52 @@ function toEvents(rows, finals) {
         en: r.en,
         cn: CN_EVENT[r.en] || '',
         city: r.city || '',
+        city_cn: CITY_CN[r.city] || r.city || '',   /* 查不到回退英文原文，不 exit 1 */
         nat_cn: NAT_CN[r.nat] || r.nat || '',
         s: r.s,
         e: r.e,
         level: r.type === 'Invitational' ? 'invitational' : 'ranking',
-        prize: r.prize || 0,
+        prize: r.prize || 0,   /* 实测是**冠军**奖金；字段本身保持不动，purse.win 才是它的权威来源 */
         field: r.field || 0,
-        winner: win ? { en: win.winner, cn: CN_NAME[win.winner] || '', nat_cn: NAT_CN[win.nat] || win.nat || '', score: win.score, runner_cn: CN_NAME[win.runner] || win.runner } : null,
+        winner: win ? { en: win.winner, cn: CN_NAME[win.winner] || '', nat_cn: NAT_CN[win.nat] || win.nat || '', score: win.score, runner: win.runner, runner_cn: CN_NAME[win.runner] || win.runner } : null,
+        rounds: null,   /* 以下三个由 attachEvents / purseOf 填 */
+        matches: [],
+        purse: null,
+        tz: TZ[r.city] || TZ_FALLBACK,
       };
     })
     .sort((a, b) => (a.s < b.s ? -1 : a.s > b.s ? 1 : 0));
 }
 
-function buildData(ranking, calendar, updated) {
-  /* 只带页面要用的两张查表：球员中文名 / 国籍中文名（都是人工维护，不做机翻） */
-  const names = {};
-  const nats = {};
+function buildData(ranking, calendar, updated, prev) {
+  /* 只带页面要用的两张查表：球员中文名 / 国籍中文名（都是人工维护，不做机翻）。
+     与上一份产物合并：排名页有时只拿到部分行（离线 fixture / 上游截断），
+     若直接重建，上一份里的中文名会成批消失，树和赛程表就退回英文了。 */
+  const names = Object.assign({}, prev && prev.names);
+  const nats = Object.assign({}, prev && prev.nats);
   /* 上游会给女选手加后缀，如 'Bai Yulu (f)'；查表时去掉后缀再查一次 */
   const bare = (n) => String(n).replace(/\s*\([a-z]\)$/i, '');
   for (const r of ranking) {
     const cn = CN_NAME[r[2]] || CN_NAME[bare(r[2])];
     if (cn) names[r[2]] = cn;
     if (NAT_CN[r[3]]) nats[r[3]] = NAT_CN[r[3]];
+  }
+  /* 每站无论走哪条路进来（赛历页 / ICS 降级 / 沿用上次快照），都补齐时区与中文地名 ——
+     页面靠这两个字段算「当地小字」和「武汉 · Wuhan」。 */
+  for (const e of calendar) {
+    /* 手工表优先：表里后来补了中文名，旧快照里的英文回退值也要跟着更新 */
+    e.city_cn = CITY_CN[e.city] || e.city_cn || e.city || '';
+    e.tz = TZ[e.city] || e.tz || TZ_FALLBACK;
+    /* 总奖金是手工表，与「这轮有没有抓到对阵页」无关 —— 逐站无条件填，
+       否则只有本轮抓过的那一两站在页面上有总奖金。 */
+    e.purse = e.purse || {};
+    const f = fundLookup(e);
+    e.purse.fund = f ? f.value : null;
+    e.purse.fundFrom = f ? f.from : null;
+    if (e.purse.win == null) e.purse.win = e.prize || null;
+    if (!e.matches) e.matches = [];
+    if (e.rounds === undefined) e.rounds = null;
+    if (e.purse === undefined) e.purse = null;
   }
   return {
     updated,
@@ -344,7 +674,7 @@ function buildData(ranking, calendar, updated) {
 
 function toJsFile(obj) {
   const row = (r) => '    ' + JSON.stringify(r);
-  return '/* 由 tools/snooker.mjs 生成，勿手改。数据源：snooker.org（两年滚动排名 / 赛季赛历 / 冠军） */\n' +
+  return '/* 由 tools/snooker.mjs 生成，勿手改。数据源：snooker.org（两年滚动排名 / 赛季赛历 / 冠军 / 单站对阵） */\n' +
     'window.SNOOKER = {\n' +
     '  "updated": ' + JSON.stringify(obj.updated) + ',\n' +
     '  "source": ' + JSON.stringify(obj.source) + ',\n' +
@@ -367,11 +697,14 @@ function readDataFile(path) {
   try { return JSON.parse(src.slice(brace, end + 1)); } catch { return null; }
 }
 
-/* 只比「数据」：updated 每次抓取都会变，不能算变化，否则天天提交空 diff */
+/* 只比「数据」：updated 每次抓取都会变，不能算变化，否则天天提交空 diff。
+   matches / purse / tz / city_cn 都在 calendar 里，被这一份对比带上。 */
+function snapOf(d) {
+  return d ? [d.season, d.names, d.nats, d.calendar, d.ranking] : null;
+}
 function sameData(a, b) {
   if (!a || !b) return false;
-  return JSON.stringify([a.season, a.names, a.nats, a.calendar, a.ranking]) ===
-         JSON.stringify([b.season, b.names, b.nats, b.calendar, b.ranking]);
+  return JSON.stringify(snapOf(a)) === JSON.stringify(snapOf(b));
 }
 
 /* ---------------- 抓取 ---------------- */
@@ -393,17 +726,149 @@ const warn = (msg) => {
   console.error('::warning::' + msg);
 };
 
+/* ---------------- --check 的额外校验（纯逻辑，联网抓完顺带跑） ---------------- */
+function checkData(data) {
+  const bad = [];
+  const today = todayIso();
+  for (const e of data.calendar) {
+    const ms = e.matches || [];
+    if (e.id) {
+      /* matches[].r 都要落在 rounds 的 id 集合里 */
+      const ids = new Set((e.rounds || []).map((r) => r.id));
+      for (const m of ms) if (!ids.has(m.r)) bad.push(`${e.en} 有场次指向不存在的轮次 r=${m.r}`);
+    }
+    /* s1/s2 必须同时有或同时无 */
+    for (const m of ms) if ((m.s1 === null) !== (m.s2 === null)) bad.push(`${e.en} 比分不成对（s1=${m.s1} s2=${m.s2}）`);
+    /* 每节开赛时刻都要能被 new Date() 解析（消费方直接 new Date(时刻) 转本地时区） */
+    for (const m of ms) {
+      for (const t of m.ses || []) if (Number.isNaN(new Date(t).getTime())) bad.push(`${e.en} 开赛时刻无法解析：${t}`);
+    }
+    /* 已结束站只留 Last 16 起的 15 场 */
+    if (e.e && today > e.e && ms.length > 15) bad.push(`${e.en} 已结束却留了 ${ms.length} 场（应 ≤15）`);
+  }
+  /* 手工表覆盖不全只报 warning（可增量补），不算失败 */
+  const miss = [...new Set(data.calendar.map((e) => e.city).filter((c) => c && !(c in CITY_CN)))];
+  if (miss.length) warn(`CITY_CN 未覆盖 ${miss.length} 个城市（暂回退英文原文）：${miss.join(', ')}`);
+  return bad;
+}
+
+/* ---------------- 单站对阵页：抓 / 冻 / 沿用 ---------------- */
+/* 给 calendar 里每一站补 rounds / matches / purse：
+   抓当前站、下一站，以及所有未冻结且已开赛或临近的站；其余站沿用 existing.calendar 里的快照。
+   任一站失败只报 warning 并保留上次快照，绝不写空数据。 */
+async function attachEvents(calendar, existing, opts) {
+  const now = Date.now();
+  const today = todayIso();
+  const prevById = new Map();
+  const prevList = Array.isArray(existing) ? existing : (existing && Array.isArray(existing.calendar) ? existing.calendar : []);
+  for (const e of prevList) if (e && e.id) prevById.set(e.id, e);
+  const focus = calendar.find((e) => e.s <= today && today <= e.e) ||
+    calendar.find((e) => e.s > today) || null;
+  let fetched = 0, kept = 0, noId = 0, missed = 0;
+
+  for (const ev of calendar) {
+    if (!ev.id) { noId++; continue; }
+    const prev = prevById.get(ev.id);
+    if (prev) {   /* 先把上次快照铺上：抓失败 / 到期未到时都还有内容 */
+      ev.rounds = prev.rounds || null;
+      ev.matches = prev.matches || [];
+      ev.purse = prev.purse || null;
+      ev.fetchedAt = prev.fetchedAt || null;   /* 每站自己的抓取时刻，不能用全局 updated 代替 */
+      ev.fails = prev.fails || 0;
+      kept++;
+    }
+    /* 离线喂文件：--local-ev 喂 focus 站；--ev <id>=<f> / --ev-dir 喂指定站。
+       显式喂了文件就绕过「冻结 / 重试上限」—— 那是给测试和补历史用的，
+       否则冻结过的站永远没法用新解析器重新跑一遍。 */
+    let file = opts.evFiles.get(ev.id) || null;
+    if (!file && focus && focus.id === ev.id) file = opts.evFiles.get('__focus__') || null;
+    if (!file && frozen(ev)) continue;    /* 赛后冻结：不再抓这一站 */
+    if (!file && ev.fails >= 3) continue; /* 连抓三次都没拿到对阵页（上游撤页等），别再白请求 */
+    let html = null;
+    if (file) {
+      html = readFileSync(file, 'utf8');
+    } else {
+      if (opts.offline) continue;   /* 离线模式不联网 */
+      const want = dueAt(ev);
+      /* ⚠️ 必须用**这一站自己的** fetchedAt，不能用 prev.updated：
+         赛季进行中数据文件每 10 分钟就写一次，全局 updated 永远是新的，
+         于是「已结束、还没有对阵数据」的历史站永远轮不到抓（这是真实踩过的坑）。 */
+      const last = ev.fetchedAt ? Date.parse(ev.fetchedAt) : 0;
+      if (!due(now, want, last)) { missed++; continue; }
+      try {
+        html = await get(URL_EVENT(ev.id));
+      } catch (e) {
+        warn(ev.en + ' 对阵页抓取失败，沿用上次快照：' + e.message);
+        ev.fails = (ev.fails || 0) + 1;
+        continue;
+      }
+    }
+    try {
+      applyEvent(ev, html);
+      ev.fails = 0;
+      ev.fetchedAt = fetchBucket(now, dueAt(ev));
+      fetched++;
+    } catch (e) {
+      warn(ev.en + ' 对阵页解析失败，沿用上次快照：' + e.message);
+    }
+  }
+  if (noId) warn(`${noId} 站没有 event id（多半来自 ICS 降级源），本轮没有对阵数据`);
+  if (missed) warn(`${missed} 站未到抓取间隔，本轮跳过`);
+  if (fetched) console.log(`对阵页：本次更新 ${fetched} 站（沿用 ${kept} 站上次快照）`);
+}
+
 /* ---------------- CLI ---------------- */
 const argv = process.argv.slice(2);
 const flag = (n) => argv.includes(n);
 const opt = (n) => { const i = argv.indexOf(n); return i >= 0 ? argv[i + 1] : null; };
 
+/* 离线时喂的对阵页：--ev <id>=<路径> 可重复；--ev-dir <目录> 按文件名前缀的 id；
+   --local-ev <路径> 喂 focus 站（保持旧行为）。 */
+function collectEventFiles() {
+  const m = new Map();
+  const put = (spec) => {
+    const i = spec.indexOf('=');
+    if (i > 0) m.set(spec.slice(0, i).trim(), resolve(spec.slice(i + 1).trim()));
+  };
+  for (let i = 0; i < argv.length; i++) {
+    const hit = /^--ev=(.+)$/.exec(argv[i]);
+    if (hit) put(hit[1]);
+    /* 也接受 `--ev <id>=<路径>` 的空格写法（两种都常见，别只认一种） */
+    else if (argv[i] === '--ev' && argv[i + 1] && !argv[i + 1].startsWith('--') && argv[i + 1].includes('=')) put(argv[++i]);
+  }
+  const one = opt('--local-ev');
+  if (one) m.set('__focus__', resolve(one));
+  const dir = opt('--ev-dir');
+  if (dir && existsSync(dir)) {
+    for (const f of readdirSync(dir).sort()) {
+      const id = /^(\d+)[-_ ]/.exec(f);
+      if (id) m.set(id[1], resolve(dir, f));
+    }
+  }
+  return m;
+}
+
 async function main() {
   const local = opt('--local');
   const stdout = flag('--stdout');
   const check = flag('--check');
-  const existing = readDataFile(OUT);
-
+  const localCal = opt('--local-cal');
+  const localFin = opt('--local-fin');
+  const evFiles = collectEventFiles();
+  /* --check 可配 --out <文件> 把「本次要写入的产物」导到临时文件，好和 committed 文件逐字比。
+     不带这个开关时行为与原来一模一样：写入路径就是 OUT。 */
+  const outPath = opt(OUT_ARG) ? resolve(opt(OUT_ARG)) : OUT;
+  const readOnly = !!check || !!stdout;
+  if (readOnly && !existsSync(outPath)) {
+    throw new Error(`要写入的文件不存在（${OUT_ARG}）：${outPath}`);
+  }
+  const existing = readDataFile(outPath);
+  /* 读进来立刻拍一份快照：calendar 抓不到时会直接沿用它（同一个数组引用），
+     attachEvents 又是原地改对象 —— 不先拍，最后比对是拿自己跟自己比，
+     对咯数据永远「无变化」、写不进文件。 */
+  const beforeSnap = existing ? JSON.stringify(snapOf(existing)) : null;
+  /* 只要给了任何离线来源，就完全不联网（--local 的用途就是离线调试 / 单测） */
+  const offline = !!(local || localCal || localFin || evFiles.size);
   /* 1) 排名（必需） */
   const rankHtml = local ? readFileSync(local, 'utf8') : await get(URL_RANK);
   const min = opt('--min') ? parseInt(opt('--min'), 10) : (local ? 1 : 100);
@@ -412,8 +877,9 @@ async function main() {
     throw new Error(`排名只解析到 ${ranking.length} 行（应约 ${min} 行以上），页面可能改版，已中止`);
   }
 
+  loadFund();
+
   /* 2) 赛历 + 冠军（可降级：抓不到就沿用上一次的） */
-  const localCal = opt('--local-cal');
   let calendar = existing ? existing.calendar : [];
   let rows = [];
   if (localCal) {
@@ -432,7 +898,6 @@ async function main() {
   }
   if (rows.length) {
     let finals = new Map();
-    const localFin = opt('--local-fin');
     try {
       finals = parseFinals(localFin ? readFileSync(localFin, 'utf8') : await get(URL_FIN));
     } catch (e) { warn('冠军表抓取失败（不影响赛历）：' + e.message); }
@@ -440,42 +905,44 @@ async function main() {
   }
   if (!calendar.length) warn('本次没有赛历数据，页面将只显示排名');
 
-  /* 3) 当前站（或下一站）的对阵表：进度图要的轮次结构。抓不到就让页面退回简版进度条。 */
-  const todayIso = new Date().toISOString().slice(0, 10);
-  const focus = calendar.find((e) => e.s <= todayIso && todayIso <= e.e) ||
-    calendar.find((e) => e.s > todayIso) || null;
-  if (focus && focus.id) {
-    const localEv = opt('--local-ev');
-    const cached = (existing && existing.calendar || []).find((e) => e.id === focus.id);
-    try {
-      const evHtml = localEv ? readFileSync(localEv, 'utf8') : await get(URL_EVENT(focus.id));
-      const rounds = parseRounds(evHtml);
-      if (rounds.length) focus.rounds = rounds;
-      else warn('对阵页没解析出轮次，进度图退回简版');
-    } catch (e) {
-      warn('对阵页抓取失败，进度图' + (cached && cached.rounds ? '沿用上次轮次' : '退回简版') + '：' + e.message);
-      if (cached && cached.rounds) focus.rounds = cached.rounds;
-    }
-  }
+  /* 3) 单站对阵页（当前站 / 下一站 / 未冻结且已开赛或临近的站） */
+  await attachEvents(calendar, existing, { evFiles, offline });
 
   const updated = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
-  const next = buildData(ranking, calendar, sameData(existing, buildData(ranking, calendar, updated)) ? existing.updated : updated);
+  const built = buildData(ranking, calendar, updated, existing);
+  const next = beforeSnap && JSON.stringify(snapOf(built)) === beforeSnap
+    ? buildData(ranking, calendar, existing.updated, existing) : built;
 
   if (stdout) { process.stdout.write(toJsFile(next)); return 0; }
 
+  const bad = checkData(next);
   if (check) {
-    if (sameData(existing, next)) { console.log(`无漂移（${ranking.length} 人 / ${next.calendar.length} 站）`); return 0; }
+    if (bad.length) {
+      for (const b of bad) console.error('校验不通过：' + b);
+      return 1;
+    }
+    if (beforeSnap && JSON.stringify(snapOf(next)) === beforeSnap) { console.log(`无漂移（${ranking.length} 人 / ${next.calendar.length} 站）`); return 0; }
     console.error('数据有漂移：assets/snooker-data.js 需要重新生成（node tools/snooker.mjs）');
     return 1;
   }
 
-  if (sameData(existing, next)) { console.log(`无变化，未写文件（${ranking.length} 人 / ${next.calendar.length} 站）`); return 0; }
-  writeFileSync(OUT, toJsFile(next));
+  if (bad.length) for (const b of bad) warn(b);
+  if (beforeSnap && JSON.stringify(snapOf(next)) === beforeSnap) { console.log(`无变化，未写文件（${ranking.length} 人 / ${next.calendar.length} 站）`); return 0; }
+  writeFileSync(outPath, toJsFile(next));
   console.log(`已写入 assets/snooker-data.js：${ranking.length} 人，赛程 ${next.calendar.length} 站（其中已完赛 ${next.calendar.filter((e) => e.winner).length} 站）`);
   return 0;
 }
 
-main().then((code) => { process.exitCode = code; }).catch((err) => {
-  console.error('失败：' + (err && err.message ? err.message : err));
-  process.exitCode = 1;
-});
+/* 供离线单测 import 用（直接 node 跑时照旧执行 main） */
+export { parseEvent, parseMatch, parseRank, parseCalendar, parseIcs, parseFinals, pickEvents, toEvents, buildData, frozen, dueAt, fetchBucket, last16Id, cutFrozenMatches, sameData, checkData, CITY_CN, TZ };
+
+const invokedDirectly = (() => {
+  try { return process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]); }
+  catch { return true; }
+})();
+if (invokedDirectly) {
+  main().then((code) => { process.exitCode = code; }).catch((err) => {
+    console.error('失败：' + (err && err.message ? err.message : err));
+    process.exitCode = 1;
+  });
+}

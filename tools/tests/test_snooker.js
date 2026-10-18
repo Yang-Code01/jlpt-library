@@ -118,14 +118,176 @@ try {
   for (const e of withR) {
     const rs = e.rounds;
     ok(rs.every((x) => x.n > 0 && x.cn && x.played <= x.n), '轮次场次合法 · ' + e.en);
-    ok(rs.every((x, i) => i === 0 || rs[i - 1].n > x.n), '轮次场次逐轮减半 · ' + e.en);
-    const tot = rs.reduce((a, x) => a + x.n, 0);
-    ok(tot === rs[0].n * 2 - 1, '总场次 = 首轮场次 ×2 −1 · ' + e.en, String(tot));
+    /* 资格赛常常是几轮同场次（128 强 / 96 强 都是 32 场），不能要求「每轮都是上一轮的一半」；
+       但从第一处真减半开始，尾段必然严格对半，总数 = 尾段首轮场次 ×2 −1。 */
+    ok(rs.every((x, i) => i === 0 || rs[i - 1].n >= x.n), '轮次场次不递增 · ' + e.en);
+    let k = 0;
+    for (let i = rs.length - 1; i > 0; i--) {
+      if (rs[i - 1].n === rs[i].n * 2) k = i - 1; else break;
+    }
+    const tot = rs.slice(k).reduce((a, x) => a + x.n, 0);
+    ok(tot === rs[k].n * 2 - 1, '尾段总场次 = 首轮场次 ×2 −1 · ' + e.en, String(tot));
     ok(rs.some((x) => x.played < x.n) || rs.every((x) => x.played === x.n), '未打完的轮次存在或全部完赛');
   }
 } catch (e) { ok(false, '读取快照失败', String(e.message).slice(0, 120)); }
 
+/* ===================== E 单站对阵页 → 场级数据 =====================
+   用真实抓下的两页做样本（tools/tests/fixtures/，已入库）：
+   北爱尔兰站是「赛周中·后程全是待定」，上海站是「已完赛·可完整成树」。
+   上游改版时这里先红，比线上树空掉早一步。 */
+const FIX_NI = path.join(ROOT, 'tools/tests/fixtures/snooker-event-niopen.html');
+const FIX_SH = path.join(ROOT, 'tools/tests/fixtures/snooker-event-shanghai.html');
+const TREE_JS = path.join(ROOT, 'assets/snooker-tree.js');
+
+if (fs.existsSync(FIX_NI) && fs.existsSync(FIX_SH)) {
+  const { pathToFileURL } = require('url');
+  const probe = `
+import { parseEvent, last16Id, frozen } from ${JSON.stringify(pathToFileURL(TOOL).href)};
+import fs from 'node:fs';
+const ni = parseEvent(fs.readFileSync(${JSON.stringify('FIX_NI')}.replace('FIX_NI', ${JSON.stringify(FIX_NI)}), 'utf8'));
+const sh = parseEvent(fs.readFileSync(${JSON.stringify(FIX_SH)}, 'utf8'));
+const fin = sh.rounds.find((r) => r.n === 1);
+const doneEv = { e: '2026-09-01', rounds: sh.rounds, matches: sh.matches };
+const noFinal = { e: '2026-09-01', rounds: sh.rounds, matches: sh.matches.filter((m) => m.r !== fin.id) };
+const liveEv = { e: '2026-10-25', rounds: ni.rounds, matches: ni.matches };
+console.log(JSON.stringify({
+  ni: { m: ni.matches.length, r: ni.rounds.length,
+        tbd: ni.matches.filter((m) => m.st === 'tbd').length,
+        timed: ni.matches.filter((m) => m.ses && m.ses.length).length },
+  sh: { m: sh.matches.length, done: sh.matches.filter((m) => m.st === 'done').length, cut: last16Id(sh.rounds) },
+  frozenDone: frozen(doneEv), frozenNoFinal: frozen(noFinal), frozenLive: frozen(liveEv)
+}));`;
+  const pr = spawnSync(process.execPath, ['--input-type=module', '-e', probe], { encoding: 'utf8' });
+  ok(pr.status === 0, '能 import 生成器并解析样本页', (pr.stderr || '').slice(0, 300));
+  let ev = null;
+  try { ev = JSON.parse(pr.stdout); } catch (e) { ok(false, '样本解析结果应是 JSON', (pr.stdout || '').slice(0, 200)); }
+  if (ev) {
+    ok(ev.ni.m === 127, '北爱站解析出 127 场', String(ev.ni.m));
+    ok(ev.ni.r === 8, '北爱站 8 个轮次', String(ev.ni.r));
+    ok(ev.ni.tbd > 0, '赛周中后程有「待定」场次', String(ev.ni.tbd));
+    ok(ev.ni.timed > 0, '有开赛时刻的场次被留下（赛后上游会撤掉）', String(ev.ni.timed));
+    ok(ev.sh.m === 23 && ev.sh.done === 23, '上海站 23 场且全部有比分', ev.sh.m + '/' + ev.sh.done);
+    ok(ev.sh.cut === 8, '冻结切点 = 16 强的轮次 id', String(ev.sh.cut));
+    /* 冻结必须等到决赛打完：按日期一刀切会把跨夜的决赛比分永久切掉 */
+    ok(ev.frozenDone === true, '决赛有比分 → 可冻结');
+    ok(ev.frozenNoFinal === false, '过了结束日但决赛没比分 → 不许冻结');
+    ok(ev.frozenLive === false, '赛周内 → 不许冻结');
+  }
+
+  /* ---- 天梯图几何：同一条不变式「每轮场次 × span = 总行数」，决赛必然落在正中 ---- */
+  const vm = require('vm');
+  const ctx = { Intl, Date, Math, JSON, String, Number, Object, Array, RegExp, isNaN, parseInt, parseFloat, encodeURIComponent };
+  ctx.window = ctx;
+  vm.createContext(ctx);
+  try {
+    vm.runInContext(fs.readFileSync(TREE_JS, 'utf8'), ctx);
+    vm.runInContext(fs.readFileSync(DATA, 'utf8'), ctx);
+  } catch (e) { ok(false, '天梯图组件应可独立加载', e.message); }
+  const T = ctx.SnookerTree, DD = ctx.SNOOKER;
+  ok(T && typeof T.render === 'function', '天梯图组件导出 render');
+  if (T && DD) {
+    const eSH = DD.calendar.find((x) => x.en === 'Shanghai Masters');
+    const eNI = DD.calendar.find((x) => x.en === 'Northern Ireland Open');
+    if (eSH && eSH.matches && eSH.matches.length) {
+      const g = T.geometry(T.buildTree(eSH), 8);
+      ok(g.rows === 8, '上海（16 强起）8 行', String(g.rows));
+      ok(g.cols.length === 4 && g.cols.every((c) => c.trusted), '上海 4 轮，每轮场次 × span = 行数',
+        g.cols.map((c) => c.n + '/' + c.span).join(','));
+      ok(g.finalCenter === 4, '决赛落在正中（4）', String(g.finalCenter));
+      ok(g.linked === 14 && g.inferred === 0 && g.orphans === 0,
+        '14 条连线全部由「胜者出现在父场」核实', g.linked + '/' + g.inferred + '/' + g.orphans);
+      ok(g.champion === 'Judd Trump', '冠军路径可识别', String(g.champion));
+      const hv = T.render(eSH, { fromId: 8, dir: 'v' });
+      const hh = T.render(eSH, { fromId: 8, dir: 'h' });
+      ok(/tn-card/.test(hv) && !/NaN/.test(hv), '纵向渲染：有卡片、无 NaN');
+      ok(/tn-card/.test(hh) && !/NaN/.test(hh), '横向渲染：有卡片、无 NaN');
+      ok((hv.match(/<path /g) || []).length === 14, '纵向渲染画了 14 条连线',
+        String((hv.match(/<path /g) || []).length));
+    }
+    if (eNI && eNI.matches && eNI.matches.length) {
+      const g2 = T.geometry(T.buildTree(eNI), 7);
+      ok(g2.rows === 32 && g2.cols.length === 6, '北爱（64 强起）32 行 × 6 轮', g2.rows + 'x' + g2.cols.length);
+      ok(g2.finalCenter === 16, '北爱决赛落在正中（16）', String(g2.finalCenter));
+      ok(g2.inferred > 0 && g2.linked === 0, '未开赛站全靠虚线配对', g2.linked + '/' + g2.inferred);
+      ok(!/NaN/.test(T.render(eNI, { fromId: 7, dir: 'v' })), '北爱纵向渲染无 NaN');
+    }
+  }
+}
+
+/* ============ G. 冻结裁剪 + 抓取频率（三个踩过的坑） ============ */
+{
+  /* 造一个「16 强 8 + 8 强 4 + 半决赛 2 + 决赛 1 + 外卡 2」的站：
+     外卡轮的胜者会出现在 16 强里（所以它连得上，不是孤儿），但它比 16 强更浅，
+     裁剪时必须靠「离决赛的层数」丢掉它，而不是靠「场数 ≤8」或轮次 id。 */
+  const m = (r, a, b, sa, sb) => ({ r, p1: { n: a }, p2: { n: b }, s1: sa, s2: sb, st: 'done', ses: [] });
+  const ms = [
+    m(20, 'W1', 'X1', 4, 2), m(20, 'W2', 'X2', 4, 3),           /* 外卡轮：2 场 */
+    m(10, 'A', 'W1', 5, 1), m(10, 'B', 'W2', 5, 2), m(10, 'C', 'F', 5, 0), m(10, 'D', 'G', 5, 1),
+    m(10, 'E', 'H', 5, 2), m(10, 'I', 'J', 5, 3), m(10, 'K', 'L', 5, 4), m(10, 'M', 'N', 5, 0),
+    m(11, 'A', 'E', 6, 3), m(11, 'C', 'I', 6, 4), m(11, 'B', 'K', 6, 2), m(11, 'D', 'M', 6, 1),
+    m(12, 'A', 'C', 6, 5), m(12, 'B', 'D', 6, 2),
+    m(15, 'A', 'B', 10, 6),
+  ];
+  const code = "import { cutFrozenMatches, dueAt, fetchBucket } from " + JSON.stringify(new URL('file://' + TOOL).href) + ';'
+    + 'const ms = JSON.parse(process.argv[1]);'
+    + 'const out = cutFrozenMatches(ms);'
+    + 'const t = new Date().toISOString().slice(0,10);'
+    + 'const day = (n) => { const d = new Date(Date.parse(t + "T00:00:00Z") + n * 86400000); return d.toISOString().slice(0,10); };'
+    + 'const far = dueAt({ s: day(30), e: day(35) });'
+    + 'const week = dueAt({ s: day(3), e: day(9) });'
+    + 'const past = dueAt({ s: day(-10), e: day(-3) });'
+    + 'const live = dueAt({ s: day(-1), e: day(6) });'
+    + 'const b1 = fetchBucket(1e12, 6 * 3600 * 1000), b2 = fetchBucket(1e12 + 60e3, 6 * 3600 * 1000);'
+    + 'process.stdout.write(JSON.stringify({ n: out.length, rounds: [...new Set(out.map(x => x.r))], far, week, past, live, b1, b2 }));';
+  const r = spawnSync(process.execPath, ['--input-type=module', '-e', code, '--', JSON.stringify(ms)], { encoding: 'utf8' });
+  let got = null;
+  try { got = JSON.parse(r.stdout || 'null'); } catch {}
+  ok(got && got.n === 15, '冻结裁剪留 15 场（8+4+2+1）', got ? String(got.n) : (r.stderr || '').slice(0, 300));
+  ok(got && got.rounds.length === 4 && !got.rounds.includes(20), '外卡轮被丢掉、只留决赛起四轮', got ? JSON.stringify(got.rounds) : '');
+  ok(got && got.far === null, '赛程 30 天外的站不抓（dueAt = Infinity）', got ? String(got.far) : '');
+  ok(got && got.week === 6 * 3600 * 1000, '开赛前一周 6 小时一次', got ? String(got.week) : '');
+  ok(got && got.past === 24 * 3600 * 1000, '已结束但仍没数据的站每天补一次（不能靠全局 updated）', got ? String(got.past) : '');
+  ok(got && got.live === 10 * 60 * 1000, '赛周内 10 分钟一次', got ? String(got.live) : '');
+  ok(got && got.b1 === got.b2, '同一时间桶里的 fetchedAt 相同（不会为了时间戳反复提交）', got ? got.b1 + ' / ' + got.b2 : '');
+}
+
 try { fs.unlinkSync(tmp); fs.unlinkSync(tiny); } catch {}
+
+/* ============ F. 已入库快照必须满足落盘契约（不联网） ============
+ * `--check` 是联网版的守门人（本机被 Cloudflare 挡，跑不了），所以这里用
+ * checkData() 对**已提交的** assets/snooker-data.js 做同一套契约校验：
+ * 场次指向的轮次存在、比分成对、开赛时刻可解析、已结束站 ≤15 场。
+ * 上游改版或手改快照会先在这里红。 */
+{
+  const code = [
+    "import fs from 'fs'; import vm from 'vm';",
+    "import { checkData } from " + JSON.stringify(new URL('file://' + TOOL).href) + ';',
+    "const ctx = { window: {} }; vm.createContext(ctx);",
+    "vm.runInContext(fs.readFileSync(" + JSON.stringify(DATA) + ", 'utf8'), ctx);",
+    "const bad = checkData(ctx.window.SNOOKER);",
+    "process.stdout.write(JSON.stringify(bad));",
+  ].join(String.fromCharCode(10));
+  const r = spawnSync(process.execPath, ['--input-type=module', '-e', code], { encoding: 'utf8' });
+  let bad = null;
+  try { bad = JSON.parse(r.stdout || 'null'); } catch {}
+  ok(r.status === 0, 'checkData 可对已入库快照运行', (r.stderr || '').slice(0, 300));
+  ok(Array.isArray(bad), 'checkData 应返回问题清单', String(r.stdout).slice(0, 200));
+  ok(Array.isArray(bad) && bad.length === 0, '已入库快照满足落盘契约',
+    Array.isArray(bad) ? bad.slice(0, 4).join(' | ') : '');
+
+  /* 手工总奖金表：能解析、每条都是正数（键用 id 或英文站名都行） */
+  const FUND = path.join(ROOT, 'tools/snooker-prize-fund.json');
+  let fund = null;
+  try { fund = JSON.parse(fs.readFileSync(FUND, 'utf8')); } catch (e) { /* 下面的断言会报 */ }
+  ok(fund && typeof fund === 'object', '总奖金手工表可解析', String(!fund));
+  const entries = Object.keys(fund || {}).filter((k) => k.charAt(0) !== '_').map((k) => [k, fund[k]]);
+  const badVal = entries.filter(([, v]) => {
+    const n = typeof v === 'number' ? v : (v && v.value);
+    return !(typeof n === 'number' && n > 0);
+  });
+  ok(entries.length >= 20 && badVal.length === 0, '总奖金手工表每条都是正数',
+    entries.length + ' 条，异常：' + badVal.map(([k]) => k).join(','));
+}
 
 /* ===================== 结论 ===================== */
 console.log('\n' + (fails.length ? '✗ ' + fails.length + ' 条失败 / ' + (pass + fails.length) : '✓ 全部通过 (' + pass + ')'));
