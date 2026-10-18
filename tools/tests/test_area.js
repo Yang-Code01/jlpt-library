@@ -255,24 +255,29 @@ function boot(opts, preset) {
   eq(dom.root.getAttribute('data-area'), 'study', '未知 jlpt-area 退回 study');
 }
 
-/* ---------------- 8. 结构断言：三个区 + 生成器标记区 + 隐藏规则 ---------------- */
+/* ---------------- 8. 结构断言：四个区 + 生成器标记区 + 隐藏规则 ---------------- */
 {
   const body = html.slice(html.indexOf('</style>')); // 只看 markup，别把 CSS 选择器算进去
   const css = html.slice(html.indexOf('<style>'), html.indexOf('</style>'));
   ok(/<div class="wb-pane" data-area-pane="study">/.test(body), '有语言学习区容器');
   ok(/<div class="wb-pane" data-area-pane="survey">/.test(body), '有调查报告区容器');
   ok(/<div class="wb-pane" data-area-pane="tools">/.test(body), '有工具开发区容器');
+  ok(/<div class="wb-pane" data-area-pane="snooker">/.test(body), '有斯诺克信息区容器');
   ok(/<main id="survey" class="entries">/.test(body), '调查报告清单有 #survey 锚点');
   ok(/<main id="tool-pane" class="entries">/.test(body), '工具清单有 #tool-pane 锚点');
-  /* 三个区共用一个 :not() 显隐规则 —— 加第四个区只改这一条，不该再写两两成对 */
+  /* 四个区共用一条 :not() 显隐规则（每个区一行）—— 加第五个区只加一行，不该再写两两成对 */
   ok(
-    /html\[data-area="tools"\] \.wb-pane:not\(\[data-area-pane="tools"\]\)[\s\S]{0,60}?display: none;/.test(css),
+    /html\[data-area="tools"\] \.wb-pane:not\(\[data-area-pane="tools"\]\)[\s\S]{0,400}?display: none;/.test(css),
     '工具区激活时隐藏非工具区 pane（CSS :not 规则）'
+  );
+  ok(
+    /html\[data-area="snooker"\] \.wb-pane:not\(\[data-area-pane="snooker"\]\)[\s\S]{0,60}?display: none;/.test(css),
+    '斯诺克区激活时隐藏其他区 pane（CSS :not 规则）'
   );
   eq(
     (css.match(/\.wb-pane:not\(\[data-area-pane=/g) || []).length,
-    3,
-    '三个区各一条 :not() 显隐规则'
+    4,
+    '四个区各一条 :not() 显隐规则'
   );
   const i = body.indexOf('<!-- wb:report-list:start -->');
   const j = body.indexOf('<!-- wb:report-list:end -->');
