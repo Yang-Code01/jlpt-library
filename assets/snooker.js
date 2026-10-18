@@ -178,11 +178,19 @@
 
   html += card + track + '</div>';
 
-  /* ---------------- 2. 世界排名 ---------------- */
+  /* ---------------- 2. 排名：两个口径（两年滚动 / 本赛季） ---------------- */
   function chgCell(c) {
     if (!c || c === '0' || c === '=' || c === '-') return '<span class="snk-chg">—</span>';
     var up = c.charAt(0) === '+';
     return '<span class="snk-chg ' + (up ? 'up' : 'down') + '">' + (up ? '▲' : '▼') + Math.abs(parseInt(c, 10)) + '</span>';
+  }
+  function tableHtml(id, list, hidden) {
+    return '<div class="snk-rank" id="' + id + '"' + (hidden ? ' hidden' : '') + '>' +
+      '<div class="snk-row snk-row-h"><span>名次</span><span>变动</span><span>球员</span><span>国家</span><span>积分</span></div>' +
+      (list.length
+        ? list.map(rowHtml).join('')
+        : '<p class="snk-blank" data-static="1">暂无本赛季榜数据：生成器还没成功抓到 One-Year List。</p>') +
+    '</div>';
   }
   function rowHtml(r, idx) {
     var en = r[2], cn = NAMES[en] || '';
@@ -199,19 +207,39 @@
     '</div>';
   }
 
-  html += '<div class="snk-sec">' +
+  /* 单赛季（One-Year List）榜：上游抓不到时是空数组，页面照样给出开关与占位 */
+  var ONE = D.ranking1y || [];
+  var rankSites = CAL.filter(function (e) { return e.level === 'ranking'; });
+  var rankDone = rankSites.filter(function (e) { return !!e.winner; }).length;
+  var STAMP = String(D.updated || '').slice(0, 10);
+  var STAMP_1Y = String(D.updated1y || D.updated || '').slice(0, 10);
+  /* 两个时间戳来自同一台机器的两次抓取，单赛季榜那次没抓到就会停在上回的时间 */
+  var STALE_1Y = !!(D.updated1y && D.updated && D.updated1y < D.updated);
+  var SEASON_LABEL = (D.season && D.season.label) || '';
+  var SUB_TWO = '两年滚动积分 · 数据 ' + STAMP + ' · 中国球员高亮 · 默认只看前 16。';
+  var SUB_ONE =
+    (STALE_1Y ? '⚠ 本次抓取失败，沿用 ' + STAMP_1Y + ' 的榜 · ' : '') +
+    (SEASON_LABEL ? SEASON_LABEL + ' 赛季 · ' : '') +
+    '已计入 ' + rankDone + ' / ' + rankSites.length + ' 站 · 数据 ' + STAMP_1Y + ' · 默认只看前 16。';
+
+  html += '<div class="snk-sec" id="snk-rank-sec">' +
     '<div class="zone-head">' +
       '<div class="zone-head-main">' +
-        '<h2 class="zone-title">世界排名 <span class="zone-en">World Ranking</span></h2>' +
-        '<p class="zone-sub">两年滚动积分 · 中国球员高亮 · ▲▼ 为本次抓取的名次变动。默认只看前 16。</p>' +
+        '<h2 class="zone-title">' +
+          '<span class="snk-tabs" role="tablist" aria-label="排名口径">' +
+            '<button type="button" class="snk-tab on" id="snk-tab-two" role="tab" data-tab="two" aria-selected="true" aria-controls="snk-rank">世界排名</button>' +
+            '<button type="button" class="snk-tab" id="snk-tab-one" role="tab" data-tab="one" aria-selected="false" aria-controls="snk-rank-1y">本赛季</button>' +
+          '</span> ' +
+          '<span class="zone-en" id="snk-rank-en">World Ranking</span>' +
+        '</h2>' +
+        '<p class="zone-sub" id="snk-sub">' + esc(SUB_TWO) + '</p>' +
       '</div>' +
       '<div class="zone-aside"><input type="search" id="snk-q" class="snk-q" placeholder="搜球员 / 国家" aria-label="搜索球员或国家" autocomplete="off"></div>' +
     '</div>' +
-    '<div class="snk-rank" id="snk-rank">' +
-      '<div class="snk-row snk-row-h"><span>名次</span><span>变动</span><span>球员</span><span>国家</span><span>积分</span></div>' +
-      D.ranking.map(rowHtml).join('') +
-    '</div>' +
+    tableHtml('snk-rank', D.ranking, false) +
     '<button type="button" class="snk-more" id="snk-more">展开全部 ' + D.ranking.length + ' 人</button>' +
+    tableHtml('snk-rank-1y', ONE, true) +
+    (ONE.length ? '<button type="button" class="snk-more" id="snk-more-1y" hidden>展开全部 ' + ONE.length + ' 人</button>' : '') +
   '</div>';
 
   host.innerHTML = html;
@@ -567,53 +595,100 @@
 
   /* ---------------- 交互 ---------------- */
   /* 不用 :not() —— tools/tests/dom.js 的迷你 DOM 只认后代选择器，遇到伪类直接抛错 */
-  var rows = [].slice.call(host.querySelectorAll('.snk-row')).filter(function (el) {
-    return String(el.className).indexOf('snk-row-h') < 0;
-  });
-  var more = document.getElementById('snk-more');
   var q = document.getElementById('snk-q');
-  var expanded = false;
+  var subEl = document.getElementById('snk-sub');
+  var enEl = document.getElementById('snk-rank-en');
+  var TABS = { two: document.getElementById('snk-tab-two'), one: document.getElementById('snk-tab-one') };
+  var SUB = { two: SUB_TWO, one: SUB_ONE };
+  var EN = { two: 'World Ranking', one: 'One-Year List' };
 
-  function apply(keepExpand) {
+  /* 两个口径共用一个搜索词；每张表各有自己的「展开」状态 */
+  function panelOf(id, moreId, total) {
+    var panel = document.getElementById(id);
+    return {
+      panel: panel,
+      more: moreId ? document.getElementById(moreId) : null,
+      total: total,
+      expanded: false,
+      rows: [].slice.call(panel ? panel.querySelectorAll('.snk-row') : []).filter(function (el) {
+        return String(el.className).indexOf('snk-row-h') < 0;
+      })
+    };
+  }
+  var panels = {
+    two: panelOf('snk-rank', 'snk-more', D.ranking.length),
+    one: panelOf('snk-rank-1y', ONE.length ? 'snk-more-1y' : null, ONE.length)
+  };
+  var cur = 'two';
+
+  function apply() {
     var kw = (q && q.value || '').trim().toLowerCase();
-    var shown = 0;
-    rows.forEach(function (el, idx) {
-      var hit = !kw || el.getAttribute('data-k').indexOf(kw) >= 0;
-      var visible = hit && (kw || expanded || idx < 16);
-      el.hidden = !visible;
-      if (visible) shown++;
-    });
-    if (more) {
-      /* 搜索时「展开全部」没有意义，直接收起来 */
-      more.hidden = !!kw;
-      if (expanded && !keepExpand) more.textContent = '收起，只看前 16';
-    }
-    var blank = host.querySelector('.snk-blank');
-    if (!shown) {
-      if (!blank) {
-        blank = document.createElement('p');
-        blank.className = 'snk-blank';
-        blank.textContent = '没有匹配的球员。';
-        document.getElementById('snk-rank').appendChild(blank);
+    Object.keys(panels).forEach(function (key) {
+      var p = panels[key];
+      var shown = 0;
+      p.rows.forEach(function (el, idx) {
+        var hit = !kw || el.getAttribute('data-k').indexOf(kw) >= 0;
+        var visible = hit && (kw || p.expanded || idx < 16);
+        el.hidden = !visible;
+        if (visible) shown++;
+      });
+      if (p.more) {
+        /* 搜索时「展开全部」没有意义；切走的那个面板连它的按钮一起藏 */
+        p.more.hidden = !!kw || p.panel.hidden;
+        p.more.textContent = p.expanded ? '收起，只看前 16' : '展开全部 ' + p.total + ' 人';
       }
-      blank.hidden = false;
-    } else if (blank) {
-      blank.hidden = true;
-    }
+      /* 空榜占位是渲染期写死的（data-static），只处理搜索落空的那条 */
+      var blank = null;
+      [].slice.call(p.panel.querySelectorAll('.snk-blank')).forEach(function (el) {
+        if (!el.getAttribute('data-static')) blank = el;
+      });
+      if (!shown && kw && p.rows.length) {
+        if (!blank) {
+          blank = document.createElement('p');
+          blank.className = 'snk-blank';
+          blank.textContent = '没有匹配的球员。';
+          p.panel.appendChild(blank);
+        }
+        blank.hidden = false;
+      } else if (blank) {
+        blank.hidden = true;
+      }
+    });
   }
 
-  if (more) {
-    more.addEventListener('click', function () {
-      expanded = !expanded;
-      more.textContent = expanded ? '收起，只看前 16' : '展开全部 ' + D.ranking.length + ' 人';
-      apply(true);
+  function setTab(key) {
+    if (!panels[key]) return;
+    cur = key;
+    Object.keys(panels).forEach(function (k) {
+      var on = k === key;
+      if (TABS[k]) {
+        TABS[k].className = 'snk-tab' + (on ? ' on' : '');
+        TABS[k].setAttribute('aria-selected', on ? 'true' : 'false');
+      }
+      panels[k].panel.hidden = !on;
     });
+    if (subEl) subEl.textContent = SUB[key];
+    if (enEl) enEl.textContent = EN[key];
+    apply();
   }
+
+  Object.keys(panels).forEach(function (key) {
+    var p = panels[key];
+    if (p.more) {
+      p.more.addEventListener('click', function () {
+        p.expanded = !p.expanded;
+        apply();
+      });
+    }
+    if (TABS[key]) {
+      TABS[key].addEventListener('click', function () { setTab(key); });
+    }
+  });
   if (q) {
     q.addEventListener('input', function () { apply(); });
     q.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') { q.value = ''; apply(); }
     });
   }
-  apply(true);
+  setTab(cur);
 })();

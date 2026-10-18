@@ -9,6 +9,7 @@
  *   --out <f>    只给 --check 用：把「本次要写入的产物」导到该文件，便于与入库文件逐字比（不写它）
  *   --ev <id>=<f>     （可重复）把一份对阵页喂给指定场次 id，供离线一次跑多站
  *   --ev-dir <dir>    目录下 2548-xxx.html 这样的文件按文件名前缀的 id 全部喂进来
+ *   --local-1y <f>  用本地已存的单赛季榜页面代替联网
  *   node tools/snooker.mjs --local <f> --stdout      # 打印生成的 JS，不落盘
  *   --min <n>   少于 n 行排名视为抓坏并中止（默认：线上 100，--local 1）
  *
@@ -16,8 +17,9 @@
  * 会被 CORS 拦死；<script src> 不受此限，所以数据以 window.SNOOKER = {...} 注入。
  * 抓取只发生在构建/CI 这一侧，页面自身不联网。
  *
- * 四个上游（都是同一家的静态 HTML 表格）：
+ * 五个上游（都是同一家的静态 HTML 表格）：
  *   template=31  两年滚动排名（128 人）
+ *   template=33  单赛季榜 One-Year list（164 人；可降级）
  *   template=2   本赛季赛历（62 行，含资格赛 / Q Tour / 女子 / 元老；本站只取 Main 正赛）
  *   template=7   已结束各站的冠军与比分
  *   event=<id>   单站对阵：轮次表头 + 场级行（「几点 谁 vs 谁」/ 父子对阵 / 冠军与亚军奖金）
@@ -30,7 +32,8 @@
  *   已结束站 ≈2 KB/站（只冻 Last 16 起的 15 场），全季 ≈44 KB；全冻 128 场会是 330 KB，
  *   file:// 首屏太重。天梯图 / 冠军路径 / 历史回看用 15 场就够。
  *
- * 赛历/冠军抓不到不算致命（页面退化成「只有排名」），排名抓不到才算失败。
+ * 两年榜（template=31）抓不到算失败（不写脏数据）；单赛季榜 / 赛历 / 对阵 / 冠军抓不到只报警告，
+ * 沿用上一次快照里的对应字段（页面退化成「只有两年榜」也不会白屏）。
  */
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
@@ -50,6 +53,9 @@ const URL_ICS = 'http://calengoo.de/snooker/snooker.ics';
    进度图要的「打到第几轮、每轮几场、当天排哪一轮」，天梯图要的「每场几点 谁 vs 谁」都从这里来。 */
 const URL_EVENT = (id) => `https://www.snooker.org/res/index.asp?event=${id}`;
 const SEASON_LABEL = '2026/27';
+/* 单赛季榜（One-Year list）：与两年榜同一套模板，season 参数是纯数字年份（2026 ↔ 2026/27）。
+   上游导航页里它叫 Season Points，球员格写 Position in the One-Year list。 */
+const URL_RANK_1Y = `https://www.snooker.org/res/index.asp?template=33&season=${SEASON_LABEL.slice(0, 4)}`;
 /* 总奖金表：上游（赛历页 / 对阵页 / help 页 / api.snooker.org）都不给总奖金，只能人工维护 */
 const FUND_JSON = join(ROOT, 'tools/snooker-prize-fund.json');
 /* 赛历页的 prize 列实测是**冠军**奖金（上海站 £210,000 与该站 Final 的 roundinfo 逐字一致），
@@ -79,7 +85,8 @@ const NAT_CN = {
   Iran: '伊朗', 'Rep. of Ireland': '爱尔兰', Cyprus: '塞浦路斯', India: '印度',
   Egypt: '埃及', Malta: '马耳他', Switzerland: '瑞士', France: '法国', Germany: '德国',
   Poland: '波兰', Ukraine: '乌克兰', Brazil: '巴西', Pakistan: '巴基斯坦',
-  Malaysia: '马来西亚', 'Saudi Arabia': '沙特', UAE: '阿联酋', Norway: '挪威',
+  Malaysia: '马来西亚', 'Saudi Arabia': '沙特',
+  Moldova: '摩尔多瓦', UAE: '阿联酋', Norway: '挪威',
   Finland: '芬兰', Sweden: '瑞典', Israel: '以色列', Morocco: '摩洛哥',
   'New Zealand': '新西兰', Canada: '加拿大', USA: '美国', Austria: '奥地利',
   Bulgaria: '保加利亚', Hungary: '匈牙利', Latvia: '拉脱维亚', Lithuania: '立陶宛',
@@ -155,7 +162,9 @@ function cellClass(attr) {
   return m ? m[1].toLowerCase() : '';
 }
 function cells(tr) {
-  return [...String(tr).matchAll(/<td([^>]*)>([\s\S]*?)<\/td>/gi)].map((m) => [cellClass(m[1]), text(m[2])]);
+  /* 先剔掉 HTML 注释：template=33 的行里用 <!-- td ... --> 藏了两列（num / avg），
+     不剔掉的话注释会吞掉后面那格，导致「总积分」被当成 avg 读到、积分全成 0。 */
+  return [...String(tr).replace(/<!--[\s\S]*?-->/g, '').matchAll(/<td([^>]*)>([\s\S]*?)<\/td>/gi)].map((m) => [cellClass(m[1]), text(m[2])]);
 }
 
 /* ---------------- template=31：两年滚动排名 ---------------- */
@@ -183,6 +192,22 @@ function parseRank(html) {
   }
   out.sort((a, b) => a[0] - b[0]);
   return out;
+}
+
+/* ---------------- template=33：单赛季榜（One-Year list） ---------------- */
+/**
+ * 与两年榜同一套表格模板，所以直接复用 parseRank；差异只在读页方式：
+ *   1) 页面里有两张 <table>（导航 + 榜单），只认 id="oneyearrankings" 那张；
+ *   2) 行数更多（164 行，含并列名次与 0 分选手）。
+ * 列语义同形：第一个 class="sum" 是本赛季总积分，第一个 change 是名次变动，
+ * 最后一个 change 是积分变动（不展示）。
+ */
+function parseRank1y(html) {
+  const src = String(html);
+  const at = src.indexOf('id="oneyearrankings"');
+  if (at < 0) return parseRank(src);
+  const end = src.indexOf('</table>', at);
+  return parseRank(src.slice(at, end < 0 ? undefined : end));
 }
 
 /* ---------------- template=2：本赛季赛历 ---------------- */
@@ -627,7 +652,7 @@ function toEvents(rows, finals) {
     .sort((a, b) => (a.s < b.s ? -1 : a.s > b.s ? 1 : 0));
 }
 
-function buildData(ranking, calendar, updated, prev) {
+function buildData(ranking, calendar, updated, prev, ranking1y, updated1y) {
   /* 只带页面要用的两张查表：球员中文名 / 国籍中文名（都是人工维护，不做机翻）。
      与上一份产物合并：排名页有时只拿到部分行（离线 fixture / 上游截断），
      若直接重建，上一份里的中文名会成批消失，树和赛程表就退回英文了。 */
@@ -635,7 +660,9 @@ function buildData(ranking, calendar, updated, prev) {
   const nats = Object.assign({}, prev && prev.nats);
   /* 上游会给女选手加后缀，如 'Bai Yulu (f)'；查表时去掉后缀再查一次 */
   const bare = (n) => String(n).replace(/\s*\([a-z]\)$/i, '');
-  for (const r of ranking) {
+  /* 单赛季榜会包含两年榜 Top128 之外的人（业余 / 外卡 / 女选手），两张榜要一起收，
+     否则那些行的中文名会缺。 */
+  for (const r of ranking.concat(ranking1y || [])) {
     const cn = CN_NAME[r[2]] || CN_NAME[bare(r[2])];
     if (cn) names[r[2]] = cn;
     if (NAT_CN[r[3]]) nats[r[3]] = NAT_CN[r[3]];
@@ -659,6 +686,8 @@ function buildData(ranking, calendar, updated, prev) {
   }
   return {
     updated,
+    /* 单赛季榜单独记一次抓取时间：它可降级（沿用上次），所以榜的年龄可能比快照老 */
+    updated1y: updated1y || updated,
     source: 'snooker.org',
     names,
     nats,
@@ -669,20 +698,23 @@ function buildData(ranking, calendar, updated, prev) {
     },
     calendar,
     ranking,
+    ranking1y: ranking1y || [],
   };
 }
 
 function toJsFile(obj) {
   const row = (r) => '    ' + JSON.stringify(r);
-  return '/* 由 tools/snooker.mjs 生成，勿手改。数据源：snooker.org（两年滚动排名 / 赛季赛历 / 冠军 / 单站对阵） */\n' +
+  return '/* 由 tools/snooker.mjs 生成，勿手改。数据源：snooker.org（两年滚动排名 / 单赛季榜 / 赛季赛历 / 冠军 / 单站对阵） */\n' +
     'window.SNOOKER = {\n' +
     '  "updated": ' + JSON.stringify(obj.updated) + ',\n' +
+    '  "updated1y": ' + JSON.stringify(obj.updated1y || obj.updated) + ',\n' +
     '  "source": ' + JSON.stringify(obj.source) + ',\n' +
     '  "names": ' + JSON.stringify(obj.names) + ',\n' +
     '  "nats": ' + JSON.stringify(obj.nats) + ',\n' +
     '  "season": ' + JSON.stringify(obj.season) + ',\n' +
     '  "calendar": [\n' + obj.calendar.map(row).join(',\n') + (obj.calendar.length ? '\n' : '') + '  ],\n' +
-    '  "ranking": [\n' + obj.ranking.map(row).join(',\n') + (obj.ranking.length ? '\n' : '') + '  ]\n' +
+    '  "ranking": [\n' + obj.ranking.map(row).join(',\n') + (obj.ranking.length ? '\n' : '') + '  ],\n' +
+    '  "ranking1y": [\n' + (obj.ranking1y || []).map(row).join(',\n') + ((obj.ranking1y || []).length ? '\n' : '') + '  ]\n' +
     '};\n';
 }
 
@@ -697,10 +729,10 @@ function readDataFile(path) {
   try { return JSON.parse(src.slice(brace, end + 1)); } catch { return null; }
 }
 
-/* 只比「数据」：updated 每次抓取都会变，不能算变化，否则天天提交空 diff。
+/* 只比「数据」：updated / updated1y 是元数据，每次抓取都会变，不能算变化，否则天天提交空 diff。
    matches / purse / tz / city_cn 都在 calendar 里，被这一份对比带上。 */
 function snapOf(d) {
-  return d ? [d.season, d.names, d.nats, d.calendar, d.ranking] : null;
+  return d ? [d.season, d.names, d.nats, d.calendar, d.ranking, d.ranking1y] : null;
 }
 function sameData(a, b) {
   if (!a || !b) return false;
@@ -854,6 +886,7 @@ async function main() {
   const check = flag('--check');
   const localCal = opt('--local-cal');
   const localFin = opt('--local-fin');
+  const local1y = opt('--local-1y');
   const evFiles = collectEventFiles();
   /* --check 可配 --out <文件> 把「本次要写入的产物」导到临时文件，好和 committed 文件逐字比。
      不带这个开关时行为与原来一模一样：写入路径就是 OUT。 */
@@ -868,13 +901,36 @@ async function main() {
      对咯数据永远「无变化」、写不进文件。 */
   const beforeSnap = existing ? JSON.stringify(snapOf(existing)) : null;
   /* 只要给了任何离线来源，就完全不联网（--local 的用途就是离线调试 / 单测） */
-  const offline = !!(local || localCal || localFin || evFiles.size);
+  const offline = !!(local || localCal || localFin || local1y || evFiles.size);
   /* 1) 排名（必需） */
   const rankHtml = local ? readFileSync(local, 'utf8') : await get(URL_RANK);
   const min = opt('--min') ? parseInt(opt('--min'), 10) : (local ? 1 : 100);
   const ranking = parseRank(rankHtml);
   if (ranking.length < min) {
     throw new Error(`排名只解析到 ${ranking.length} 行（应约 ${min} 行以上），页面可能改版，已中止`);
+  }
+
+  /* 1b) 单赛季榜（可降级：抓不到就沿用上一次；从未成功过就留空，页面显示占位） */
+  let ranking1y = (existing && existing.ranking1y) || [];
+  let got1y = false;
+  if (local1y) {
+    try {
+      const rows1y = parseRank1y(readFileSync(local1y, 'utf8'));
+      if (!rows1y.length) throw new Error('一行为空，页面可能不对');
+      ranking1y = rows1y;
+      got1y = true;
+    } catch (e) {
+      warn('单赛季榜本地页读取失败，' + (ranking1y.length ? '沿用上次的榜' : '本次留空') + '：' + e.message);
+    }
+  } else if (!local) {
+    try {
+      const rows1y = parseRank1y(await get(URL_RANK_1Y));
+      if (rows1y.length < min) throw new Error(`只解析到 ${rows1y.length} 行（应约 ${min} 行以上），页面可能改版`);
+      ranking1y = rows1y;
+      got1y = true;
+    } catch (e) {
+      warn('单赛季榜抓取失败，' + (ranking1y.length ? '沿用上次的榜' : '本次留空') + '：' + e.message);
+    }
   }
 
   loadFund();
@@ -908,10 +964,12 @@ async function main() {
   /* 3) 单站对阵页（当前站 / 下一站 / 未冻结且已开赛或临近的站） */
   await attachEvents(calendar, existing, { evFiles, offline });
 
-  const updated = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
-  const built = buildData(ranking, calendar, updated, existing);
+  const nowIso = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
+  /* 榜龄只记「这份 list 上次真被抓到」的时刻：抓失败沿用旧榜时不刷新它，页面据此提示「沿用」 */
+  const updated1y = got1y ? nowIso : ((existing && existing.updated1y) || '');
+  const built = buildData(ranking, calendar, nowIso, existing, ranking1y, updated1y);
   const next = beforeSnap && JSON.stringify(snapOf(built)) === beforeSnap
-    ? buildData(ranking, calendar, existing.updated, existing) : built;
+    ? buildData(ranking, calendar, existing.updated, existing, ranking1y, updated1y) : built;
 
   if (stdout) { process.stdout.write(toJsFile(next)); return 0; }
 
@@ -927,14 +985,15 @@ async function main() {
   }
 
   if (bad.length) for (const b of bad) warn(b);
-  if (beforeSnap && JSON.stringify(snapOf(next)) === beforeSnap) { console.log(`无变化，未写文件（${ranking.length} 人 / ${next.calendar.length} 站）`); return 0; }
+  /* 旧快照里还没有 updated1y 时强制写一次：否则元数据永远补不上，页面一直不知道榜龄 */
+  if (beforeSnap && JSON.stringify(snapOf(next)) === beforeSnap && existing.updated1y) { console.log(`无变化，未写文件（${ranking.length} 人 / ${next.calendar.length} 站）`); return 0; }
   writeFileSync(outPath, toJsFile(next));
-  console.log(`已写入 assets/snooker-data.js：${ranking.length} 人，赛程 ${next.calendar.length} 站（其中已完赛 ${next.calendar.filter((e) => e.winner).length} 站）`);
+  console.log(`已写入 assets/snooker-data.js：${ranking.length} 人 / 单赛季 ${ranking1y.length} 人，赛程 ${next.calendar.length} 站（其中已完赛 ${next.calendar.filter((e) => e.winner).length} 站）`);
   return 0;
 }
 
 /* 供离线单测 import 用（直接 node 跑时照旧执行 main） */
-export { parseEvent, parseMatch, parseRank, parseCalendar, parseIcs, parseFinals, pickEvents, toEvents, buildData, frozen, dueAt, fetchBucket, last16Id, cutFrozenMatches, sameData, checkData, CITY_CN, TZ };
+export { parseEvent, parseMatch, parseRank, parseRank1y, toJsFile, loadFund, parseCalendar, parseIcs, parseFinals, pickEvents, toEvents, buildData, frozen, dueAt, fetchBucket, last16Id, cutFrozenMatches, sameData, checkData, CITY_CN, TZ };
 
 const invokedDirectly = (() => {
   try { return process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]); }

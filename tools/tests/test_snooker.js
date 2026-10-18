@@ -99,6 +99,16 @@ if (fs.existsSync(DATA)) {
   ok(d.names && Object.keys(d.names).length >= 20, '带球员中文名表', String(Object.keys(d.names || {}).length));
   ok(d.nats && d.nats.China === '中国', '带国籍中文名表');
   ok(d.ranking.slice(0, 16).filter((x) => x[3] === 'China').every((x) => d.names[x[2]]), '中国球员都有中文名');
+  /* 单赛季榜（One-Year List）：同一份快照里的第二张榜，形状与世界排名一致 */
+  ok(Array.isArray(d.ranking1y) && d.ranking1y.length >= 100, '正式数据含单赛季榜', String((d.ranking1y || []).length));
+  if (d.ranking1y && d.ranking1y.length) {
+    ok(d.ranking1y.every((x) => Array.isArray(x) && x.length === 5), '单赛季榜每人 5 个字段');
+    ok(d.ranking1y[0][0] === 1 && d.ranking1y.every((x, i) => i === 0 || x[0] >= d.ranking1y[i - 1][0]), '单赛季榜名次升序（允许并列）');
+    ok(d.ranking1y.filter((x) => x[4] > 0).length > 50, '单赛季榜有积分（不是全 0）',
+      d.ranking1y.filter((x) => x[4] > 0).length + ' / ' + d.ranking1y.length);
+    /* 上游每行开头是「位置」，单赛季榜第一格不是 0 */
+    ok(d.updated1y && d.updated1y.length >= 10, '带单赛季榜的抓取时间', String(d.updated1y));
+  }
   if (d.calendar.length) {
     ok(d.calendar.every((e) => e.s && e.e && e.s <= e.e), '赛程日期区间合法');
     ok(d.calendar.every((e, i) => i === 0 || d.calendar[i - 1].s <= e.s), '赛程按开始日升序');
@@ -286,6 +296,72 @@ console.log(JSON.stringify({
 }
 
 try { fs.unlinkSync(tmp); fs.unlinkSync(tiny); } catch {}
+
+/* ============ H. 单赛季榜（template=33）的解析契约 ============
+ * 上游那一页把两列（num / avg）写成 HTML 注释：`<!-- td class="num" >0</td> <td class="avg" ></td -->`。
+ * 注释里结尾是 `</td -->` 而不是 `</td>`，不先剔注释就会把后面的 sum 格吞掉，
+ * 结果整张榜的积分全是 0（2026-10 真踩过）。这里用合成页钉住。 */
+{
+  const y1 = (pos, chg, name, nat, pts) =>
+    '<tr>' +
+      '<td class="position">' + pos + '</td>' +
+      '<td class="change">' + chg + '</td>' +
+      '<td class="position">' + pos + '</td>' +
+      '<td class="seed">0</td>' +
+      '<td class="player">' + name + '</td>' +
+      '<td class="nationality">' + nat + '</td>' +
+      '<!-- <td class="num" >0</td> <td class="avg" ></td -->' +
+      '<td class="sum">' + pts + '</td>' +
+      '<td class="change">' + chg + '</td>' +
+    '</tr>';
+  const yHtml = '<table id="oneyearrankings"><tr><th>Pos</th><th>&plusmn;</th><th>Name</th></tr>' +
+    y1(1, '', 'Mark Selby', 'England', '348&nbsp;350') +
+    y1(2, '', 'Chang Bingyu', 'China', '207&nbsp;100') +
+    y1(3, '+28', 'Wu Yize', 'China', '204&nbsp;000') +
+    y1(4, '-2', 'Nobody  Here', 'Egypt', '0') +
+    '</table>';
+  const yFile = path.join(os.tmpdir(), 'snooker-1y-' + process.pid + '.html');
+  fs.writeFileSync(yFile, yHtml);
+  /* 配套的两年榜小页：只验「同一次运行里两张榜互不干扰」 */
+  const wFile = path.join(os.tmpdir(), 'snooker-w-' + process.pid + '.html');
+  fs.writeFileSync(wFile, head + row(1, '+0', 'Zhao Xintong', 'China', 1265550) +
+    row(2, '+2', 'Wu Yize', 'China', 1238900) + '</table>');
+
+  const run = (extra) => spawnSync(process.execPath,
+    [TOOL, '--local', wFile, '--local-1y', extra === null ? yFile : extra, '--stdout', '--min', '1'],
+    { cwd: ROOT, encoding: 'utf8' });
+
+  const r3 = run(null);
+  ok(r3.status === 0, '能解析单赛季榜并产出数据', (r3.stderr || '').slice(0, 300));
+  /* --stdout 打的是完整数据文件（window.SNOOKER = {...}），按 A 段同样方式切出 JSON */
+  const jsonOf = (out) => {
+    const at = String(out).indexOf('window.SNOOKER');
+    const brace = String(out).indexOf('{', at);
+    return JSON.parse(String(out).slice(brace, String(out).lastIndexOf('}') + 1));
+  };
+  let j = null;
+  try { j = jsonOf(r3.stdout); } catch (e) { ok(false, '单赛季榜结果应是 JSON', String(e.message)); }
+  if (j) {
+    const one = j.ranking1y || [];
+    ok(one.length === 4, '单赛季榜解析出 4 行', String(one.length));
+    ok(one[0] && one[0][4] === 348350, 'HTML 注释里的 num/avg 不能吞掉总积分', JSON.stringify(one[0]));
+    ok(one[2] && one[2][1] === '+28', '单赛季榜保留名次变动', JSON.stringify(one[2]));
+    ok(one[3] && one[3][2] === 'Nobody Here', '球员名里的连续空格归一', JSON.stringify(one[3]));
+    ok(one[3] && one[3][4] === 0, '0 分球员保留在榜上', JSON.stringify(one[3]));
+    ok((j.ranking || []).length === 2, '同一次运行里两年榜照旧解析', String((j.ranking || []).length));
+    ok(typeof j.updated1y === 'string' && j.updated1y.length >= 10, '抓到单赛季榜时写 updated1y', String(j.updated1y));
+  }
+
+  /* 单赛季榜抓取失败只降级、不失败：世界排名依然是完整结果 */
+  const r4 = run(path.join(os.tmpdir(), 'snooker-1y-missing-' + process.pid + '.html'));
+  ok(r4.status === 0, '单赛季榜抓不到时不中断生成', (r4.stderr || '').slice(0, 300));
+  ok(/单赛季榜本地页读取失败/.test(r4.stderr || ''), '本地页读不到时只报警告', (r4.stderr || '').trim().slice(0, 160));
+  let j4 = null;
+  try { j4 = jsonOf(r4.stdout); } catch (e) { ok(false, '降级后的结果应是 JSON', String(e.message)); }
+  if (j4) ok(Array.isArray(j4.ranking1y) && j4.ranking.length === 2,
+    '降级时 ranking1y 仍是数组、两年榜不受影响', JSON.stringify([j4.ranking1y.length, j4.ranking.length]));
+  try { fs.unlinkSync(yFile); fs.unlinkSync(wFile); } catch {}
+}
 
 /* ============ F. 已入库快照必须满足落盘契约（不联网） ============
  * `--check` 是联网版的守门人（本机被 Cloudflare 挡，跑不了），所以这里用
