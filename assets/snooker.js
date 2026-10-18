@@ -112,7 +112,7 @@
       '<div class="zone-head-main">' +
         '<h2 class="zone-title">赛程进度 <span class="zone-en">Season Progress</span></h2>' +
         '<p class="zone-sub">' + esc(season.label || '') + ' 赛季 · 共 ' + CAL.length + ' 站 · 已完赛 ' + done +
-        ' 站 · 数据每日抓取（最近一次 ' + esc(stamp) + ' UTC）</p>' +
+        ' 站 · 定时抓取（最近一次 ' + esc(stamp) + ' UTC）</p>' +
       '</div>' +
       '<div class="zone-aside"><span class="zone-count">赛季 ' + pctS + '%</span>' +
         /* 静态页不能自己触发抓取：链到 GitHub Actions，登录后按 Run workflow */
