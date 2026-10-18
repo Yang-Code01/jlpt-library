@@ -9,6 +9,7 @@
 # 二进制：不做行尾转换、不做 diff
 *.wav binary
 *.mp3 binary
+*.pdf binary
 *.png binary
 *.jpg binary
 *.jpeg binary

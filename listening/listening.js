@@ -252,7 +252,12 @@
 
       area.innerHTML = `
         <div class="q-card">
-          <div class="q-num">問題${q.section} ・ ${q.qNo}番</div>
+          <div class="q-head">
+            <div class="q-num">問題${q.section} ・ ${q.qNo}番</div>
+            <a class="pdf-btn" href="${this.handoutUrl(q)}" download title="下载本题注音讲义（PDF・原文＋译文＋生词＋语法）">
+              <span class="pdf-ico" aria-hidden="true">↓</span>注音讲义 PDF
+            </a>
+          </div>
           ${q.prompt ? `<div class="q-prompt-text">${q.prompt}</div>` : ''}
           ${q.question ? `<div class="q-question">${q.question}</div>` : ''}
           ${optsHtml}
@@ -287,6 +292,13 @@
           };
         });
       }
+    }
+
+    /* 本题讲义 PDF 地址：data/<level>/audio/ → data/<level>/pdf/<exam>_<section>_Q<n>.pdf */
+    handoutUrl(q) {
+      const base = this.options.audioBase.replace(/audio\/?$/, 'pdf/');
+      const stem = String(this.data.meta.exam).replace('-', '');
+      return `${base}${stem}_${q.section}_Q${q.qNo}.pdf`;
     }
 
     renderActions() {

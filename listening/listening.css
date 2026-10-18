@@ -296,3 +296,24 @@
   .section-grid { grid-template-columns: 1fr; }
   .q-card { padding: 14px; }
 }
+
+/* ===== 本题注音讲义 PDF 下载 ===== */
+.q-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.q-head .q-num { margin-bottom: 0; }
+.pdf-btn {
+  display: inline-flex; align-items: center; gap: 6px; flex: none;
+  font-size: 12px; font-weight: 600; line-height: 1;
+  color: var(--accent-ink); text-decoration: none;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 999px; padding: 6px 12px 6px 7px;
+  transition: background .15s, border-color .15s;
+}
+.pdf-btn:hover { background: #f6eae7; border-color: var(--accent); }
+.pdf-ico {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 17px; height: 17px; border-radius: 50%;
+  background: #f6eae7; color: var(--accent); font-size: 12px; line-height: 1;
+}
+@media (max-width: 520px) {
+  .pdf-btn { font-size: 11px; padding: 5px 9px 5px 6px; }
+}
