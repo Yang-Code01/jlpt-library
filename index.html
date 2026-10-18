@@ -865,6 +865,20 @@
   .zone-aside { display: flex; align-items: center; flex: none; gap: 10px; }
   .zone-count { color: var(--muted); font-size: .76rem; font-variant-numeric: tabular-nums; }
   .zone-inline { margin-bottom: 26px; }
+  /* 斯诺克区的「手动更新」：静态页触发不了抓取，链到 Actions 的 workflow 页 */
+  .snk-upd {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding-bottom: 1px;
+    border-bottom: 1px dashed var(--border);
+    font-size: .74rem;
+    color: var(--muted);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .snk-upd:hover { color: var(--accent-ink); border-color: var(--accent-line); }
+  .snk-upd:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   /* ---------- 调查报告清单 ---------- */
   .filter-bar {

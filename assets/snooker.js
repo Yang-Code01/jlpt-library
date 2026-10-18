@@ -53,6 +53,7 @@
   var sPass = season.start ? Math.min(sTot, Math.max(0, gap(season.start, today) + 1)) : 0;
   var done = CAL.filter(function (e) { return e.e < today; }).length;
   var stamp = String(D.updated || '').replace('T', ' ').replace('Z', '');
+  var UPDATE_URL = 'https://github.com/Yang-Code01/jlpt-library/actions/workflows/snooker.yml';
 
 
   /* ---- 轮次轨道：一列一轮，场次与日期都来自单站对阵页（--local-ev / 线上 event=ID） ---- */
@@ -113,7 +114,11 @@
         '<p class="zone-sub">' + esc(season.label || '') + ' 赛季 · 共 ' + CAL.length + ' 站 · 已完赛 ' + done +
         ' 站 · 数据每日抓取（最近一次 ' + esc(stamp) + ' UTC）</p>' +
       '</div>' +
-      '<div class="zone-aside"><span class="zone-count">赛季 ' + pctS + '%</span></div>' +
+      '<div class="zone-aside"><span class="zone-count">赛季 ' + pctS + '%</span>' +
+        /* 静态页不能自己触发抓取：链到 GitHub Actions，登录后按 Run workflow */
+        '<a class="snk-upd" href="' + UPDATE_URL + '" target="_blank" rel="noopener" ' +
+          'title="打开 GitHub Actions，点右上 Run workflow 立刻抓一次">手动更新 <span aria-hidden="true">↗</span></a>' +
+      '</div>' +
     '</div>';
 
   /* ---- 当前站：赛事头 + 轮次轨道 + 场次进度 ---- */
