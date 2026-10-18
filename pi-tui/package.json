@@ -1,6 +1,6 @@
 {
   "name": "pi-tui-plus",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "pi-open-tui 的自有分支（Starship 风格 footer / 圆角编辑器 / 动画 logo）+ WorkBuddy 风格模型选择器 + 网关统计状态行",
   "type": "module",
   "repository": {
@@ -17,6 +17,9 @@
     "starship"
   ],
   "license": "MIT",
+  "scripts": {
+    "test": "node --experimental-transform-types --no-warnings --test \"test/**/*.test.ts\""
+  },
   "files": [
     "extensions/",
     "assets/",

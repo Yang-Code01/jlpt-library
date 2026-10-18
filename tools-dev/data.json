@@ -34,12 +34,12 @@
         "网关"
       ],
       "status": "可用",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "updated": "2026-10-18",
-      "summary": "基于 pi-open-tui 的自有分支：Starship 风格 footer、alt+m 可点击的模型选择器（模型 / 思考强度 / 上下文窗口）、网关积分与繁忙度状态行；配置自动降级，非 wb2api 用户也能用。",
+      "summary": "基于 pi-open-tui 的自有分支：Starship 风格 footer、alt+m 可点击的模型选择器（模型 / 思考强度 / 上下文窗口）、网关积分状态行（本轮/会话 + 缓存命中率）；配置自动降级，非 wb2api 用户也能用。",
       "page": "pi-tui.html",
       "dir": "../pi-tui",
-      "download": "downloads/pi-tui-0.4.0.zip"
+      "download": "downloads/pi-tui-0.4.1.zip"
     }
   ]
 }

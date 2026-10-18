@@ -14,6 +14,10 @@ export interface IconGlyphs {
 	output: string;
 	cacheHit: string;
 	cost: string;
+	/** 积分（WorkBuddy 网关的余额段） */
+	credits: string;
+	/** 积分到期时间 */
+	expiry: string;
 	speed: string;
 	latency: string;
 	stall: string;
@@ -45,6 +49,8 @@ const NERD_GLYPHS: IconGlyphs = {
 	output: "",
 	cacheHit: "",
 	cost: "",
+	credits: "",
+	expiry: "",
 	speed: "󰓅",
 	latency: "",
 	stall: "",
@@ -78,6 +84,8 @@ const ASCII_GLYPHS: IconGlyphs = {
 	output: "↓",
 	cacheHit: "c",
 	cost: "$",
+	credits: "C",
+	expiry: "T",
 	speed: ">",
 	latency: "~",
 	stall: "!",
@@ -115,6 +123,8 @@ const UNICODE_GLYPHS: IconGlyphs = {
 	output: "↓",
 	cacheHit: "💾",
 	cost: "$",
+	credits: "⚡",
+	expiry: "⏳",
 	speed: "⚡",
 	latency: "⌛",
 	stall: "⚠",
