@@ -1,5 +1,6 @@
 import type { Usage } from "@earendil-works/pi-ai";
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type { CostView } from "../wb-panel.ts";
 import type { GitStatus } from "./git.ts";
 import { emptyGitStatus } from "./git.ts";
 import type { RuntimeInfo } from "./runtime.ts";
@@ -11,6 +12,8 @@ export interface FooterState {
 	sessionStartEpoch: number;
 	workingSince: number | undefined;
 	lastDoneIn: number | undefined;
+	/** 费用渲染口径；由 wb-stats 通过 `wb2:cost` 事件写入，缺省按 `$` 渲染 */
+	cost: CostView;
 }
 
 export interface UsageTotals {
@@ -82,6 +85,7 @@ export function createInitialState(): FooterState {
 		sessionStartEpoch: Date.now(),
 		workingSince: undefined,
 		lastDoneIn: undefined,
+		cost: { mode: "usd" },
 	};
 }
 

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WorkBuddy2API — 把账号额度转成 OpenAI / Anthropic 兼容网关</title>
+<style>
+  :root{
+    --paper:#FBFAF8; --ink:#17161A; --muted:#6C6A73; --faint:#9C9AA3;
+    --rule:#E4E1DB; --rule-strong:#CFCBC3;
+    --accent:#B4451F; --accent-soft:#F6EDE7;
+    --code-bg:#F2F0EC; --card:#FFFFFF;
+    --ok:#2F6B4F; --ok-soft:#EAF2EC;
+    --warn:#8A4B12; --warn-soft:#FBF1E4; --warn-rule:#E3C08C;
+    --bad:#A32A2A;
+    --mono:"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Songti SC",SimSun,serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#131216; --ink:#EDEAE4; --muted:#A5A2AB; --faint:#7C7A83;
+      --rule:#2B2930; --rule-strong:#3D3A43;
+      --accent:#F08A5D; --accent-soft:#2A1D18;
+      --code-bg:#1C1B20; --card:#191820;
+      --ok:#7FC2A1; --ok-soft:#16211B;
+      --warn:#E0A96A; --warn-soft:#241A10; --warn-rule:#5A4428;
+      --bad:#F08A8A;
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--sans);font-size:16.5px;line-height:1.72;letter-spacing:.005em;
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:52px 26px 100px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+  a:hover{border-bottom-color:var(--accent)}
+
+  header.masthead{border-bottom:2px solid var(--ink);padding-bottom:24px;margin-bottom:30px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+  h1{font-family:var(--serif);font-size:2.15rem;line-height:1.24;margin:0 0 12px;letter-spacing:-.01em}
+  .lead{color:var(--muted);margin:0;max-width:60ch}
+  .metaline{font-family:var(--mono);font-size:12.5px;color:var(--faint);margin-top:18px;display:flex;gap:18px;flex-wrap:wrap}
+  .metaline .pill{color:var(--ok);background:var(--ok-soft);padding:1px 8px;border-radius:999px}
+
+  .dl{
+    display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+    border:1px solid var(--rule-strong);background:var(--card);border-radius:10px;
+    padding:20px 22px;margin:26px 0 38px;
+  }
+  .dl-main{font-family:var(--mono);font-size:13.5px;color:var(--muted)}
+  .dl-main b{display:block;font-family:var(--sans);font-size:1rem;color:var(--ink);margin-bottom:4px}
+  .btn{
+    display:inline-block;background:var(--accent);color:#fff;border:0;border-radius:7px;
+    padding:9px 20px;font-size:.94rem;font-weight:600;white-space:nowrap;
+  }
+  .btn:hover{filter:brightness(1.07)}
+  .dl-note{font-size:.78rem;color:var(--faint);margin-top:6px}
+
+  h2{font-family:var(--serif);font-size:1.32rem;margin:44px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--rule)}
+  h3{font-size:1rem;margin:26px 0 8px}
+  p{margin:10px 0}
+  ul,ol{margin:10px 0;padding-left:1.3em}
+  li{margin:5px 0}
+  code{font-family:var(--mono);font-size:.86em;background:var(--code-bg);padding:1.5px 5px;border-radius:4px}
+  pre{background:var(--code-bg);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:12.8px;line-height:1.62}
+  pre code{background:none;padding:0;font-size:inherit}
+  pre .c{color:var(--faint)}
+  table{border-collapse:collapse;width:100%;font-size:.9rem;margin:14px 0}
+  th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:500}
+  td code{white-space:nowrap}
+  .note{border-left:3px solid var(--rule-strong);padding:2px 0 2px 16px;color:var(--muted);font-size:.92rem;margin:18px 0}
+  .warn{
+    border:1px solid var(--warn-rule);background:var(--warn-soft);color:var(--warn);
+    border-radius:10px;padding:16px 20px;margin:22px 0;font-size:.93rem;
+  }
+  .warn h3{margin:0 0 8px;color:var(--warn);font-size:1rem}
+  .warn ul{padding-left:1.15em;margin:8px 0 0}
+  .warn li{margin:3px 0}
+  .check{list-style:none;padding-left:0}
+  .check li{padding-left:1.7em;text-indent:-1.7em}
+  .check input{margin-right:.5em}
+  figure{margin:24px 0}
+  figure img{display:block;width:100%;height:auto;border:1px solid var(--rule-strong);border-radius:10px;background:#0b0b0d}
+  figcaption{font-family:var(--mono);font-size:.79rem;line-height:1.5;color:var(--faint);margin-top:9px}
+  .ok{color:var(--ok)}
+  .bad{color:var(--bad)}
+  footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--rule);color:var(--faint);font-size:.82rem;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <div class="kicker">Tool · Gateway · 自托管</div>
+  <h1>WorkBuddy2API：把账号额度转成 OpenAI / Anthropic 兼容网关</h1>
+  <p class="lead">一个容器、一个管理面板，把已注册账号的模型额度摊成三条标准端点：<code>/v1/chat/completions</code>、<code>/v1/responses</code>、<code>/v1/messages</code>。pi、codex、Claude Code 都能直接连，不用协议桥、不用改客户端源码。下载包里带着完整源码与兼容层，一条命令现场编译。</p>
+  <div class="metaline">
+    <span>v1.13.0</span><span>2026-10-18</span>
+    <span class="pill">可用</span>
+    <span>MIT</span>
+    <span>本机架构编译</span>
+    <span>单容器 · 7863</span>
+  </div>
+</header>
+
+<div class="dl">
+  <div>
+    <div class="dl-main"><b>下载部署包（zip）</b>wb2api-1.13.0.zip · 2.3 MB · 含完整源码、兼容层补丁、compose 与说明</div>
+    <div class="dl-note">解压后 <code>docker compose up -d --build</code> 一条命令编译并起容器。包里不带预构建镜像 —— 编译出来就是你本机的架构（Apple Silicon 也是原生 arm64）。</div>
+  </div>
+  <a class="btn" href="../tools-dev/downloads/wb2api-1.13.0.zip" download>下载 zip</a>
+</div>
+
+<div class="warn">
+  <h3>⚠ 用之前先读完这一段</h3>
+  <ul>
+    <li>这是<b>非官方</b>网关，不是腾讯或 WorkBuddy 发布的东西；它靠逆向客户端协议工作，随时可能因为上游改协议而失效。</li>
+    <li><b>只用来接你自己已经注册的账号。</b>批量注册小号、转售、二次打包对外提供服务，都违反上游条款，也可能违法。</li>
+    <li>账号凭证以<b>明文 JSON</b> 存在容器的 <code>auths/</code> 里。别把 <code>auths/</code> 和 <code>config.json</code> 传给别人、也别丢进公开仓库。</li>
+    <li><b>对外暴露就必须设 api_key</b>，并且这个 key 为空时代码是<b>完全不鉴权</b>（见下面「两个坑」）。</li>
+    <li>封号、额度清零、协议失效的风险由你自己承担；上游作者与本页都不提供任何保证或支持。</li>
+    <li>原项目 <code>Sliverkiss/workbuddy2api</code> 曾经整个删过一次库。这种项目的常态是随时消失 —— 不要把它当成长期基础设施。</li>
+  </ul>
+</div>
+
+<h2>三条端点分别给谁用</h2>
+<p>同一个容器、同一份账号池、同一套选号与用量统计，对三种协议各开一扇门：</p>
+<table>
+  <tr><th>端点</th><th>协议</th><th>典型客户端</th><th>base 该写什么</th></tr>
+  <tr>
+    <td><code>/v1/chat/completions</code></td><td>OpenAI Chat</td>
+    <td>pi、任何 OpenAI SDK、绝大多数第三方客户端</td>
+    <td><code>http://127.0.0.1:7863/v1</code></td>
+  </tr>
+  <tr>
+    <td><code>/v1/responses</code></td><td>OpenAI Responses</td>
+    <td>codex ≥ 0.125（<code>wire_api = "chat"</code> 已被移除，只能讲 Responses）</td>
+    <td><code>http://127.0.0.1:7863/v1</code></td>
+  </tr>
+  <tr>
+    <td><code>/v1/messages</code></td><td>Anthropic Messages</td>
+    <td>Claude Code</td>
+    <td><code>http://127.0.0.1:7863</code>（<b>不带</b> <code>/v1</code>）</td>
+  </tr>
+</table>
+<p class="note">上游原版只有第一条。后两条是这个 fork 里加的兼容层（<code>src/internal/server/responses.go</code>、<code>messages.go</code>），做法是<i>翻译协议后复用同一条 chat 链路</i>，所以选号轮转、粘性会话、冷却、积分账本、请求归档全都自动继承，不存在两套调度状态互相打架。</p>
+
+<h2>前置条件</h2>
+<ul>
+  <li><b>Docker</b>：Windows 用 Docker Desktop（带 Compose v2），Linux 用 <code>docker</code> + <code>docker compose</code> 插件。</li>
+  <li><b>能拉到两个基础镜像</b>：<code>golang:1.23-alpine</code>（约 370 MB 展开）与 <code>alpine:3.20</code>。这是整套流程唯一必须联网的一步 —— 拉不动时看下面「排错」第一节，或 <code>README.md</code> 里的加速器写法。</li>
+  <li><b>一个已注册的 WorkBuddy / CodeBuddy 账号</b>，能在浏览器里正常登录。账号从哪来本页不提供 —— 用你自己的。</li>
+  <li>宿主机 <b>7863 端口空闲</b>（被占用就改 compose 里的映射，或设 <code>WB2A_BIND</code>）。</li>
+  <li>磁盘 ~1.5 GB（两个基础镜像 + 构建缓存 + 请求日志）。</li>
+</ul>
+
+<h2>两步部署</h2>
+<p>解压后的目录长这样，后面所有命令都在这个目录里执行：</p>
+<pre><code>wb2api/
+├── docker-compose.yml          <span class="c"># build: ./src，一条命令编译 + 起容器</span>
+├── config.example.json         <span class="c"># 复制成 config.json，改掉 api_key</span>
+├── src/                        <span class="c"># 完整源码（上游 6b31db6 + 兼容层），Dockerfile 在这里</span>
+├── patches/compat.patch        <span class="c"># 相对上游的兼容层补丁（6 文件 / 119,662 字节）</span>
+├── UPSTREAM.md                 <span class="c"># 构建 / 跟版 / 回滚流程</span>
+└── README.md</code></pre>
+
+<h3>① 造一份 config.json（<b>这一步别跳</b>）</h3>
+<pre><code><span class="c"># bash / Git Bash</span>
+cp config.example.json config.json
+node -e "console.log('sk-'+require('crypto').randomBytes(18).toString('base64url'))"
+
+<span class="c"># PowerShell</span>
+Copy-Item config.example.json config.json</code></pre>
+<p>把生成的那串（或 <code>openssl rand -base64 24</code> 的结果）填进 <code>config.json</code> 的 <code>"api_key"</code>，替换掉占位的 <code>REPLACE_ME</code>。其余字段先别动，默认值就是能跑的状态。</p>
+
+<h3>② 编译并起容器</h3>
+<pre><code>docker compose up -d --build
+<span class="c"># 首次会拉 golang:1.23-alpine + alpine:3.20 并编译 4 个二进制，约 2-4 分钟</span>
+docker compose logs -f          <span class="c"># 看到监听 :7863 就可以 Ctrl+C 退出日志</span></code></pre>
+<p class="note"><code>--build</code> 别省：改了 <code>src/</code> 却不带这个旗标，compose 会直接用旧镜像，看起来像「改了没生效」。</p>
+<p>默认只绑 <code>127.0.0.1:7863</code>，局域网里的手机也访问不到。确实需要别的机器访问时：</p>
+<pre><code><span class="c"># 前提：api_key 已经设成非空随机串，并且你清楚它在暴露什么</span>
+WB2A_BIND=0.0.0.0 docker compose up -d --build</code></pre>
+
+<h3>起来之后自检三条</h3>
+<pre><code><span class="c"># 1) 健康检查：此时还没有账号 → healthy 是 0，HTTP 码 503（设计如此，不是坏了）</span>
+curl -s -i http://127.0.0.1:7863/healthz | head -1
+curl -s http://127.0.0.1:7863/healthz
+<span class="c"># → HTTP/1.1 503 Service Unavailable</span>
+<span class="c"># → {"healthy":0,"realm_servable":{"cn":false,"global":false},"service":"workbuddy2api","total":0}</span></code></pre>
+<p class="note">因为镜像是按这个接口做 <code>HEALTHCHECK</code> 的，所以<b>还没加账号时 <code>docker compose ps</code> 会显示 <code>(unhealthy)</code></b>。加完第一个可用账号就自动转 <code>(healthy)</code> —— 不用重启，也不用慌。</p>
+
+<pre><code><span class="c"># 2) 面板能开（浏览器里打开也行）</span>
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:7863/panel/
+<span class="c"># → 200</span>
+
+<span class="c"># 3) 鉴权生效：随便编一个 key，必须是 401</span>
+curl -s -o /dev/null -w '%{http_code}\n' -H "Authorization: Bearer wrong" \
+  http://127.0.0.1:7863/v1/models
+<span class="c"># → 401   如果是 200，说明 api_key 是空的或还是 REPLACE_ME，立刻改</span></code></pre>
+
+<h2>加账号</h2>
+<p>面板是主路径：浏览器打开 <code>http://127.0.0.1:7863/panel/</code>，它会先要一次 API 密钥（就是 <code>config.json</code> 里的 <code>api_key</code>，存在浏览器 <code>localStorage</code> 里），进去之后点右上角<b>「添加账号」</b>：</p>
+<ol>
+  <li>面板给出一个授权链接，点开（同一台机器、手机、另一个浏览器都行）；</li>
+  <li>在页面上登录你自己的账号，授权完把页面关掉；</li>
+  <li>回到面板，它会自己轮询登录态，成功即<b>落盘并热加载</b>，账号立刻出现在「账号池」里；</li>
+  <li>首次登录会顺手做一次签到（拿当天积分），失败不影响可用性。</li>
+</ol>
+<p>不方便开浏览器也可以走命令行（镜像里已经带了 <code>login</code> 二进制与脚本）：</p>
+<pre><code>docker exec -it workbuddy2api ./login.sh
+<span class="c"># 按提示打开链接登录 → 回来按 y → 拿到 token 并写入 auths/</span>
+docker restart workbuddy2api     <span class="c"># 命令行登录写的是文件，重启才会加载</span></code></pre>
+<p class="note">多个账号就是重复点几次「添加账号」。选号是按剩余积分、到期时间、失败率自动挑的，不用手工指定。</p>
+
+<h2>勾对清单</h2>
+<p>部署完挨个打勾；有一条不对就别急着接客户端。</p>
+<ul class="check">
+  <li><input type="checkbox"> 宿主机上的 <code>config.json</code> 是<b>文件</b>，不是目录（<code>ls -l config.json</code>）</li>
+  <li><input type="checkbox"> <code>api_key</code> 是一串随机值，既不是空字符串也不是 <code>REPLACE_ME</code></li>
+  <li><input type="checkbox"> 加完账号后 <code>docker compose ps</code> 变成 <code>(healthy)</code>（加之前是 <code>(unhealthy)</code>，因为 <code>/healthz</code> 在空池时返回 503）</li>
+  <li><input type="checkbox"> <code>/healthz</code> 返回 JSON，加完账号后 <code>healthy</code> ≥ 1 且 HTTP 码变 200</li>
+  <li><input type="checkbox"> 错误 key 调 <code>/v1/models</code> 得 <b>401</b></li>
+  <li><input type="checkbox"> 正确 key 调 <code>/v1/models</code> 得 200，且 <code>data</code> 里有模型</li>
+  <li><input type="checkbox"> 面板「账号池」里有 1 个以上「可用」账号，积分不是 0</li>
+  <li><input type="checkbox"> 三条端点都不是 404（用正确 key 请求，返回 503 说明路由在、只是没账号）</li>
+  <li><input type="checkbox"> 你自己那台机器上的 <code>auths/</code> 没被误传给别人（里面有明文 token）</li>
+</ul>
+
+<h2>两个坑，几乎人人踩</h2>
+
+<h3>坑一：<code>config.json</code> 不存在 → 容器起不来</h3>
+<p>compose 里 <code>./config.json</code> 是挂在容器里的<b>文件</b>。宿主机上没有这个文件时，Docker 会把挂载点当成目录创建出来，于是容器里 <code>/app/config.json</code> 变成目录，进程读配置直接失败：</p>
+<pre><code>Error: read config: read /app/config.json: is a directory</code></pre>
+<p>解法就是前面第 ② 步：<b>先 <code>cp</code> 再 <code>up</code></b>。已经踩到了的话，<code>docker compose down</code> → 删掉那个空目录 → 重新 <code>cp</code> → 再 <code>up</code>。</p>
+
+<h3>坑二：<code>api_key</code> 留空 = 完全不鉴权（跟 README 说的相反）</h3>
+<p>上游 README 写的是「留空会自动生成随机密钥」。实际行为是：只有 <code>config.json</code> <b>不存在</b>时程序才会写一份默认配置并生成 key（<code>cmd/server/config.go:342</code>）。文件存在、而 <code>api_key</code> 是空字符串时，鉴权函数第一行就 <code>return true</code>（<code>internal/httpauth/httpauth.go:26</code>）—— <b>任何请求都被放行</b>。</p>
+<p>自查，两条结果必须相反：</p>
+<pre><code>curl -s -o /dev/null -w 'wrong:%{http_code}\n' -H "Authorization: Bearer wrong" http://127.0.0.1:7863/v1/models
+curl -s -o /dev/null -w 'right:%{http_code}\n' -H "Authorization: Bearer 你的key" http://127.0.0.1:7863/v1/models
+
+<span class="c"># 期望：wrong:401   right:200</span>
+<span class="c"># 若两条都是 200 → api_key 为空，任何人（含扫端口的机器人）都能白用你的账号</span></code></pre>
+<p class="note">同理：面板 <code>/panel/</code> 页面本身不鉴权（<code>app.js</code> 也匿名可读），只有 <code>/panel/api/*</code> 要 key。所以「面板能打开」不代表「鉴权正常」，一定要用上面那条假 key 的 curl 验。</p>
+
+<h2>接客户端</h2>
+<p>三份模板都能直接抄。唯一容易抄错的是 <b>base 到底带不带 <code>/v1</code></b> —— 先看这张表再看细节：</p>
+<table>
+  <tr><th>客户端</th><th>配置字段</th><th>该写什么</th><th>最终请求的路径</th></tr>
+  <tr><td>pi</td><td><code>baseUrl</code></td><td><code>http://127.0.0.1:7863/v1</code></td><td><code>/v1/chat/completions</code></td></tr>
+  <tr><td>codex</td><td><code>base_url</code></td><td><code>http://127.0.0.1:7863/v1</code></td><td><code>/v1/responses</code></td></tr>
+  <tr><td>Claude Code</td><td><code>ANTHROPIC_BASE_URL</code></td><td><code>http://127.0.0.1:7863</code></td><td><code>/v1/messages</code></td></tr>
+</table>
+<p class="note">另外三份模板都把 key 交给环境变量，而不是直接写进配置文件 —— 这些配置文件经常被同步、被截图、被丢进 dotfiles 仓库。</p>
+
+<h3>pi（OpenAI Chat 协议）</h3>
+<p><code>~/.pi/agent/models.json</code> 里加一个 provider，<code>api</code> 用 <code>openai-completions</code>：</p>
+<pre><code>{
+  "providers": {
+    "wb2api": {
+      "baseUrl": "http://127.0.0.1:7863/v1",
+      "api": "openai-completions",
+      "apiKey": "$WB2API_KEY",
+      "compat": {
+        "supportsDeveloperRole": false,
+        "supportsReasoningEffort": true,
+        "maxTokensField": "max_tokens"
+      },
+      "models": [
+        {
+          "id": "cn:deepseek-v4.1-flash",
+          "name": "DeepSeek V4.1 Flash",
+          "reasoning": true,
+          "input": ["text"],
+          "contextWindow": 1000000,
+          "maxTokens": 32000
+        }
+      ]
+    }
+  }
+}</code></pre>
+<ul>
+  <li><code>id</code> 必须是网关 <code>/v1/models</code> 里真实存在的名字（带 <code>cn:</code> 前缀），写错就是 503。</li>
+  <li><code>apiKey</code> 支持 <code>$NAME</code> / <code>${NAME}</code> 展开，也可以写 <code>!command</code> 执行命令取值 —— 用前者就够：设好环境变量 <code>WB2API_KEY</code>，配置文件里只留 <code>"$WB2API_KEY"</code>。</li>
+  <li><code>compat</code> 三键是给「非 OpenAI 官方上游」的适配：不走 developer role、认 <code>reasoning_effort</code>、上限字段叫 <code>max_tokens</code>。</li>
+</ul>
+<p><code>~/.pi/agent/settings.json</code> 里把它设成默认：</p>
+<pre><code>{
+  "defaultProvider": "wb2api",
+  "defaultModel": "cn:deepseek-v4.1-flash"
+}</code></pre>
+
+<h3>codex（OpenAI Responses 协议）</h3>
+<p><code>~/.codex/config.toml</code>：</p>
+<pre><code>[model_providers.wb2api]
+name = "WorkBuddy2API"
+base_url = "http://127.0.0.1:7863/v1"
+wire_api = "responses"
+env_key = "WB2API_KEY"
+request_max_retries = 4
+stream_max_retries = 10
+stream_idle_timeout_ms = 300000
+
+[profiles.wb2api]
+model = "cn:deepseek-v4.1-flash"
+model_provider = "wb2api"</code></pre>
+<p>用法：<code>codex --profile wb2api</code>，或者把 <code>profile = "wb2api"</code> 写到文件顶层当默认。</p>
+<ul>
+  <li><code>wire_api = "responses"</code> 是唯一选择：codex 0.125 起删了 <code>"chat"</code>，上游原版网关会直接 404（表现是 <code>ERROR: Reconnecting... 1/10</code> 循环）。</li>
+  <li><code>env_key</code> 指的环境变量里放 key，别写 <code>api_key</code> 字段。</li>
+  <li>profile 名<b>不能含点</b>（<code>cn:glm-5.3</code> 这种名字不能当 profile）。</li>
+  <li>模型 id 写错会得到 <code>503 no_healthy_account</code> + <code>code 11102 model [...] service info not found</code>，看起来像账号问题，其实是模型名不认识。</li>
+</ul>
+
+<h3>Claude Code（Anthropic Messages 协议）</h3>
+<p><code>~/.claude/settings.json</code>（或用 <code>CLAUDE_CONFIG_DIR</code> 指向的那个目录）的 <code>env</code> 段：</p>
+<pre><code>{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:7863",
+    "ANTHROPIC_AUTH_TOKEN": "sk-你的api_key",
+    "ANTHROPIC_MODEL": "claude-sonnet-4-5",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "claude-sonnet-4-5",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "claude-haiku-4-5",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-6",
+    "ANTHROPIC_SMALL_FAST_MODEL": "claude-haiku-4-5"
+  }
+}</code></pre>
+<ul>
+  <li><b><code>ANTHROPIC_BASE_URL</code> 不带 <code>/v1</code></b> —— Claude Code 自己接 <code>/v1/messages</code>。</li>
+  <li><b>必须用 <code>ANTHROPIC_AUTH_TOKEN</code></b>（它发 <code>Authorization: Bearer</code>）。只设 <code>ANTHROPIC_API_KEY</code> 时客户端发的是 <code>x-api-key</code>，网关只认 Bearer，结果是 401。</li>
+  <li>模型名写 <code>claude-*</code> 就行：网关会按家族映射到真实模型（<code>claude-opus-4-6</code> → <code>cn:space-bunny</code>、<code>claude-sonnet-4-5</code> → <code>cn:glm-5.3</code>、<code>claude-haiku-4-5</code> → <code>cn:deepseek-v4.1-flash</code>…），未知的 <code>claude-*</code> 落到默认档。映射表在 <code>src/internal/server/messages.go</code>，改这一处即可。</li>
+  <li>别把 <code>cn:*</code> 名字直接填进去：能跑，但每条消息都会刷 <code>unrecognized_model</code> 提示，且上下文窗口按 200K 估。</li>
+</ul>
+
+<h2>长这样</h2>
+<p>下面三张是空白实例（还没加账号）截的，账号池为空，所以没有昵称、uid、积分之类的东西。面板自带明暗两套，跟随系统。</p>
+
+<figure>
+  <img src="shots/wb2api-panel-accounts.png" alt="面板账号池页：顶部 KPI 显示账号总数、可用、冷却中、已禁用、已暂停选号、积分剩余/总额、粘性会话，下面账号池为空并提示添加账号" width="2360" height="1640">
+  <figcaption>① 账号池：顶部一排是池子状态（可用/冷却/禁用/暂停、积分、粘性会话），下面是账号列表与模型锁池。右上角就是「添加账号」</figcaption>
+</figure>
+
+<figure>
+  <img src="shots/wb2api-panel-config.png" alt="面板配置页：监听地址、API 密钥（打码显示，带显示按钮）、单账号明细条数，下面是自动签到、Token 保活、旅行巡检、活跃上报的时刻设置" width="2360" height="1640">
+  <figcaption>② 配置：API 密钥就在这里改，保存后<b>立即生效</b>（含面板自身）；监听地址改动要重启进程。下面那些勾是自动签到 / 保活 / 巡检的时刻表</figcaption>
+</figure>
+
+<figure>
+  <img src="shots/wb2api-panel-models.png" alt="面板模型与档位页的筛选条：搜索框、域、能力、档位、价格、排序，表格列为模型、积分倍率、默认档、支持的思考档位、上下文长度、最大输出，此时提示没有可用账号" width="2360" height="709">
+  <figcaption>③ 模型与档位：加完账号点「重新获取」，这里会列出上游全部模型、积分倍率、支持哪些思考档位与上下文长度 —— 想接哪个模型，先在这里看 id</figcaption>
+</figure>
+
+<h2>包里都有什么</h2>
+<table>
+  <tr><th>路径</th><th>是什么</th></tr>
+  <tr><td><code>docker-compose.yml</code></td><td><code>build: ./src</code> 一份搞定。端口默认 <code>${WB2A_BIND:-127.0.0.1}:7863</code>，三个挂载点是 <code>auths/</code>、<code>data/</code>、<code>config.json</code>。</td></tr>
+  <tr><td><code>config.example.json</code></td><td>配置样例。复制成 <code>config.json</code> 后<b>只需要改 <code>api_key</code></b>。</td></tr>
+  <tr><td><code>src/</code></td><td>完整源码：上游 <code>6b31db6</code> + 兼容层的 6 个文件（约 2.2 MB / 171 文件）。<code>Dockerfile</code> 也在这儿。删掉了 <code>.git</code> 与 <code>.github</code>，其余原样。</td></tr>
+  <tr><td><code>src/docker-compose.yml</code></td><td>上游原样的那份（<code>build: .</code>，在 <code>src/</code> 里单独跑）。日常用包根那一份就够。</td></tr>
+  <tr><td><code>patches/compat.patch</code></td><td>兼容层相对上游的完整补丁（119,662 字节 / 6 文件）。想核对「到底改了什么」，直接读它。</td></tr>
+  <tr><td><code>UPSTREAM.md</code></td><td>构建、跑测试、跟上游升版、回滚的完整流程。</td></tr>
+  <tr><td><code>src/scripts/</code></td><td>上游带的诊断脚本。<b>注意</b>：<code>probe_max_tokens.py</code> 会真实发请求、真实消耗额度；<code>probe_active.py</code> 默认 dry-run（只看不发）。</td></tr>
+</table>
+
+<h2>改了代码 / 跟上游升版</h2>
+<p>构建就是主路径（包里不带预构建镜像），改完 <code>src/</code> 直接：</p>
+<pre><code>docker compose build            <span class="c"># 只构建，不起容器</span>
+docker compose up -d --build    <span class="c"># 构建 + 重启，重跑变化的层</span></code></pre>
+<p>绕过 compose 手动 build（<b><code>DOCKER_BUILDKIT=0</code> 别省</b>：Dockerfile 首行要 BuildKit 去拉 frontend 镜像，国内 DNS 经常失败）：</p>
+<pre><code>cd src
+DOCKER_BUILDKIT=0 docker build -t workbuddy2api-panel:1.13.0 .</code></pre>
+<p>测试不用装 Go，容器里跑：</p>
+<pre><code>MSYS_NO_PATHCONV=1 docker run --rm -v "$PWD/src:/src" -v "wb2api-gocache:/go" -w /src golang:1.23-alpine \
+  sh -c "go build ./... && go vet ./internal/server/ && go test ./... -count=1"</code></pre>
+<p>上游更新后的跟版流程（并行克隆 + 补丁重放 + canary 验证）、以及「回滚到上一版」的步骤，都写在包里的 <code>UPSTREAM.md</code>。回滚靠本地 tag（重建前 <code>docker tag … prev</code>），因为这些包里不再存旧镜像。核心只有一句：<b>别在 <code>src/</code> 里直接改</b>——它是快照不是仓库，改动请改在克隆下来的新上游上，然后重新导出 <code>patches/compat.patch</code>。</p>
+
+<h2>排错</h2>
+<table>
+  <tr><th>症状</th><th>原因 / 处理</th></tr>
+  <tr>
+    <td>构建卡在 <code>failed to fetch anonymous token … dial tcp …:443</code></td>
+    <td>BuildKit 拉不到 frontend，或基础镜像本身就拉不动。先试 <code>DOCKER_BUILDKIT=0 docker compose build</code>；还不行就给 <code>golang:1.23-alpine</code> / <code>alpine:3.20</code> 配镜像加速器（<code>README.md</code> 里有可直接复制的四行 <code>pull</code> + <code>tag</code>）。</td>
+  </tr>
+  <tr>
+    <td>改了 <code>src/</code> 里的代码，行为没变</td>
+    <td><code>up -d</code> 少了 <code>--build</code>，compose 复用了旧镜像。加旗标重来即可。</td>
+  </tr>
+  <tr>
+    <td>容器一直是 <code>(unhealthy)</code></td>
+    <td>先看 <code>curl -i http://127.0.0.1:7863/healthz</code>：<b>空池返回 503 是设计</b>，加一个可用账号就转 healthy。已有账号还 503，就是那个账号在冷却 / 额度耗尽 / 两个域名都不可达。</td>
+  </tr>
+  <tr>
+    <td><code>read /app/config.json: is a directory</code></td>
+    <td>宿主机上没有 <code>config.json</code> 就先 <code>up</code> 了，Docker 把挂载点建成了目录。down → 删目录 → <code>cp</code> → 再 up。</td>
+  </tr>
+  <tr>
+    <td>容器 healthy，但所有请求都 401</td>
+    <td>多半是客户端没带 <code>Authorization: Bearer</code>（Claude Code 只设 <code>ANTHROPIC_API_KEY</code> 就会这样），或 key 里混了引号/空格。</td>
+  </tr>
+  <tr>
+    <td>容器 healthy，假 key 也返回 200</td>
+    <td><code>api_key</code> 为空。改 <code>config.json</code>（面板「配置」页保存即可，立即生效）。</td>
+  </tr>
+  <tr>
+    <td><code>permission denied</code> 写 <code>auths/</code></td>
+    <td>Linux 上 uid 不匹配：<code>PUID=$(id -u) PGID=$(id -g) docker compose up -d</code>，或 <code>chown -R 10001 auths data</code>。Windows 不受影响。</td>
+  </tr>
+  <tr>
+    <td>codex 一直 <code>Reconnecting... 1/10</code></td>
+    <td>打到上游原版（没有 <code>/v1/responses</code>）或 base 少了 <code>/v1</code>。用 <code>curl -X POST .../v1/responses</code> 应返回 400/503 而不是 404。</td>
+  </tr>
+  <tr>
+    <td>Claude Code 刷 <code>unrecognized_model</code></td>
+    <td>模型名填了 <code>cn:*</code>。改成 <code>claude-*</code> 家族名，让网关做映射。</td>
+  </tr>
+  <tr>
+    <td><code>503 no_healthy_account</code></td>
+    <td>池子里没有可用账号：没加账号、账号在冷却、或额度耗尽。看面板「账号池」与「模型锁池」。</td>
+  </tr>
+  <tr>
+    <td>端口被占用</td>
+    <td><code>WB2A_BIND=127.0.0.1 docker compose up -d</code> 只能改绑定地址；换端口要改 compose 里的 <code>7863:7863</code> 左侧。</td>
+  </tr>
+</table>
+
+<footer>
+  <span><a href="../index.html#tools">← 回到工具开发</a></span>
+  <span>上游 <a href="https://github.com/linguo2625469/workbuddy2api-panel">linguo2625469/workbuddy2api-panel</a> · MIT · 2026-10-18</span>
+</footer>
+
+</div>
+</body>
+</html>

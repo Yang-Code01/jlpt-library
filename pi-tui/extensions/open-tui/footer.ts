@@ -26,6 +26,7 @@ import {
 } from "./utils.ts";
 import type { FooterState, ModelMeta, UsageTotals } from "./state.ts";
 import { getUsageTotals } from "./state.ts";
+import { formatCredits, shortExpiry, shouldShowExpiry, type CostView } from "../wb-panel.ts";
 
 export function shortHostname(hostname: string): string {
 	return hostname.split(".")[0] ?? "";
@@ -156,9 +157,22 @@ function renderContextBar(
 	return `${contextIcon} ${renderBar(theme, contextPct, barWidth, resolveIconMode(iconMode) === "ascii")} ${pctText} ${theme.fg("dim", "·")} ${ctxText}`;
 }
 
+/**
+ * 模型名里的上下文后缀（`· 1M` / `· 200K`）是 `models.json` 的静态文本，
+ * 用 alt+m 调过窗口后它就不对了（用户 2026-10 报：设了 500k，这行永远写 1M）。
+ * 所以把名字里那个尺寸段摘掉，换成 `ctx.model.contextWindow` 的**生效值**。
+ */
+function modelLabelWithLiveWindow(name: string, contextWindow: number | undefined): string {
+	const parts = name.split(" · ").filter((part) => !/^\d+(?:\.\d+)?[KM]$/.test(part.trim()));
+	const window = Number(contextWindow ?? 0);
+	if (window > 0) parts.push(fmtTokens(window));
+	return parts.join(" · ");
+}
+
 function renderStatsBlock(
 	theme: Theme,
 	totals: UsageTotals,
+	cost: CostView,
 	glyphs: IconGlyphs,
 	segments: OpenTuiConfig["footerSegments"],
 ): string {
@@ -174,10 +188,40 @@ function renderStatsBlock(
 		}
 	}
 	if (segments.cost) {
-		stats.push(theme.fg("warning", `${glyphs.cost} $${totals.cost.toFixed(3)}`));
+		const costSegment = renderCostSegment(theme, totals, cost, glyphs);
+		if (costSegment) stats.push(costSegment);
 	}
 
 	return stats.join(` ${theme.fg("dim", "|")} `);
+}
+
+/**
+ * 费用段两种口径：
+ * - `credits`（WorkBuddy 控制台网关）：余额 `⚡4568/7250`，快到期的批次追加 `⏳28@10-31`
+ * - `usd`（普通 apikey）：pi 自己算的钱 `$0.123`，与以前完全一致
+ * 取不到余额时标签标灰并加 `!!`，不把用户手里的数字换成 `—`。
+ */
+function renderCostSegment(theme: Theme, totals: UsageTotals, cost: CostView, glyphs: IconGlyphs): string {
+	if (cost.mode === "credits") {
+		const balance = cost.credits;
+		if (!balance) return "";
+		const stale = cost.stale === true;
+		const valueColor = stale ? "muted" : "warning";
+		const icon = theme.fg(valueColor, glyphs.credits);
+		const remaining = theme.fg(valueColor, formatCredits(balance.remaining));
+		const total = theme.fg("muted", `/${formatCredits(balance.total)}`);
+		const flag = stale ? theme.fg("muted", `${glyphs.stale}${glyphs.stale}`) : "";
+		let text = `${icon} ${remaining}${total}${flag}`;
+		if (shouldShowExpiry(balance.expiryRemaining, balance.total, balance.expiryAt)) {
+			const left = balance.expiryRemaining !== undefined && balance.expiryRemaining >= 1
+				? formatCredits(balance.expiryRemaining)
+				: "";
+			const when = shortExpiry(balance.expiryAt as number);
+			text += ` ${theme.fg("muted", `${glyphs.expiry}${left}@${when}`)}`;
+		}
+		return text;
+	}
+	return theme.fg("warning", `${glyphs.cost} $${totals.cost.toFixed(3)}`);
 }
 
 const ANSI_RESET = "\x1b[0m";
@@ -388,14 +432,14 @@ function renderFooterContent(
 	if (meta.provider && meta.provider !== "Unknown") {
 		modelParts.push(theme.fg(providerColor(ctx.model?.provider ?? "none"), meta.provider));
 	}
-	modelParts.push(theme.fg("text", meta.model));
+	modelParts.push(theme.fg("text", modelLabelWithLiveWindow(meta.model, ctx.model?.contextWindow)));
 	if (meta.effort && meta.effort !== "off") {
 		modelParts.push(theme.fg(effortColor(meta.effort), `${glyphs.thinking} ${meta.effort}`));
 	}
 	// 本分支自有：提示模型选择器入口（内置 /model 无法被扩展覆盖，见 README）
 	modelParts.push(theme.fg("dim", "alt+m 模型"));
 	const modelBlock = modelParts.join(theme.fg("dim", " · "));
-	const statsBlock = renderStatsBlock(theme, totals, glyphs, segments);
+	const statsBlock = renderStatsBlock(theme, totals, state.cost, glyphs, segments);
 	const inlineBottom = fitInlineLine(modelBlock, statsBlock, width, theme);
 	const line2 = alignRight(inlineBottom.left, inlineBottom.right, width, theme);
 	const mainLines: [string, string] = [line1, line2]

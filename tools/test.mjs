@@ -93,9 +93,20 @@ function guardNoFetch() {
      这种上游代码样例，扫它会因为「如实引用」而假失败。报告本身自包含（research.mjs check
      保证无外链 css/js），不靠 fetch 取数。 */
   const EXTS = ['.html', '.js'];
+  /* 工具本体（tools-dev/data.json 里的 dir）是下载到别处去跑的东西，不是本站用 file://
+     打开的页面：wb2api 的面板 app.js 走 HTTP，fetch 天经地义。只扫站点自己的 html/js。 */
+  const toolDirs = (() => {
+    try {
+      const d = JSON.parse(fs.readFileSync(path.join(ROOT, 'tools-dev/data.json'), 'utf8'));
+      return (d.tools || [])
+        .map((t) => t.dir && t.dir.replace(/^\.\.[\\/]/, '').split(/[\\/]/).join('/'))
+        .filter(Boolean);
+    } catch { return []; }
+  })();
+  const inToolDir = (f) => toolDirs.some((d) => f === d || f.startsWith(d + '/'));
   const files = execFileSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard'], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 28 })
     .split('\0').filter(Boolean)
-    .filter((f) => EXTS.some((e) => f.endsWith(e)) && !ALLOW.has(f) && !/^research\//.test(f));
+    .filter((f) => EXTS.some((e) => f.endsWith(e)) && !ALLOW.has(f) && !/^research\//.test(f) && !inToolDir(f));
   const bad = [];
   for (const f of files) {
     const text = fs.readFileSync(path.join(ROOT, f), 'utf8');

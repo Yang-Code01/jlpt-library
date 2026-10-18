@@ -160,12 +160,73 @@ function makeSandbox() {
   c = chk('');
   eq(c.code, 0, '重新 pack 后 check 恢复通过');
 
+  /* 详情页里的下载链接是手写的：指向不存在的包（升版后忘改）→ 失败 */
+  const pagePath = path.join(tmp, 'tools-dev', 'demo.html');
+  fs.writeFileSync(pagePath, '<!DOCTYPE html><title>demo</title>\n<a href="downloads/demo-9.9.9.zip">x</a>\n', 'utf8');
+  c = chk('');
+  eq(c.code, 1, '详情页下载链接指向不存在的包，check 必须失败');
+  ok(/下载链接/.test(c.out), `失败原因应当提到下载链接：${c.out.trim()}`);
+  fs.writeFileSync(pagePath, '<!DOCTYPE html><title>demo</title>\n<a href="downloads/demo-0.1.0.zip" download>x</a>\n', 'utf8');
+  c = chk('');
+  eq(c.code, 0, '下载链接正确时 check 恢复通过');
+
   /* data.json 与 package.json 版本不一致 → 失败 */
   fs.writeFileSync(path.join(tmp, 'demo', 'package.json'), JSON.stringify({ name: 'demo', version: '0.2.0' }, null, 2) + '\n', 'utf8');
   c = chk('');
   eq(c.code, 1, '版本与 package.json 不一致，check 必须失败');
   ok(/版本/.test(c.out), `失败原因应当提到版本：${c.out.trim()}`);
   fs.writeFileSync(path.join(tmp, 'demo', 'package.json'), JSON.stringify({ name: 'demo', version: '0.1.0' }, null, 2) + '\n', 'utf8');
+
+  /* versionFrom：版本从源码常量取（Go 这类不该塞 package.json 的仓库） */
+  const dj0 = path.join(tmp, 'tools-dev', 'data.json');
+  const setData = (mut) => {
+    const d = JSON.parse(fs.readFileSync(dj0, 'utf8'));
+    mut(d.tools[0]);
+    fs.writeFileSync(dj0, JSON.stringify(d, null, 2) + '\n', 'utf8');
+  };
+  fs.writeFileSync(path.join(tmp, 'demo', 'version.go'), 'package main\n\nconst appVersion = "0.1.0-panel"\n', 'utf8');
+  setData((t) => {
+    t.versionFrom = { file: 'version.go', pattern: 'appVersion = "([0-9]+\\.[0-9]+\\.[0-9]+)' };
+  });
+  c = chk('');
+  r = run(['tools/tools.mjs', 'pack', 'demo'], tmp);
+  eq(r.status, 0, `versionFrom 一致时 pack 应当成功：${(r.stdout || r.stderr).trim()}`);
+  c = chk('');
+  eq(c.code, 0, `versionFrom 与源码一致时 check 应当通过：${c.out.trim()}`);
+
+  /* 源码版本变了但 data.json 没跟 → 失败（且 pack 也不许打出撒谎的包） */
+  fs.writeFileSync(path.join(tmp, 'demo', 'version.go'), 'package main\n\nconst appVersion = "0.2.0-panel"\n', 'utf8');
+  c = chk('');
+  eq(c.code, 1, 'versionFrom 与源码不一致，check 必须失败');
+  ok(/版本/.test(c.out), `失败原因应当提到版本：${c.out.trim()}`);
+  r = run(['tools/tools.mjs', 'pack', 'demo'], tmp);
+  eq(r.status, 1, 'versionFrom 与源码不一致，pack 必须拒绝打包');
+  fs.writeFileSync(path.join(tmp, 'demo', 'version.go'), 'package main\n\nconst appVersion = "0.1.0-panel"\n', 'utf8');
+
+  /* pattern 匹配不到（源码改了写法）→ 失败 */
+  setData((t) => {
+    t.versionFrom.pattern = 'version = "([0-9.]+)';
+  });
+  c = chk('');
+  eq(c.code, 1, 'versionFrom.pattern 匹配不到，check 必须失败');
+  ok(/匹配不到/.test(c.out), `失败原因应当提到匹配不到：${c.out.trim()}`);
+
+  /* versionFrom.file 不存在 → 失败 */
+  setData((t) => {
+    t.versionFrom = { file: 'nope.go', pattern: 'appVersion = "([0-9.]+)' };
+  });
+  c = chk('');
+  eq(c.code, 1, 'versionFrom.file 不存在，check 必须失败');
+
+  /* 还原成 package.json 口径，后面的用例继续用它 */
+  setData((t) => {
+    delete t.versionFrom;
+  });
+  fs.unlinkSync(path.join(tmp, 'demo', 'version.go'));
+  r = run(['tools/tools.mjs', 'pack', 'demo'], tmp);
+  eq(r.status, 0, '去掉 versionFrom 后重新 pack 成功');
+  c = chk('');
+  eq(c.code, 0, '去掉 versionFrom 后回到 package.json 口径，check 恢复通过');
 
   /* 缺详情页 → 失败 */
   fs.unlinkSync(path.join(tmp, 'tools-dev', 'demo.html'));

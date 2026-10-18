@@ -1,5 +1,5 @@
 {
-  "_note": "工具开发区的真源。改这里，再跑 node tools/tools.mjs gen 写进 index.html 的 wb:tool-list 标记区；pack 会把 dir 打成 zip 并回写 download 字段（文件名带版本，别手改）。字段：id 唯一标识·title 显示名·tags 必须从本文件 tags 里选·status 只能是 可用/试验/暂停·version 与 dir/package.json 一致·updated YYYY-MM-DD 决定排序·summary 一句话·page 详情页文件名（放 tools-dev/）·dir 工具目录（相对 tools-dev/）",
+  "_note": "工具开发区的真源。改这里，再跑 node tools/tools.mjs gen 写进 index.html 的 wb:tool-list 标记区；pack 会把 dir 打成 zip 并回写 download 字段（文件名带版本，别手改）。字段：id 唯一标识·title 显示名·tags 必须从本文件 tags 里选·status 只能是 可用/试验/暂停·version 与 dir/package.json（或 versionFrom 指的源码常量）一致·updated YYYY-MM-DD 决定排序·summary 一句话·page 详情页文件名（放 tools-dev/）·dir 工具目录（相对 tools-dev/）·versionFrom 可选 {file,pattern} 从源码取版本（不给 Go 仓库塞只为凑版本的 package.json）",
   "tags": [
     "pi 扩展",
     "TUI",
@@ -7,6 +7,24 @@
     "离线脚本"
   ],
   "tools": [
+    {
+      "id": "wb2api",
+      "title": "WorkBuddy2API：额度转 OpenAI / Anthropic 网关",
+      "tags": [
+        "网关"
+      ],
+      "status": "可用",
+      "version": "1.13.0",
+      "versionFrom": {
+        "file": "src/cmd/server/main.go",
+        "pattern": "appVersion = \"([0-9]+\\.[0-9]+\\.[0-9]+)"
+      },
+      "updated": "2026-10-18",
+      "summary": "把已注册账号的额度包成 OpenAI + Anthropic 兼容网关：单容器、自带管理面板，pi / codex / Claude Code 都能直连；完整源码与兼容层都在包里，一条命令现场编译。",
+      "page": "wb2api.html",
+      "dir": "../wb2api",
+      "download": "downloads/wb2api-1.13.0.zip"
+    },
     {
       "id": "pi-tui",
       "title": "pi-tui-plus：pi 的 TUI 增强包",
@@ -16,12 +34,12 @@
         "网关"
       ],
       "status": "可用",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "updated": "2026-10-18",
-      "summary": "基于 pi-open-tui 的自有分支：Starship 风格 footer、alt+m 可点击的模型选择器（模型 / 思考强度 / 上下文窗口）、网关积分与繁忙度状态行；配置自动降级，非 wb2api 用户也能用。",
+      "summary": "基于 pi-open-tui 的自有分支：Starship 风格 footer、alt+m 可点击的模型选择器（模型 / 思考强度 / 上下文窗口）、网关积分状态行（本轮/会话 + 缓存命中率）；配置自动降级，非 wb2api 用户也能用。",
       "page": "pi-tui.html",
       "dir": "../pi-tui",
-      "download": "downloads/pi-tui-0.4.0.zip"
+      "download": "downloads/pi-tui-0.4.1.zip"
     }
   ]
 }
