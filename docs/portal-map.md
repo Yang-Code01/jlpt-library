@@ -5,8 +5,8 @@
 
 ## 一、门户 `index.html`（唯一首页，零构建、`file://` 直开）
 
-一层 `data-lang`（日语 / 英语）+ 一层 `data-area`（区：`study` / `survey` / `tools`）驱动显隐，状态分别记在
-`localStorage` 的 `jlpt-lang` / `jlpt-area`（`#survey` / `#tools` 可深链直达对应区）。
+一层 `data-lang`（日语 / 英语）+ 一层 `data-area`（区：`study` / `survey` / `tools` / `snooker`）驱动显隐，状态分别记在
+`localStorage` 的 `jlpt-lang` / `jlpt-area`（`#survey` / `#tools` / `#snooker` 可深链直达对应区）。
 三区共用一条 `:not()` 显隐规则（加第四区只改这一条）。四处内容由生成器写入，**位置之外的 markup 手写安全**：
 
 | 标记区（`index.html`） | 内容 | 归属工具 | 手改后果 |
@@ -44,12 +44,14 @@
 | `wb2api/` | WorkBuddy2API 部署包（额度转 OpenAI / Anthropic 网关：源码 + 兼容层补丁，`compose up -d --build` 现场编译），详情页 `tools-dev/wb2api.html` | 上游 `linguo2625469/workbuddy2api-panel` rev `6b31db6` + 兼容层（`src/internal/server/{responses,messages}.go`） | 无生成器（`src/` 与 `patches/` 手工更新，步骤见包内 `UPSTREAM.md`） | `node tools/tools.mjs check`（版本从 `src/cmd/server/main.go` 的 `appVersion` 取，见 `versionFrom`） |
 | `tools-dev/` + `tools/tools.mjs` | 工具开发区的清单与下载 | `tools-dev/data.json` + `tools-dev/<page>.html` | `node tools/tools.mjs gen`、`pack <id>` | `node tools/tools.mjs check` |
 | `research/pi-changelog.html` | pi 更新履历报告（报告区里的一篇） | 本机已装 pi 的 `CHANGELOG.md`（**不在仓库里**） | `node tools/pi-changelog-gen.mjs` | `node tools/pi-changelog-gen.mjs check` |
+| `assets/snooker*.js` | 斯诺克信息区（赛季进度 + 世界排名） | snooker.org 的 `template=31 / 2 / 7` 三张表 | `node tools/snooker.mjs`（线上由 `.github/workflows/snooker.yml` 每天跑） | `node tools/snooker.mjs --check`、`tools/tests/test_snooker.js` |
 
 细节：
 - **真题库是「明文源 → 密文发布」管线**：`exam/data/N2/<卷>.js` → `encrypt` → `exam/data/N2/enc/*.js`（**唯一入库形态**）；运行时 `exam/exam-lock.js` 用 WebCrypto 解密（PBKDF2→KEK→DEK→HKDF→AES-GCM→inflate）。`exam/data/N2/index-lite.js` 是明文常驻例外（只有卷/题型/题数）。**部署只能经 git，绝不能整目录上传**（明文仍躺在工作区）。
 - **工具区**：`tools-dev/data.json` 是清单真源；版本默认取 `<dir>/package.json`，源码仓库（Go 之类）用 `"versionFrom": {file, pattern}` 从源码常量取（`wb2api` 取 `src/cmd/server/main.go` 的 `appVersion`）。`check` 还会抓两件易漏的事：改了源码没重新 `pack`、详情页里手写的下载链接指向不存在的 zip（升版后最容易原地 404）。
 - **调查报告**：`research/data.json` 是清单真源；报告 HTML 必须自包含（无外链 css/js，可 `file://` 直开）并带三对 `wb:shell:*` 外壳标记（`tools/research.mjs add-shell`）。
 - **pi 更新履历报告是生成物**：`research/pi-changelog.html` 由 `tools/pi-changelog-gen.mjs` 从本机装的 pi 那个 600 KB 的 `CHANGELOG.md` 生成（3131 条原文全部内联），再自动补 `add-shell`。**别手改这个 HTML** —— 改分期文案 / 本机卡片改生成器里的 `ERAS` / `LOCAL` 常量后重跑；`check` 子命令会重跑一遍并与仓库里的成品比对，不一致就报第一次分叉的行号。找不到 pi 包时 `check` 退出 2，`tools/test.mjs` 据此标 SKIP（克隆仓库没有 pi，属正常）。
+- **斯诺克信息区是「抓取侧生成、页面侧只读」**：`assets/snooker-data.js` 是快照（用 `window.SNOOKER = {...}` 注入而不是 `.json` —— `file://` 下 `fetch` 会被 CORS 拦死），`assets/snooker.js` 只负责渲染到 `#snk`，页面里不允许出现 `fetch`（`tools/test.mjs` 的 `guardNoFetch` 守护）。生成器只取 `tour=Main` 且非资格赛的行，并把 12 月那 8 个 `Championship League` Group 合并成一站；排名抓不到算失败（不写脏数据），赛历 / 冠军抓不到只报警告、沿用上次赛历。源站直连会被 Cloudflare 挡（403）：线上 runner 正常，本机要走 `127.0.0.1:18790` 代理，或先 `curl` 存页面再用 `--local*` 离线跑。
 - `listener/audio/` 是**空目录且无任何引用**（疑似残留）。
 - 英语侧的源材料在 `.scratch/`（`.gitignore` 排除）→ 相关 `check` / 套件在克隆仓库里跑不了，属正常。
 

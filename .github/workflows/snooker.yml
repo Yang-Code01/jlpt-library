@@ -1,0 +1,47 @@
+name: snooker
+
+# 斯诺克信息区的数据管道（每天一次）：
+#   抓 snooker.org 的两年滚动排名 / 本赛季赛历 / 已完赛冠军 → 写 assets/snooker-data.js
+# 生成器自己比对「除 updated 之外的载荷」，没变就不写文件；下面那步再看 staging 区，
+# 于是「数据没变的那天不会产生提交」—— 提交历史只留真的变动。
+#
+# 失败策略：排名抓不到 = 中止（exit 1，会亮红告警，宁可不更新也不写脏数据）；
+#           赛历 / 冠军抓不到 = ::warning:: 黄条 + 沿用上次赛历，job 仍然绿。
+on:
+  schedule:
+    # 01:10 UTC = 09:10 北京时间。避开 UTC 整点（GitHub 的 cron 队列在整点最挤，常延迟几十分钟）
+    - cron: '10 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: snooker-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 抓取并生成
+        run: node tools/snooker.mjs
+
+      - name: 有变化才提交
+        run: |
+          git add assets/snooker-data.js
+          if git diff --cached --quiet; then
+            echo "数据无变化，跳过提交"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "data(snooker): 每日快照 $(date -u +%Y-%m-%d)"
+          git push
