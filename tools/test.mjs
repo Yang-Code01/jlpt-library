@@ -206,6 +206,6 @@ if (skipN) {
 }
 if (failN) {
   console.log(`\n${c.r}失败的项：${c.x}`);
-  for (const r of results.filter((r) => r.state === 'fail')) console.log(`  ✗ ${r.label}`);
+  for (const r of results.filter((r) => r.state === 'fail')) { console.log(`  ✗ ${r.label}`); console.log('----- captured output -----'); console.log(r.out || '(空)'); }
 }
 process.exit(failN ? 1 : 0);
