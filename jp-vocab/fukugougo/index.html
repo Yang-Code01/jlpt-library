@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>课堂单词</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/theme.js"></script>
+<link rel="stylesheet" href="../vocab.css">
+</head>
+<body>
+<div class="wrap">
+<div class="left-rail">
+<nav class="pagenav">
+  <a href="../index.html">← 返回课堂单词</a>
+  <span class="spacer"></span>
+  <a href="../../index.html">门户首页</a>
+</nav>
+</div>
+
+<header>
+  <h1 id="title">—</h1>
+  <div class="sub" id="sub"></div>
+  <span class="meaning" id="hmeaning"></span>
+</header>
+<nav class="tabs" id="tabs">
+  <button data-tab="browse" class="active">浏览</button>
+  <button data-tab="card">翻转卡</button>
+  <button data-tab="quiz">测验</button>
+  <button data-tab="srs">复习<span id="duepill" class="pill" style="display:none">0</span></button>
+</nav>
+
+<section id="browse"></section>
+<section id="card" style="display:none"></section>
+<section id="quiz" style="display:none"></section>
+<section id="srs" style="display:none"></section>
+</div>
+
+<!-- 数据内联：file:// 下不可 fetch，故以本块为准；与同目录 data.json 内容一致 -->
+<script type="application/json" id="vocab-data">
+{
+  "title": "二つの言葉をプラス",
+  "reading": "ふたつのことばをプラス",
+  "meaning_cn": "第7章「語形成」第1课 复合动词与复合名词",
+  "categories": [
+    {
+      "name": "1-1 〜かける",
+      "reading": "どうし＋どうし",
+      "cards": [
+        { "id": "1-1", "word": "話しかける", "kana": "はなしかける", "pos": "複合動詞", "meaning_cn": "搭话、攀谈", "example_jp": "恥ずかしくて、好きな人に自分から話しかけることができない。", "example_jp_ruby": "<ruby>恥<rt>は</rt></ruby>ずかしくて、<ruby>好<rt>す</rt></ruby>きな<ruby>人<rt>ひと</rt></ruby>に<ruby>自分<rt>じぶん</rt></ruby>から<ruby>話<rt>はな</rt></ruby>しかけることができない。", "example_cn": "因为害羞，没办法主动向喜欢的人搭话。" },
+        { "id": "1-2", "word": "笑いかける", "kana": "わらいかける", "pos": "複合動詞", "meaning_cn": "冲人微笑、向人笑", "example_jp": "母は赤ちゃんに優しく笑いかけた。", "example_jp_ruby": "<ruby>母<rt>はは</rt></ruby>は<ruby>赤<rt>あか</rt></ruby>ちゃんに<ruby>優<rt>やさ</rt></ruby>しく<ruby>笑<rt>わら</rt></ruby>いかけた。", "example_cn": "母亲温柔地冲婴儿笑了笑。" },
+        { "id": "1-3", "word": "問いかける", "kana": "といかける", "pos": "複合動詞", "meaning_cn": "发问、向…质问", "example_jp": "彼は「なぜだ」と私に問いかけた。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は「なぜだ」と<ruby>私<rt>わたし</rt></ruby>に<ruby>問<rt>と</rt></ruby>いかけた。", "example_cn": "他向我发问：「为什么？」" },
+        { "id": "1-4", "word": "訴えかける", "kana": "うったえかける", "pos": "複合動詞", "meaning_cn": "向…倾诉、呼吁", "example_jp": "彼女は目で「助けて」と訴えかけてきた。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>目<rt>め</rt></ruby>で「<ruby>助<rt>たす</rt></ruby>けて」と<ruby>訴<rt>うった</rt></ruby>えかけてきた。", "example_cn": "她用眼神向我求助。" },
+        { "id": "1-5", "word": "ほほえみかける", "kana": "ほほえみかける", "pos": "複合動詞", "meaning_cn": "朝…微笑", "example_jp": "先生はいつも私にほほえみかけてくれる。", "example_jp_ruby": "<ruby>先生<rt>せんせい</rt></ruby>はいつも<ruby>私<rt>わたし</rt></ruby>にほほえみかけてくれる。", "example_cn": "老师总是朝我微笑。" }
+      ]
+    },
+    {
+      "name": "1-2 〜合う",
+      "reading": "どうし＋どうし",
+      "cards": [
+        { "id": "2-1", "word": "話し合う", "kana": "はなしあう", "pos": "複合動詞", "meaning_cn": "商谈、讨论", "example_jp": "進学について両親と話し合ったが、結論は出なかった。", "example_jp_ruby": "<ruby>進学<rt>しんがく</rt></ruby>について<ruby>両親<rt>りょうしん</rt></ruby>と<ruby>話<rt>はな</rt></ruby>し<ruby>合<rt>あ</rt></ruby>ったが、<ruby>結論<rt>けつろん</rt></ruby>は<ruby>出<rt>で</rt></ruby>なかった。", "example_cn": "就升学的事和父母谈过，但没得出结论。" },
+        { "id": "2-2", "word": "殺し合う", "kana": "ころしあう", "pos": "複合動詞", "meaning_cn": "互相残杀", "example_jp": "戦争で多くの人が殺し合った。", "example_jp_ruby": "<ruby>戦争<rt>せんそう</rt></ruby>で<ruby>多<rt>おお</rt></ruby>くの<ruby>人<rt>ひと</rt></ruby>が<ruby>殺<rt>ころ</rt></ruby>し<ruby>合<rt>あ</rt></ruby>った。", "example_cn": "战争中许多人互相残杀。" },
+        { "id": "2-3", "word": "見つめ合う", "kana": "みつめあう", "pos": "複合動詞", "meaning_cn": "相互凝视", "example_jp": "二人はしばらく見つめ合った。", "example_jp_ruby": "<ruby>二人<rt>ふたり</rt></ruby>はしばらく<ruby>見<rt>み</rt></ruby>つめ<ruby>合<rt>あ</rt></ruby>った。", "example_cn": "两人互相凝视了一会儿。" },
+        { "id": "2-4", "word": "助け合う", "kana": "たすけあう", "pos": "複合動詞", "meaning_cn": "互相帮助", "example_jp": "近所の人たちはいつも助け合っている。", "example_jp_ruby": "<ruby>近所<rt>きんじょ</rt></ruby>の<ruby>人<rt>ひと</rt></ruby>たちはいつも<ruby>助<rt>たす</rt></ruby>け<ruby>合<rt>あ</rt></ruby>っている。", "example_cn": "邻里之间总是互相帮助。" },
+        { "id": "2-5", "word": "言い合う", "kana": "いいあう", "pos": "複合動詞", "meaning_cn": "互相争论、拌嘴", "example_jp": "兄弟はおもちゃのことで言い合った。", "example_jp_ruby": "<ruby>兄弟<rt>きょうだい</rt></ruby>はおもちゃのことで<ruby>言<rt>い</rt></ruby>い<ruby>合<rt>あ</rt></ruby>った。", "example_cn": "兄弟俩为了玩具吵了起来。" },
+        { "id": "2-6", "word": "ほほえみ合う", "kana": "ほほえみあう", "pos": "複合動詞", "meaning_cn": "相视而笑", "example_jp": "合格の知らせを聞いて、二人はほほえみ合った。", "example_jp_ruby": "<ruby>合格<rt>ごうかく</rt></ruby>の<ruby>知<rt>し</rt></ruby>らせを<ruby>聞<rt>き</rt></ruby>いて、<ruby>二人<rt>ふたり</rt></ruby>はほほえみ<ruby>合<rt>あ</rt></ruby>った。", "example_cn": "听到合格的消息，两人相视而笑。" }
+      ]
+    },
+    {
+      "name": "1-3 〜直す",
+      "reading": "どうし＋どうし",
+      "cards": [
+        { "id": "3-1", "word": "考え直す", "kana": "かんがえなおす", "pos": "複合動詞", "meaning_cn": "重新考虑", "example_jp": "一度考え直してから決めたほうがいい。", "example_jp_ruby": "<ruby>一度<rt>いちど</rt></ruby><ruby>考<rt>かんが</rt></ruby>え<ruby>直<rt>なお</rt></ruby>してから<ruby>決<rt>き</rt></ruby>めたほうがいい。", "example_cn": "最好重新考虑一次再决定。" },
+        { "id": "3-2", "word": "建て直す", "kana": "たてなおす", "pos": "複合動詞", "meaning_cn": "重建、翻建", "example_jp": "古い家を建て直すことにした。", "example_jp_ruby": "<ruby>古<rt>ふる</rt></ruby>い<ruby>家<rt>いえ</rt></ruby>を<ruby>建<rt>た</rt></ruby>て<ruby>直<rt>なお</rt></ruby>すことにした。", "example_cn": "决定把老房子翻建一下。" },
+        { "id": "3-3", "word": "読み直す", "kana": "よみなおす", "pos": "複合動詞", "meaning_cn": "重读、再看一遍", "example_jp": "書いたメールを読み直してから送った。", "example_jp_ruby": "<ruby>書<rt>か</rt></ruby>いたメールを<ruby>読<rt>よ</rt></ruby>み<ruby>直<rt>なお</rt></ruby>してから<ruby>送<rt>おく</rt></ruby>った。", "example_cn": "把写好的邮件重读一遍才发出去。" },
+        { "id": "3-4", "word": "温め直す", "kana": "あたためなおす", "pos": "複合動詞", "meaning_cn": "重新加热", "example_jp": "味噌汁を温め直してから食べた。", "example_jp_ruby": "<ruby>味噌汁<rt>みそしる</rt></ruby>を<ruby>温<rt>あたた</rt></ruby>め<ruby>直<rt>なお</rt></ruby>してから<ruby>食<rt>た</rt></ruby>べた。", "example_cn": "把味噌汤热了一下才吃。" },
+        { "id": "3-5", "word": "見直す", "kana": "みなおす", "pos": "複合動詞", "meaning_cn": "重新检查；另眼相看", "example_jp": "宿題を提出する前に、間違いがないか、もう一度見直した。", "example_jp_ruby": "<ruby>宿題<rt>しゅくだい</rt></ruby>を<ruby>提出<rt>ていしゅつ</rt></ruby>する<ruby>前<rt>まえ</rt></ruby>に、<ruby>間違<rt>まちが</rt></ruby>いがないか、もう<ruby>一度<rt>いちど</rt></ruby><ruby>見<rt>み</rt></ruby><ruby>直<rt>なお</rt></ruby>した。", "example_cn": "交作业之前，又检查了一遍有没有错。" },
+        { "id": "3-6", "word": "書き直す", "kana": "かきなおす", "pos": "複合動詞", "meaning_cn": "重写", "example_jp": "レポートの間違いが多くて、最初から書き直した。", "example_jp_ruby": "レポートの<ruby>間違<rt>まちが</rt></ruby>いが<ruby>多<rt>おお</rt></ruby>くて、<ruby>最初<rt>さいしょ</rt></ruby>から<ruby>書<rt>か</rt></ruby>き<ruby>直<rt>なお</rt></ruby>した。", "example_cn": "报告里错误太多，从开头重新写了一遍。" },
+        { "id": "3-7", "word": "見つめ直す", "kana": "みつめなおす", "pos": "複合動詞", "meaning_cn": "重新审视", "example_jp": "自分の生活を見つめ直すいい機会になった。", "example_jp_ruby": "<ruby>自分<rt>じぶん</rt></ruby>の<ruby>生活<rt>せいかつ</rt></ruby>を<ruby>見<rt>み</rt></ruby>つめ<ruby>直<rt>なお</rt></ruby>すいい<ruby>機会<rt>きかい</rt></ruby>になった。", "example_cn": "成了重新审视自己生活的好机会。" }
+      ]
+    },
+    {
+      "name": "1-4 〜上がる",
+      "reading": "どうし＋どうし",
+      "cards": [
+        { "id": "4-1", "word": "書き上がる", "kana": "かきあがる", "pos": "複合動詞", "meaning_cn": "写完", "example_jp": "一週間掛かったが、昨日、やっとレポートが書き上がった。", "example_jp_ruby": "<ruby>一週間<rt>いっしゅうかん</rt></ruby><ruby>掛<rt>か</rt></ruby>かったが、<ruby>昨日<rt>きのう</rt></ruby>、やっとレポートが<ruby>書<rt>か</rt></ruby>き<ruby>上<rt>あ</rt></ruby>がった。", "example_cn": "花了一周时间，昨天报告终于写完了。" },
+        { "id": "4-2", "word": "出来上がる", "kana": "できあがる", "pos": "複合動詞", "meaning_cn": "做好、完成", "example_jp": "ケーキがちょうど出来上がった。", "example_jp_ruby": "ケーキがちょうど<ruby>出来<rt>でき</rt></ruby><ruby>上<rt>あ</rt></ruby>がった。", "example_cn": "蛋糕正好烤好了。" },
+        { "id": "4-3", "word": "編み上がる", "kana": "あみあがる", "pos": "複合動詞", "meaning_cn": "织完", "example_jp": "セーターがやっと編み上がった。", "example_jp_ruby": "セーターがやっと<ruby>編<rt>あ</rt></ruby>み<ruby>上<rt>あ</rt></ruby>がった。", "example_cn": "毛衣终于织完了。" },
+        { "id": "4-4", "word": "焼き上がる", "kana": "やきあがる", "pos": "複合動詞", "meaning_cn": "烤好", "example_jp": "パンがおいしそうに焼き上がった。", "example_jp_ruby": "パンがおいしそうに<ruby>焼<rt>や</rt></ruby>き<ruby>上<rt>あ</rt></ruby>がった。", "example_cn": "面包烤得香喷喷的。" },
+        { "id": "4-5", "word": "炊き上がる", "kana": "たきあがる", "pos": "複合動詞", "meaning_cn": "（米饭）煮好", "example_jp": "ご飯が炊き上がったら知らせてください。", "example_jp_ruby": "ご<ruby>飯<rt>はん</rt></ruby>が<ruby>炊<rt>た</rt></ruby>き<ruby>上<rt>あ</rt></ruby>がったら<ruby>知<rt>し</rt></ruby>らせてください。", "example_cn": "饭煮好了请告诉我。" },
+        { "id": "4-6", "word": "ゆで上がる", "kana": "ゆであがる", "pos": "複合動詞", "meaning_cn": "煮好、烫熟", "example_jp": "麺がゆで上がったら、すぐに食べたほうがいい。", "example_jp_ruby": "<ruby>麺<rt>めん</rt></ruby>がゆで<ruby>上<rt>あ</rt></ruby>がったら、すぐに<ruby>食<rt>た</rt></ruby>べたほうがいい。", "example_cn": "面煮好了最好马上吃。" }
+      ]
+    },
+    {
+      "name": "1-5 〜出す",
+      "reading": "どうし＋どうし",
+      "cards": [
+        { "id": "5-1", "word": "呼び出す", "kana": "よびだす", "pos": "複合動詞", "meaning_cn": "叫出来、传唤", "example_jp": "電話で彼女を呼び出して、プレゼントを渡した。", "example_jp_ruby": "<ruby>電話<rt>でんわ</rt></ruby>で<ruby>彼女<rt>かのじょ</rt></ruby>を<ruby>呼<rt>よ</rt></ruby>び<ruby>出<rt>だ</rt></ruby>して、プレゼントを<ruby>渡<rt>わた</rt></ruby>した。", "example_cn": "打电话把她叫出来，送了礼物。" },
+        { "id": "5-2", "word": "連れ出す", "kana": "つれだす", "pos": "複合動詞", "meaning_cn": "带出去", "example_jp": "週末は子どもを公園へ連れ出した。", "example_jp_ruby": "<ruby>週末<rt>しゅうまつ</rt></ruby>は<ruby>子<rt>こ</rt></ruby>どもを<ruby>公園<rt>こうえん</rt></ruby>へ<ruby>連<rt>つ</rt></ruby>れ<ruby>出<rt>だ</rt></ruby>した。", "example_cn": "周末把孩子带到公园去了。" },
+        { "id": "5-3", "word": "貸し出す", "kana": "かしだす", "pos": "複合動詞", "meaning_cn": "出借、出租", "example_jp": "図書館ではビデオも貸し出している。", "example_jp_ruby": "<ruby>図書館<rt>としょかん</rt></ruby>ではビデオも<ruby>貸<rt>か</rt></ruby>し<ruby>出<rt>だ</rt></ruby>している。", "example_cn": "图书馆也出借录像带。" },
+        { "id": "5-4", "word": "持ち出す", "kana": "もちだす", "pos": "複合動詞", "meaning_cn": "带出去、搬出去", "example_jp": "部屋から荷物を持ち出して、車に乗せた。", "example_jp_ruby": "<ruby>部屋<rt>へや</rt></ruby>から<ruby>荷物<rt>にもつ</rt></ruby>を<ruby>持<rt>も</rt></ruby>ち<ruby>出<rt>だ</rt></ruby>して、<ruby>車<rt>くるま</rt></ruby>に<ruby>乗<rt>の</rt></ruby>せた。", "example_cn": "把行李从房间搬出去，装上了车。" },
+        { "id": "5-5", "word": "抜き出す", "kana": "ぬきだす", "pos": "複合動詞", "meaning_cn": "抽出、挑出", "example_jp": "資料から大切な数字を抜き出す。", "example_jp_ruby": "<ruby>資料<rt>しりょう</rt></ruby>から<ruby>大切<rt>たいせつ</rt></ruby>な<ruby>数字<rt>すうじ</rt></ruby>を<ruby>抜<rt>ぬ</rt></ruby>き<ruby>出<rt>だ</rt></ruby>す。", "example_cn": "从资料里把重要的数字挑出来。" },
+        { "id": "5-6", "word": "飛び出す", "kana": "とびだす", "pos": "複合動詞", "meaning_cn": "冲出、跳出", "example_jp": "子どもが急に道に飛び出したので、急ブレーキをかけた。", "example_jp_ruby": "<ruby>子<rt>こ</rt></ruby>どもが<ruby>急<rt>きゅう</rt></ruby>に<ruby>道<rt>みち</rt></ruby>に<ruby>飛<rt>と</rt></ruby>び<ruby>出<rt>だ</rt></ruby>したので、<ruby>急<rt>きゅう</rt></ruby>ブレーキをかけた。", "example_cn": "孩子突然冲到路上，我急忙踩了刹车。" },
+        { "id": "5-7", "word": "逃げ出す", "kana": "にげだす", "pos": "複合動詞", "meaning_cn": "逃出去、逃走", "example_jp": "犬が門から逃げ出してしまった。", "example_jp_ruby": "<ruby>犬<rt>いぬ</rt></ruby>が<ruby>門<rt>もん</rt></ruby>から<ruby>逃<rt>に</rt></ruby>げ<ruby>出<rt>だ</rt></ruby>してしまった。", "example_cn": "狗从大门跑掉了。" },
+        { "id": "5-8", "word": "歩き出す", "kana": "あるきだす", "pos": "複合動詞", "meaning_cn": "走起来、开始走", "example_jp": "赤ちゃんがやっと歩き出した。", "example_jp_ruby": "<ruby>赤<rt>あか</rt></ruby>ちゃんがやっと<ruby>歩<rt>ある</rt></ruby>き<ruby>出<rt>だ</rt></ruby>した。", "example_cn": "婴儿终于会走了。" },
+        { "id": "5-9", "word": "泣き出す", "kana": "なきだす", "pos": "複合動詞", "meaning_cn": "哭起来", "example_jp": "急に妹が泣き出したので、びっくりした。", "example_jp_ruby": "<ruby>急<rt>きゅう</rt></ruby>に<ruby>妹<rt>いもうと</rt></ruby>が<ruby>泣<rt>な</rt></ruby>き<ruby>出<rt>だ</rt></ruby>したので、びっくりした。", "example_cn": "妹妹突然哭了起来，吓了我一跳。" },
+        { "id": "5-10", "word": "怒り出す", "kana": "おこりだす", "pos": "複合動詞", "meaning_cn": "生起气来", "example_jp": "父はその話を聞いて急に怒り出した。", "example_jp_ruby": "<ruby>父<rt>ちち</rt></ruby>はその<ruby>話<rt>はなし</rt></ruby>を<ruby>聞<rt>き</rt></ruby>いて<ruby>急<rt>きゅう</rt></ruby>に<ruby>怒<rt>おこ</rt></ruby>り<ruby>出<rt>だ</rt></ruby>した。", "example_cn": "父亲听了那话突然发起火来。" },
+        { "id": "5-11", "word": "歌い出す", "kana": "うたいだす", "pos": "複合動詞", "meaning_cn": "唱起来", "example_jp": "彼はギターを弾きながら急に歌い出した。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>はギターを<ruby>弾<rt>ひ</rt></ruby>きながら<ruby>急<rt>きゅう</rt></ruby>に<ruby>歌<rt>うた</rt></ruby>い<ruby>出<rt>だ</rt></ruby>した。", "example_cn": "他一边弹吉他一边突然唱起来。" },
+        { "id": "5-12", "word": "言い出す", "kana": "いいだす", "pos": "複合動詞", "meaning_cn": "说出口、提出", "example_jp": "なかなか本当のことを言い出せなかった。", "example_jp_ruby": "なかなか<ruby>本当<rt>ほんとう</rt></ruby>のことを<ruby>言<rt>い</rt></ruby>い<ruby>出<rt>だ</rt></ruby>せなかった。", "example_cn": "迟迟没能把真相说出口。" },
+        { "id": "5-13", "word": "話し出す", "kana": "はなしだす", "pos": "複合動詞", "meaning_cn": "说起来、开口讲", "example_jp": "先生が話し出すと、教室は静かになった。", "example_jp_ruby": "<ruby>先生<rt>せんせい</rt></ruby>が<ruby>話<rt>はな</rt></ruby>し<ruby>出<rt>だ</rt></ruby>すと、<ruby>教室<rt>きょうしつ</rt></ruby>は<ruby>静<rt>しず</rt></ruby>かになった。", "example_cn": "老师一开口，教室就安静了。" },
+        { "id": "5-14", "word": "痛み出す", "kana": "いたみだす", "pos": "複合動詞", "meaning_cn": "开始疼", "example_jp": "走ったあとから、膝が痛み出した。", "example_jp_ruby": "<ruby>走<rt>はし</rt></ruby>ったあとから、<ruby>膝<rt>ひざ</rt></ruby>が<ruby>痛<rt>いた</rt></ruby>み<ruby>出<rt>だ</rt></ruby>した。", "example_cn": "跑完步之后膝盖开始疼了。" }
+      ]
+    },
+    {
+      "name": "1-6 〜回る",
+      "reading": "どうし＋どうし",
+      "cards": [
+        { "id": "6-1", "word": "歩き回る", "kana": "あるきまわる", "pos": "複合動詞", "meaning_cn": "到处走", "example_jp": "一日中町を歩き回って、くたくたになった。", "example_jp_ruby": "<ruby>一日中<rt>いちにちじゅう</rt></ruby><ruby>町<rt>まち</rt></ruby>を<ruby>歩<rt>ある</rt></ruby>き<ruby>回<rt>まわ</rt></ruby>って、くたくたになった。", "example_cn": "在街上走了一整天，累得不行。" },
+        { "id": "6-2", "word": "見回る", "kana": "みまわる", "pos": "複合動詞", "meaning_cn": "巡视、到处查看", "example_jp": "先生が教室を見回って、窓を閉めた。", "example_jp_ruby": "<ruby>先生<rt>せんせい</rt></ruby>が<ruby>教室<rt>きょうしつ</rt></ruby>を<ruby>見<rt>み</rt></ruby><ruby>回<rt>まわ</rt></ruby>って、<ruby>窓<rt>まど</rt></ruby>を<ruby>閉<rt>し</rt></ruby>めた。", "example_cn": "老师巡视了一圈教室，把窗户关上了。" },
+        { "id": "6-3", "word": "走り回る", "kana": "はしりまわる", "pos": "複合動詞", "meaning_cn": "到处跑", "example_jp": "子どもたちが庭を走り回っている。", "example_jp_ruby": "<ruby>子<rt>こ</rt></ruby>どもたちが<ruby>庭<rt>にわ</rt></ruby>を<ruby>走<rt>はし</rt></ruby>り<ruby>回<rt>まわ</rt></ruby>っている。", "example_cn": "孩子们在院子里跑来跑去。" },
+        { "id": "6-4", "word": "捜し回る", "kana": "さがしまわる", "pos": "複合動詞", "meaning_cn": "到处找", "example_jp": "家中捜し回ったのに、とうとう財布は見つからなかった。", "example_jp_ruby": "<ruby>家中<rt>いえじゅう</rt></ruby><ruby>捜<rt>さが</rt></ruby>し<ruby>回<rt>まわ</rt></ruby>ったのに、とうとう<ruby>財布<rt>さいふ</rt></ruby>は<ruby>見<rt>み</rt></ruby>つからなかった。", "example_cn": "家里到处都找过了，钱包最后还是没找到。" },
+        { "id": "6-5", "word": "遊び回る", "kana": "あそびまわる", "pos": "複合動詞", "meaning_cn": "到处玩", "example_jp": "夏休みは友達と遊び回った。", "example_jp_ruby": "<ruby>夏休<rt>なつやす</rt></ruby>みは<ruby>友達<rt>ともだち</rt></ruby>と<ruby>遊<rt>あそ</rt></ruby>び<ruby>回<rt>まわ</rt></ruby>った。", "example_cn": "暑假和朋友到处玩。" },
+        { "id": "6-6", "word": "逃げ回る", "kana": "にげまわる", "pos": "複合動詞", "meaning_cn": "到处逃窜", "example_jp": "犯人は町を逃げ回ったが、すぐに捕まった。", "example_jp_ruby": "<ruby>犯人<rt>はんにん</rt></ruby>は<ruby>町<rt>まち</rt></ruby>を<ruby>逃<rt>に</rt></ruby>げ<ruby>回<rt>まわ</rt></ruby>ったが、すぐに<ruby>捕<rt>つか</rt></ruby>まった。", "example_cn": "犯人在城里四处逃窜，但很快被抓了。" },
+        { "id": "6-7", "word": "飛び回る", "kana": "とびまわる", "pos": "複合動詞", "meaning_cn": "到处飞、来回跑动", "example_jp": "蝶が花の間を飛び回っている。", "example_jp_ruby": "<ruby>蝶<rt>ちょう</rt></ruby>が<ruby>花<rt>はな</rt></ruby>の<ruby>間<rt>あいだ</rt></ruby>を<ruby>飛<rt>と</rt></ruby>び<ruby>回<rt>まわ</rt></ruby>っている。", "example_cn": "蝴蝶在花丛间飞来飞去。" }
+      ]
+    },
+    {
+      "name": "1-7 〜込む",
+      "reading": "どうし＋どうし",
+      "cards": [
+        { "id": "7-1", "word": "乗り込む", "kana": "のりこむ", "pos": "複合動詞", "meaning_cn": "乘上、进入（车船）", "example_jp": "駅で大勢の人がバスに乗り込んだ。", "example_jp_ruby": "<ruby>駅<rt>えき</rt></ruby>で<ruby>大勢<rt>おおぜい</rt></ruby>の<ruby>人<rt>ひと</rt></ruby>がバスに<ruby>乗<rt>の</rt></ruby>り<ruby>込<rt>こ</rt></ruby>んだ。", "example_cn": "车站上许多人挤上了公交。" },
+        { "id": "7-2", "word": "飛び込む", "kana": "とびこむ", "pos": "複合動詞", "meaning_cn": "跳进", "example_jp": "彼はプールに勢いよく飛び込んだ。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>はプールに<ruby>勢<rt>いきお</rt></ruby>いよく<ruby>飛<rt>と</rt></ruby>び<ruby>込<rt>こ</rt></ruby>んだ。", "example_cn": "他猛地跳进了泳池。" },
+        { "id": "7-3", "word": "混ぜ込む", "kana": "まぜこむ", "pos": "複合動詞", "meaning_cn": "拌进、掺入", "example_jp": "生地にチーズを混ぜ込んでから焼く。", "example_jp_ruby": "<ruby>生地<rt>きじ</rt></ruby>にチーズを<ruby>混<rt>ま</rt></ruby>ぜ<ruby>込<rt>こ</rt></ruby>んでから<ruby>焼<rt>や</rt></ruby>く。", "example_cn": "把奶酪拌进面团之后再烤。" },
+        { "id": "7-4", "word": "持ち込む", "kana": "もちこむ", "pos": "複合動詞", "meaning_cn": "带进、拿进", "example_jp": "飛行機の中にナイフやライターを持ち込むことは禁止されている。", "example_jp_ruby": "<ruby>飛行機<rt>ひこうき</rt></ruby>の<ruby>中<rt>なか</rt></ruby>にナイフやライターを<ruby>持<rt>も</rt></ruby>ち<ruby>込<rt>こ</rt></ruby>むことは<ruby>禁止<rt>きんし</rt></ruby>されている。", "example_cn": "禁止把刀和打火机带上飞机。" },
+        { "id": "7-5", "word": "染み込む", "kana": "しみこむ", "pos": "複合動詞", "meaning_cn": "渗入、渗透", "example_jp": "水は土の中にゆっくり染み込んでいく。", "example_jp_ruby": "<ruby>水<rt>みず</rt></ruby>は<ruby>土<rt>つち</rt></ruby>の<ruby>中<rt>なか</rt></ruby>にゆっくり<ruby>染<rt>し</rt></ruby>み<ruby>込<rt>こ</rt></ruby>んでいく。", "example_cn": "水慢慢渗进土里。" },
+        { "id": "7-6", "word": "駆け込む", "kana": "かけこむ", "pos": "複合動詞", "meaning_cn": "冲进、跑进", "example_jp": "雨が急に降り出したので、店に駆け込んだ。", "example_jp_ruby": "<ruby>雨<rt>あめ</rt></ruby>が<ruby>急<rt>きゅう</rt></ruby>に<ruby>降<rt>ふ</rt></ruby>り<ruby>出<rt>だ</rt></ruby>したので、<ruby>店<rt>みせ</rt></ruby>に<ruby>駆<rt>か</rt></ruby>け<ruby>込<rt>こ</rt></ruby>んだ。", "example_cn": "突然下起雨来，我冲进了店里。" },
+        { "id": "7-7", "word": "詰め込む", "kana": "つめこむ", "pos": "複合動詞", "meaning_cn": "塞满、硬塞", "example_jp": "かばんに服を詰め込んで、旅行に出た。", "example_jp_ruby": "かばんに<ruby>服<rt>ふく</rt></ruby>を<ruby>詰<rt>つ</rt></ruby>め<ruby>込<rt>こ</rt></ruby>んで、<ruby>旅行<rt>りょこう</rt></ruby>に<ruby>出<rt>で</rt></ruby>た。", "example_cn": "把衣服塞进包里，出门旅行了。" },
+        { "id": "7-8", "word": "信じ込む", "kana": "しんじこむ", "pos": "複合動詞", "meaning_cn": "深信不疑", "example_jp": "彼は自分が必ず勝つと信じ込んでいる。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>自分<rt>じぶん</rt></ruby>が<ruby>必<rt>かなら</rt></ruby>ず<ruby>勝<rt>か</rt></ruby>つと<ruby>信<rt>しん</rt></ruby>じ<ruby>込<rt>こ</rt></ruby>んでいる。", "example_cn": "他深信自己一定会赢。" },
+        { "id": "7-9", "word": "思い込む", "kana": "おもいこむ", "pos": "複合動詞", "meaning_cn": "以为、认定", "example_jp": "彼女は私より年下だと思い込んでいたが、実は年上だった。", "example_jp_ruby": "<ruby>彼女<rt>かのじょ</rt></ruby>は<ruby>私<rt>わたし</rt></ruby>より<ruby>年下<rt>としした</rt></ruby>だと<ruby>思<rt>おも</rt></ruby>い<ruby>込<rt>こ</rt></ruby>んでいたが、<ruby>実<rt>じつ</rt></ruby>は<ruby>年上<rt>としうえ</rt></ruby>だった。", "example_cn": "我一直以为她比我小，其实她比我大。" },
+        { "id": "7-10", "word": "黙り込む", "kana": "だまりこむ", "pos": "複合動詞", "meaning_cn": "沉默不语", "example_jp": "質問をすると、彼は黙り込んでしまった。", "example_jp_ruby": "<ruby>質問<rt>しつもん</rt></ruby>をすると、<ruby>彼<rt>かれ</rt></ruby>は<ruby>黙<rt>だま</rt></ruby>り<ruby>込<rt>こ</rt></ruby>んでしまった。", "example_cn": "我一问，他就沉默不语了。" },
+        { "id": "7-11", "word": "落ち込む", "kana": "おちこむ", "pos": "複合動詞", "meaning_cn": "情绪低落", "example_jp": "試験に失敗して、少し落ち込んでいる。", "example_jp_ruby": "<ruby>試験<rt>しけん</rt></ruby>に<ruby>失敗<rt>しっぱい</rt></ruby>して、<ruby>少<rt>すこ</rt></ruby>し<ruby>落<rt>お</rt></ruby>ち<ruby>込<rt>こ</rt></ruby>んでいる。", "example_cn": "考试没考好，有点低落。" },
+        { "id": "7-12", "word": "眠り込む", "kana": "ねむりこむ", "pos": "複合動詞", "meaning_cn": "睡熟", "example_jp": "電車の中でぐっすり眠り込んで、駅を乗り過ごした。", "example_jp_ruby": "<ruby>電車<rt>でんしゃ</rt></ruby>の<ruby>中<rt>なか</rt></ruby>でぐっすり<ruby>眠<rt>ねむ</rt></ruby>り<ruby>込<rt>こ</rt></ruby>んで、<ruby>駅<rt>えき</rt></ruby>を<ruby>乗<rt>の</rt></ruby>り<ruby>過<rt>す</rt></ruby>ごした。", "example_cn": "在电车里睡熟了，坐过了站。" },
+        { "id": "7-13", "word": "話し込む", "kana": "はなしこむ", "pos": "複合動詞", "meaning_cn": "谈得入迷", "example_jp": "友達と駅前で話し込んで、帰りが遅くなってしまった。", "example_jp_ruby": "<ruby>友達<rt>ともだち</rt></ruby>と<ruby>駅前<rt>えきまえ</rt></ruby>で<ruby>話<rt>はな</rt></ruby>し<ruby>込<rt>こ</rt></ruby>んで、<ruby>帰<rt>かえ</rt></ruby>りが<ruby>遅<rt>おそ</rt></ruby>くなってしまった。", "example_cn": "和朋友在车站前聊得入迷，回去晚了。" }
+      ]
+    },
+    {
+      "name": "2-1 取り〜",
+      "reading": "まえに＋どうし",
+      "cards": [
+        { "id": "8-1", "word": "取り入れる", "kana": "とりいれる", "pos": "複合動詞", "meaning_cn": "采纳、吸收；收进来", "example_jp": "会社は若い社員の考えを取り入れることにした。", "example_jp_ruby": "<ruby>会社<rt>かいしゃ</rt></ruby>は<ruby>若<rt>わか</rt></ruby>い<ruby>社員<rt>しゃいん</rt></ruby>の<ruby>考<rt>かんが</rt></ruby>えを<ruby>取<rt>と</rt></ruby>り<ruby>入<rt>い</rt></ruby>れることにした。", "example_cn": "公司决定采纳年轻员工的想法。" },
+        { "id": "8-2", "word": "取り替える", "kana": "とりかえる", "pos": "複合動詞", "meaning_cn": "更换", "example_jp": "時計の電池を取り替えてもらった。", "example_jp_ruby": "<ruby>時計<rt>とけい</rt></ruby>の<ruby>電池<rt>でんち</rt></ruby>を<ruby>取<rt>と</rt></ruby>り<ruby>替<rt>か</rt></ruby>えてもらった。", "example_cn": "让人帮我换了手表的电池。" },
+        { "id": "8-3", "word": "取り消す", "kana": "とりけす", "pos": "複合動詞", "meaning_cn": "取消", "example_jp": "急に用事ができたので、ホテルの予約を取り消した。", "example_jp_ruby": "<ruby>急<rt>きゅう</rt></ruby>に<ruby>用事<rt>ようじ</rt></ruby>ができたので、ホテルの<ruby>予約<rt>よやく</rt></ruby>を<ruby>取<rt>と</rt></ruby>り<ruby>消<rt>け</rt></ruby>した。", "example_cn": "突然有事，取消了酒店预订。" },
+        { "id": "8-4", "word": "取り上げる", "kana": "とりあげる", "pos": "複合動詞", "meaning_cn": "拿起；（媒体）报道；没收", "example_jp": "新聞はその事件を大きく取り上げた。", "example_jp_ruby": "<ruby>新聞<rt>しんぶん</rt></ruby>はその<ruby>事件<rt>じけん</rt></ruby>を<ruby>大<rt>おお</rt></ruby>きく<ruby>取<rt>と</rt></ruby>り<ruby>上<rt>あ</rt></ruby>げた。", "example_cn": "报纸大幅报道了那起事件。" },
+        { "id": "8-5", "word": "取り出す", "kana": "とりだす", "pos": "複合動詞", "meaning_cn": "拿出、取出", "example_jp": "ポケットから財布を取り出して、お金を払った。", "example_jp_ruby": "ポケットから<ruby>財布<rt>さいふ</rt></ruby>を<ruby>取<rt>と</rt></ruby>り<ruby>出<rt>だ</rt></ruby>して、お<ruby>金<rt>かね</rt></ruby>を<ruby>払<rt>はら</rt></ruby>った。", "example_cn": "从口袋里掏出钱包付了钱。" }
+      ]
+    },
+    {
+      "name": "2-2 受け〜",
+      "reading": "まえに＋どうし",
+      "cards": [
+        { "id": "9-1", "word": "受け入れる", "kana": "うけいれる", "pos": "複合動詞", "meaning_cn": "接受、接纳", "example_jp": "その大学は留学生を温かく受け入れた。", "example_jp_ruby": "その<ruby>大学<rt>だいがく</rt></ruby>は<ruby>留学生<rt>りゅうがくせい</rt></ruby>を<ruby>温<rt>あたた</rt></ruby>かく<ruby>受<rt>う</rt></ruby>け<ruby>入<rt>い</rt></ruby>れた。", "example_cn": "那所大学热情地接纳了留学生。" },
+        { "id": "9-2", "word": "受け持つ", "kana": "うけもつ", "pos": "複合動詞", "meaning_cn": "担任、负责", "example_jp": "今年は三年生の授業を受け持っている。", "example_jp_ruby": "<ruby>今年<rt>ことし</rt></ruby>は<ruby>三年生<rt>さんねんせい</rt></ruby>の<ruby>授業<rt>じゅぎょう</rt></ruby>を<ruby>受<rt>う</rt></ruby>け<ruby>持<rt>も</rt></ruby>っている。", "example_cn": "今年担任三年级的课。" },
+        { "id": "9-3", "word": "受け取る", "kana": "うけとる", "pos": "複合動詞", "meaning_cn": "收下、领取；理解为", "example_jp": "家に帰ってから、届いた荷物を受け取った。", "example_jp_ruby": "<ruby>家<rt>いえ</rt></ruby>に<ruby>帰<rt>かえ</rt></ruby>ってから、<ruby>届<rt>とど</rt></ruby>いた<ruby>荷物<rt>にもつ</rt></ruby>を<ruby>受<rt>う</rt></ruby>け<ruby>取<rt>と</rt></ruby>った。", "example_cn": "回家之后才收下送来的包裹。" }
+      ]
+    },
+    {
+      "name": "2-3 あて〜",
+      "reading": "まえに＋どうし",
+      "cards": [
+        { "id": "10-1", "word": "あてはまる", "kana": "あてはまる", "pos": "複合動詞", "meaning_cn": "符合、适用", "example_jp": "この条件にあてはまる人はほとんどいない。", "example_jp_ruby": "この<ruby>条件<rt>じょうけん</rt></ruby>にあてはまる<ruby>人<rt>ひと</rt></ruby>はほとんどいない。", "example_cn": "符合这个条件的人几乎没有。" },
+        { "id": "10-2", "word": "あてはめる", "kana": "あてはめる", "pos": "複合動詞", "meaning_cn": "套用、应用", "example_jp": "海外の例をそのまま日本にあてはめるのは難しい。", "example_jp_ruby": "<ruby>海外<rt>かいがい</rt></ruby>の<ruby>例<rt>れい</rt></ruby>をそのまま<ruby>日本<rt>にほん</rt></ruby>にあてはめるのは<ruby>難<rt>むずか</rt></ruby>しい。", "example_cn": "把海外的例子直接套用到日本，很难。" }
+      ]
+    },
+    {
+      "name": "2-4 組み〜",
+      "reading": "まえに＋どうし",
+      "cards": [
+        { "id": "11-1", "word": "組み立てる", "kana": "くみたてる", "pos": "複合動詞", "meaning_cn": "组装、搭建", "example_jp": "説明書を見ながら、本棚を組み立てた。", "example_jp_ruby": "<ruby>説明書<rt>せつめいしょ</rt></ruby>を<ruby>見<rt>み</rt></ruby>ながら、<ruby>本棚<rt>ほんだな</rt></ruby>を<ruby>組<rt>く</rt></ruby>み<ruby>立<rt>た</rt></ruby>てた。", "example_cn": "一边看说明书一边把书架组装好了。" },
+        { "id": "11-2", "word": "組み合わせる", "kana": "くみあわせる", "pos": "複合動詞", "meaning_cn": "搭配、组合", "example_jp": "白いシャツと黒いスカートを組み合わせると、とても上品に見える。", "example_jp_ruby": "<ruby>白<rt>しろ</rt></ruby>いシャツと<ruby>黒<rt>くろ</rt></ruby>いスカートを<ruby>組<rt>く</rt></ruby>み<ruby>合<rt>あ</rt></ruby>わせると、とても<ruby>上品<rt>じょうひん</rt></ruby>に<ruby>見<rt>み</rt></ruby>える。", "example_cn": "白衬衫配黑裙子，看起来很雅致。" }
+      ]
+    },
+    {
+      "name": "2-5 追い〜",
+      "reading": "まえに＋どうし",
+      "cards": [
+        { "id": "12-1", "word": "追いかける", "kana": "おいかける", "pos": "複合動詞", "meaning_cn": "追赶", "example_jp": "警官は泥棒を追いかけた。", "example_jp_ruby": "<ruby>警官<rt>けいかん</rt></ruby>は<ruby>泥棒<rt>どろぼう</rt></ruby>を<ruby>追<rt>お</rt></ruby>いかけた。", "example_cn": "警察追赶小偷。" },
+        { "id": "12-2", "word": "追い越す", "kana": "おいこす", "pos": "複合動詞", "meaning_cn": "超过、赶超", "example_jp": "スピードを出して前の車を追い越した。", "example_jp_ruby": "スピードを<ruby>出<rt>だ</rt></ruby>して<ruby>前<rt>まえ</rt></ruby>の<ruby>車<rt>くるま</rt></ruby>を<ruby>追<rt>お</rt></ruby>い<ruby>越<rt>こ</rt></ruby>した。", "example_cn": "加快速度超过了前面的车。" },
+        { "id": "12-3", "word": "追い付く", "kana": "おいつく", "pos": "複合動詞", "meaning_cn": "追上", "example_jp": "全力で走ったが、前の車に追い付かなかった。", "example_jp_ruby": "<ruby>全力<rt>ぜんりょく</rt></ruby>で<ruby>走<rt>はし</rt></ruby>ったが、<ruby>前<rt>まえ</rt></ruby>の<ruby>車<rt>くるま</rt></ruby>に<ruby>追<rt>お</rt></ruby>い<ruby>付<rt>つ</rt></ruby>かなかった。", "example_cn": "全力跑，但没追上前面那辆车。" },
+        { "id": "12-4", "word": "追い出す", "kana": "おいだす", "pos": "複合動詞", "meaning_cn": "赶出去、驱逐", "example_jp": "母は庭から猫を追い出した。", "example_jp_ruby": "<ruby>母<rt>はは</rt></ruby>は<ruby>庭<rt>にわ</rt></ruby>から<ruby>猫<rt>ねこ</rt></ruby>を<ruby>追<rt>お</rt></ruby>い<ruby>出<rt>だ</rt></ruby>した。", "example_cn": "妈妈把猫从院子里赶了出去。" }
+      ]
+    },
+    {
+      "name": "2-6 振り〜",
+      "reading": "まえに＋どうし",
+      "cards": [
+        { "id": "13-1", "word": "振り返る", "kana": "ふりかえる", "pos": "複合動詞", "meaning_cn": "回头；回顾", "example_jp": "過去を振り返って、これからのことを考えた。", "example_jp_ruby": "<ruby>過去<rt>かこ</rt></ruby>を<ruby>振<rt>ふ</rt></ruby>り<ruby>返<rt>かえ</rt></ruby>って、これからのことを<ruby>考<rt>かんが</rt></ruby>えた。", "example_cn": "回顾过去，思考今后的打算。" },
+        { "id": "13-2", "word": "振り向く", "kana": "ふりむく", "pos": "複合動詞", "meaning_cn": "回头、转身", "example_jp": "後ろから名前を呼ばれて、振り向いた。", "example_jp_ruby": "<ruby>後<rt>うし</rt></ruby>ろから<ruby>名前<rt>なまえ</rt></ruby>を<ruby>呼<rt>よ</rt></ruby>ばれて、<ruby>振<rt>ふ</rt></ruby>り<ruby>向<rt>む</rt></ruby>いた。", "example_cn": "后面有人叫我的名字，我回过头。" }
+      ]
+    },
+    {
+      "name": "2-7 差し〜",
+      "reading": "まえに＋どうし",
+      "cards": [
+        { "id": "14-1", "word": "差し出す", "kana": "さしだす", "pos": "複合動詞", "meaning_cn": "递出、伸出", "example_jp": "彼は手紙を差し出して、「読んでください」と言った。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>手紙<rt>てがみ</rt></ruby>を<ruby>差<rt>さ</rt></ruby>し<ruby>出<rt>だ</rt></ruby>して、「<ruby>読<rt>よ</rt></ruby>んでください」と言った。", "example_cn": "他把信递过来，说「请读一下」。" },
+        { "id": "14-2", "word": "差し引く", "kana": "さしひく", "pos": "複合動詞", "meaning_cn": "扣除", "example_jp": "給料から税金を差し引いて渡す。", "example_jp_ruby": "<ruby>給料<rt>きゅうりょう</rt></ruby>から<ruby>税金<rt>ぜいきん</rt></ruby>を<ruby>差<rt>さ</rt></ruby>し<ruby>引<rt>ひ</rt></ruby>いて<ruby>渡<rt>わた</rt></ruby>す。", "example_cn": "从工资里扣掉税金再给。" }
+      ]
+    },
+    {
+      "name": "2-8 通り〜",
+      "reading": "まえに＋どうし",
+      "cards": [
+        { "id": "15-1", "word": "通りかかる", "kana": "とおりかかる", "pos": "複合動詞", "meaning_cn": "恰巧路过", "example_jp": "偶然通りかかった人が、その事故を目撃した。", "example_jp_ruby": "<ruby>偶然<rt>ぐうぜん</rt></ruby><ruby>通<rt>とお</rt></ruby>りかかった<ruby>人<rt>ひと</rt></ruby>が、その<ruby>事故<rt>じこ</rt></ruby>を<ruby>目撃<rt>もくげき</rt></ruby>した。", "example_cn": "一个偶然路过的人目睹了那起事故。" },
+        { "id": "15-2", "word": "通り過ぎる", "kana": "とおりすぎる", "pos": "複合動詞", "meaning_cn": "通过、经过", "example_jp": "台風が通り過ぎるのを、家の中で待った。", "example_jp_ruby": "<ruby>台風<rt>たいふう</rt></ruby>が<ruby>通<rt>とお</rt></ruby>り<ruby>過<rt>す</rt></ruby>ぎるのを、<ruby>家<rt>いえ</rt></ruby>の<ruby>中<rt>なか</rt></ruby>で<ruby>待<rt>ま</rt></ruby>った。", "example_cn": "在家里等台风过去。" }
+      ]
+    },
+    {
+      "name": "2-9 乗り〜",
+      "reading": "まえに＋どうし",
+      "cards": [
+        { "id": "16-1", "word": "乗り遅れる", "kana": "のりおくれる", "pos": "複合動詞", "meaning_cn": "没赶上（车）", "example_jp": "寝坊して、いつもの電車に乗り遅れてしまった。", "example_jp_ruby": "<ruby>寝坊<rt>ねぼう</rt></ruby>して、いつもの<ruby>電車<rt>でんしゃ</rt></ruby>に<ruby>乗<rt>の</rt></ruby>り<ruby>遅<rt>おく</rt></ruby>れてしまった。", "example_cn": "睡过头，没赶上平时那班电车。" },
+        { "id": "16-2", "word": "乗り越す", "kana": "のりこす", "pos": "複合動詞", "meaning_cn": "坐过站", "example_jp": "本を読んでいて、降りる駅を乗り越してしまった。", "example_jp_ruby": "<ruby>本<rt>ほん</rt></ruby>を<ruby>読<rt>よ</rt></ruby>んでいて、<ruby>降<rt>お</rt></ruby>りる<ruby>駅<rt>えき</rt></ruby>を<ruby>乗<rt>の</rt></ruby>り<ruby>越<rt>こ</rt></ruby>してしまった。", "example_cn": "看书太入迷，坐过了要下车的站。" },
+        { "id": "16-3", "word": "乗り越える", "kana": "のりこえる", "pos": "複合動詞", "meaning_cn": "克服、跨越", "example_jp": "二人で力を合わせて、困難を乗り越えた。", "example_jp_ruby": "<ruby>二人<rt>ふたり</rt></ruby>で<ruby>力<rt>ちから</rt></ruby>を<ruby>合<rt>あ</rt></ruby>わせて、<ruby>困難<rt>こんなん</rt></ruby>を<ruby>乗<rt>の</rt></ruby>り<ruby>越<rt>こ</rt></ruby>えた。", "example_cn": "两人合力克服了困难。" }
+      ]
+    },
+    {
+      "name": "2-10 見〜",
+      "reading": "まえに＋どうし",
+      "cards": [
+        { "id": "17-1", "word": "見かける", "kana": "みかける", "pos": "複合動詞", "meaning_cn": "看到、碰见", "example_jp": "最近、町でよくあの看板を見かける。", "example_jp_ruby": "<ruby>最近<rt>さいきん</rt></ruby>、<ruby>町<rt>まち</rt></ruby>でよくあの<ruby>看板<rt>かんばん</rt></ruby>を<ruby>見<rt>み</rt></ruby>かける。", "example_cn": "最近常在街上看到那块招牌。" },
+        { "id": "17-2", "word": "見習う", "kana": "みならう", "pos": "複合動詞", "meaning_cn": "学习、效仿", "example_jp": "立派な先輩を見習って、毎日練習している。", "example_jp_ruby": "<ruby>立派<rt>りっぱ</rt></ruby>な<ruby>先輩<rt>せんぱい</rt></ruby>を<ruby>見習<rt>みなら</rt></ruby>って、<ruby>毎日<rt>まいにち</rt></ruby><ruby>練習<rt>れんしゅう</rt></ruby>している。", "example_cn": "以出色的前辈为榜样，每天练习。" },
+        { "id": "17-3", "word": "見送る", "kana": "みおくる", "pos": "複合動詞", "meaning_cn": "送行；放过（机会）", "example_jp": "空港で友達を見送った。", "example_jp_ruby": "<ruby>空港<rt>くうこう</rt></ruby>で<ruby>友達<rt>ともだち</rt></ruby>を<ruby>見送<rt>みおく</rt></ruby>った。", "example_cn": "在机场送走了朋友。" },
+        { "id": "17-4", "word": "見つめる", "kana": "みつめる", "pos": "複合動詞", "meaning_cn": "凝视、注视", "example_jp": "彼はしばらく写真を見つめていた。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>はしばらく<ruby>写真<rt>しゃしん</rt></ruby>を<ruby>見<rt>み</rt></ruby>つめていた。", "example_cn": "他盯着照片看了一会儿。" },
+        { "id": "17-5", "word": "見慣れる", "kana": "みなれる", "pos": "複合動詞", "meaning_cn": "看惯", "example_jp": "毎日通っているので、この景色にも見慣れた。", "example_jp_ruby": "<ruby>毎日<rt>まいにち</rt></ruby><ruby>通<rt>かよ</rt></ruby>っているので、この<ruby>景色<rt>けしき</rt></ruby>にも<ruby>見慣<rt>みな</rt></ruby>れた。", "example_cn": "因为每天都经过，这景色也看惯了。" }
+      ]
+    },
+    {
+      "name": "2-11 引き〜",
+      "reading": "まえに＋どうし",
+      "cards": [
+        { "id": "18-1", "word": "引き受ける", "kana": "ひきうける", "pos": "複合動詞", "meaning_cn": "承担、接受", "example_jp": "断りきれなくて、その仕事を引き受けてしまった。", "example_jp_ruby": "<ruby>断<rt>ことわ</rt></ruby>りきれなくて、その<ruby>仕事<rt>しごと</rt></ruby>を<ruby>引<rt>ひ</rt></ruby>き<ruby>受<rt>う</rt></ruby>けてしまった。", "example_cn": "不好拒绝，就把那活儿接下了。" },
+        { "id": "18-2", "word": "引き返す", "kana": "ひきかえす", "pos": "複合動詞", "meaning_cn": "折回、返回", "example_jp": "忘れ物に気づいて、途中で家に引き返した。", "example_jp_ruby": "<ruby>忘<rt>わす</rt></ruby>れ<ruby>物<rt>もの</rt></ruby>に<ruby>気<rt>き</rt></ruby>づいて、<ruby>途中<rt>とちゅう</rt></ruby>で<ruby>家<rt>いえ</rt></ruby>に<ruby>引<rt>ひ</rt></ruby>き<ruby>返<rt>かえ</rt></ruby>した。", "example_cn": "发现忘了东西，中途折回了家。" },
+        { "id": "18-3", "word": "引き取る", "kana": "ひきとる", "pos": "複合動詞", "meaning_cn": "取回、领回", "example_jp": "デパートに預けた荷物を引き取って帰った。", "example_jp_ruby": "デパートに<ruby>預<rt>あず</rt></ruby>けた<ruby>荷物<rt>にもつ</rt></ruby>を<ruby>引<rt>ひ</rt></ruby>き<ruby>取<rt>と</rt></ruby>って<ruby>帰<rt>かえ</rt></ruby>った。", "example_cn": "把寄存在百货店的行李取回来就回家了。" },
+        { "id": "18-4", "word": "引き止める", "kana": "ひきとめる", "pos": "複合動詞", "meaning_cn": "挽留、劝阻", "example_jp": "帰ろうとする彼を引き止めて、もう少し話した。", "example_jp_ruby": "<ruby>帰<rt>かえ</rt></ruby>ろうとする<ruby>彼<rt>かれ</rt></ruby>を<ruby>引<rt>ひ</rt></ruby>き<ruby>止<rt>と</rt></ruby>めて、もう<ruby>少<rt>すこ</rt></ruby>し<ruby>話<rt>はな</rt></ruby>した。", "example_cn": "挽留正要回去的他，又聊了一会儿。" },
+        { "id": "18-5", "word": "引き出す", "kana": "ひきだす", "pos": "複合動詞", "meaning_cn": "取出；引出（潜力）", "example_jp": "銀行でお金を引き出した。", "example_jp_ruby": "<ruby>銀行<rt>ぎんこう</rt></ruby>でお<ruby>金<rt>かね</rt></ruby>を<ruby>引<rt>ひ</rt></ruby>き<ruby>出<rt>だ</rt></ruby>した。", "example_cn": "在银行取了钱。" }
+      ]
+    },
+    {
+      "name": "2-12 引っ〜",
+      "reading": "まえに＋どうし",
+      "cards": [
+        { "id": "19-1", "word": "引っかける", "kana": "ひっかける", "pos": "複合動詞", "meaning_cn": "挂住、钩住", "example_jp": "足をコードに引っかけて、転んでしまった。", "example_jp_ruby": "<ruby>足<rt>あし</rt></ruby>をコードに<ruby>引<rt>ひ</rt></ruby>っかけて、<ruby>転<rt>ころ</rt></ruby>んでしまった。", "example_cn": "脚被电线绊了一下，摔倒了。" },
+        { "id": "19-2", "word": "引っかかる", "kana": "ひっかかる", "pos": "複合動詞", "meaning_cn": "被钩住；受骗", "example_jp": "木に風船が引っかかってしまった。", "example_jp_ruby": "<ruby>木<rt>き</rt></ruby>に<ruby>風船<rt>ふうせん</rt></ruby>が<ruby>引<rt>ひ</rt></ruby>っかかってしまった。", "example_cn": "气球挂在了树上。" },
+        { "id": "19-3", "word": "引っかく", "kana": "ひっかく", "pos": "複合動詞", "meaning_cn": "抓、挠", "example_jp": "猫が壁を引っかいて、傷がついた。", "example_jp_ruby": "<ruby>猫<rt>ねこ</rt></ruby>が<ruby>壁<rt>かべ</rt></ruby>を<ruby>引<rt>ひ</rt></ruby>っかいて、<ruby>傷<rt>きず</rt></ruby>がついた。", "example_cn": "猫把墙抓出了痕迹。" },
+        { "id": "19-4", "word": "引っ込む", "kana": "ひっこむ", "pos": "複合動詞", "meaning_cn": "退回里面、缩进", "example_jp": "店員が店の奥に引っ込んだ。", "example_jp_ruby": "<ruby>店員<rt>てんいん</rt></ruby>が<ruby>店<rt>みせ</rt></ruby>の<ruby>奥<rt>おく</rt></ruby>に<ruby>引<rt>ひ</rt></ruby>っ<ruby>込<rt>こ</rt></ruby>んだ。", "example_cn": "店员退到店里面去了。" },
+        { "id": "19-5", "word": "引っ張る", "kana": "ひっぱる", "pos": "複合動詞", "meaning_cn": "拉、拽；带领", "example_jp": "キャプテンがチームを引っ張って、優勝した。", "example_jp_ruby": "キャプテンがチームを<ruby>引<rt>ひ</rt></ruby>っ<ruby>張<rt>ぱ</rt></ruby>って、<ruby>優勝<rt>ゆうしょう</rt></ruby>した。", "example_cn": "队长带领队伍拿下了冠军。" }
+      ]
+    },
+    {
+      "name": "2-13 打ち〜",
+      "reading": "まえに＋どうし",
+      "cards": [
+        { "id": "20-1", "word": "打ち消す", "kana": "うちけす", "pos": "複合動詞", "meaning_cn": "否认、消除", "example_jp": "会社はそのうわさを打ち消す声明を出した。", "example_jp_ruby": "<ruby>会社<rt>かいしゃ</rt></ruby>はそのうわさを<ruby>打<rt>う</rt></ruby>ち<ruby>消<rt>け</rt></ruby>す<ruby>声明<rt>せいめい</rt></ruby>を<ruby>出<rt>だ</rt></ruby>した。", "example_cn": "公司发表了否认传闻的声明。" },
+        { "id": "20-2", "word": "打ち合わせる", "kana": "うちあわせる", "pos": "複合動詞", "meaning_cn": "商量、碰头", "example_jp": "旅行の前に、友達と予定を打ち合わせた。", "example_jp_ruby": "<ruby>旅行<rt>りょこう</rt></ruby>の<ruby>前<rt>まえ</rt></ruby>に、<ruby>友達<rt>ともだち</rt></ruby>と<ruby>予定<rt>よてい</rt></ruby>を<ruby>打<rt>う</rt></ruby>ち<ruby>合<rt>あ</rt></ruby>わせた。", "example_cn": "旅行之前和朋友商量了行程。" }
+      ]
+    },
+    {
+      "name": "2-14 すれ〜",
+      "reading": "まえに＋どうし",
+      "cards": [
+        { "id": "21-1", "word": "すれ違う", "kana": "すれちがう", "pos": "複合動詞", "meaning_cn": "擦肩而过；错过", "example_jp": "道できれいな人とすれ違った。", "example_jp_ruby": "<ruby>道<rt>みち</rt></ruby>できれいな<ruby>人<rt>ひと</rt></ruby>とすれ<ruby>違<rt>ちが</rt></ruby>った。", "example_cn": "路上和一位美人擦肩而过。" }
+      ]
+    },
+    {
+      "name": "3-1 〜違い",
+      "reading": "めいしになる",
+      "cards": [
+        { "id": "22-1", "word": "言葉違い", "kana": "ことばちがい", "pos": "複合名詞", "meaning_cn": "说错话、用词不当", "example_jp": "面接では言葉違いに気を付けよう。", "example_jp_ruby": "<ruby>面接<rt>めんせつ</rt></ruby>では<ruby>言葉<rt>ことば</rt></ruby><ruby>違<rt>ちが</rt></ruby>いに<ruby>気<rt>き</rt></ruby>を<ruby>付<rt>つ</rt></ruby>けよう。", "example_cn": "面试时要注意别说错话。" },
+        { "id": "22-2", "word": "色違い", "kana": "いろちがい", "pos": "複合名詞", "meaning_cn": "同款不同色", "example_jp": "色違いのTシャツを三枚買った。", "example_jp_ruby": "<ruby>色<rt>いろ</rt></ruby><ruby>違<rt>ちが</rt></ruby>いのTシャツを<ruby>三枚<rt>さんまい</rt></ruby><ruby>買<rt>か</rt></ruby>った。", "example_cn": "买了三件同款不同色的T恤。" },
+        { "id": "22-3", "word": "金違い", "kana": "かねちがい", "pos": "複合名詞", "meaning_cn": "款项弄错（找零、付钱出错）", "example_jp": "お釣りの金違いに気づいて、店に返しに行った。", "example_jp_ruby": "お<ruby>釣<rt>つ</rt></ruby>りの<ruby>金<rt>かね</rt></ruby><ruby>違<rt>ちが</rt></ruby>いに<ruby>気<rt>き</rt></ruby>づいて、<ruby>店<rt>みせ</rt></ruby>に<ruby>返<rt>かえ</rt></ruby>しに<ruby>行<rt>い</rt></ruby>った。", "example_cn": "发现找零的钱数不对，回店里去还了。" },
+        { "id": "22-4", "word": "人違い", "kana": "ひとちがい", "pos": "複合名詞", "meaning_cn": "认错人", "example_jp": "知り合いだと思っていたら、人違いだった。", "example_jp_ruby": "<ruby>知<rt>し</rt></ruby>り<ruby>合<rt>あ</rt></ruby>いだと<ruby>思<rt>おも</rt></ruby>っていたら、<ruby>人<rt>ひと</rt></ruby><ruby>違<rt>ちが</rt></ruby>いだった。", "example_cn": "以为是认识的人，结果认错了。" },
+        { "id": "22-5", "word": "計算違い", "kana": "けいさんちがい", "pos": "複合名詞", "meaning_cn": "计算错误", "example_jp": "計算違いで、予算をオーバーしてしまった。", "example_jp_ruby": "<ruby>計算<rt>けいさん</rt></ruby><ruby>違<rt>ちが</rt></ruby>いで、<ruby>予算<rt>よさん</rt></ruby>をオーバーしてしまった。", "example_cn": "算错了，超出了预算。" }
+      ]
+    },
+    {
+      "name": "3-2 〜沿い",
+      "reading": "めいしになる",
+      "cards": [
+        { "id": "23-1", "word": "道沿い", "kana": "みちぞい", "pos": "複合名詞", "meaning_cn": "沿路", "example_jp": "道沿いに桜の木が植えられている。", "example_jp_ruby": "<ruby>道<rt>みち</rt></ruby><ruby>沿<rt>ぞ</rt></ruby>いに<ruby>桜<rt>さくら</rt></ruby>の<ruby>木<rt>き</rt></ruby>が<ruby>植<rt>う</rt></ruby>えられている。", "example_cn": "路边种着樱花树。" },
+        { "id": "23-2", "word": "川沿い", "kana": "かわぞい", "pos": "複合名詞", "meaning_cn": "河边、沿河", "example_jp": "川沿いをゆっくり散歩した。", "example_jp_ruby": "<ruby>川<rt>かわ</rt></ruby><ruby>沿<rt>ぞ</rt></ruby>いをゆっくり<ruby>散歩<rt>さんぽ</rt></ruby>した。", "example_cn": "沿着河边慢慢散步。" },
+        { "id": "23-3", "word": "海岸沿い", "kana": "かいがんぞい", "pos": "複合名詞", "meaning_cn": "沿海岸", "example_jp": "海岸沿いの道を車で走った。", "example_jp_ruby": "<ruby>海岸<rt>かいがん</rt></ruby><ruby>沿<rt>ぞ</rt></ruby>いの<ruby>道<rt>みち</rt></ruby>を<ruby>車<rt>くるま</rt></ruby>で<ruby>走<rt>はし</rt></ruby>った。", "example_cn": "开车沿着海岸公路走。" }
+      ]
+    },
+    {
+      "name": "3-3 〜扱い",
+      "reading": "めいしになる",
+      "cards": [
+        { "id": "24-1", "word": "子供扱い", "kana": "こどもあつかい", "pos": "複合名詞", "meaning_cn": "当小孩对待", "example_jp": "親はいつまでも私を子ども扱いする。", "example_jp_ruby": "<ruby>親<rt>おや</rt></ruby>はいつまでも<ruby>私<rt>わたし</rt></ruby>を<ruby>子<rt>こ</rt></ruby>ども<ruby>扱<rt>あつか</rt></ruby>いする。", "example_cn": "父母到现在还把我当小孩。" },
+        { "id": "24-2", "word": "犯人扱い", "kana": "はんにんあつかい", "pos": "複合名詞", "meaning_cn": "当犯人对待", "example_jp": "証拠もないのに、彼を犯人扱いするのはひどい。", "example_jp_ruby": "<ruby>証拠<rt>しょうこ</rt></ruby>もないのに、<ruby>彼<rt>かれ</rt></ruby>を<ruby>犯人<rt>はんにん</rt></ruby><ruby>扱<rt>あつか</rt></ruby>いするのはひどい。", "example_cn": "没有证据就把人当犯人对待，太过分了。" }
+      ]
+    },
+    {
+      "name": "3-4 〜明け",
+      "reading": "めいしになる",
+      "cards": [
+        { "id": "25-1", "word": "週明け", "kana": "しゅうあけ", "pos": "複合名詞", "meaning_cn": "下周初、周一", "example_jp": "明日は日曜なので、週明けに伺います。", "example_jp_ruby": "<ruby>明日<rt>あした</rt></ruby>は<ruby>日曜<rt>にちよう</rt></ruby>なので、<ruby>週<rt>しゅう</rt></ruby><ruby>明<rt>あ</rt></ruby>けに<ruby>伺<rt>うかが</rt></ruby>います。", "example_cn": "明天是周日，我下周一去拜访。" },
+        { "id": "25-2", "word": "夜明け", "kana": "よあけ", "pos": "複合名詞", "meaning_cn": "黎明、天亮", "example_jp": "夜明けとともに、鳥が鳴き始めた。", "example_jp_ruby": "<ruby>夜<rt>よ</rt></ruby><ruby>明<rt>あ</rt></ruby>けとともに、<ruby>鳥<rt>とり</rt></ruby>が<ruby>鳴<rt>な</rt></ruby>き<ruby>始<rt>はじ</rt></ruby>めた。", "example_cn": "天一亮，鸟就开始叫了。" },
+        { "id": "25-3", "word": "休み明け", "kana": "やすみあけ", "pos": "複合名詞", "meaning_cn": "假期之后", "example_jp": "休み明けの授業は、なんだか長く感じる。", "example_jp_ruby": "<ruby>休<rt>やす</rt></ruby>み<ruby>明<rt>あ</rt></ruby>けの<ruby>授業<rt>じゅぎょう</rt></ruby>は、なんだか<ruby>長<rt>なが</rt></ruby>く<ruby>感<rt>かん</rt></ruby>じる。", "example_cn": "假期之后的课，总觉得特别长。" }
+      ]
+    },
+    {
+      "name": "3-5 〜済み",
+      "reading": "めいしになる",
+      "cards": [
+        { "id": "26-1", "word": "使用済み", "kana": "しようずみ", "pos": "複合名詞", "meaning_cn": "已使用过的", "example_jp": "使用済みの電池を捨てた。", "example_jp_ruby": "<ruby>使用<rt>しよう</rt></ruby><ruby>済<rt>ず</rt></ruby>みの<ruby>電池<rt>でんち</rt></ruby>を<ruby>捨<rt>す</rt></ruby>てた。", "example_cn": "把用过的电池扔了。" },
+        { "id": "26-2", "word": "登録済み", "kana": "とうろくずみ", "pos": "複合名詞", "meaning_cn": "已登记、已注册", "example_jp": "そのアカウントは登録済みだと表示された。", "example_jp_ruby": "そのアカウントは<ruby>登録<rt>とうろく</rt></ruby><ruby>済<rt>ず</rt></ruby>みだと<ruby>表示<rt>ひょうじ</rt></ruby>された。", "example_cn": "显示那个账号已经注册过了。" },
+        { "id": "26-3", "word": "解決済み", "kana": "かいけつずみ", "pos": "複合名詞", "meaning_cn": "已解决", "example_jp": "その問題はもう解決済みだ。", "example_jp_ruby": "その<ruby>問題<rt>もんだい</rt></ruby>はもう<ruby>解決<rt>かいけつ</rt></ruby><ruby>済<rt>ず</rt></ruby>みだ。", "example_cn": "那个问题已经解决了。" }
+      ]
+    },
+    {
+      "name": "3-6 〜連れ",
+      "reading": "めいしになる",
+      "cards": [
+        { "id": "27-1", "word": "家族連れ", "kana": "かぞくづれ", "pos": "複合名詞", "meaning_cn": "一家人同行", "example_jp": "デパートは家族連れでいっぱいだ。", "example_jp_ruby": "デパートは<ruby>家族<rt>かぞく</rt></ruby><ruby>連<rt>づ</rt></ruby>れでいっぱいだ。", "example_cn": "百货店里挤满了举家前来的人。" },
+        { "id": "27-2", "word": "子供連れ", "kana": "こどもづれ", "pos": "複合名詞", "meaning_cn": "带着孩子", "example_jp": "子ども連れでも入りやすい店を探している。", "example_jp_ruby": "<ruby>子<rt>こ</rt></ruby>ども<ruby>連<rt>づ</rt></ruby>れでも<ruby>入<rt>はい</rt></ruby>りやすい<ruby>店<rt>みせ</rt></ruby>を<ruby>探<rt>さが</rt></ruby>している。", "example_cn": "正在找带孩子也容易进去的店。" },
+        { "id": "27-3", "word": "三人連れ", "kana": "さんにんづれ", "pos": "複合名詞", "meaning_cn": "三人同行", "example_jp": "三人連れのグループが店に入ってきた。", "example_jp_ruby": "<ruby>三人<rt>さんにん</rt></ruby><ruby>連<rt>づ</rt></ruby>れのグループが<ruby>店<rt>みせ</rt></ruby>に<ruby>入<rt>はい</rt></ruby>ってきた。", "example_cn": "三个人一伙的客人走进了店里。" }
+      ]
+    },
+    {
+      "name": "3-7 〜たて",
+      "reading": "めいしになる",
+      "cards": [
+        { "id": "28-1", "word": "焼きたて", "kana": "やきたて", "pos": "複合名詞", "meaning_cn": "刚烤好的", "example_jp": "焼きたてのパンはとてもおいしい。", "example_jp_ruby": "<ruby>焼<rt>や</rt></ruby>きたてのパンはとてもおいしい。", "example_cn": "刚出炉的面包非常好吃。" },
+        { "id": "28-2", "word": "出来たて", "kana": "できたて", "pos": "複合名詞", "meaning_cn": "刚做好的", "example_jp": "出来たての豆腐をそのまま食べた。", "example_jp_ruby": "<ruby>出来<rt>でき</rt></ruby>たての<ruby>豆腐<rt>とうふ</rt></ruby>をそのまま<ruby>食<rt>た</rt></ruby>べた。", "example_cn": "把刚做好的豆腐直接吃了。" },
+        { "id": "28-3", "word": "とれたて", "kana": "とれたて", "pos": "複合名詞", "meaning_cn": "刚采摘／刚捕捞的", "example_jp": "とれたての新鮮な野菜を食べる。", "example_jp_ruby": "とれたての<ruby>新鮮<rt>しんせん</rt></ruby>な<ruby>野菜<rt>やさい</rt></ruby>を<ruby>食<rt>た</rt></ruby>べる。", "example_cn": "吃刚采摘的新鲜蔬菜。" }
+      ]
+    },
+    {
+      "name": "3-8 〜おき",
+      "reading": "めいしになる",
+      "cards": [
+        { "id": "29-1", "word": "二メートルおき", "speak_word": "にめーとるおき", "kana": "にめーとるおき", "pos": "複合名詞", "meaning_cn": "每隔两米", "example_jp": "二メートルおきに木が植えられている。", "example_jp_ruby": "二メートルおきに<ruby>木<rt>き</rt></ruby>が<ruby>植<rt>う</rt></ruby>えられている。", "example_cn": "每隔两米种着一棵树。" },
+        { "id": "29-2", "word": "一日おき", "speak_word": "いちにちおき", "kana": "いちにちおき", "pos": "複合名詞", "meaning_cn": "隔一天", "example_jp": "この薬は一日おきに飲んでください。", "example_jp_ruby": "この<ruby>薬<rt>くすり</rt></ruby>は<ruby>一日<rt>いちにち</rt></ruby>おきに<ruby>飲<rt>の</rt></ruby>んでください。", "example_cn": "这个药请隔一天吃一次。" },
+        { "id": "29-3", "word": "一つおき", "kana": "ひとつおき", "pos": "複合名詞", "meaning_cn": "隔一个", "example_jp": "椅子を一つおきに並べてください。", "example_jp_ruby": "<ruby>椅子<rt>いす</rt></ruby>を<ruby>一<rt>ひと</rt></ruby>つおきに<ruby>並<rt>なら</rt></ruby>べてください。", "example_cn": "请把椅子隔一个摆一把。" }
+      ]
+    },
+    {
+      "name": "3-9 〜ぶり",
+      "reading": "めいしになる",
+      "cards": [
+        { "id": "30-1", "word": "仕事ぶり", "kana": "しごとぶり", "pos": "複合名詞", "meaning_cn": "工作表现、干活的样", "example_jp": "彼の仕事ぶりは部長にも評価されている。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>の<ruby>仕事<rt>しごと</rt></ruby>ぶりは<ruby>部長<rt>ぶちょう</rt></ruby>にも<ruby>評価<rt>ひょうか</rt></ruby>されている。", "example_cn": "他的工作态度连部长都很认可。" },
+        { "id": "30-2", "word": "話しぶり", "kana": "はなしぶり", "pos": "複合名詞", "meaning_cn": "说话的样子", "example_jp": "彼の話しぶりから、誠実さが伝わってきた。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>の<ruby>話<rt>はな</rt></ruby>しぶりから、<ruby>誠実<rt>せいじつ</rt></ruby>さが<ruby>伝<rt>つた</rt></ruby>わってきた。", "example_cn": "从他的说话方式能感受到他的诚恳。" },
+        { "id": "30-3", "word": "暮らしぶり", "kana": "くらしぶり", "pos": "複合名詞", "meaning_cn": "生活状况", "example_jp": "祖母の暮らしぶりを写真に残したい。", "example_jp_ruby": "<ruby>祖母<rt>そぼ</rt></ruby>の<ruby>暮<rt>く</rt></ruby>らしぶりを<ruby>写真<rt>しゃしん</rt></ruby>に<ruby>残<rt>のこ</rt></ruby>したい。", "example_cn": "想把祖母的生活样子留在照片里。" }
+      ]
+    },
+    {
+      "name": "3-10 〜つき",
+      "reading": "めいしになる",
+      "cards": [
+        { "id": "31-1", "word": "目つき", "kana": "めつき", "pos": "複合名詞", "meaning_cn": "眼神", "example_jp": "彼は怖い目つきで私を見た。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>怖<rt>こわ</rt></ruby>い<ruby>目<rt>め</rt></ruby>つきで<ruby>私<rt>わたし</rt></ruby>を<ruby>見<rt>み</rt></ruby>た。", "example_cn": "他用可怕的眼神看我。" },
+        { "id": "31-2", "word": "顔つき", "kana": "かおつき", "pos": "複合名詞", "meaning_cn": "脸色、相貌", "example_jp": "娘の顔つきが最近妻に似てきた。", "example_jp_ruby": "<ruby>娘<rt>むすめ</rt></ruby>の<ruby>顔<rt>かお</rt></ruby>つきが<ruby>最近<rt>さいきん</rt></ruby><ruby>妻<rt>つま</rt></ruby>に<ruby>似<rt>に</rt></ruby>てきた。", "example_cn": "女儿的相貌最近越来越像妻子。" },
+        { "id": "31-3", "word": "体つき", "kana": "からだつき", "pos": "複合名詞", "meaning_cn": "体形、体格", "example_jp": "彼はがっしりした体つきをしている。", "example_jp_ruby": "<ruby>彼<rt>かれ</rt></ruby>はがっしりした<ruby>体<rt>からだ</rt></ruby>つきをしている。", "example_cn": "他体格结实。" }
+      ]
+    }
+  ]
+}
+</script>
+<script src="../vocab.js"></script>
+</body>
+</html>

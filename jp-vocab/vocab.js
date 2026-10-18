@@ -97,7 +97,7 @@ var HAS_AUDIO = DATA.audio !== false;
 function play(id, kind){ try{ new Audio('audio/'+id+'-'+kind+'.wav').play(); }catch(e){} }
 function playBtn(c, kind){
   if(!HAS_AUDIO) return '';
-  return '<button onclick="play(\''+c.id+'\',\''+kind+'\')"><span class="im im-play" aria-hidden="true"></span> '+(kind==='w'?'副词':'例文')+'</button>';
+  return '<button onclick="play(\''+c.id+'\',\''+kind+'\')"><span class="im im-play" aria-hidden="true"></span> '+(kind==='w'?'单词':'例文')+'</button>';
 }
 function audioBtns(c){ return HAS_AUDIO ? playBtn(c,'w')+playBtn(c,'e') : ''; }
 function exHtml(c){ return c.example_jp_ruby || c.example_jp; }   // ruby version for display, plain for fallback
