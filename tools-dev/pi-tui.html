@@ -83,7 +83,7 @@
   <h1>pi-tui-plus：pi 的 TUI 增强包</h1>
   <p class="lead">给 pi 命令行加三样东西：一个说清状态的 footer、一个能直接用鼠标点的模型选择器、一行不占版的网关状态。整套东西是 pi-open-tui 的自有分支，改坏了改回来就在这个包里，不会随上游升级被覆盖。</p>
   <div class="metaline">
-    <span>v0.4.0</span><span>2026-10-18</span>
+    <span>v0.4.1</span><span>2026-10-18</span>
     <span class="pill">可用</span>
     <span>MIT</span>
     <span>无 npm 依赖</span>
@@ -92,10 +92,10 @@
 
 <div class="dl">
   <div>
-    <div class="dl-main"><b>下载源码包（zip）</b>pi-tui-0.4.0.zip · 含扩展源码、配置样例、README</div>
+    <div class="dl-main"><b>下载源码包（zip）</b>pi-tui-0.4.1.zip · 含扩展源码、配置样例、README</div>
     <div class="dl-note">解压即一个目录，不用安装依赖、不用构建。</div>
   </div>
-  <a class="btn" href="../tools-dev/downloads/pi-tui-0.4.0.zip" download>下载 zip</a>
+  <a class="btn" href="../tools-dev/downloads/pi-tui-0.4.1.zip" download>下载 zip</a>
 </div>
 
 <h2>装了什么</h2>
@@ -104,7 +104,7 @@
   <tr><th>扩展</th><th>它做什么</th></tr>
   <tr>
     <td><code>open-tui</code></td>
-    <td>Starship 风格的底部信息：目录、分支、模型、思考档位、上下文占用。<b>本分支在模型名后面加了 <code>alt+m 模型</code> 的提示</b>，这是与上游唯一的差别。</td>
+    <td>Starship 风格的底部信息：目录、分支、模型、思考档位、上下文占用。<b>本分支在模型名后面加了 <code>alt+m 模型</code> 的提示</b>，这是与上游唯一的差别。模型名后面那个窗口数字显示的是<b>实际生效值</b>：用选择器把窗口改成 500K，这里就写 500k，不再是 <code>models.json</code> 名字里写死的 <code>1M</code>。</td>
   </tr>
   <tr>
     <td><code>wb-model-picker</code></td>
@@ -112,7 +112,7 @@
   </tr>
   <tr>
     <td><code>wb-stats</code></td>
-    <td>一行状态：本轮 token、积分、上下文占用、网关健康/繁忙账号、tok/s、缓存命中。发布方式是可叠加的扩展状态行，不跟 footer 抢位置。</td>
+    <td>一行状态：本轮 token（↑入 ↓出）、积分（本轮 / 会话）、tok/s、缓存读写量与命中率。发布方式是可叠加的扩展状态行，不跟 footer 抢位置。<b>0.4.1 起移除了上游账号与繁忙度那一段</b>（网关内的实时负载在选择器里已经能看到，状态行不必重复占宽）；「本轮积分」按会话累计的增量累加，一次用户请求里的工具循环不会被反复归零，晚到的网关日志也会补进当轮。</td>
   </tr>
 </table>
 <p class="note">后两个只在你用「OpenAI 兼容网关」时才多出额外信息（倍率、积分、上游账号）。<b>其他 provider 自动降级</b>：选择器照常换模型与思考强度，网关相关的列显示为空，不会报错。</p>
@@ -220,16 +220,16 @@ pi install C:\path\to\pi-tui</code></pre>
   "gateway": {
     "provider": "wb2api",              // 也可用环境变量 WB2API_PROVIDER
     "baseUrl": "http://127.0.0.1:7863/v1",  // 覆盖推导出来的地址
-    "logDir": "F:\\docker\\workbuddy2api\\data\\request-logs"
+    "logDir": "F:\\docker\\workbuddy2api\\data\\request-logs"   // 可选，0.3 时代的日志口径
   }
 }</code></pre>
 <table>
   <tr><th>环境变量</th><th>作用</th></tr>
   <tr><td><code>WB2API_PROVIDER</code></td><td>以哪个 provider 为准（默认：当前模型所在 provider）</td></tr>
   <tr><td><code>WB2API_BASE_URL</code></td><td>覆盖网关地址</td></tr>
-  <tr><td><code>WB2API_LOG_DIR</code></td><td>请求日志目录（积分统计用；没有就只显示网关健康度）</td></tr>
+  <tr><td><code>WB2API_LOG_DIR</code></td><td>0.3 时代的本地请求日志目录。0.4 起积分改读网关自己的控制台接口，这个变量一般不用设了</td></tr>
 </table>
-<p class="note">积分优先按本地请求日志算，只统计 <code>user_agent</code> 以 <code>pi</code> 开头的行 —— 同一个人同一台网关下还跑着别的客户端时，不会把它们算进来。</p>
+<p class="note">积分不靠端口日志、也不抓面板网页：直接打控制台页里那层 JSON API —— <code>/panel/api/overview</code> 取余额（健康且未禁用账号求和），<code>/panel/api/request_logs</code> 取逐条消耗，只算 <code>user_agent</code> 以 <code>pi</code> 开头的行 —— 同一个人同一台网关下还跑着别的客户端时，不会把它们算进来。探测那一下只看接口能不能答出 <code>accounts[]</code>：404/401/403 就是别人的网关，自动回落到 pi 自己算的 <code>$</code> 费用，不报错。</p>
 
 <h2>自己改</h2>
 <table>
@@ -243,8 +243,8 @@ pi install C:\path\to\pi-tui</code></pre>
 
 <h2>局限</h2>
 <ul>
-  <li><b>网关字段是私有约定</b>：倍率、繁忙度、积分来自 <code>/v1/models</code> 与 <code>/status</code> 的自定义字段。换别的网关时这些列会空着，不报错。</li>
-  <li><b>积分默认路径是 Windows 的</b>：写在 <code>WB2API_LOG_DIR</code> 的默认值里，别的系统要设一下这个变量。</li>
+  <li><b>网关字段是私有约定</b>：倍率、繁忙度来自 <code>/v1/models</code> 与 <code>/status</code>，积分与余额来自 <code>/panel/api</code>，都是自定义字段。换别的网关时这些列会空着，不报错。</li>
+  <li><b>余额是快照</b>：控制台数字每 15 秒刷一次，刚结束的那笔请求可能还没落账。状态行已经把晚到的行增量补进当轮，但极端情况下「本轮积分」会比控制台最终值少一点点，以控制台为准。</li>
   <li><b>上游更新要手动跟</b>：这个包 fork 了 pi-open-tui 的 15 个源文件（约 3700 行），想要上游的新功能得自己 merge；好处是升级不会再把你的改动冲掉。</li>
   <li><b>上下文档位不是省钱开关</b>：它只改本会话认为的窗口大小，真正要压缩历史请用 <code>/compact</code>。</li>
 </ul>

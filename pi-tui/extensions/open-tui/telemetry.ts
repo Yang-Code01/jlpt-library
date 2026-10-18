@@ -10,6 +10,7 @@ import type {
 	Theme,
 } from "@earendil-works/pi-coding-agent";
 import type { IconMode, TelemetryConfig } from "./config.ts";
+import type { CostView } from "../wb-panel.ts";
 import { resolveGlyphs } from "./icons.ts";
 import { finiteOrZero, fmtTokens, formatDuration, formatInputBreakdown } from "./utils.ts";
 
@@ -276,6 +277,7 @@ export function formatTurnTelemetry(
 	theme: Theme,
 	config: TelemetryConfig,
 	iconMode: IconMode,
+	cost?: CostView,
 ): string {
 	const glyphs = resolveGlyphs(iconMode);
 	const parts: string[] = [];
@@ -296,8 +298,16 @@ export function formatTurnTelemetry(
 	if (config.stalls && telemetry.stallMs > 0) {
 		parts.push(theme.fg("warning", `${glyphs.stall} stall ${telemetry.stallCount}x / ${formatTurnDuration(telemetry.stallMs)}`));
 	}
-	if (config.cost && telemetry.rateUsdPerMTokens !== null) {
-		parts.push(theme.fg("warning", `${glyphs.cost} $${telemetry.rateUsdPerMTokens.toFixed(2)}/M`));
+	if (config.cost) {
+		// 积分网关没有美元单价（models.json 的 cost 全为 0），改用模型自己的倍率；
+		// 普通 apikey 仍然显示 $/M，与以前一致。
+		if (cost?.mode === "credits") {
+			if (cost.multiplier !== null && cost.multiplier !== undefined) {
+				parts.push(theme.fg("warning", `${glyphs.credits} x${cost.multiplier.toFixed(2)}/次`));
+			}
+		} else if (telemetry.rateUsdPerMTokens !== null) {
+			parts.push(theme.fg("warning", `${glyphs.cost} $${telemetry.rateUsdPerMTokens.toFixed(2)}/M`));
+		}
 	}
 	return parts.join(` ${theme.fg("dim", "|")} `);
 }

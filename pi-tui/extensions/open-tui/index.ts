@@ -15,6 +15,7 @@ import {
 	type FooterState,
 } from "./state.ts";
 import { resolveGlyphs } from "./icons.ts";
+import type { CostView } from "../wb-panel.ts";
 import {
 	buildPeekLabel,
 	collectPeekParts,
@@ -42,10 +43,37 @@ function isTuiContext(ctx: ExtensionContext): boolean {
 	}
 }
 
+/**
+ * 事件总线是跨扩展的裸通道，别信任负载：形状不对就当没收到，footer 继续渲染 `$`。
+ * 进程内的对象本来没有序列化，这里只做最小校验（mode 与积分数值）。
+ */
+function readCostView(payload: unknown): CostView | undefined {
+	const view = payload as CostView | undefined;
+	if (!view || (view.mode !== "usd" && view.mode !== "credits")) return undefined;
+	if (view.mode === "usd") return { mode: "usd" };
+	const balance = view.credits;
+	if (!balance || !Number.isFinite(balance.remaining) || !Number.isFinite(balance.total)) return undefined;
+	return {
+		mode: "credits",
+		credits: balance,
+		stale: view.stale === true,
+		multiplier: Number.isFinite(view.multiplier as number) ? (view.multiplier as number) : null,
+	};
+}
+
 export default function (pi: ExtensionAPI) {
 	const sessionLifecycle = new SessionLifecycle();
 	const state: FooterState = createInitialState();
 	const turnTelemetry = new TurnTelemetryTracker();
+
+	// 费用口径（`$` 或积分）由 wb-stats 通过事件总线推来；普通 apikey 网关不发事件，
+	// 这里就保持默认的 `usd`，与改造前完全一致。
+	pi.events.on("wb2:cost", (payload: unknown) => {
+		const view = readCostView(payload);
+		if (!view) return;
+		state.cost = view;
+		requestFooterRender?.();
+	});
 
 	let config: OpenTuiConfig = structuredClone(DEFAULT_CONFIG);
 	let active = false;
@@ -238,6 +266,7 @@ export default function (pi: ExtensionAPI) {
 		state.sessionStartEpoch = Date.now();
 		state.workingSince = undefined;
 		state.lastDoneIn = undefined;
+		state.cost = { mode: "usd" };
 		invalidateUsageCache();
 
 		ensureConfigExists();
@@ -330,7 +359,7 @@ export default function (pi: ExtensionAPI) {
 	pi.on("agent_settled", (event, ctx) => {
 		const telemetry = turnTelemetry.handle(event);
 		if (telemetry && config.enabled && config.telemetry.enabled && isTuiContext(ctx)) {
-			const message = formatTurnTelemetry(telemetry, ctx.ui.theme, config.telemetry, config.icons.mode);
+			const message = formatTurnTelemetry(telemetry, ctx.ui.theme, config.telemetry, config.icons.mode, state.cost);
 			if (message) ctx.ui.notify(message, "info");
 		}
 		// Only clear the peek label when this task is still the current one.

@@ -1,11 +1,11 @@
 {
   "tools": {
     "pi-tui": {
-      "version": "0.4.0",
+      "version": "0.4.1",
       "dir": "../pi-tui",
-      "zip": "downloads/pi-tui-0.4.0.zip",
-      "bytes": 276742,
-      "sha256": "95f4505c95448f7539b98d9810d19db00b782300bff5c3cbdff658190f026827",
+      "zip": "downloads/pi-tui-0.4.1.zip",
+      "bytes": 307919,
+      "sha256": "23206b1f09ce6198fe15af7dd380a582d42bdc79083d6a45da98272e3e4dbed8",
       "files": [
         {
           "path": "LICENSE",
@@ -13,7 +13,7 @@
         },
         {
           "path": "README.md",
-          "sha256": "aeea2e7c256c7b413cb5088ee4cd9a53af77386d92bfc1cc222563f830898081"
+          "sha256": "d09e64870c8c75b921e3b84e0e9ebd2557f3fc732a36f4bca4508cd03b61b069"
         },
         {
           "path": "README.upstream.md",
@@ -21,7 +21,7 @@
         },
         {
           "path": "README.zh-CN.md",
-          "sha256": "6f14e03f122f825caf2f935ad6e40868cbaed2ee2b9b22e1e170d87585332b9b"
+          "sha256": "eacb57f0c7088839c24cefff9628e9b21a3988cf2b5597e653c4075d2af7e8e7"
         },
         {
           "path": "assets/.gitkeep",
@@ -41,7 +41,7 @@
         },
         {
           "path": "extensions/open-tui/footer.ts",
-          "sha256": "e83d84164625e5a766d09f9bd156af8c46f3269c6264de31d25d12e97cedcc6d"
+          "sha256": "25d8c5e9693fbcb0cbf9286133bd85fdd67191e7ad563c15e5a999132ea0e058"
         },
         {
           "path": "extensions/open-tui/git.ts",
@@ -53,11 +53,11 @@
         },
         {
           "path": "extensions/open-tui/icons.ts",
-          "sha256": "63a3875a87531bf2857e343908c521bb9cc6b5b2396ae49fe1f9a1622ad86f5f"
+          "sha256": "a7291a064174c6a0c7d320f3b09883e15e379cd5b3383d395d8fecdfa727eb34"
         },
         {
           "path": "extensions/open-tui/index.ts",
-          "sha256": "32b5240fc98b38c3fff78f6448deee9144f57d2f97a2a833f13743d8ac067729"
+          "sha256": "8a03e17f7abe348606e7b7637fcce29cf2f9e5e19a66104734f432c35b25bedf"
         },
         {
           "path": "extensions/open-tui/peek.ts",
@@ -77,11 +77,11 @@
         },
         {
           "path": "extensions/open-tui/state.ts",
-          "sha256": "ba3c48b118f76be9a9a69e292c6f4758c88c72ca9c910a7f954a2c7c9e6526eb"
+          "sha256": "d9d94e7fd7560a89f6ec4f75619ac32c855fd3a8613bc02dae0c55c0ff71e544"
         },
         {
           "path": "extensions/open-tui/telemetry.ts",
-          "sha256": "ad40130d301218fd9c713f026a825e1d9826f76abafff81f871e6f4f6d712da6"
+          "sha256": "88d045e6c02f15dabd6f864205740db07d98246971c63650d8d5cc3a441aedf8"
         },
         {
           "path": "extensions/open-tui/utils.ts",
@@ -96,12 +96,20 @@
           "sha256": "b17b734a1955be2a3ee68fba9a5c4f5ecef31aad89377a3e3456621c40f9154b"
         },
         {
+          "path": "extensions/wb-panel.ts",
+          "sha256": "8a89983a461c20e37fb0f64e3e87911272246f8c5e18ec3c5780ac4d53014bd6"
+        },
+        {
           "path": "extensions/wb-stats.ts",
-          "sha256": "1dda91dd41952bbb80713473cc9c1ed3b616f8f0e7226e34f76864bfd069d4c0"
+          "sha256": "f7873a0eafcd7bbacca5452e139807bb850a1a777b0634b90db341f309b32237"
         },
         {
           "path": "package.json",
-          "sha256": "33c0dbc1eb0915d170f84e72d8af315ff6eaf8ed9b5e24ef52ba7a85fba75bf9"
+          "sha256": "c461d5efdea64bc59dffc48b7eb8ea4cc32ec39ba7c1842c78a1304bc889678b"
+        },
+        {
+          "path": "test/wb-panel.test.ts",
+          "sha256": "654211f68d1be4cfe6bea630e982937a4279f52a20d8c2bcaea174cef29330a0"
         }
       ]
     },
