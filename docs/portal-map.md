@@ -44,7 +44,7 @@
 | `wb2api/` | WorkBuddy2API 部署包（额度转 OpenAI / Anthropic 网关：源码 + 兼容层补丁，`compose up -d --build` 现场编译），详情页 `tools-dev/wb2api.html` | 上游 `linguo2625469/workbuddy2api-panel` rev `6b31db6` + 兼容层（`src/internal/server/{responses,messages}.go`） | 无生成器（`src/` 与 `patches/` 手工更新，步骤见包内 `UPSTREAM.md`） | `node tools/tools.mjs check`（版本从 `src/cmd/server/main.go` 的 `appVersion` 取，见 `versionFrom`） |
 | `tools-dev/` + `tools/tools.mjs` | 工具开发区的清单与下载 | `tools-dev/data.json` + `tools-dev/<page>.html` | `node tools/tools.mjs gen`、`pack <id>` | `node tools/tools.mjs check` |
 | `research/pi-changelog.html` | pi 更新履历报告（报告区里的一篇） | 本机已装 pi 的 `CHANGELOG.md`（**不在仓库里**） | `node tools/pi-changelog-gen.mjs` | `node tools/pi-changelog-gen.mjs check` |
-| `assets/snooker*.js` | 斯诺克信息区（赛季轨道 + 世界排名 + 单站天梯图与赛程） | snooker.org 的 `template=31 / 2 / 7` 三张表 + **逐站 `index.asp?event=<id>` 对阵页** | `node tools/snooker.mjs`（线上由 `.github/workflows/snooker.yml` 每 10 分钟跑） | `node tools/snooker.mjs --check`（需联网）、`tools/tests/test_snooker.js`（含已入库快照的契约校验，离线） |
+| `assets/snooker*.js` | 斯诺克信息区（赛季轨道 + 世界排名 / 本赛季排名 + 单站天梯图与赛程） | snooker.org 的 `template=31 / 33 / 2 / 7` 四张表（31 = 两年滚动排名，33 = 单赛季榜） + **逐站 `index.asp?event=<id>` 对阵页** | `node tools/snooker.mjs`（线上由 `.github/workflows/snooker.yml` 每 10 分钟跑） | `node tools/snooker.mjs --check`（需联网）、`tools/tests/test_snooker.js`（含已入库快照的契约校验，离线） |
 
 细节：
 - **真题库是「明文源 → 密文发布」管线**：`exam/data/N2/<卷>.js` → `encrypt` → `exam/data/N2/enc/*.js`（**唯一入库形态**）；运行时 `exam/exam-lock.js` 用 WebCrypto 解密（PBKDF2→KEK→DEK→HKDF→AES-GCM→inflate）。`exam/data/N2/index-lite.js` 是明文常驻例外（只有卷/题型/题数）。**部署只能经 git，绝不能整目录上传**（明文仍躺在工作区）。
