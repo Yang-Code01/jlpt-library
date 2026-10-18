@@ -332,10 +332,17 @@
         if (n.fact.kids.indexOf(n) < 0) n.fact.kids.push(n);
       });
 
-      /* 父场落 slot：取已落实的孩子中心行均值 → 决赛中心必落在 rows/2 */
+      /* 父场落 slot：取两个子场中心行的均值 → 决赛中心必落在 rows/2。
+         ⚠️ 两个子场都得参与均值：只挂上一个事实孩子时，另一个还没挂父场（下面那圈才按页序挂），
+         若只拿已挂的那个取均值，父场会偏半格、并逐层往上传，决赛中心就落到 16.5 这种半格上。
+         所以这里按页序补上缺的那半（它的 abs 上一圈已经算好，直接取）。 */
       parCol.nodes.forEach(function (p, pi) {
-        var mine = kidCol.nodes.filter(function (k) { return k.parent === p; });
-        var use = mine.length ? mine : [kidCol.nodes[2 * pi], kidCol.nodes[2 * pi + 1]];
+        var use = kidCol.nodes.filter(function (k) { return k.parent === p; });
+        if (use.length < 2) {
+          [kidCol.nodes[2 * pi], kidCol.nodes[2 * pi + 1]].forEach(function (sib) {
+            if (sib && use.indexOf(sib) < 0) use.push(sib);
+          });
+        }
         var cnt = 0, sum = 0;
         for (var q = 0; q < use.length; q++) {
           if (!use[q] || use[q].slot < 0) continue;
