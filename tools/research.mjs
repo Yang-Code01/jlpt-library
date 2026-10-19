@@ -6,6 +6,8 @@
  *   node tools/research.mjs check            # 校验 data.json / 报告文件 / 清单区一致性，有问题退出码 1
  *   node tools/research.mjs add-shell <文件…> # 给报告文件写/刷新工作台外壳（幂等，可重复跑）
  *
+ * 新增报告的标准顺序：add-shell → gen → check
+ *
  * 真源是 research/data.json；报告本身是 research/ 下的自包含单文件 HTML（无外链 css/js），
  * 随仓库发布，不进构建管线。index.html 里的标记区由 gen 写，勿手改。
  */

@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>git worktree 调查报告 · AI 工具视角 · 2026-10-19</title>
+<meta name="description" content="从 AI 编码工具视角理解 git worktree：文件系统原理、命令速查、四工具对比、常见坑与排查。">
+<style>
+/* ============ tokens ============ */
+:root{
+  --bg:#0d1117;--bg2:#161b22;--panel:#1c2129;--panel2:#212830;
+  --rule:#2d333b;--rule-strong:#3d444d;
+  --ink:#e6edf3;--muted:#8b949e;--dim:#6e7681;
+  --accent:#58a6ff;--accent2:#d2a8ff;
+  --green:#3fb950;--yellow:#d29922;--red:#f85149;--orange:#db6d28;
+  --mono:"SF Mono","Cascadia Code","JetBrains Mono",Consolas,"Courier New",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+  --sidebar-w:260px;
+}
+@media(prefers-color-scheme:light){
+  :root{
+    --bg:#fff;--bg2:#f6f8fa;--panel:#eaeef2;--panel2:#dde3e8;
+    --rule:#d1d9e0;--rule-strong:#afb8c1;
+    --ink:#1f2328;--muted:#656d76;--dim:#8c959f;
+    --accent:#0969da;--accent2:#8250df;
+    --green:#1a7f37;--yellow:#9a6700;--red:#cf222e;--orange:#bc4c00;
+  }
+}
+
+/* ============ base ============ */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  line-height:1.75;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:var(--mono);font-size:.88em;background:var(--panel2);
+  border:1px solid var(--rule);border-radius:4px;padding:1px 5px}
+pre{background:var(--panel);border:1px solid var(--rule);border-radius:8px;
+  padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.6;
+  font-family:var(--mono);color:var(--ink);margin:12px 0;position:relative}
+pre code{background:none;border:none;padding:0;font-size:inherit}
+pre .cmd{color:var(--green)}
+pre .out{color:var(--muted)}
+pre .warn{color:var(--yellow)}
+pre .err{color:var(--red)}
+pre .ok{color:var(--green)}
+h1,h2,h3,h4{line-height:1.3;font-weight:600}
+h2{font-size:1.55em;margin:2.2em 0 .6em;padding-bottom:.3em;
+  border-bottom:2px solid var(--rule);scroll-margin-top:24px}
+h3{font-size:1.2em;margin:1.6em 0 .4em;scroll-margin-top:24px}
+h4{font-size:1.05em;margin:1.2em 0 .3em}
+p{margin:.6em 0}
+ul,ol{padding-left:1.4em;margin:.5em 0}
+li{margin:.25em 0}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.92em}
+th,td{border:1px solid var(--rule);padding:8px 12px;text-align:left}
+th{background:var(--panel2);font-weight:600}
+
+/* ============ layout ============ */
+.layout{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;position:sticky;top:0;
+  height:100vh;overflow-y:auto;border-right:1px solid var(--rule);
+  padding:20px 0;background:var(--bg2)}
+.sidebar .toc-title{font-size:.78em;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dim);padding:0 20px 12px;font-family:var(--mono)}
+.sidebar nav a{display:block;padding:5px 20px;font-size:.86em;color:var(--muted);
+  border-left:2px solid transparent;transition:all .15s}
+.sidebar nav a:hover{color:var(--ink);background:var(--panel);text-decoration:none}
+.sidebar nav a.active{color:var(--accent);border-left-color:var(--accent);
+  background:var(--panel);font-weight:600}
+.sidebar nav a.sub{padding-left:34px;font-size:.82em}
+.main{flex:1;max-width:900px;padding:36px 40px 80px;min-width:0}
+
+/* ============ overview cards ============ */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:16px 0}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;
+  padding:18px 20px}
+.card-label{font-size:.72em;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--dim);font-family:var(--mono);margin-bottom:6px}
+.card-value{font-size:1.15em;font-weight:600;color:var(--ink)}
+.card-sub{font-size:.82em;color:var(--muted);margin-top:4px}
+
+/* ============ step flow ============ */
+.flow{display:flex;flex-wrap:wrap;gap:0;align-items:center;margin:20px 0;
+  font-size:.84em}
+.flow-step{background:var(--panel);border:1px solid var(--rule);border-radius:8px;
+  padding:10px 16px;text-align:center;min-width:120px;flex:1;
+  font-family:var(--mono);font-size:.9em;position:relative}
+.flow-step .step-n{font-size:.68em;color:var(--dim);display:block;margin-bottom:2px}
+.flow-step .step-t{font-weight:600;color:var(--ink)}
+.flow-step .step-c{font-size:.78em;color:var(--muted);display:block;margin-top:3px}
+.flow-arrow{flex-shrink:0;width:28px;text-align:center;color:var(--dim);font-size:1.1em}
+.flow-step.highlight{border-color:var(--accent);background:var(--accent);
+  background:color-mix(in srgb,var(--accent) 12%,var(--panel))}
+.flow-step.highlight .step-t{color:var(--accent)}
+
+/* ============ comparison grid ============ */
+.cmp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}
+@media(max-width:900px){.cmp-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:540px){.cmp-grid{grid-template-columns:1fr}}
+.cmp-card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;
+  padding:18px;transition:border-color .15s}
+.cmp-card:hover{border-color:var(--accent)}
+.cmp-card h4{margin:0 0 4px;font-size:1em}
+.cmp-card .cmp-def{font-size:.82em;color:var(--muted);margin-bottom:10px}
+.cmp-card ul{list-style:none;padding:0;margin:0}
+.cmp-card li{font-size:.84em;padding:3px 0;border-bottom:1px solid var(--rule)}
+.cmp-card li:last-child{border-bottom:none}
+.cmp-card .yes{color:var(--green)}
+.cmp-card .no{color:var(--red)}
+.cmp-card .tag{display:inline-block;font-size:.7em;font-family:var(--mono);
+  background:var(--panel2);border:1px solid var(--rule);border-radius:999px;
+  padding:2px 8px;margin:6px 2px 0;color:var(--muted)}
+
+/* ============ tree diagram ============ */
+.tree-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:16px 0}
+@media(max-width:700px){.tree-row{grid-template-columns:1fr}}
+.tree{background:var(--panel);border:1px solid var(--rule);border-radius:10px;
+  padding:18px;font-family:var(--mono);font-size:.82em;line-height:1.65}
+.tree-title{font-size:.78em;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:10px;font-family:var(--mono)}
+.tree .node{padding:1px 0;white-space:pre}
+.tree .hl{color:var(--accent);font-weight:600}
+.tree .hl2{color:var(--accent2);font-weight:600}
+.tree .dim{color:var(--dim)}
+.tree .green{color:var(--green)}
+.tree .yellow{color:var(--yellow)}
+
+/* ============ decision tree ============ */
+.decision{background:var(--panel);border:1px solid var(--rule);border-radius:10px;
+  padding:18px 20px;margin:14px 0;font-size:.9em}
+.decision .d-title{font-weight:600;color:var(--yellow);margin-bottom:8px;
+  font-family:var(--mono);font-size:.92em}
+.decision-tree{font-family:var(--mono);font-size:.88em;line-height:1.8}
+.decision-tree .branch{padding-left:1.2em;border-left:1px solid var(--rule);
+  margin-left:.4em}
+.decision-tree .symptom{color:var(--yellow)}
+.decision-tree .check{color:var(--ink)}
+.decision-tree .fix{color:var(--green)}
+.decision-tree .err{color:var(--red)}
+.decision-tree .note{color:var(--muted)}
+
+/* ============ tool cards ============ */
+.tool-card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;
+  padding:20px 22px;margin:14px 0}
+.tool-card h4{margin:0 0 6px;font-size:1.05em;display:flex;align-items:center;gap:8px}
+.tool-card .tool-badge{font-size:.68em;font-family:var(--mono);
+  background:var(--panel2);border:1px solid var(--rule);border-radius:4px;
+  padding:2px 6px;color:var(--muted)}
+.tool-card .tool-desc{color:var(--muted);font-size:.88em;margin-bottom:10px}
+.tool-card .tool-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;
+  font-size:.84em}
+@media(max-width:600px){.tool-card .tool-grid{grid-template-columns:1fr}}
+.tool-card .tg-label{color:var(--dim);font-family:var(--mono);font-size:.78em}
+.tool-card .tg-val{color:var(--ink)}
+
+/* ============ code copy ============ */
+pre.copyable::after{content:"copy";position:absolute;top:8px;right:8px;
+  font-size:.7em;font-family:var(--mono);color:var(--dim);cursor:pointer;
+  padding:2px 8px;border:1px solid var(--rule);border-radius:4px;
+  background:var(--panel2);opacity:0;transition:opacity .15s}
+pre.copyable:hover::after{opacity:1}
+pre.copyable.copied::after{content:"✓";color:var(--green)}
+
+/* ============ details ============ */
+details{margin:8px 0;border:1px solid var(--rule);border-radius:8px;
+  overflow:hidden}
+details summary{padding:12px 16px;font-weight:600;cursor:pointer;
+  background:var(--panel);font-size:.94em;list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"▸ ";color:var(--dim)}
+details[open] summary::before{content:"▾ "}
+details .detail-body{padding:14px 16px;border-top:1px solid var(--rule)}
+
+/* ============ callout ============ */
+.callout{border-left:3px solid var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent);
+  padding:12px 16px;border-radius:0 8px 8px 0;margin:14px 0;font-size:.92em}
+.callout.warn{border-left-color:var(--yellow);background:color-mix(in srgb,var(--yellow) 6%,transparent)}
+.callout.danger{border-left-color:var(--red);background:color-mix(in srgb,var(--red) 6%,transparent)}
+.callout .co-title{font-weight:600;font-size:.92em;margin-bottom:4px}
+</style>
+<style data-wb-shell="1">
+  /* ===== 个人工作站外壳（顶部细条 + 浮动胶囊 + 页脚返回）：由 tools/research.mjs add-shell 写入，勿手改 =====
+     颜色尽量套用报告自己的令牌，套不到就退到中性半透明灰：浅色报告与深色报告都不违和。 */
+  .wb-shell-bar{display:flex;align-items:center;gap:10px;padding:9px 20px;
+    border-bottom:1px solid var(--rule,var(--border,rgba(127,127,127,.28)));
+    background:var(--card,var(--panel,rgba(127,127,127,.08)));
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;font-size:.78rem;line-height:1.6}
+  .wb-shell-mark{display:grid;place-items:center;flex:none;width:20px;height:20px;border-radius:5px;
+    background:var(--accent,#B4451F);color:#fff;font-size:.7rem;font-weight:700;letter-spacing:-.01em;
+    /* QY 是两枚拉丁大写 —— 字号按 20px 容器实测定（.scratch/icons/probe-mark.mjs）；
+       门户头部那枚 30px 的同形标记在 index.html 的 .portal-brand-mark 里，两处要一起改。 */
+    font-family:Georgia,"Times New Roman","Songti SC",serif}
+  .wb-shell-path{color:var(--muted,#6C6A73)}
+  .wb-shell-path b{color:var(--ink,var(--text,inherit));font-weight:600}
+  .wb-shell-back{margin-left:auto;flex:none;color:var(--accent,#B4451F);font-weight:600;text-decoration:none}
+  .wb-shell-back:hover{text-decoration:underline}
+  .wb-shell-float{position:fixed;right:22px;bottom:22px;z-index:50;display:inline-flex;align-items:center;gap:9px;
+    padding:9px 15px;border:1px solid var(--rule-strong,var(--border,rgba(127,127,127,.4)));border-radius:999px;
+    background:var(--card,var(--panel,rgba(127,127,127,.14)));color:var(--ink,var(--text,inherit));
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;font-size:.8rem;font-weight:600;text-decoration:none;
+    box-shadow:0 2px 4px rgba(0,0,0,.06),0 12px 28px -14px rgba(0,0,0,.4)}
+  .wb-shell-float:hover{color:var(--accent,#B4451F);border-color:var(--accent,#B4451F)}
+  .wb-shell-foot{max-width:760px;margin:56px auto 0;padding:22px 24px 0;
+    border-top:2px solid var(--ink,var(--text,currentColor));
+    display:flex;flex-wrap:wrap;align-items:center;gap:14px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;font-size:.8rem;color:var(--muted,#6C6A73)}
+  .wb-shell-foot b{color:var(--ink,var(--text,inherit))}
+  .wb-shell-foot a{margin-left:auto;color:var(--accent,#B4451F);font-weight:600;text-decoration:none}
+  .wb-shell-foot a:hover{text-decoration:underline}
+  @media (max-width:560px){
+    .wb-shell-bar{gap:8px;padding:8px 14px}
+    .wb-shell-float{right:14px;bottom:14px}
+  }
+</style>
+</head>
+<body>
+<!-- wb:shell:bar:start -->
+<div class="wb-shell-bar">
+  <span class="wb-shell-mark" aria-hidden="true">QY</span>
+  <span class="wb-shell-path">个人工作站 › <b>调查报告</b></span>
+  <a class="wb-shell-back" href="../index.html#survey">← 返回报告清单</a>
+</div>
+<!-- wb:shell:bar:end -->
+<div class="layout">
+
+<!-- ============ sidebar TOC ============ -->
+<aside class="sidebar">
+  <div class="toc-title">目录</div>
+  <nav id="toc">
+    <a href="#s1">速览（5 分钟）</a>
+    <a href="#s2">为什么 AI 工具用 worktree</a>
+    <a href="#s3">AI 工具 × worktree 生命周期</a>
+    <a href="#s3-pi" class="sub">pi-coding-agent</a>
+    <a href="#s3-claude" class="sub">Claude Code</a>
+    <a href="#s3-cursor" class="sub">Cursor</a>
+    <a href="#s3-copilot" class="sub">Copilot Workspace</a>
+    <a href="#s4">命令速查</a>
+    <a href="#s4-create" class="sub">创建</a>
+    <a href="#s4-manage" class="sub">管理</a>
+    <a href="#s4-debug" class="sub">排查</a>
+    <a href="#s4-clean" class="sub">清理</a>
+    <a href="#s5">实战工作流</a>
+    <a href="#s6">原理深潜</a>
+    <a href="#s6-fs" class="sub">文件系统布局</a>
+    <a href="#s6-objects" class="sub">共享对象库</a>
+    <a href="#s6-refs" class="sub">refs 与 HEAD</a>
+    <a href="#s6-limit" class="sub">分支独占限制</a>
+    <a href="#s7">对比与选型</a>
+    <a href="#s8">常见坑与排查</a>
+    <a href="#s9">附录</a>
+  </nav>
+</aside>
+
+<!-- ============ main content ============ -->
+<main class="main">
+
+<!-- ========== S1: 速览 ========== -->
+<h2 id="s1">速览（5 分钟）</h2>
+
+<div class="cards">
+  <div class="card">
+    <div class="card-label">是什么</div>
+    <div class="card-value">git worktree</div>
+    <div class="card-sub">一个仓库同时 checkout 多个分支到不同目录，共享对象库</div>
+  </div>
+  <div class="card">
+    <div class="card-label">为什么 AI 工具用它</div>
+    <div class="card-value">任务隔离</div>
+    <div class="card-sub">每个 AI agent 在独立 worktree 中工作，互不干扰，磁盘开销极小</div>
+  </div>
+  <div class="card">
+    <div class="card-label">核心命令</div>
+    <div class="card-value" style="font-size:.85em;font-family:var(--mono)">
+      git worktree add<br>git worktree list<br>git worktree remove
+    </div>
+    <div class="card-sub">创建 / 查看 / 删除</div>
+  </div>
+</div>
+
+<div class="callout">
+  <div class="co-title">一句话理解</div>
+  <code>git worktree</code> 让你在<strong>不切换分支</strong>的前提下，把另一个分支 checkout 到另一个目录。主仓库的 <code>.git</code> 是一个<strong>目录</strong>；worktree 的 <code>.git</code> 是一个<strong>文件</strong>，指向主仓库里的元数据。两个目录共享同一份 git objects——所以创建 worktree 几乎不占额外磁盘空间。
+</div>
+
+<!-- ========== S2: 为什么 AI 工具用 worktree ========== -->
+<h2 id="s2">为什么 AI 工具用 worktree</h2>
+
+<p>AI 编码工具（pi、Claude Code、Cursor 等）的核心能力是<strong>并行执行多个编码任务</strong>。但传统 git 有一个根本限制：</p>
+
+<div class="callout warn">
+  <div class="co-title">传统痛点</div>
+  一个 git 仓库只有一个工作目录。要切换分支就得 <code>git checkout</code>，未提交的改动要么 stash 要么先 commit。两个 agent 同时改同一个目录 → 文件冲突、状态混乱。
+</div>
+
+<p><code>git worktree</code> 是 git 原生解决这个问题的方案（2.5 版本引入，2015 年）：</p>
+
+<table>
+  <tr><th>需求</th><th>worktree 如何解决</th></tr>
+  <tr><td>两个 agent 同时工作在不同分支</td><td>每个 agent 一个独立 worktree 目录，互不干扰</td></tr>
+  <tr><td>不丢失主分支未提交的改动</td><td>worktree 有独立的 index（暂存区），不影响主目录</td></tr>
+  <tr><td>磁盘开销不能太大</td><td>共享对象库，worktree 只存工作文件 + 少量元数据</td></tr>
+  <tr><td>agent 结束后干净清理</td><td><code>git worktree remove</code> 一条命令移除</td></tr>
+</table>
+
+<!-- ========== S3: AI 工具 × worktree 生命周期 ========== -->
+<h2 id="s3">AI 工具 × worktree 生命周期</h2>
+
+<h3>通用生命周期</h3>
+
+<div class="flow">
+  <div class="flow-step"><span class="step-n">1</span><span class="step-t">Agent 启动</span><span class="step-c">收到任务</span></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step highlight"><span class="step-n">2</span><span class="step-t">worktree add</span><span class="step-c">创建隔离目录</span></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step"><span class="step-n">3</span><span class="step-t">独立编码</span><span class="step-c">读 / 写 / 测试</span></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step"><span class="step-n">4</span><span class="step-t">commit</span><span class="step-c">提交到分支</span></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step"><span class="step-n">5</span><span class="step-t">Agent 结束</span><span class="step-c">任务完成</span></div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step highlight"><span class="step-n">6</span><span class="step-t">worktree remove</span><span class="step-c">清理目录</span></div>
+</div>
+
+<p>关键观察：<strong>步骤 2 和 6 由工具自动执行</strong>，用户通常不需要手动操作。但 agent 崩溃或超时时，worktree 可能残留——这就是第 8 章「常见坑」要解决的问题。</p>
+
+<!-- pi -->
+<h3 id="s3-pi">pi-coding-agent</h3>
+<div class="tool-card">
+  <h4>pi <span class="tool-badge">@earendil-works/pi-coding-agent</span></h4>
+  <div class="tool-desc">pi 的 subagent / workflow 系统支持 <code>worktree: true</code> 选项，为每个子代理创建隔离的 git worktree。</div>
+  <div class="tool-grid">
+    <div><span class="tg-label">何时创建</span><br><span class="tg-val">workflow 中设置 <code>worktree: true</code> 的子代理</span></div>
+    <div><span class="tg-label">命名规则</span><br><span class="tg-val">由 pi 内部管理（managed worktree）</span></div>
+    <div><span class="tg-label">清理方式</span><br><span class="tg-val">子代理结束后自动清理；<code>worktree: false</code> 可覆盖</span></div>
+    <div><span class="tg-label">手动介入</span><br><span class="tg-val">通常不需要；残留时跑 <code>git worktree prune</code></span></div>
+  </div>
+</div>
+
+<!-- Claude Code -->
+<h3 id="s3-claude">Claude Code</h3>
+<div class="tool-card">
+  <h4>Claude Code <span class="tool-badge">Anthropic</span></h4>
+  <div class="tool-desc">Claude Code 的会话绑定目录。官方文档推荐用 git worktree 实现并行会话：「Since sessions are tied to directories, you can run parallel Claude sessions by using git worktrees.」</div>
+  <div class="tool-grid">
+    <div><span class="tg-label">何时创建</span><br><span class="tg-val">用户手动创建 worktree，然后在各目录启动独立 Claude 会话</span></div>
+    <div><span class="tg-label">命名规则</span><br><span class="tg-val">用户自定义（如 <code>~/work/feature-a</code>）</span></div>
+    <div><span class="tg-label">清理方式</span><br><span class="tg-val">用户手动 <code>git worktree remove</code>；<code>/resume</code> 可选择其他 worktree 的会话</span></div>
+    <div><span class="tg-label">手动介入</span><br><span class="tg-val">是——worktree 由用户管理，Claude 不自动创建/清理</span></div>
+  </div>
+</div>
+
+<!-- Cursor -->
+<h3 id="s3-cursor">Cursor</h3>
+<div class="tool-card">
+  <h4>Cursor <span class="tool-badge">Anysphere</span></h4>
+  <div class="tool-desc">Cursor Agent 使用自己的 <strong>Checkpoints</strong> 机制（本地文件快照）做安全回退，而非 git worktree。但 Cursor Agent 可以执行终端命令，包括 <code>git worktree</code>——用户或 agent 可以在 Cursor 中手动创建 worktree 来隔离任务。</div>
+  <div class="tool-grid">
+    <div><span class="tg-label">何时创建</span><br><span class="tg-val">不自动创建；用户可通过 Agent 终端执行 <code>git worktree</code> 命令</span></div>
+    <div><span class="tg-label">命名规则</span><br><span class="tg-val">用户自定义</span></div>
+    <div><span class="tg-label">清理方式</span><br><span class="tg-val">用户手动；Checkpoints 与 worktree 独立</span></div>
+    <div><span class="tg-label">手动介入</span><br><span class="tg-val">是——worktree 不是 Cursor 的内建机制</span></div>
+  </div>
+</div>
+
+<!-- Copilot Workspace -->
+<h3 id="s3-copilot">GitHub Copilot Workspace</h3>
+<div class="tool-card">
+  <h4>Copilot Workspace <span class="tool-badge">GitHub</span></h4>
+  <div class="tool-desc">GitHub 的 Copilot Workspace 在云端 VM 中为每个 issue/task 创建隔离环境。其底层使用 git worktree 机制为并行任务提供独立的工作目录，每个任务在独立 worktree 中执行，完成后通过 PR 合回。</div>
+  <div class="tool-grid">
+    <div><span class="tg-label">何时创建</span><br><span class="tg-val">每个 Workspace 任务自动创建</span></div>
+    <div><span class="tg-label">命名规则</span><br><span class="tg-val">GitHub 内部按 issue/task ID 管理</span></div>
+    <div><span class="tg-label">清理方式</span><br><span class="tg-val">任务完成（PR 合并/关闭）后自动清理</span></div>
+    <div><span class="tg-label">手动介入</span><br><span class="tg-val">通常不需要；云端环境由 GitHub 管理</span></div>
+  </div>
+</div>
+
+<!-- ========== S4: 命令速查 ========== -->
+<h2 id="s4">命令速查</h2>
+
+<details id="s4-create" open>
+<summary>创建</summary>
+<div class="detail-body">
+<pre class="copyable"><code><span class="cmd">git worktree add</span> <span class="out">&lt;path&gt;</span> [branch]
+<span class="out"># 创建 worktree 并 checkout 指定分支</span>
+
+<span class="cmd">git worktree add</span> ../feat-x -b feat-x
+<span class="out"># 创建 worktree 同时创建新分支 feat-x</span>
+
+<span class="cmd">git worktree add</span> ../hotfix --detach
+<span class="out"># 创建 detached HEAD 的 worktree（不跟踪分支）</span>
+
+<span class="cmd">git worktree add</span> ../release --checkout-ignore-sparse
+<span class="out"># 忽略 sparse-checkout 配置</span></code></pre>
+<table>
+  <tr><th>参数</th><th>说明</th></tr>
+  <tr><td><code>&lt;path&gt;</code></td><td>worktree 目录路径（相对或绝对）</td></tr>
+  <tr><td><code>[branch]</code></td><td>要 checkout 的分支（省略则 detached HEAD）</td></tr>
+  <tr><td><code>-b &lt;branch&gt;</code></td><td>创建新分支</td></tr>
+  <tr><td><code>--detach</code></td><td>强制 detached HEAD</td></tr>
+  <tr><td><code>--lock</code></td><td>创建后立即锁定（防止误删）</td></tr>
+  <tr><td><code>--force</code></td><td>强制（即使分支已被其他 worktree 使用）</td></tr>
+</table>
+</div>
+</details>
+
+<details id="s4-manage">
+<summary>管理</summary>
+<div class="detail-body">
+<pre class="copyable"><code><span class="cmd">git worktree list</span>
+<span class="out"># 列出所有 worktree（主仓库 + 所有链接 worktree）</span>
+
+<span class="cmd">git worktree list</span> --porcelain
+<span class="out"># 机器可读格式（脚本用）</span>
+
+<span class="cmd">git worktree move</span> ../old-path ../new-path
+<span class="out"># 移动 worktree 到新路径</span>
+
+<span class="cmd">git worktree lock</span> ../path
+<span class="out"># 锁定（防止 prune 误删）</span>
+
+<span class="cmd">git worktree unlock</span> ../path
+<span class="out"># 解锁</span></code></pre>
+</div>
+</details>
+
+<details id="s4-debug">
+<summary>排查</summary>
+<div class="detail-body">
+<pre class="copyable"><code><span class="cmd">git worktree prune</span>
+<span class="out"># 清理已手动删除的 worktree 的元数据残留</span>
+
+<span class="cmd">git worktree prune</span> -v
+<span class="out"># 显示详细清理信息</span>
+
+<span class="cmd">git worktree repair</span> ../path
+<span class="out"># 修复 .git 文件指向（移动/复制目录后）</span>
+
+<span class="cmd">cat</span> ../path/.git
+<span class="out"># 直接查看 .git 文件内容（应包含 gitdir: 行）</span></code></pre>
+</div>
+</details>
+
+<details id="s4-clean">
+<summary>清理</summary>
+<div class="detail-body">
+<pre class="copyable"><code><span class="cmd">git worktree remove</span> ../feat-x
+<span class="out"># 删除 worktree（有未提交改动时会拒绝）</span>
+
+<span class="cmd">git worktree remove</span> --force ../feat-x
+<span class="out"># 强制删除（即使有未提交改动）</span>
+
+<span class="cmd">git worktree lock</span> --drop ../feat-x
+<span class="out"># 移除锁定标记</span></code></pre>
+<div class="callout danger">
+  <div class="co-title">注意</div>
+  <code>git worktree remove</code> 只删除工作目录和 <code>.git/worktrees/&lt;name&gt;/</code> 元数据。<strong>不会</strong>删除分支本身。分支还在，可以用 <code>git branch -d</code> 单独删除。
+</div>
+</div>
+</details>
+
+<!-- ========== S5: 实战工作流 ========== -->
+<h2 id="s5">实战工作流</h2>
+
+<h3>场景 1：人工并行开发</h3>
+<p>你在 <code>main</code> 上开发功能 A，突然需要修 <code>hotfix</code> 分支的紧急 bug——不想 stash 功能 A 的改动：</p>
+
+<pre class="copyable"><code><span class="cmd">git worktree add</span> ../hotfix hotfix/urgent-bug
+<span class="out">Preparing worktree (checking out 'hotfix/urgent-bug')</span>
+<span class="out">HEAD is now at a1b2c3d fix: null check in parser</span>
+
+<span class="out"># 在 ../hotfix 目录修 bug，commit，push</span>
+<span class="out"># 主目录的功能 A 改动完全不受影响</span>
+
+<span class="cmd">git worktree remove</span> ../hotfix
+<span class="out"># 修完后清理</span></code></pre>
+
+<h3>场景 2：AI agent 并行任务</h3>
+<p>用 pi 的 subagent workflow 并行执行两个任务：</p>
+
+<pre class="copyable"><code><span class="out"># pi workflow 伪代码（实际由 pi 内部调用）</span>
+<span class="cmd">git worktree add</span> /tmp/pi-task-1 -b task/refactor-api
+<span class="cmd">git worktree add</span> /tmp/pi-task-2 -b task/fix-tests
+
+<span class="out"># agent-1 在 /tmp/pi-task-1 中重构 API</span>
+<span class="out"># agent-2 在 /tmp/pi-task-2 中修复测试</span>
+<span class="out"># 两者互不干扰，共享同一个 .git/objects</span>
+
+<span class="cmd">git worktree remove</span> /tmp/pi-task-1
+<span class="cmd">git worktree remove</span> /tmp/pi-task-2
+<span class="out"># 两个 agent 都结束后清理</span></code></pre>
+
+<h3>场景 3：CI/CD 隔离构建</h3>
+<pre class="copyable"><code><span class="out"># CI pipeline 伪代码</span>
+<span class="cmd">git worktree add</span> "$BUILD_DIR" --detach "$COMMIT_SHA"
+<span class="out"># 在独立 worktree 中 checkout 指定 commit（detached）</span>
+<span class="out"># 构建 + 测试 + 打包</span>
+<span class="cmd">git worktree remove</span> --force "$BUILD_DIR"
+<span class="out"># 构建完成后清理（--force 因为可能有构建产物）</span></code></pre>
+
+<!-- ========== S6: 原理深潜 ========== -->
+<h2 id="s6">原理深潜</h2>
+
+<h3 id="s6-fs">文件系统布局</h3>
+<p>以下是一个真实仓库创建 worktree 后的磁盘结构（基于 git 2.43 实测）：</p>
+
+<div class="tree-row">
+  <div class="tree">
+    <div class="tree-title">主仓库 repo/</div>
+    <div class="node">repo/
+├── <span class="hl">.git/</span>                    <span class="dim">← 目录（主仓库）</span>
+│   ├── HEAD              <span class="dim">→ ref: refs/heads/main</span>
+│   ├── config
+│   ├── index              <span class="dim">← 主仓库的暂存区</span>
+│   ├── objects/            <span class="green">← 共享对象库</span>
+│   │   ├── aa/
+│   │   ├── bb/
+│   │   └── pack/
+│   ├── refs/
+│   │   ├── heads/
+│   │   │   ├── main
+│   │   │   └── feat-auth
+│   │   └── tags/
+│   ├── logs/
+│   └── <span class="hl2">worktrees/</span>           <span class="dim">← worktree 元数据</span>
+│       └── feature-auth/
+│           ├── HEAD       <span class="dim">→ ref: refs/heads/feat-auth</span>
+│           ├── index      <span class="dim">← 该 worktree 的暂存区</span>
+│           ├── commondir  <span class="dim">→ ../..（指向主 .git）</span>
+│           ├── gitdir     <span class="dim">→ 指向 worktree 的 .git 文件</span>
+│           ├── logs/
+│           └── refs/      <span class="dim">← per-worktree refs（通常空）</span>
+├── src/
+└── .gitignore</div>
+  </div>
+  <div class="tree">
+    <div class="tree-title">worktree feature-auth/</div>
+    <div class="node">feature-auth/
+├── <span class="hl2">.git</span>                   <span class="yellow">← 文件（不是目录！）</span>
+│   └── 内容:
+│       <span class="hl2">gitdir: /path/to/repo/.git/worktrees/feature-auth</span>
+├── src/
+└── .gitignore
+
+<span class="dim">关键区别：</span>
+<span class="dim">  主仓库: .git 是目录</span>
+<span class="dim">  worktree: .git 是文件</span>
+<span class="dim">  文件内容 = gitdir: + 绝对路径</span>
+<span class="dim">  指向主仓库 .git/worktrees/&lt;name&gt;/</span></div>
+  </div>
+</div>
+
+<div class="callout">
+  <div class="co-title">commondir 文件</div>
+  <code>.git/worktrees/feature-auth/commondir</code> 的内容是 <code>../..</code>——它告诉 git「共享目录（objects、config 等）在两个层级之上」，即主仓库的 <code>.git/</code> 目录。这就是 worktree 和主仓库共享对象库的机制。
+</div>
+
+<h3 id="s6-objects">共享对象库</h3>
+
+<p>所有 worktree 通过 <code>commondir</code> 指向同一个 <code>.git/objects/</code> 目录：</p>
+
+<div class="tree">
+  <div class="tree-title">对象共享示意</div>
+  <div class="node"><span class="green">.git/objects/</span>          <span class="dim">← 只有一份，所有 worktree 共享</span>
+    ├── 5f/
+    │   └── 7a3b2...    <span class="dim">← commit object</span>
+    ├── aa/
+    │   └── 1c9e0...    <span class="dim">← blob object (file content)</span>
+    └── pack/
+        └── pack-xxx.pack <span class="dim">← 打包对象</span>
+
+<span class="dim">主仓库 worktree ──┐</span>
+<span class="dim">                    ├──→ 同一个 .git/objects/</span>
+<span class="dim">feature-auth  ──────┘</span>
+
+<span class="note">创建 worktree 的磁盘开销 ≈ 工作文件大小 + 少量元数据（~100 字节级）</span>
+<span class="note">不是线性增长——10 个 worktree 不会让 objects 膨胀 10 倍</span></div>
+</div>
+
+<h3 id="s6-refs">refs 与 HEAD</h3>
+
+<p>每个 worktree 有自己独立的 <code>HEAD</code> 和 <code>index</code>（暂存区），但 <code>refs</code> 是共享的：</p>
+
+<table>
+  <tr><th>组件</th><th>作用域</th><th>说明</th></tr>
+  <tr><td><code>HEAD</code></td><td>per-worktree</td><td>每个 worktree 可以指向不同分支或 commit</td></tr>
+  <tr><td><code>index</code></td><td>per-worktree</td><td>每个 worktree 有独立的暂存区，互不影响</td></tr>
+  <tr><td><code>refs/heads/</code></td><td>shared</td><td>分支引用在主仓库的 <code>.git/refs/</code> 中，所有 worktree 看到同一组分支</td></tr>
+  <tr><td><code>refs/</code>（per-worktree）</td><td>per-worktree</td><td>通常为空；git 2.29+ 支持 per-worktree refs</td></tr>
+  <tr><td><code>objects/</code></td><td>shared</td><td>所有 worktree 共享</td></tr>
+  <tr><td><code>config</code></td><td>shared</td><td>全局配置在主仓库；per-worktree 可设 <code>core.worktree</code></td></tr>
+</table>
+
+<div class="callout warn">
+  <div class="co-title">Detached HEAD 在 worktree 中</div>
+  用 <code>--detach</code> 或 checkout 一个 commit SHA 创建的 worktree，其 HEAD 直接指向一个 commit 而非分支。这在 CI 场景很常见——构建指定 commit 不需要分支名。AI 工具也常用 detached worktree 做一次性任务。
+</div>
+
+<h3 id="s6-limit">分支独占限制</h3>
+
+<div class="callout danger">
+  <div class="co-title">硬限制：一个分支同一时间只能被一个 worktree checkout</div>
+  <p><code>git worktree add ../x main</code> 会报错，因为 <code>main</code> 已经在主仓库被 checkout 了。这是 git 的<strong>安全机制</strong>——防止两个工作目录同时修改同一分支导致 refs 冲突。</p>
+  <p>所以 AI 工具为每个 agent 创建<strong>独立分支</strong>（或 detached HEAD），而不是多个 worktree 指向同一分支。</p>
+</div>
+
+<pre class="copyable"><code><span class="cmd">git worktree add</span> ../dup main
+<span class="err">fatal: 'main' is already used by worktree at '/path/to/main-repo'</span></code></pre>
+
+<!-- ========== S7: 对比与选型 ========== -->
+<h2 id="s7">对比与选型</h2>
+
+<p>git worktree 不是唯一的「多分支并行」方案。以下是四种常见替代方案的对比：</p>
+
+<div class="cmp-grid">
+  <div class="cmp-card">
+    <h4>git worktree</h4>
+    <div class="cmp-def">同仓库多工作目录</div>
+    <ul>
+      <li><span class="yes">✅</span> 零额外网络开销</li>
+      <li><span class="yes">✅</span> 共享对象库，磁盘极小</li>
+      <li><span class="yes">✅</span> git 原生，无额外依赖</li>
+      <li><span class="yes">✅</span> 分支/commit 实时可见</li>
+      <li><span class="no">❌</span> 同分支不能两个 worktree</li>
+      <li><span class="no">❌</span> 移动目录后需 <code>repair</code></li>
+    </ul>
+    <span class="tag">本地并行</span>
+    <span class="tag">AI agent 隔离</span>
+    <span class="tag">hotfix</span>
+  </div>
+  <div class="cmp-card">
+    <h4>git 子模块</h4>
+    <div class="cmp-def">仓库内嵌仓库</div>
+    <ul>
+      <li><span class="yes">✅</span> 独立版本控制</li>
+      <li><span class="yes">✅</span> 可指向不同远程仓库</li>
+      <li><span class="no">❌</span> 不是为并行开发设计的</li>
+      <li><span class="no">❌</span> 操作复杂（<code>submodule update</code>）</li>
+      <li><span class="no">❌</span> 不共享对象库</li>
+      <li><span class="no">❌</span> 解决的是「代码复用」不是「并行」</li>
+    </ul>
+    <span class="tag">代码复用</span>
+    <span class="tag">多仓库项目</span>
+  </div>
+  <div class="cmp-card">
+    <h4>shallow clone</h4>
+    <div class="cmp-def">部分历史克隆</div>
+    <ul>
+      <li><span class="yes">✅</span> 下载体积小（<code>--depth=1</code>）</li>
+      <li><span class="yes">✅</span> CI 场景省带宽</li>
+      <li><span class="no">❌</span> 独立仓库，不共享对象</li>
+      <li><span class="no">❌</span> 无本地分支历史</li>
+      <li><span class="no">❌</span> 不能 <code>git log</code> 到 depth 之外</li>
+      <li><span class="no">❌</span> 不是 worktree 的替代品</li>
+    </ul>
+    <span class="tag">CI 省带宽</span>
+    <span class="tag">一次性构建</span>
+  </div>
+  <div class="cmp-card">
+    <h4>Docker 容器</h4>
+    <div class="cmp-def">容器化隔离</div>
+    <ul>
+      <li><span class="yes">✅</span> 完全隔离（OS 级）</li>
+      <li><span class="yes">✅</span> 环境一致性（依赖/版本）</li>
+      <li><span class="no">❌</span> 重量级（镜像拉取/启动慢）</li>
+      <li><span class="no">❌</span> 文件系统隔离，调试不便</li>
+      <li><span class="no">❌</span> 需要 Docker daemon</li>
+      <li><span class="no">❌</span> 过度——纯 git 分支隔离不需要</li>
+    </ul>
+    <span class="tag">环境隔离</span>
+    <span class="tag">CI/CD</span>
+    <span class="tag">Dev Container</span>
+  </div>
+</div>
+
+<div class="callout">
+  <div class="co-title">选型建议</div>
+  <strong>本地多分支并行</strong>（人工或 AI agent）→ <code>git worktree</code>（最轻量、git 原生）<br>
+  <strong>CI 省带宽</strong> → <code>git clone --depth=1</code>（shallow clone）<br>
+  <strong>跨仓库代码复用</strong> → <code>git submodule</code><br>
+  <strong>需要完全环境隔离</strong>（不同 OS 依赖）→ Docker / Dev Container
+</div>
+
+<!-- ========== S8: 常见坑与排查 ========== -->
+<h2 id="s8">常见坑与排查</h2>
+
+<div class="decision">
+  <div class="d-title">⚠ 磁盘空间告急</div>
+  <div class="decision-tree">
+<span class="symptom">症状：</span>磁盘空间不够，怀疑 git 仓库膨胀
+<span class="check">→ git worktree list</span>  <span class="note"># 列出所有 worktree</span>
+  <div class="branch">
+    <span class="check">→ du -sh .git/objects/</span>  <span class="note"># 看对象库大小</span>
+    <span class="note">objects 是共享的，不会因 worktree 数量线性增长</span>
+    <span class="check">→ du -sh &lt;每个 worktree 路径&gt;</span>  <span class="note"># 工作文件才是大头</span>
+    <span class="fix">→ git worktree remove &lt;不用的&gt;</span>  <span class="fix"># 清理不用的 worktree</span>
+    <span class="fix">→ git gc --aggressive</span>  <span class="fix"># 压缩对象库（慎用，慢）</span>
+  </div>
+  </div>
+</div>
+
+<div class="decision">
+  <div class="d-title">⚠ AI 工具崩溃后 worktree 残留</div>
+  <div class="decision-tree">
+<span class="symptom">症状：</span>agent 崩溃/超时，worktree 目录还在
+<span class="check">→ git worktree list</span>  <span class="note"># 找到残留</span>
+  <div class="branch">
+    <span class="check">→ cd &lt;残留路径&gt; && git status</span>  <span class="note"># 检查有无未提交改动</span>
+    <div class="branch">
+      <span class="note">有未提交改动：</span>
+      <span class="check">→ git diff</span>  <span class="note"># 看看改动是否值得保留</span>
+      <span class="fix">→ git stash</span>  <span class="fix"># 或 commit 后再 remove</span>
+      <span class="fix">→ git worktree remove &lt;path&gt;</span>
+    </div>
+    <div class="branch">
+      <span class="note">无未提交改动（或不需要）：</span>
+      <span class="fix">→ git worktree remove --force &lt;path&gt;</span>  <span class="fix"># 强制清理</span>
+    </div>
+    <span class="note">如果目录已被手动 rm -rf：</span>
+    <span class="fix">→ git worktree prune</span>  <span class="fix"># 清理元数据残留</span>
+  </div>
+</div>
+</div>
+
+<div class="decision">
+  <div class="d-title">⚠ 多 worktree 下 stash 混乱</div>
+  <div class="decision-tree">
+<span class="symptom">症状：</span><code>git stash pop</code> 应用了错误的改动
+<span class="check">→ git stash list</span>  <span class="note"># 列出所有 stash</span>
+  <div class="branch">
+    <span class="note">stash 是 per-repo 的，所有 worktree 共享同一个 stash 列表</span>
+    <span class="check">→ git stash show -p stash@{n}</span>  <span class="note"># 确认是哪个 worktree 的</span>
+    <span class="fix">→ 避免在多个 worktree 中同时用 stash</span>
+    <span class="fix">→ 替代方案：用 worktree 隔离代替 stash</span>
+  </div>
+</div>
+</div>
+
+<div class="decision">
+  <div class="d-title">⚠ 移动目录后 worktree 报错</div>
+  <div class="decision-tree">
+<span class="symptom">症状：</span><code>fatal: not a git repository</code> 或 <code>gitdir file points to non-existent location</code>
+<span class="check">→ cat .git</span>  <span class="note"># 查看 gitdir 指向</span>
+  <div class="branch">
+    <span class="err">原因：</span>worktree 的 .git 文件存的是绝对路径，移动后失效
+    <span class="fix">→ git worktree repair &lt;path&gt;</span>  <span class="fix"># 修复指向</span>
+    <span class="note">或者：手动编辑 .git 文件中的 gitdir 路径</span>
+  </div>
+</div>
+</div>
+
+<div class="decision">
+  <div class="d-title">⚠ <code>git worktree add</code> 报分支已被使用</div>
+  <div class="decision-tree">
+<span class="symptom">症状：</span><code>fatal: 'main' is already used by worktree at '...'</code>
+  <div class="branch">
+    <span class="err">原因：</span>一个分支同一时间只能被一个 worktree checkout
+    <span class="fix">→ 创建新分支：</span><span class="fix">git worktree add ../x -b my-new-branch</span>
+    <span class="fix">→ 或用 detached：</span><span class="fix">git worktree add ../x --detach</span>
+    <span class="fix">→ 或强制（危险）：</span><span class="fix">git worktree add --force ../x main</span>
+  </div>
+</div>
+</div>
+
+<!-- ========== S9: 附录 ========== -->
+<h2 id="s9">附录</h2>
+
+<h3>版本历史</h3>
+<table>
+  <tr><th>版本</th><th>年份</th><th>变更</th></tr>
+  <tr><td>2.5.0</td><td>2015</td><td><code>git worktree</code> 命令引入（<code>add</code> / <code>remove</code> / <code>list</code>）</td></tr>
+  <tr><td>2.9.0</td><td>2016</td><td>增加 <code>--detach</code>、<code>--lock</code> 选项</td></tr>
+  <tr><td>2.11.0</td><td>2017</td><td>增加 <code>git worktree move</code></td></tr>
+  <tr><td>2.20.0</td><td>2018</td><td>增加 <code>git worktree repair</code></td></tr>
+  <tr><td>2.29.0</td><td>2020</td><td>支持 per-worktree refs</td></tr>
+  <tr><td>2.43+</td><td>2023+</td><td>持续改进 sparse-checkout 交互</td></tr>
+</table>
+
+<h3>相关文档</h3>
+<ul>
+  <li><a href="https://git-scm.com/docs/git-worktree" target="_blank" rel="noopener">git worktree 官方文档 ↗</a></li>
+  <li><a href="https://git-scm.com/book/en/v2/Git-Tools-Worktrees" target="_blank" rel="noopener">Pro Git: Worktrees ↗</a></li>
+  <li><a href="https://docs.anthropic.com/en/docs/claude-code/how-claude-code-works" target="_blank" rel="noopener">Claude Code: How it works ↗</a></li>
+  <li><a href="https://cursor.com/docs/agent" target="_blank" rel="noopener">Cursor Agent 文档 ↗</a></li>
+</ul>
+
+</main>
+</div>
+
+<!-- ============ inline JS ============ -->
+<script>
+// TOC scroll-spy
+(function(){
+  const links=[...document.querySelectorAll('#toc a[href^="#"]')];
+  const ids=links.map(a=>a.getAttribute('href').slice(1));
+  const secs=ids.map(id=>document.getElementById(id)).filter(Boolean);
+  function onScroll(){
+    let cur=secs[0];
+    for(const s of secs){if(s.getBoundingClientRect().top<=80)cur=s;}
+    links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+(cur?cur.id:'')));
+  }
+  window.addEventListener('scroll',onScroll,{passive:true});
+  onScroll();
+})();
+
+// code copy
+document.querySelectorAll('pre.copyable').forEach(pre=>{
+  pre.addEventListener('click',e=>{
+    if(e.target.textContent==='copy'){
+      navigator.clipboard.writeText(pre.textContent.replace('copy','').trim()).then(()=>{
+        pre.classList.add('copied');
+        setTimeout(()=>pre.classList.remove('copied'),1500);
+      });
+    }
+  });
+});
+</script>
+<!-- wb:shell:foot:start -->
+<div class="wb-shell-foot">
+  <span>这份报告属于 <b>个人工作站 › 调查报告</b></span>
+  <a href="../index.html#survey">← 返回报告清单</a>
+</div>
+<!-- wb:shell:foot:end -->
+<!-- wb:shell:float:start -->
+<a class="wb-shell-float" href="../index.html#survey">
+  <span class="wb-shell-mark" aria-hidden="true">QY</span>
+  <span>返回调查报告</span>
+</a>
+<!-- wb:shell:float:end -->
+</body>
+</html>

@@ -3,6 +3,14 @@
   "tags": ["技能生态", "工具横评", "工程实践", "模型", "环境配置", "学习资料", "版本履历"],
   "reports": [
     {
+      "file": "git-worktree-research.html",
+      "title": "git worktree 调查报告：AI 工具视角",
+      "date": "2026-10-19",
+      "tags": ["工程实践", "工具横评"],
+      "summary": "从 AI 编码工具视角理解 git worktree：文件系统原理、四工具对比、命令速查、常见坑与排查决策树。",
+      "source": { "label": "Git", "url": "https://git-scm.com/docs/git-worktree" }
+    },
+    {
       "file": "pi-changelog.html",
       "title": "pi 更新履历：0.10.0 → 1.3.0",
       "date": "2026-10-15",
