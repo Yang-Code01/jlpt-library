@@ -25,6 +25,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { FAVICON } from './brand.mjs';
+import { railHtml } from './shell.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const rel = (p) => path.join(ROOT, ...p.split('/'));
@@ -534,14 +535,22 @@ function build() {
   meta.generated = crypto.createHash('sha256')
     .update(JSON.stringify(bandsOut)).digest('hex').slice(0, 16);
 
-  for (const a of picked) files['en/reading/' + a.band + '/' + pad(a.no) + '.html'] = articlePage(a);
-  files['en/reading/index.html'] = listPage(meta);
+  for (const a of picked) files['en/reading/' + a.band + '/' + pad(a.no) + '.html'] = withRail(articlePage(a), '../../../', 'en-reading');
+  files['en/reading/index.html'] = withRail(listPage(meta), '../../', 'en-reading');
   files['__portal_region__'] = portalRegion(meta);
 
   return { files, meta, ctx, picked, pool, skipped, books };
 }
 
 /* -------------------------------- 页面模板 ------------------------------- */
+/* 左栏（ADR-0010）：生成页也常驻 56px 图标条，与手写页同一份 markup */
+var LF = String.fromCharCode(10);
+function withRail(page, prefix, active) {
+  return page.replace(/<body([^>]*)>/, function (m, attrs) {
+    return '<body class="has-rail"' + attrs + '>' + LF + railHtml({ prefix: prefix, active: active });
+  });
+}
+
 function articlePage(a) {
   const key = 'en/reading/' + a.band + '/' + pad(a.no) + '.html';
   const title = a.book.title + ' · 第 ' + a.no + ' 篇 · 英语阅读 · 个人工作站';

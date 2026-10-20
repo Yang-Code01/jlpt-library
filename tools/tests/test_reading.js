@@ -278,10 +278,10 @@ section('F 门户英语面：阅读行与总分母');
   eq(read.length, 30, '阅读行 30 条');
   eq(d.querySelector('[data-en-overall]').textContent, '已看 0/107', '总进度分母 107');
   const prog = d.querySelectorAll('[data-en-prog]').map((s) => s.textContent);
-  const rows = d.querySelectorAll('#en-paths .path-row');
-  eq(rows.length, 2, '阅读已有自己的 feature-block，不再在 .path-list 里重复一行');
-  eq(rows.map((r) => r.querySelector('.row-index').textContent).join(','), '03,04',
-    '入口行编号接在两个 feature-block（01/02）之后');
+  /* ADR-0010：语言学习区改成模块卡片，旧的编号入口行（.path-row）已退休 */
+  const raw = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+  eq((raw.match(/<article class="card"/g) || []).length, 11, '语言学习区 11 张模块卡');
+  ok(/<article class="card"[\s\S]{0,700}?href="en\/reading\/index\.html"/.test(raw), '阅读精读卡片存在');
   ok(prog.some((t) => t === '已看 0/8'), '阅读 1k 档分组计数 已看 0/8', prog.join(' | '));
   ok(prog.some((t) => t === '已看 0/20'), '词表 1k 档分组计数 已看 0/20', prog.join(' | '));
 }

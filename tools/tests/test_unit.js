@@ -166,32 +166,17 @@ function portalSandbox(seedLang, seedDone) {
   });
 }
 
-section('E 门户双语壳');
+section('E 门户：语言轴已并进分组，英语清单与进度分母不动');
 {
   const sb = portalSandbox();
   const d = sb.__doc;
-  eq(d.documentElement.getAttribute('data-lang'), 'ja', '默认日语');
+  /* ADR-0010：不再有 data-lang 与语言 tab —— 日语/英语是同一区里的两个分组 */
+  eq(d.documentElement.getAttribute('data-lang'), null, '不再有 data-lang 轴');
+  eq(d.querySelectorAll('[data-tab="en"]').length, 0, '语言切换 tab 已移除');
   eq(d.querySelector('[data-en-overall]').textContent, '已看 0/107', '总进度分母来自门户全部英语单元（77 词表 + 30 阅读）');
   eq(d.querySelectorAll('.en-band [data-en-prog]').length, 8, '分组计数：词表 4 档 + 阅读 4 档');
   eq(d.querySelector('#en-band-1k [data-en-prog]').textContent, '已看 0/20', '词表 1k 档 20 页');
   eq(d.querySelector('#en-read-1k [data-en-prog]').textContent, '已看 0/8', '阅读 1k 档的分组计数是另一套（篇）');
-
-  d.querySelector('[data-tab="en"]').click();
-  eq(d.documentElement.getAttribute('data-lang'), 'en', '切到英语：改的是 html[data-lang]');
-  eq(sb.__store.get('jlpt-lang'), 'en', '记在 localStorage');
-  eq(d.querySelector('[data-tab="en"]').getAttribute('aria-selected'), 'true', 'tab 状态跟着切');
-  ok(d.querySelector('[data-tab="en"]').classList.contains('on'), 'tab 高亮跟着切');
-  eq(sb.location.hash, '', '切语言不改网址（不加 hash）');
-  eq(sb.location.pathname, '/index.html', '也不改路径');
-
-  d.querySelector('[data-tab="ja"]').click();
-  eq(d.documentElement.getAttribute('data-lang'), 'ja', '切回日语');
-  eq(sb.__store.get('jlpt-lang'), 'ja', '记忆跟着回写');
-}
-{
-  /* 记住的语言要在首次绘制前就生效（不闪一下日语） */
-  const sb = portalSandbox('en', null);
-  eq(sb.__doc.documentElement.getAttribute('data-lang'), 'en', '刷新后仍在英语');
 }
 {
   const sb = portalSandbox(null, { 'en/1k/01.html': 111, 'en/2k/21.html': 222, 'n5/grammar/01.html': 333 });

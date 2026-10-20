@@ -19,6 +19,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { FAVICON } from './brand.mjs';
+import { railHtml } from './shell.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const rel = (p) => path.join(ROOT, ...p.split('/'));
@@ -210,7 +211,7 @@ function build(csvPath) {
       pageUnits.push({ band: b.id, unit: no, from: b.from + w0 - 1, to: b.from + w1 - 1, i: w0, j: w1 });
     }
   }
-  for (const u of pageUnits) files['en/' + u.band + '/' + pad(u.unit) + '.html'] = unitPage(u, bands);
+  for (const u of pageUnits) files['en/' + u.band + '/' + pad(u.unit) + '.html'] = withRail(unitPage(u, bands), '../../', 'en-vocab');
 
   /* 门户清单区：由生成器写进 index.html 的标记区，避免 77 行手工维护漂移。 */
   const unitsByBand = {};
@@ -227,6 +228,14 @@ function esc(t) {
 }
 
 /* favicon 的唯一定义在 tools/brand.mjs（见那里的注释）。 */
+
+/* 左栏（ADR-0010）：生成页也常驻 56px 图标条，与手写页同一份 markup */
+var LF = String.fromCharCode(10);
+function withRail(page, prefix, active) {
+  return page.replace(/<body([^>]*)>/, function (m, attrs) {
+    return '<body class="has-rail"' + attrs + '>' + LF + railHtml({ prefix: prefix, active: active });
+  });
+}
 
 function unitPage(u, bands) {
   if (!Number.isFinite(u.from) || !Number.isFinite(u.to)) {

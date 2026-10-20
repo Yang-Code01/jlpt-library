@@ -85,27 +85,45 @@
     background:var(--card,var(--panel,rgba(127,127,127,.08)));
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;font-size:.78rem;line-height:1.6}
   .wb-shell-mark{display:grid;place-items:center;flex:none;width:20px;height:20px;border-radius:5px;
-    background:var(--accent,#B4451F);color:#fff;font-size:.7rem;font-weight:700;letter-spacing:-.01em;
+    background:#176b75;color:#fff;font-size:.7rem;font-weight:700;letter-spacing:-.01em;
     /* QY 是两枚拉丁大写 —— 字号按 20px 容器实测定（.scratch/icons/probe-mark.mjs）；
        门户头部那枚 30px 的同形标记在 index.html 的 .portal-brand-mark 里，两处要一起改。 */
     font-family:Georgia,"Times New Roman","Songti SC",serif}
   .wb-shell-path{color:var(--muted,#6C6A73)}
   .wb-shell-path b{color:var(--ink,var(--text,inherit));font-weight:600}
-  .wb-shell-back{margin-left:auto;flex:none;color:var(--accent,#B4451F);font-weight:600;text-decoration:none}
+  .wb-shell-back{margin-left:auto;flex:none;color:var(--accent,#176b75);font-weight:600;text-decoration:none}
   .wb-shell-back:hover{text-decoration:underline}
   .wb-shell-float{position:fixed;right:22px;bottom:22px;z-index:50;display:inline-flex;align-items:center;gap:9px;
     padding:9px 15px;border:1px solid var(--rule-strong,var(--border,rgba(127,127,127,.4)));border-radius:999px;
     background:var(--card,var(--panel,rgba(127,127,127,.14)));color:var(--ink,var(--text,inherit));
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;font-size:.8rem;font-weight:600;text-decoration:none;
     box-shadow:0 2px 4px rgba(0,0,0,.06),0 12px 28px -14px rgba(0,0,0,.4)}
-  .wb-shell-float:hover{color:var(--accent,#B4451F);border-color:var(--accent,#B4451F)}
+  .wb-shell-float:hover{color:var(--accent,#176b75);border-color:var(--accent,#176b75)}
   .wb-shell-foot{max-width:760px;margin:56px auto 0;padding:22px 24px 0;
     border-top:2px solid var(--ink,var(--text,currentColor));
     display:flex;flex-wrap:wrap;align-items:center;gap:14px;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;font-size:.8rem;color:var(--muted,#6C6A73)}
   .wb-shell-foot b{color:var(--ink,var(--text,inherit))}
-  .wb-shell-foot a{margin-left:auto;color:var(--accent,#B4451F);font-weight:600;text-decoration:none}
+  .wb-shell-foot a{margin-left:auto;color:var(--accent,#176b75);font-weight:600;text-decoration:none}
   .wb-shell-foot a:hover{text-decoration:underline}
+  /* ---- 正文排版（opt-in）：给报告正文容器加 class="wb-prose" 即生效 ---- */
+  .wb-prose{max-width:74ch}
+  .wb-prose h2{font-size:1.32em;line-height:1.35;margin:2em 0 .55em;padding-bottom:.28em;
+    border-bottom:1px solid var(--rule,var(--border,rgba(127,127,127,.28)))}
+  .wb-prose h3{font-size:1.08em;margin:1.6em 0 .4em}
+  .wb-prose p,.wb-prose li{line-height:1.78}
+  .wb-prose ul,.wb-prose ol{padding-left:1.35em}
+  .wb-prose li{margin:.28em 0}
+  .wb-prose table{width:100%;border-collapse:collapse;font-size:.94em;margin:1em 0}
+  .wb-prose th,.wb-prose td{padding:.5em .7em;text-align:left;vertical-align:top;
+    border-bottom:1px solid var(--rule,var(--border,rgba(127,127,127,.22)))}
+  .wb-prose th{font-weight:600;color:var(--ink,var(--text,inherit))}
+  .wb-prose pre{overflow:auto;padding:12px 14px;margin:1em 0;border-radius:10px;
+    background:var(--card,var(--panel,rgba(127,127,127,.08)));font-size:.9em;line-height:1.6}
+  .wb-prose code{font-size:.94em}
+  .wb-prose blockquote{margin:1em 0;padding:.2em 0 .2em 1em;
+    border-left:3px solid var(--accent,#176b75);color:var(--muted,#6C6A73)}
+  .wb-prose a{color:var(--accent,#176b75)}
   @media (max-width:560px){
     .wb-shell-bar{gap:8px;padding:8px 14px}
     .wb-shell-float{right:14px;bottom:14px}

@@ -125,6 +125,9 @@ function guardNoFetch() {
 /* 静态校验：与套件同样对待，缺依赖就 SKIP */
 const CHECKS = [
   { fn: guardNoFetch, name: 'file:// 硬约束（无 fetch/XHR）', needs: [] },
+  { cmd: ['node', 'tools/rail.mjs', 'check'], name: '左栏一致性（全站）', needs: [] },
+  { cmd: ['node', 'tools/portal.mjs', 'check'], name: '门户进度分母', needs: [] },
+  { cmd: ['node', 'tools/tests/contrast-and-tokens.js'], name: '三主题对比度 + 裸色值', needs: [] },
   { cmd: ['node', 'tools/research.mjs', 'check'], name: '调查报告清单自洽',   needs: [] },
   { cmd: ['node', 'tools/tools.mjs', 'check'], name: '工具开发清单自洽',   needs: [] },
   { cmd: ['node', 'tools/pi-changelog-gen.mjs', 'check'], name: 'pi 更新履历报告', needs: ['pi'] },
