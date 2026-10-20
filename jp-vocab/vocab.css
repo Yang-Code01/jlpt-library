@@ -6,19 +6,12 @@
    ============================================================ */
 
 :root{
-  --paper:#f5f6f7;
-  --surface:#ffffff;
-  --surface-2:#eef1f3;
-  --ink:#17202a;
-  --muted:#66727e;
+  /* 颜色一律继承 assets/style.css 的令牌（ADR-0010）。这里曾经重复定义
+     --paper/--surface/--accent 等，把全站令牌覆盖回旧配色 —— 已删除。
+     只保留本页自己的形状与阴影。 */
   --line:var(--border);
   --line-soft:var(--border-soft);
-  --accent:#c3422a;
-  --accent-ink:#8e2a18;
-  --accent-soft:#f7e9e5;
-  --green:#3f7a5a;
   --green-soft:var(--green-l);
-  --red:#a33b3b;
   --red-soft:var(--red-l);
   --shadow:0 18px 48px rgba(28,43,58,.1);
   --shadow-hover:0 22px 58px rgba(28,43,58,.15);

@@ -278,5 +278,5 @@
   #pdf-root .q-block { margin-bottom: 12px; break-inside: auto; }
   #pdf-root .q-head, #pdf-root .opts { break-inside: avoid; }
   #pdf-root .q-passage { break-inside: auto; }
-  #pdf-root .opt.correct .o-idx { background: var(--green); color: #fff; }
+  #pdf-root .opt.correct .o-idx { background: var(--green); color: var(--on-strong); }
 }

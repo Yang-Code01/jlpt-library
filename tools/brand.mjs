@@ -24,4 +24,4 @@ export const MARK = 'QY';
    32×32 视框 / rx9 / 主色底（浅色 #b93e28）/ 白字 / Georgia / 字号 14 /
    字距 −0.3 / y=20.5（视线居中）。
    深色模式不做第二份 —— 16px 下这点色差看不出来，而多一份就多一处要同步。 */
-export const FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23b93e28'/%3E%3Ctext x='16' y='20.5' font-size='14' letter-spacing='-0.3' font-family='Georgia,serif' fill='%23ffffff' text-anchor='middle'%3EQY%3C/text%3E%3C/svg%3E";
+export const FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23176b75'/%3E%3Ctext x='16' y='20.5' font-size='14' letter-spacing='-0.3' font-family='Georgia,serif' fill='%23ffffff' text-anchor='middle'%3EQY%3C/text%3E%3C/svg%3E";

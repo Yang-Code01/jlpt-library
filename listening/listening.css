@@ -44,7 +44,7 @@
 .lv-badge {
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 30px; height: 22px; border-radius: var(--radius-chip);
-  font-size: 11px; font-weight: 700; color: #fff; padding: 0 6px;
+  font-size: 11px; font-weight: 700; color: var(--on-strong); padding: 0 6px;
 }
 .lv-n1 { background: var(--sumi-1); }
 .lv-n2 { background: var(--sumi-2); }
@@ -166,9 +166,9 @@
 }
 .opt-item.selected .oi-num { background: var(--accent); color: var(--on-accent); }
 .opt-item.correct { border-color: var(--green-line); background: var(--green-l); }
-.opt-item.correct .oi-num { background: var(--green); color: #fff; }
+.opt-item.correct .oi-num { background: var(--green); color: var(--on-strong); }
 .opt-item.wrong { border-color: var(--red-line); background: var(--red-l); }
-.opt-item.wrong .oi-num { background: var(--red); color: #fff; }
+.opt-item.wrong .oi-num { background: var(--red); color: var(--on-strong); }
 .opt-list[data-locked] .opt-item { cursor: default; }
 .opt-list[data-locked] .opt-item:hover { border-color: var(--border); }
 .opt-list[data-locked] .opt-item.selected:hover { border-color: var(--accent); }
@@ -279,8 +279,8 @@
 .q-dot:hover { border-color: var(--accent-line); }
 .q-dot.cur { border-color: var(--accent); border-width: 2px; color: var(--accent-ink); font-weight: 700; }
 .q-dot.answered { background: var(--ink); color: var(--paper); border-color: var(--ink); }
-.q-dot.correct { background: var(--green); color: #fff; border-color: var(--green); }
-.q-dot.wrong { background: var(--red); color: #fff; border-color: var(--red); }
+.q-dot.correct { background: var(--green); color: var(--on-strong); border-color: var(--green); }
+.q-dot.wrong { background: var(--red); color: var(--on-strong); border-color: var(--red); }
 
 /* 确认按钮行 */
 .confirm-row { margin-top: 14px; display: flex; justify-content: center; }
@@ -308,11 +308,11 @@
   border-radius: 999px; padding: 6px 12px 6px 7px;
   transition: background .15s, border-color .15s;
 }
-.pdf-btn:hover { background: #f6eae7; border-color: var(--accent); }
+.pdf-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
 .pdf-ico {
   display: inline-flex; align-items: center; justify-content: center;
   width: 17px; height: 17px; border-radius: 50%;
-  background: #f6eae7; color: var(--accent); font-size: 12px; line-height: 1;
+  background: var(--accent-soft); color: var(--accent); font-size: 12px; line-height: 1;
 }
 @media (max-width: 520px) {
   .pdf-btn { font-size: 11px; padding: 5px 9px 5px 6px; }

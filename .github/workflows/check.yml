@@ -19,3 +19,5 @@ jobs:
           node-version: '22'
       - name: 逻辑套件 + 静态校验
         run: node tools/test.mjs
+      - name: 调查报告管线校验
+        run: node tools/research.mjs check

@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>个人工作站 · Personal Workbench</title>
 <meta name="description" content="个人工作站：日语与英语两条自学路径、AI 调查报告与自建工具，全部离线可用。">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23b93e28'/%3E%3Ctext x='16' y='20.5' font-size='14' letter-spacing='-0.3' font-family='Georgia,serif' fill='%23ffffff' text-anchor='middle'%3EQY%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23176b75'/%3E%3Ctext x='16' y='20.5' font-size='14' letter-spacing='-0.3' font-family='Georgia,serif' fill='%23ffffff' text-anchor='middle'%3EQY%3C/text%3E%3C/svg%3E">
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/theme.js"></script>
 <script>
   /* 两级导航：一级是「区」（语言学习 / 调查报告），二级是语言（日本語 / English）。
-     两个状态都落在 <html> 上：data-area=study|survey、data-lang=ja|en，标题与描述由
-     这两个属性算出来。与主题同一套路，进 <head> 里先落一次，避免首屏闪错区／闪日语。
+     状态只落在 <html data-area> 上（study|survey|tools|snooker），标题与描述由它算出来。
+     与主题同一套路，进 <head> 里先落一次，避免首屏闪错区。语言轴已在 ADR-0010 里移除：
+     日语与英语并列为同一区里的两个分组小标题。
      键名 jlpt-area / jlpt-lang，默认 study / ja；只记在浏览器里，不写进 URL —— URL 是
      书签与深链的身份，不该被区与语言污染。应用逻辑只写一遍：这里定义，页尾再补按钮态。
 
@@ -48,8 +49,7 @@
       var root = document.documentElement;
       var raw = root.getAttribute('data-area');
       var area = raw === 'survey' || raw === 'tools' || raw === 'snooker' ? raw : 'study';
-      var lang = root.getAttribute('data-lang') === 'en' ? 'en' : 'ja';
-      var meta = area === 'survey' ? S : area === 'tools' ? W : area === 'snooker' ? N : T[lang];
+      var meta = area === 'survey' ? S : area === 'tools' ? W : area === 'snooker' ? N : T.ja;
       document.title = meta.t;
       var m = document.querySelector('meta[name="description"]');
       if (m) m.setAttribute('content', meta.d);
@@ -60,9 +60,9 @@
       var a = raw === 'survey' ? 'survey' : raw === 'tools' ? 'tools' : raw === 'snooker' ? 'snooker' : 'study';
       document.documentElement.setAttribute('data-area', a);
       var onBtn = null;
-      Array.prototype.forEach.call(document.querySelectorAll('.wb-tabs button'), function (b) {
+      Array.prototype.forEach.call(document.querySelectorAll('[data-area-btn]'), function (b) {
         var on = b.getAttribute('data-area-btn') === a;
-        b.classList.toggle('on', on);
+        b.classList.toggle('is-on', on);
         b.setAttribute('aria-selected', on ? 'true' : 'false');
         if (on) onBtn = b;
       });
@@ -71,24 +71,13 @@
         try { onBtn.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) {}
       }
       syncMeta();
+      /* 顶栏那枚标题跟着区走（左栏高亮负责「你在哪」，标题负责「这是什么区」）。 */
+      var TITLES = { study: '语言学习', survey: '调查报告', tools: '工具开发', snooker: '斯诺克信息' };
+      var t = document.querySelector('.topbar-title');
+      if (t) t.textContent = TITLES[a];
       if (persist) { try { localStorage.setItem('jlpt-area', a); } catch (e) {} }
       return a;
     };
-    window.portalApplyLang = function (lang, persist) {
-      var l = T[lang] ? lang : 'ja';
-      document.documentElement.setAttribute('data-lang', l);
-      Array.prototype.forEach.call(document.querySelectorAll('.lang-tabs button'), function (b) {
-        var on = b.getAttribute('data-tab') === l;
-        b.classList.toggle('on', on);
-        b.setAttribute('aria-selected', on ? 'true' : 'false');
-      });
-      syncMeta();
-      if (persist) { try { localStorage.setItem('jlpt-lang', l); } catch (e) {} }
-      return l;
-    };
-    var init = 'ja';
-    try { if (localStorage.getItem('jlpt-lang') === 'en') init = 'en'; } catch (e) {}
-    document.documentElement.setAttribute('data-lang', init);
     var initArea = 'study';
     try {
       var saved = localStorage.getItem('jlpt-area');
@@ -100,7 +89,6 @@
     else if (location.hash === '#snooker') initArea = 'snooker';
     document.documentElement.setAttribute('data-area', initArea);
     syncMeta();
-    window.PORTAL_LANG_INIT = init;
     window.PORTAL_AREA_INIT = initArea;
   })();
 </script>
@@ -596,10 +584,7 @@
 
   /* ---------- 语言开关 ----------
      两套入口 DOM 同时存在，靠 <html data-lang> 显隐：不重建 DOM、不换网址。 */
-  html[data-lang="ja"] .lang-pane[data-pane="en"],
-  html[data-lang="en"] .lang-pane[data-pane="ja"] {
-    display: none;
-  }
+  /* ADR-0010：语言轴移除，.lang-pane 的显隐规则随之退休 */
 
   .lang-tabs {
     margin-left: auto;
@@ -1460,178 +1445,260 @@
     .zone-aside .snk-q { width: 100%; }
   }
 </style>
+<style id="wb-v2">
+/* ====================== 工作台壳 v2（ADR-0010） ======================
+   门户 = 左栏 180px（常驻、可折叠分组）+ 顶栏 48px + 单列卡片（卡内左内容 / 右指标）。
+   只作用于门户：与旧四区样式（.survey-* / .snk-* / .zone-*）不冲突。 */
+.portal.wrap { max-width: none; margin: 0; padding: 0; display: grid; grid-template-columns: 180px minmax(0, 1fr); align-items: start; }
+.portal > .rail { grid-column: 1; grid-row: 1 / span 99; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 2px; padding: 18px 12px 12px; background: var(--surface-2); border-right: 1px solid var(--border-soft); overflow-y: auto; }
+.portal > *:not(.rail) { grid-column: 2; }
+
+.rail-brand { display: flex; align-items: center; gap: 9px; height: 44px; padding: 0 10px; border-radius: 8px; text-decoration: none; color: var(--ink); }
+.portal-brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: var(--accent); color: var(--on-accent); font-family: Georgia, "Times New Roman", serif; font-size: 12.5px; letter-spacing: -.3px; }
+.rail-name { font-size: 14px; font-weight: 600; white-space: nowrap; }
+.rail-nav { display: flex; flex-direction: column; gap: 2px; flex: 1 1 auto; overflow-y: auto; }
+.rail-group { display: block; }
+.rail-group > summary { list-style: none; cursor: pointer; }
+.rail-group > summary::-webkit-details-marker { display: none; }
+.rail-area { display: flex; align-items: center; gap: 10px; width: 100%; height: 40px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; }
+.rail-area .im { --im-size: 17px; opacity: .8; }
+.rail-area.is-on .im { opacity: 1; }
+.rail-area:hover { background: var(--accent-soft); color: var(--accent-ink); }
+.rail-area.is-on { background: var(--surface); box-shadow: 0 1px 2px rgba(28,39,51,.10); color: var(--accent-ink); }
+.rail-chev { margin-left: auto; font-size: 11px; color: var(--muted); transition: transform .15s ease; }
+.rail-group[open] .rail-chev { transform: rotate(90deg); }
+.rail-sub { margin: 0; padding: 12px 10px 4px; font-size: 11px; color: var(--muted); }
+.rail-item { display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 10px; border-radius: 8px; color: var(--muted); font-size: 13.5px; text-decoration: none; white-space: nowrap; }
+.rail-item .im { --im-size: 16px; opacity: .7; }
+.rail-item:hover { background: var(--accent-soft); color: var(--accent-ink); }
+.rail .theme-slot { margin: 0 4px; }
+.rail-foot { display: flex; gap: 12px; padding: 10px 10px 0; border-top: 1px solid var(--border-soft); font-size: 11.5px; }
+.rail-foot a { color: var(--muted); text-decoration: none; }
+.rail-foot a:hover { color: var(--accent); }
+
+.topbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 14px; height: 48px; padding: 0 28px; background: var(--paper); border-bottom: 1px solid var(--border-soft); }
+.topbar-title { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.1px; white-space: nowrap; }
+.rail-toggle { display: none; width: 30px; height: 30px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 15px; line-height: 1; cursor: pointer; }
+.tabs { display: flex; gap: 2px; flex: 1 1 auto; overflow-x: auto; scrollbar-width: none; }
+html:not([data-area="study"]) .tabs { display: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { height: 26px; padding: 0 10px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); font: inherit; font-size: 12.5px; cursor: pointer; white-space: nowrap; }
+.tab:hover { background: var(--accent-soft); color: var(--accent-ink); }
+.tab.is-on { background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
+.search input { width: 230px; height: 30px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--muted); font: inherit; font-size: 12.5px; }
+
+.wb-pane { padding: 22px 28px 64px; }
+.pane-head { margin-bottom: 14px; }
+.pane-head h2 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: -.4px; }
+.pane-head p { margin: 5px 0 0; font-size: 13px; color: var(--muted); }
+.pane-split { margin: 16px 0 7px; font-size: 11px; color: var(--muted); }
+
+.cards { display: flex; flex-direction: column; gap: 8px; }
+.card { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 168px; grid-template-rows: auto auto auto auto; column-gap: 24px; align-items: center; padding: 11px 18px 12px; background: var(--surface); border: 1px solid var(--border-soft); border-radius: 12px; box-shadow: 0 1px 2px rgba(32, 42, 48, .03); }
+.card:hover { border-color: var(--border); box-shadow: 0 3px 12px rgba(28, 39, 51, .07); }
+.card-head, .card-title, .card-desc, .card-foot { grid-column: 1; }
+.card-head { display: flex; align-items: center; gap: 7px; min-height: 17px; font-size: 12.5px; }
+.card-kicker { color: var(--muted); }
+.pill { display: inline-flex; align-items: center; gap: 4px; height: 18px; padding: 0 7px; border-radius: 999px; background: var(--amber-soft); color: var(--amber-ink); font-size: 11px; font-weight: 500; white-space: nowrap; }
+.pill::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.card-title { margin: 1px 0 0; font-size: 17px; font-weight: 650; line-height: 1.55; letter-spacing: -.3px; }
+.card-title a { color: inherit; text-decoration: none; }
+.card-title a::after { content: ""; position: absolute; inset: 0; z-index: 0; }
+.card:hover .card-title { color: var(--accent-ink); }
+.card-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin: 1px 0 0; color: var(--muted); font-size: 14.5px; line-height: 1.6; }
+.card-foot { margin-top: 9px; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { display: inline-flex; align-items: center; gap: 5px; height: 21px; padding: 0 8px; border: 1px solid var(--border-soft); border-radius: 999px; background: var(--surface-2); color: var(--muted); font-size: 11.5px; text-decoration: none; white-space: nowrap; }
+.chip b { font-weight: 600; color: var(--ink); }
+.chip-plain { background: transparent; }
+a.chip:hover { border-color: var(--accent-line); background: var(--accent-soft); color: var(--accent-ink); }
+.card-side { position: relative; z-index: 1; grid-column: 2; grid-row: 1 / span 4; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 7px; text-align: right; }
+.prog-pill { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 22px; padding: 0 9px; border-radius: 999px; background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent-line); color: var(--accent-ink); font-size: 12px; white-space: nowrap; overflow: hidden; }
+.prog-pill > i { position: absolute; left: 0; top: 0; bottom: 0; width: var(--p, 0%); background: var(--accent-line); opacity: .55; }
+.prog-label, .prog-sep, .prog-val { position: relative; }
+.prog-label { font-size: 11px; opacity: .78; }
+.prog-sep { width: 1px; height: 10px; background: currentColor; opacity: .28; }
+.prog-val { font-weight: 600; font-variant-numeric: tabular-nums; }
+.prog-val em { font-style: normal; font-size: 11px; opacity: .8; }
+.badge { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink); font-size: 11.5px; font-weight: 500; white-space: nowrap; }
+.act { color: var(--accent-ink); font-size: 12.5px; font-weight: 500; text-decoration: none; white-space: nowrap; }
+.act:hover { text-decoration: underline; }
+
+.fold { margin-top: 22px; background: var(--surface); border: 1px solid var(--border-soft); border-radius: 12px; overflow: hidden; }
+.fold > summary { display: flex; align-items: center; gap: 10px; padding: 13px 15px; list-style: none; cursor: pointer; }
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary:hover { background: var(--accent-soft); }
+.fold-title { font-size: 14px; font-weight: 600; }
+.fold-sub { font-size: 12px; color: var(--muted); }
+.fold > summary .badge { margin-left: auto; }
+.fold-body { padding: 2px 15px 14px; }
+
+@media (max-width: 960px) {
+  .portal.wrap { grid-template-columns: minmax(0, 1fr); }
+  /* 基规则把所有非左栏子项钉在第 2 列；窄屏只有 1 列时必须一起改回来，
+     否则会凭空长出一条隐式列，页面横向溢出。 */
+  .portal > *:not(.rail) { grid-column: 1; }
+  .portal > .rail { position: fixed; left: 0; top: 0; bottom: 0; height: auto; width: 184px; transform: translateX(-100%); transition: transform .2s ease; z-index: 60; box-shadow: var(--shadow-hover); }
+  body.nav-open .rail { transform: none; }
+  .rail-toggle { display: block; }
+  .topbar { padding: 0 14px; gap: 10px; }
+  .wb-pane { padding: 18px 14px 48px; }
+  .card { grid-template-columns: minmax(0, 1fr); }
+  .card-side { grid-column: 1; grid-row: auto; flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--border-soft); text-align: left; }
+  .search input { width: 120px; }
+}
+</style>
 </head>
 <body>
 <div class="portal wrap">
-  <nav class="portal-nav" aria-label="主导航">
-    <a class="portal-brand" href="index.html">
+  <aside class="rail" aria-label="主导航">
+    <a class="rail-brand" href="index.html">
       <span class="portal-brand-mark" aria-hidden="true">QY</span>
-      <span>Qingmin Yang</span>
+      <span class="rail-name">Qingmin Yang</span>
     </a>
-    <span class="portal-nav-tag">Personal Workbench</span>
-  </nav>
+    <nav class="rail-nav">
+      <details class="rail-group" open>
+        <summary class="rail-area is-on" data-area-btn="study"><span class="im im-globe" aria-hidden="true"></span>语言学习<span class="rail-chev" aria-hidden="true">▸</span></summary>
+        <p class="rail-sub">日本語</p>
+        <a class="rail-item" href="material/index.html"><span class="im im-card" aria-hidden="true"></span>学习资料</a>
+        <a class="rail-item" href="exam/index.html"><span class="im im-sheet" aria-hidden="true"></span>真题练习</a>
+        <a class="rail-item" href="listening/index.html"><span class="im im-ear" aria-hidden="true"></span>听力专项</a>
+        <a class="rail-item" href="dictation/index.html"><span class="im im-mic" aria-hidden="true"></span>听写练习</a>
+        <a class="rail-item" href="jp-vocab/index.html"><span class="im im-cards" aria-hidden="true"></span>课堂单词</a>
+        <a class="rail-item" href="verb/index.html"><span class="im im-swap" aria-hidden="true"></span>动词专练</a>
+        <a class="rail-item" href="typing/index.html"><span class="im im-keys" aria-hidden="true"></span>打字练习</a>
+        <p class="rail-sub">English</p>
+        <a class="rail-item" href="en/1k/01.html"><span class="im im-book" aria-hidden="true"></span>词表资料</a>
+        <a class="rail-item" href="en/dictation/index.html"><span class="im im-mic" aria-hidden="true"></span>英语听写</a>
+        <a class="rail-item" href="en/reading/index.html"><span class="im im-doc" aria-hidden="true"></span>阅读精读</a>
+        <a class="rail-item" href="en/typing/index.html"><span class="im im-keys" aria-hidden="true"></span>英语打字</a>
+      </details>
+      <button type="button" class="rail-area" data-area-btn="survey"><span class="im im-doc" aria-hidden="true"></span>调查报告</button>
+      <button type="button" class="rail-area" data-area-btn="tools"><span class="im im-sliders" aria-hidden="true"></span>工具开发</button>
+      <button type="button" class="rail-area" data-area-btn="snooker"><span class="im im-target" aria-hidden="true"></span>斯诺克信息</button>
+    </nav>
+    <div class="theme-slot" data-theme-slot></div>
+    <div class="rail-foot">
+      <a href="https://github.com/Yang-Code01/jlpt-library" target="_blank" rel="noopener">关于</a>
+      <a href="https://github.com/Yang-Code01/jlpt-library/commits/main" target="_blank" rel="noopener">更新日志</a>
+      <a href="https://github.com/Yang-Code01/jlpt-library/issues" target="_blank" rel="noopener">反馈</a>
+    </div>
+  </aside>
 
-  <!-- 一级导航：区。一个文件两个区，靠 <html data-area> 显隐。 -->
-  <div class="wb-tabs" role="tablist" aria-label="工作台区域">
-    <button type="button" role="tab" data-area-btn="study" aria-selected="true" class="on">语言学习<span>Language Study</span></button>
-    <button type="button" role="tab" data-area-btn="survey" aria-selected="false">调查报告<span>AI Research</span></button>
-    <button type="button" role="tab" data-area-btn="tools" aria-selected="false">工具开发<span>Toolsmith</span></button>
-    <button type="button" role="tab" data-area-btn="snooker" aria-selected="false">斯诺克信息<span>Snooker</span></button>
-  </div>
+  <header class="topbar">
+    <button type="button" class="rail-toggle" aria-label="打开导航" data-rail-toggle>☰</button>
+    <h1 class="topbar-title">语言学习</h1>
+    <div class="tabs" role="tablist" aria-label="模块类型筛选">
+      <button type="button" class="tab is-on" data-tag="全部">全部</button>
+      <button type="button" class="tab" data-tag="资料">资料</button>
+      <button type="button" class="tab" data-tag="词汇">词汇</button>
+      <button type="button" class="tab" data-tag="听力">听力</button>
+      <button type="button" class="tab" data-tag="真题">真题</button>
+      <button type="button" class="tab" data-tag="练习">练习</button>
+      <button type="button" class="tab" data-tag="工具">工具</button>
+    </div>
+    <div class="search"><input type="search" placeholder="搜索模块、单元、报告…" aria-label="搜索（即将上线）" readonly></div>
+  </header>
 
   <!-- ============================ 区一：语言学习 ============================ -->
   <div class="wb-pane" data-area-pane="study">
-  <p class="wb-lead"><strong>每天都要碰的那部分。</strong>日语与英语两套练法，各自的难度梯级、进度与复习记录分开记。</p>
-
-  <div class="zone-head zone-inline">
-    <div class="zone-head-main">
-      <h2 class="zone-title">入口<span class="zone-en">Entries</span></h2>
-    </div>
-    <div class="zone-aside">
-      <!-- 语言开关：区里的二级筛选，不是全站开关。仍然是一个文件、两套入口 DOM，
-           靠 <html data-lang> 显隐；不用 JS 重建 DOM，按钮只切属性，不产生新网址。 -->
-      <div class="lang-tabs" role="tablist" aria-label="语言 / Language">
-        <button type="button" role="tab" data-tab="ja" aria-selected="true" class="on">日本語</button>
-        <button type="button" role="tab" data-tab="en" aria-selected="false">English</button>
-      </div>
-    </div>
+  <div class="pane-head">
+    <h2>语言学习</h2>
+    <p>11 个模块 · 日语 168 单元 + 英语 77 单元 / 30 篇 · 进度只存在这台浏览器里</p>
   </div>
 
-  <div class="lang-pane" data-pane="ja">
-  <header class="portal-hero">
-    <div class="portal-copy">
-      <p class="portal-eyebrow">日本語能力試験 / 自学系统</p>
-      <h1>每天一点，<em>学成自己的语言。</em></h1>
-      <p class="portal-lede">从 N5 到 N1，把知识、词汇、听力与真题放进同一条学习路径。</p>
-      <div class="portal-actions">
-        <a class="portal-btn portal-btn-quiet" href="#paths">查看全部入口</a>
-      </div>
-    </div>
-  </header>
+  <div class="cards">
+  <article class="card" data-tags="资料 词汇" data-units="ja">
+    <header class="card-head"><span class="card-kicker">日本語 · 资料库</span><span class="pill">带自测</span></header>
+    <h3 class="card-title"><a href="material/index.html">学习资料</a></h3>
+    <p class="card-desc">按 N5–N1 组织基础知识、语法与词汇，每单元配振假名、自测与连续导航。</p>
+    <div class="card-foot"><div class="chips"><a class="chip" href="material/index.html#n5">N5 <b>24</b></a><a class="chip" href="material/index.html#n4">N4 <b>27</b></a><a class="chip" href="material/index.html#n3">N3 <b>37</b></a><a class="chip" href="material/index.html#n2">N2 <b>41</b></a><a class="chip" href="material/index.html#n1">N1 <b>39</b></a></div></div>
+    <aside class="card-side"><span class="prog-pill" style="--p:0%" data-state="empty"><i aria-hidden="true"></i><span class="prog-label">已看</span><span class="prog-sep" aria-hidden="true"></span><span class="prog-val">—</span></span><a class="act" href="material/index.html">打开 <span aria-hidden="true">→</span></a></aside>
+  </article>
+  <article class="card" data-tags="真题 练习">
+    <header class="card-head"><span class="card-kicker">日本語 · 真题</span><span class="pill">整卷仿真</span></header>
+    <h3 class="card-title"><a href="exam/index.html">真题练习</a></h3>
+    <p class="card-desc">N2 真题按题型专练或整卷仿真：155 分钟、听力放最后、只播一次。</p>
+    <div class="card-foot"><div class="chips"><span class="chip chip-plain">2 卷</span><span class="chip chip-plain">30 套试卷</span><span class="chip chip-plain">带音频</span></div></div>
+    <aside class="card-side"><span class="badge">30 套</span><a class="act" href="exam/index.html">打开 <span aria-hidden="true">→</span></a></aside>
+  </article>
+  <article class="card" data-tags="听力 练习">
+    <header class="card-head"><span class="card-kicker">日本語 · 听力</span><span class="pill">讲义 PDF</span></header>
+    <h3 class="card-title"><a href="listening/index.html">听力专项</a></h3>
+    <p class="card-desc">5 大题型变速练习，配原文对照；每题另有一份注音讲义 PDF。</p>
+    <div class="card-foot"><div class="chips"><span class="chip chip-plain">5 大题型</span><span class="chip chip-plain">变速</span><span class="chip chip-plain">原文对照</span></div></div>
+    <aside class="card-side"><span class="badge">5 大题型</span><a class="act" href="listening/index.html">打开 <span aria-hidden="true">→</span></a></aside>
+  </article>
+  <article class="card" data-tags="听力 词汇 练习">
+    <header class="card-head"><span class="card-kicker">日本語 · 听写</span><span class="pill">TTS 朗读</span></header>
+    <h3 class="card-title"><a href="dictation/index.html">听写练习</a></h3>
+    <p class="card-desc">听 TTS 朗读拼写单词，播放次数与词序可调，错词本能集中复练。</p>
+    <div class="card-foot"><div class="chips"><span class="chip chip-plain">1,115 词</span><span class="chip chip-plain">错词回顾</span></div></div>
+    <aside class="card-side"><span class="badge">1,115 词</span><a class="act" href="dictation/index.html">打开 <span aria-hidden="true">→</span></a></aside>
+  </article>
+  <article class="card" data-tags="词汇">
+    <header class="card-head"><span class="card-kicker">日本語 · 词汇</span><span class="pill">配音频</span></header>
+    <h3 class="card-title"><a href="jp-vocab/index.html">课堂单词</a></h3>
+    <p class="card-desc">按课堂主题打包的词卡：浏览、翻转、测验、间隔重复四态，词与例句都配音频。</p>
+    <div class="card-foot"><div class="chips"><span class="chip chip-plain">9 单元</span><span class="chip chip-plain">241 张卡</span></div></div>
+    <aside class="card-side"><span class="badge">241 张卡</span><a class="act" href="jp-vocab/index.html">打开 <span aria-hidden="true">→</span></a></aside>
+  </article>
+  <article class="card" data-tags="词汇 练习">
+    <header class="card-head"><span class="card-kicker">日本語 · 词汇</span><span class="pill">形态表</span></header>
+    <h3 class="card-title"><a href="verb/index.html">动词专练</a></h3>
+    <p class="card-desc">按 19 类 × 11 形态刷 1,003 个动词的活用，错题可回看。</p>
+    <div class="card-foot"><div class="chips"><span class="chip chip-plain">1,003 动词</span><span class="chip chip-plain">19 × 11 形态</span></div></div>
+    <aside class="card-side"><span class="badge">209 形态格</span><a class="act" href="verb/index.html">打开 <span aria-hidden="true">→</span></a></aside>
+  </article>
+  <article class="card" data-tags="练习 工具">
+    <header class="card-head"><span class="card-kicker">日本語 · 练习</span><span class="pill">音效</span></header>
+    <h3 class="card-title"><a href="typing/index.html">打字练习</a></h3>
+    <p class="card-desc">看词敲词，练习 / 竞技 / 无尽三种模式，带动画与音效。</p>
+    <div class="card-foot"><div class="chips"><span class="chip chip-plain">3 档难度</span><span class="chip chip-plain">3 种模式</span></div></div>
+    <aside class="card-side"><span class="badge">3 种模式</span><a class="act" href="typing/index.html">打开 <span aria-hidden="true">→</span></a></aside>
+  </article>
+  </div>
 
-  <main id="paths" class="entries">
-    <div class="entries-head">
-      <h2>找到最适合你的入口</h2>
-      <p>七种练法，连接成一套完整的 JLPT 学习系统。先选目标，再选节奏。</p>
-    </div>
+  <p class="pane-split">English</p>
+  <div class="cards">
+  <article class="card" data-tags="词汇" data-units="en-vocab">
+    <header class="card-head"><span class="card-kicker">English · 词汇</span><span class="pill">可离线</span></header>
+    <h3 class="card-title"><a href="en/1k/01.html">词表资料</a></h3>
+    <p class="card-desc">按全表词频切 1k–4k 四档、每 50 词一个单元；列表速览与翻转卡两种背法。</p>
+    <div class="card-foot"><div class="chips"><a class="chip" href="#fold-vocab">1k <b>20</b></a><a class="chip" href="#fold-vocab">2k <b>20</b></a><a class="chip" href="#fold-vocab">3k <b>17</b></a><a class="chip" href="#fold-vocab">4k <b>20</b></a></div></div>
+    <aside class="card-side"><span class="prog-pill" style="--p:0%" data-state="empty"><i aria-hidden="true"></i><span class="prog-label">已看</span><span class="prog-sep" aria-hidden="true"></span><span class="prog-val">—</span></span><a class="act" href="en/1k/01.html">打开 <span aria-hidden="true">→</span></a></aside>
+  </article>
+  <article class="card" data-tags="听力 练习">
+    <header class="card-head"><span class="card-kicker">English · 听写</span><span class="pill">TTS 朗读</span></header>
+    <h3 class="card-title"><a href="en/dictation/index.html">英语听写</a></h3>
+    <p class="card-desc">与词表单元一一对应的 77 个词单，听英文发音拼写，练过的词不再出现。</p>
+    <div class="card-foot"><div class="chips"><span class="chip chip-plain">77 词单</span><span class="chip chip-plain">错词本</span></div></div>
+    <aside class="card-side"><span class="badge">77 词单</span><a class="act" href="en/dictation/index.html">打开 <span aria-hidden="true">→</span></a></aside>
+  </article>
+  <article class="card" data-tags="资料" data-units="en-reading">
+    <header class="card-head"><span class="card-kicker">English · 阅读</span><span class="pill">点词查义</span></header>
+    <h3 class="card-title"><a href="en/reading/index.html">阅读精读</a></h3>
+    <p class="card-desc">30 篇公有领域短文按超纲词比例分四档；超纲词高亮、点词查义，读完手动盖章。</p>
+    <div class="card-foot"><div class="chips"><a class="chip" href="#fold-reading">1k <b>8</b></a><a class="chip" href="#fold-reading">2k <b>8</b></a><a class="chip" href="#fold-reading">3k <b>7</b></a><a class="chip" href="#fold-reading">4k <b>7</b></a></div></div>
+    <aside class="card-side"><span class="prog-pill" style="--p:0%" data-state="empty"><i aria-hidden="true"></i><span class="prog-label">已看</span><span class="prog-sep" aria-hidden="true"></span><span class="prog-val">—</span></span><a class="act" href="en/reading/index.html">打开 <span aria-hidden="true">→</span></a></aside>
+  </article>
+  <article class="card" data-tags="练习 工具">
+    <header class="card-head"><span class="card-kicker">English · 练习</span><span class="pill">WPM 竞技</span></header>
+    <h3 class="card-title"><a href="en/typing/index.html">英语打字</a></h3>
+    <p class="card-desc">按四档词频随机出词，4k 档混入 37 条固定搭配；60 秒竞技看 WPM。</p>
+    <div class="card-foot"><div class="chips"><span class="chip chip-plain">4 档</span><span class="chip chip-plain">37 条搭配</span></div></div>
+    <aside class="card-side"><span class="badge">37 条搭配</span><a class="act" href="en/typing/index.html">打开 <span aria-hidden="true">→</span></a></aside>
+  </article>
+  </div>
 
-    <div class="entry-layout">
-      <section class="feature-block" aria-labelledby="feature-title">
-        <span class="feature-index" aria-hidden="true">01</span>
-        <h3 id="feature-title" class="feature-title">学习资料</h3>
-        <p class="feature-lede">按 N5 到 N1 组织基础知识、语法与词汇。每个单元配振假名、自测与连续导航。</p>
-
-        <nav class="ruler" aria-label="资料库级别">
-          <a class="ruler-station" href="material/index.html#n5"><span class="ruler-lv">N5</span><span class="ruler-count">24 单元</span></a>
-          <a class="ruler-station" href="material/index.html#n4"><span class="ruler-lv">N4</span><span class="ruler-count">27 单元</span></a>
-          <a class="ruler-station" href="material/index.html#n3"><span class="ruler-lv">N3</span><span class="ruler-count">37 单元</span></a>
-          <a class="ruler-station" href="material/index.html#n2"><span class="ruler-lv">N2</span><span class="ruler-count">41 单元</span></a>
-          <a class="ruler-station" href="material/index.html#n1"><span class="ruler-lv">N1</span><span class="ruler-count">39 单元</span></a>
-        </nav>
-
-        <div class="feature-foot">
-          <a class="feature-cta" href="material/index.html">进入资料库 <span aria-hidden="true">→</span></a>
-          <span class="feature-stats">168 个单元 · 6,218 词汇 · 带自测</span>
-        </div>
-      </section>
-
-      <div class="path-list">
-        <a class="path-row" href="exam/index.html">
-          <span class="row-index" aria-hidden="true">02</span>
-          <span class="row-body">
-            <span class="row-title">真题练习</span>
-            <span class="row-meta">N2 真题 · 30 套试卷 · 155 分钟</span>
-          </span>
-          <span class="row-arrow" aria-hidden="true">→</span>
-        </a>
-
-        <a class="path-row" href="listening/index.html">
-          <span class="row-index" aria-hidden="true">03</span>
-          <span class="row-body">
-            <span class="row-title">听力专项</span>
-            <span class="row-meta">5 大题型 · 变速 · 原文对照</span>
-          </span>
-          <span class="row-arrow" aria-hidden="true">→</span>
-        </a>
-
-        <a class="path-row" href="dictation/index.html">
-          <span class="row-index" aria-hidden="true">04</span>
-          <span class="row-body">
-            <span class="row-title">听写练习</span>
-            <span class="row-meta">1,115 词 · TTS 朗读 · 错词回顾</span>
-          </span>
-          <span class="row-arrow" aria-hidden="true">→</span>
-        </a>
-
-        <a class="path-row" href="jp-vocab/index.html">
-          <span class="row-index" aria-hidden="true">05</span>
-          <span class="row-body">
-            <span class="row-title">课堂单词</span>
-            <span class="row-meta">9 单元 · 241 张卡 · 间隔重复</span>
-          </span>
-          <span class="row-arrow" aria-hidden="true">→</span>
-        </a>
-
-        <a class="path-row" href="verb/index.html">
-          <span class="row-index" aria-hidden="true">06</span>
-          <span class="row-body">
-            <span class="row-title">动词专练</span>
-            <span class="row-meta">1,003 动词 · 19 × 11 形态</span>
-          </span>
-          <span class="row-arrow" aria-hidden="true">→</span>
-        </a>
-
-        <a class="path-row" href="typing/index.html">
-          <span class="row-index" aria-hidden="true">07</span>
-          <span class="row-body">
-            <span class="row-title">打字练习</span>
-            <span class="row-meta">3 档难度 · 3 种模式 · 音效</span>
-          </span>
-          <span class="row-arrow" aria-hidden="true">→</span>
-        </a>
-      </div>
-    </div>
-  </main>
-
-  <aside class="portal-note">
-    <span class="note-mark" aria-hidden="true">済</span>
-    <div>
-      <strong>学习进度会保存在当前浏览器</strong>
-      <p>完成单元后会自动盖章；在学习资料页可以导出或导入进度备份。</p>
-    </div>
-
-  </aside>
-
-  <footer class="portal-footer">
-    <span>Qingmin Yang · 语言学习（日本語）</span>
-    <span>N5 → N1 完整路径 · 168 个单元</span>
-  </footer>
-  </div><!-- /日语面 -->
-
-  <!-- ============================ 英语面 ============================
-       版式镜像日语面：一个 feature-block（四站刻度尺 + 展开式单元清单）+ 三
-       个入口行。刻度尺、清单与数字全部由 tools/en-vocab.mjs 写进标记区，
-       不在这里手维护 —— 77 个单元行手工维护必然漂移。 -->
-  <div class="lang-pane" data-pane="en">
-  <header class="portal-hero">
-    <div class="portal-copy">
-      <p class="portal-eyebrow">英语词汇 / 自学系统</p>
-      <h1>每天一点，<em>学成自己的语言。</em></h1>
-      <p class="portal-lede">从 1k 到 4k 词频档位，把词表、听写、打字与阅读放进同一条学习路径。</p>
-      <div class="portal-actions">
-        <a class="portal-btn portal-btn-quiet" href="#en-paths">查看全部入口</a>
-      </div>
-    </div>
-  </header>
-
-  <main id="en-paths" class="entries">
-    <div class="entries-head">
-      <h2>找到最适合你的入口</h2>
-      <p>四个入口，从最高频的一千个词开始。选一档，再选节奏。</p>
-    </div>
-
-    <div class="entry-layout">
-      <!-- en:unit-lists:start -->
+  <details class="fold" id="fold-vocab">
+    <summary>
+      <span class="fold-title">英语词表 · 77 个单元</span>
+      <span class="fold-sub">3,766 词 · 每 50 词一单元</span>
+      <span class="badge">已看 0 / 77</span>
+    </summary>
+    <div class="fold-body">
+<!-- en:unit-lists:start -->
       <!-- 以下区块由 tools/en-vocab.mjs 生成，勿手改；数据变了请重跑生成器 -->
       <section class="feature-block" aria-labelledby="en-feature-title">
         <span class="feature-index" aria-hidden="true">01</span>
@@ -1767,8 +1834,17 @@
         </div>
       </section>
     <!-- en:unit-lists:end -->
+    </div>
+  </details>
 
-    <!-- en:reading-lists:start -->
+  <details class="fold" id="fold-reading">
+    <summary>
+      <span class="fold-title">英语阅读 · 30 篇</span>
+      <span class="fold-sub">公有领域短文 · 按超纲词比例分档</span>
+      <span class="badge">已读 0 / 30</span>
+    </summary>
+    <div class="fold-body">
+<!-- en:reading-lists:start -->
       <!-- 以下区块由 tools/en-reading.mjs 生成，勿手改；数据变了请重跑生成器 -->
       <section class="feature-block" aria-labelledby="en-reading-title">
         <span class="feature-index" aria-hidden="true">02</span>
@@ -1857,44 +1933,10 @@
         </div>
       </section>
     <!-- en:reading-lists:end -->
-
-      <div class="path-list">
-        <a class="path-row" href="en/dictation/index.html">
-          <span class="row-index" aria-hidden="true">03</span>
-          <span class="row-body">
-            <span class="row-title">听写练习</span>
-            <span class="row-meta">77 个词单 · 英语朗读 · 错词回顾</span>
-          </span>
-          <span class="row-arrow" aria-hidden="true">→</span>
-        </a>
-
-        <a class="path-row" href="en/typing/index.html">
-          <span class="row-index" aria-hidden="true">04</span>
-          <span class="row-body">
-            <span class="row-title">打字练习</span>
-            <span class="row-meta">四档词频 · 60 秒竞速 · WPM 与准确率</span>
-          </span>
-          <span class="row-arrow" aria-hidden="true">→</span>
-        </a>
-
-      </div>
     </div>
-  </main>
-
-  <aside class="portal-note">
-    <span class="note-mark" aria-hidden="true">済</span>
-    <div>
-      <strong>学习进度会保存在当前浏览器</strong>
-      <p>词表单元背满一遍会自动盖章；日语与英语分开记，互不干扰。</p>
-    </div>
-  </aside>
-
-  <footer class="portal-footer">
-    <span>Qingmin Yang · 语言学习（English）</span>
-    <span>1k → 4k 词频档位 · 3,766 个词</span>
-  </footer>
-  </div><!-- /英语面 -->
+  </details>
   </div><!-- /语言学习区 -->
+
 
   <!-- ============================ 区二：调查报告 ============================
        每篇是一份自包含的离线 HTML，放在 research/ 下随 git 发布；清单由
@@ -1937,7 +1979,7 @@
         </span>
         <span class="survey-src">
           <span class="src-main"><a href="https://git-scm.com/docs/git-worktree" target="_blank" rel="noopener noreferrer">Git ↗</a></span>
-          <span class="src-sub">9 章 · 43 KB</span>
+          <span class="src-sub">9 章 · 44 KB</span>
         </span>
       </div>
       <div class="survey-item" data-tags="版本履历 工具横评">
@@ -1952,7 +1994,7 @@
         </span>
         <span class="survey-src">
           <span class="src-main"><a href="https://github.com/earendil-works/pi" target="_blank" rel="noopener noreferrer">GitHub ↗</a></span>
-          <span class="src-sub">6 章 · 1129 KB</span>
+          <span class="src-sub">6 章 · 1130 KB</span>
         </span>
       </div>
       <div class="survey-item" data-tags="技能生态">
@@ -1966,7 +2008,7 @@
         </span>
         <span class="survey-src">
           <span class="src-main"><a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener noreferrer">GitHub ↗</a></span>
-          <span class="src-sub">8 章 · 48 KB</span>
+          <span class="src-sub">8 章 · 50 KB</span>
         </span>
       </div>
       <div class="survey-item" data-tags="技能生态">
@@ -1980,7 +2022,7 @@
         </span>
         <span class="survey-src">
           <span class="src-main"><a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener noreferrer">GitHub ↗</a></span>
-          <span class="src-sub">7 章 · 28 KB</span>
+          <span class="src-sub">7 章 · 29 KB</span>
         </span>
       </div>
       </div>
@@ -2075,6 +2117,8 @@
   </div><!-- /斯诺克信息区 -->
 </div>
 <script src="assets/progress.js"></script>
+<script src="assets/units.js"></script>
+<script src="assets/portal.js"></script>
 <script src="assets/snooker-data.js"></script>
 <script src="assets/snooker-tree.js"></script>
 <script src="assets/snooker.js"></script>
@@ -2085,31 +2129,9 @@
   (function () {
     'use strict';
 
-    var apply = window.portalApplyLang;
     var applyArea = window.portalApplyArea;
     var root = document.documentElement;
-    apply(root.getAttribute('data-lang') || 'ja', false);
     applyArea(root.getAttribute('data-area') || 'study', false);
-
-    Array.prototype.forEach.call(document.querySelectorAll('.lang-tabs button'), function (btn) {
-      btn.addEventListener('click', function () {
-        var lang = btn.getAttribute('data-tab');
-        if (lang === root.getAttribute('data-lang')) return;
-        apply(lang, true);
-        window.scrollTo(0, 0);
-        refreshProgress();
-      });
-    });
-
-    /* 区开关：切区只改属性与标题，两个区的 DOM 都在（一个区也就几十 KB 的清单）。 */
-    Array.prototype.forEach.call(document.querySelectorAll('.wb-tabs button'), function (btn) {
-      btn.addEventListener('click', function () {
-        var area = btn.getAttribute('data-area-btn');
-        if (area === root.getAttribute('data-area')) return;
-        applyArea(area, true);
-        window.scrollTo(0, 0);
-      });
-    });
 
     /* 标签筛选：只改本页显示，不写 URL、不记状态。门户里有两处清单（调查报告 /
        工具开发），各自按容器取元素 —— 用全局选择器两边按钮会互相串台。 */
@@ -2200,6 +2222,43 @@
     }, { threshold: 0.08, rootMargin: '0px 0px -8% 0px' });
     nodes.forEach(function (n) { io.observe(n); });
   })();
+</script>
+
+<script>
+/* 工作台壳 v2 的交互：左栏区切换（复用头部 portalApplyArea）、类型筛选、窄屏抽屉。
+   旧的 .wb-tabs / .lang-tabs 逻辑随 DOM 一起退休。 */
+(function () {
+  var KEY = 'jlpt-area';
+
+  document.querySelectorAll('[data-area-btn]').forEach(function (b) {
+    b.addEventListener('click', function (e) {
+      if (b.tagName !== 'SUMMARY') e.preventDefault();
+      if (window.portalApplyArea) window.portalApplyArea(b.getAttribute('data-area-btn'), true);
+      document.body.classList.remove('nav-open');
+    });
+  });
+
+  document.querySelectorAll('.tab').forEach(function (t) {
+    t.addEventListener('click', function () {
+      var tag = t.getAttribute('data-tag');
+      document.querySelectorAll('.tab').forEach(function (x) { x.classList.toggle('is-on', x === t); });
+      document.querySelectorAll('[data-area-pane="study"] .card').forEach(function (c) {
+        c.hidden = tag !== '\u5168\u90e8' && (c.getAttribute('data-tags') || '').split(' ').indexOf(tag) === -1;
+      });
+    });
+  });
+
+  var burger = document.querySelector('[data-rail-toggle]');
+  if (burger) burger.addEventListener('click', function () { document.body.classList.toggle('nav-open'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') document.body.classList.remove('nav-open'); });
+
+  /* 首屏：深链 > localStorage > study */
+  var initial = (location.hash || '').replace('#', '');
+  if (['study', 'survey', 'tools', 'snooker'].indexOf(initial) === -1) {
+    try { initial = localStorage.getItem(KEY) || 'study'; } catch (e) { initial = 'study'; }
+  }
+  if (window.portalApplyArea) window.portalApplyArea(initial, false);
+})();
 </script>
 </body>
 </html>

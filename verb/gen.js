@@ -18,6 +18,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { railHtml } = require('../tools/shell.mjs');
 
 const ROOT = __dirname;
 const UNIT_ROOT = path.join(ROOT, 'units');
@@ -119,7 +120,15 @@ function serializeUnit(d){
   return out.join('\n') + '\n';
 }
 
-function renderUnitPage(d){ return SHELL_HEAD + serializeUnit(d) + SHELL_TAIL; }
+/* 左栏（ADR-0010）：生成页也常驻 56px 图标条，与手写页同一份 markup。
+   样式在 assets/style.css 的「工作台左栏」标记区，页面靠 has-rail 让出 56px。 */
+var LF = String.fromCharCode(10);
+function withRail(page, prefix, active){
+  return page.replace(/<body([^>]*)>/, function (m, attrs) {
+    return '<body class="has-rail"' + attrs + '>' + LF + railHtml({ prefix: prefix, active: active });
+  });
+}
+function renderUnitPage(d){ return withRail(SHELL_HEAD + serializeUnit(d) + SHELL_TAIL, '../../../', 'verb'); }
 
 /* ---------------- 目录页 UNITS ---------------- */
 
@@ -361,7 +370,7 @@ function checkConj(){
   if(raw !== serializeConj(d)) bad.push('conjugation/data.json 不是 gen.js 的规范格式（跑 write 可规范化）');
   let page = '';
   try { page = readText(CONJ_PAGE); } catch(e){ bad.push('读不到 conjugation/index.html'); return bad; }
-  if(page !== renderConjPage(d)) bad.push('conjugation/index.html 与生成结果不一致（跑 write 可修）');
+  if(page !== withRail(renderConjPage(d), '../../', 'verb')) bad.push('conjugation/index.html 与生成结果不一致（跑 write 可修）');
   return bad;
 }
 
@@ -812,7 +821,7 @@ function doWrite(only){
   else console.log('· 目录页 UNITS 无改动');
   // 变形练习页
   const cd = JSON.parse(readText(CONJ_DATA));
-  const cj = serializeConj(cd), cp = renderConjPage(cd);
+  const cj = serializeConj(cd), cp = withRail(renderConjPage(cd), '../../', 'verb');
   const cjBefore = readText(CONJ_DATA);
   const cpBefore = fs.existsSync(CONJ_PAGE) ? readText(CONJ_PAGE) : '';
   if(cj !== cjBefore) fs.writeFileSync(CONJ_DATA, cj, 'utf8');

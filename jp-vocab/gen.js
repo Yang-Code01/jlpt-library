@@ -13,6 +13,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { railHtml } = require('../tools/shell.mjs');
 
 const ROOT = __dirname;
 const DIR_PAGE = path.join(ROOT, 'index.html');
@@ -105,7 +106,15 @@ function serializeUnit(d){
   return out.join('\n') + '\n';
 }
 
-function renderUnitPage(d){ return SHELL_HEAD + serializeUnit(d) + SHELL_TAIL; }
+/* 左栏（ADR-0010）：生成页也常驻 56px 图标条，与手写页同一份 markup。
+   样式在 assets/style.css 的「工作台左栏」标记区，页面靠 has-rail 让出 56px。 */
+var LF = String.fromCharCode(10);
+function withRail(page, prefix, active){
+  return page.replace(/<body([^>]*)>/, function (m, attrs) {
+    return '<body class="has-rail"' + attrs + '>' + LF + railHtml({ prefix: prefix, active: active });
+  });
+}
+function renderUnitPage(d){ return withRail(SHELL_HEAD + serializeUnit(d) + SHELL_TAIL, '../../', 'jp-vocab'); }
 
 /* ---------------- 目录页 UNITS ---------------- */
 

@@ -3,8 +3,10 @@
    单一样式源：索引页 + 全部单元页共用。深色模式沿用
    html[data-theme="dark"]（由 assets/theme.js 注入）。
 
-   视觉语言：墨（Sumi）
-   - 冷石墨纸面 + 单一朱色 accent（印章 / 朱肉 / 校正的颜色）
+   视觉语言：暖白纸 + 深青（ADR-0010）
+   - 暖白纸面 + 单一深青 accent 承担全部交互（链接 / 按钮 / 焦点 / 进度）
+   - 朱色退役为内容语义色 `--seal`：只给【済】章与和纸 PDF 朱线
+   - 三套主题只覆盖令牌：浅色（默认）/ 护眼 / 深色
    - 五级墨阶：N5 最浅 → N1 最深，用明度编码难度，不换色相
    - 圆角只有三档：14 / 10 / 8（+ pill 999）
    - 深色模式只覆盖令牌，不重复写组件
@@ -14,22 +16,31 @@
    ============================================================ */
 
 :root {
-  /* ===== 表面 / 文字 ===== */
-  --paper: #e9ebee;
-  --surface: #fbfcfc;
-  --surface-2: #f2f4f5;
-  --ink: #17202a;
-  --muted: #5a6672;
-  --border: #d8dde2;
-  --border-soft: #e4e8ec;
+  /* ===== 表面 / 文字（暖白纸） ===== */
+  --paper: #faf9f6;
+  --surface: #ffffff;
+  --surface-2: #fdfdfb;
+  --ink: #202a30;
+  --muted: #59656b;
+  --border: #dfe4e1;
+  --border-soft: #e9ede9;
 
-  /* ===== 交互色：朱（全站唯一 accent） =====
-     accent 同时用作正文小字颜色，故须在 --paper / --surface 上达 AA 4.5:1。 */
-  --accent: #b93e28;
-  --accent-ink: #8e2a18;
-  --accent-soft: #f6eae7;
-  --accent-line: #e0b1a6;
+  /* ===== 交互色：深青（全站唯一交互 accent） =====
+     accent 同时用作正文小字颜色，故须在 --paper / --surface 上达 AA 4.5:1。
+     实测：#176b75 on #faf9f6 = 5.87；on #ffffff = 6.18。 */
+  --accent: #176b75;
+  --accent-ink: #145f68;
+  --accent-soft: #eef5f5;
+  --accent-line: #a9cdd0;
   --on-accent: #ffffff;
+
+  /* ===== 印章色：朱（只给【済】章与和纸 PDF 朱线，不再承担交互） =====
+     实测：#b3402a on #faf9f6 = 5.41。 */
+  --seal: #b3402a;
+  --seal-soft: #f7eceb;
+
+  /* 饱和底色上的文字（印章白字等）：不随主题反转，三套主题同值 */
+  --on-strong: #ffffff;
 
   /* ===== 五级墨阶（N5 最浅 → N1 最深） ===== */
   --sumi-5: #8a9aab;
@@ -41,12 +52,13 @@
   /* ===== 内容语义色（低饱和，不与 accent 争位） ===== */
   --green: #3f7a5a;  --green-l: #edf4ef;  --green-line: #a8c9b6;
   --amber: #8a6420;  --amber-l: #fbf3e3;  --amber-line: #dcc08a;
+  --amber-soft: #fbf3e3;  --amber-ink: #7c5a24;
   --red: #a33b3b;    --red-l: #faeded;    --red-line: #d99a9a;
   --gray: #5a6672;
 
   /* ===== 阴影（只有可点击层使用） ===== */
-  --shadow: 0 1px 2px rgba(20, 35, 55, .05), 0 8px 24px -16px rgba(20, 35, 55, .18);
-  --shadow-hover: 0 2px 4px rgba(20, 35, 55, .06), 0 14px 30px -18px rgba(20, 35, 55, .28);
+  --shadow: 0 1px 2px rgba(32, 42, 48, .04), 0 8px 24px -16px rgba(28, 39, 51, .16);
+  --shadow-hover: 0 2px 4px rgba(32, 42, 48, .05), 0 14px 30px -18px rgba(28, 39, 51, .24);
 
   /* ===== 形状：只有三档 + pill ===== */
   --radius: 14px;
@@ -59,10 +71,10 @@
   --z-switch: 100;
 
   /* ===== 头部 hero 带（随外观变化） ===== */
-  --top-bg: #f2f4f5;
-  --top-ink: #17202a;
-  --top-muted: #5a6672;
-  --top-line: rgba(20, 35, 55, .12);
+  --top-bg: #f4f3ef;
+  --top-ink: #202a30;
+  --top-muted: #59656b;
+  --top-line: rgba(32, 42, 48, .12);
 }
 
 /* 深色模式：只覆盖令牌，组件规则不再重复一遍 */
@@ -75,11 +87,15 @@ html[data-theme="dark"] {
   --border: #2c3742;
   --border-soft: #232d37;
 
-  --accent: #e8654c;
-  --accent-ink: #f0927c;
-  --accent-soft: #2c1c19;
-  --accent-line: #5e352b;
+  --accent: #6fd0d8;
+  --accent-ink: #86dbe2;
+  --accent-soft: #203137;
+  --accent-line: #305058;
   --on-accent: #10151a;
+
+  --seal: #e8654c;
+  --seal-soft: #35292b;
+  --on-strong: #ffffff;
 
   /* 墨阶在深底上反转亮度序，保证 N1 依然最突出 */
   --sumi-5: #7d8e9e;
@@ -90,6 +106,7 @@ html[data-theme="dark"] {
 
   --green: #6fbf8f;  --green-l: #1f3029;  --green-line: #3d5f4c;
   --amber: #d9b26a;  --amber-l: #332c1c;  --amber-line: #5f4f2c;
+  --amber-soft: #332c1c;  --amber-ink: #d3b26a;
   --red: #e08a8a;    --red-l: #3a2223;    --red-line: #5f3a3a;
   --gray: #8a939e;
 
@@ -113,11 +130,17 @@ html[data-theme="eye"] {
   --border: #a3c7aa;
   --border-soft: #b3d2b9;
 
-  --accent: #944a3c;
-  --accent-ink: #8e463a;
-  --accent-soft: #e6efe6;
-  --accent-line: #bfd6c4;
+  /* 深青在绿底上必须调深：#176b75 on #c3e1c8 只有 4.39，不达 AA */
+  --accent: #145f68;
+  --accent-ink: #0f4d54;
+  --accent-soft: #bfdcd2;
+  --accent-line: #8fbab5;
   --on-accent: #ffffff;
+
+  /* 朱色降为印章色：#944a3c on #c3e1c8 = 4.52 */
+  --seal: #944a3c;
+  --seal-soft: #cfe0d1;
+  --on-strong: #ffffff;
 
   /* 墨阶在护眼底上沿亮度序，保证 N1 依然最突出 */
   --sumi-5: #6f8a78;
@@ -128,6 +151,7 @@ html[data-theme="eye"] {
 
   --green: #3f7a5a;  --green-l: #dcecdf;  --green-line: #a8c9b6;
   --amber: #8a6420;  --amber-l: #f3ecd9;  --amber-line: #dcc08a;
+  --amber-soft: #f3ecd9;  --amber-ink: #6b4c1c;
   --red: #a34747;    --red-l: #f2e3e3;    --red-line: #d9a8a8;
   --gray: #56685c;
 
@@ -334,6 +358,16 @@ nav.pagenav span.finish {
   --ic-sliders: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7.6h8.6M17.8 7.6H20M4 16.4h2.2M11.4 16.4H20'/%3E%3Ccircle cx='14.6' cy='7.6' r='1.9'/%3E%3Ccircle cx='8.6' cy='16.4' r='1.9'/%3E%3C/svg%3E");
   --ic-done: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.6 12a8.6 8.6 0 1 1-3.5-6.9'/%3E%3Cpath d='m8.6 11.9 2.8 2.8 6.2-6.6'/%3E%3C/svg%3E");
   --ic-chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9.4 5.6 15.8 12l-6.4 6.4'/%3E%3C/svg%3E");
+  --ic-globe: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8.6'/%3E%3Cpath d='M3.4 12h17.2'/%3E%3Cpath d='M12 3.4c2.9 3 2.9 14.2 0 17.2'/%3E%3Cpath d='M12 3.4c-2.9 3-2.9 14.2 0 17.2'/%3E%3C/svg%3E");
+  --ic-ear: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 14.2v-1.4a6 6 0 0 1 12 0v1.4'/%3E%3Crect x='3.8' y='13.4' width='3.4' height='5' rx='1.6'/%3E%3Crect x='16.8' y='13.4' width='3.4' height='5' rx='1.6'/%3E%3C/svg%3E");
+  --ic-mic: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9.4' y='3' width='5.2' height='10' rx='2.6'/%3E%3Cpath d='M6.4 12.2a5.6 5.6 0 0 0 11.2 0'/%3E%3Cpath d='M12 17.8V21M9.4 21h5.2'/%3E%3C/svg%3E");
+  --ic-cards: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.4' y='8' width='12.6' height='11.6' rx='2.4'/%3E%3Cpath d='M7.4 8V6.2a2.2 2.2 0 0 1 2.2-2.2h6.8a2.2 2.2 0 0 1 2.2 2.2v8.2'/%3E%3C/svg%3E");
+  --ic-keys: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='2.6' y='6.6' width='18.8' height='10.8' rx='2.6'/%3E%3Cpath d='M6 10h.01M9 10h.01M12 10h.01M15 10h.01M18 10h.01M6 14h.01M18 14h.01M9 14.2h6'/%3E%3C/svg%3E");
+  --ic-book: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 4.8c3-1.4 5.4-1.4 8 0v14.4c-2.6-1.4-5-1.4-8 0z'/%3E%3Cpath d='M20 4.8c-3-1.4-5.4-1.4-8 0v14.4c2.6-1.4 5-1.4 8 0z'/%3E%3C/svg%3E");
+  --ic-doc: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M13.6 3.2H7.4a2 2 0 0 0-2 2v13.6a2 2 0 0 0 2 2h9.2a2 2 0 0 0 2-2V8.2z'/%3E%3Cpath d='M13.6 3.2v5h5'/%3E%3Cpath d='M8.8 13.4h6.4M8.8 16.6h4.2'/%3E%3C/svg%3E");
+  --ic-sun: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='4.2'/%3E%3Cpath d='M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2'/%3E%3Cpath d='M5.4 5.4 7 7M17 17l1.6 1.6M18.6 5.4 17 7M7 17l-1.6 1.6'/%3E%3C/svg%3E");
+  --ic-eye: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2.4 12S6 5.6 12 5.6 21.6 12 21.6 12 18 18.4 12 18.4 2.4 12 2.4 12z'/%3E%3Ccircle cx='12' cy='12' r='2.8'/%3E%3C/svg%3E");
+  --ic-moon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.4 14.6A8.6 8.6 0 0 1 9.4 3.6a8.6 8.6 0 1 0 11 11z'/%3E%3C/svg%3E");
 }
 
 .im {
@@ -355,6 +389,16 @@ nav.pagenav span.finish {
 .im-sliders { --ic: var(--ic-sliders); }
 .im-done { --ic: var(--ic-done); }
 .im-chev { --ic: var(--ic-chev); }
+.im-globe { --ic: var(--ic-globe); }
+.im-ear { --ic: var(--ic-ear); }
+.im-mic { --ic: var(--ic-mic); }
+.im-cards { --ic: var(--ic-cards); }
+.im-keys { --ic: var(--ic-keys); }
+.im-book { --ic: var(--ic-book); }
+.im-doc { --ic: var(--ic-doc); }
+.im-sun { --ic: var(--ic-sun); }
+.im-eye { --ic: var(--ic-eye); }
+.im-moon { --ic: var(--ic-moon); }
 /* ====================== /线描图标集 ====================== */
 
 /* ====================== 内容卡片（单元页） ====================== */
@@ -676,7 +720,58 @@ footer a:hover { border-bottom-color: var(--accent); }
 .reveal.in { opacity: 1; transform: none; }
 
 /* ====================== 主题切换按钮 ====================== */
-.theme-switch {
+/* 外观切换：照 MyHOT 的三格 radiogroup（滑动指示块 + 14px 图标 + sr-only 文字）。
+   挂在左栏底部的 [data-theme-slot]；没有 slot 的页面退回左下角固定。 */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.theme-toggle {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  height: 34px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+}
+.theme-toggle .tt-thumb {
+  position: absolute;
+  top: 3px; bottom: 3px; left: 3px;
+  width: calc((100% - 6px) / 3);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(28, 39, 51, .10), 0 1px 1px rgba(28, 39, 51, .04);
+  transform: translateX(calc(100% * var(--i, 0)));
+  transition: transform .18s ease;
+  pointer-events: none;
+}
+.theme-toggle button {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; justify-content: center;
+  min-width: 0; padding: 0;
+  border: 0; background: transparent; color: var(--muted);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+.theme-toggle button .im { --im-size: 15px; }
+.theme-toggle button.on { color: var(--ink); }
+.theme-toggle button:not(.on):hover { color: var(--ink); background: var(--accent-soft); }
+.theme-toggle button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* 没有 slot 的页面：固定左下角 */
+.theme-toggle.is-floating {
+  position: fixed; left: 14px; bottom: 14px; z-index: var(--z-switch);
+  width: 138px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(6px);
+}
+
+/* PDF 导出：仍在右上角，与外观看点分开（外观是「我喜欢的阅读环境」，导出是动作） */
+.pdf-dock {
   position: fixed; top: 12px; right: 14px; z-index: var(--z-switch);
   display: flex; align-items: center; gap: 4px;
   background: color-mix(in srgb, var(--surface) 92%, transparent);
@@ -687,19 +782,16 @@ footer a:hover { border-bottom-color: var(--accent); }
   backdrop-filter: blur(6px);
   font-size: .82em;
 }
-.theme-switch .ts-label { padding: 0 6px 0 8px; color: var(--ink); font-weight: 600; white-space: nowrap; }
-.theme-switch button {
+.pdf-dock button {
   border: none; background: transparent; color: var(--muted);
   border-radius: var(--radius-pill);
   padding: 3px 12px; cursor: pointer; font-size: 1em; line-height: 1.5;
 }
-.theme-switch button.on { background: var(--accent); color: var(--on-accent); font-weight: 600; }
-.theme-switch button:not(.on):hover { background: var(--accent-soft); }
 
 /* ====================== PDF 下载（按钮 + 主题菜单） ====================== */
-.theme-switch .ts-sep { width: 1px; align-self: stretch; margin: 2px 2px; background: var(--border); }
-.theme-switch .ts-pdf { color: var(--ink); font-weight: 600; }
-.theme-switch .ts-pdf.is-off { color: var(--muted); opacity: .6; cursor: not-allowed; }
+.pdf-dock .ts-sep { width: 1px; align-self: stretch; margin: 2px 2px; background: var(--border); }
+.pdf-dock .ts-pdf { color: var(--ink); font-weight: 600; }
+.pdf-dock .ts-pdf.is-off { color: var(--muted); opacity: .6; cursor: not-allowed; }
 .pdf-pop {
   position: absolute; top: calc(100% + 6px); right: 0;
   min-width: 220px; padding: 8px;
@@ -711,16 +803,16 @@ footer a:hover { border-bottom-color: var(--accent); }
 .pdf-pop-h { margin: 2px 6px 6px; font-size: .85em; color: var(--muted); }
 .pdf-pop-tip, .pdf-pop-msg { margin: 6px 6px 2px; font-size: .8em; color: var(--muted); line-height: 1.5; }
 .pdf-pop-msg { color: var(--ink); max-width: 240px; }
-.theme-switch .pdf-pop button {
+.pdf-dock .pdf-pop button {
   display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
   width: 100%; padding: 6px 10px; border-radius: var(--radius-chip);
   text-align: left; color: var(--ink);
 }
-.theme-switch .pdf-pop button small { color: var(--muted); font-size: .8em; }
-.theme-switch .pdf-pop button.on { background: var(--accent-soft); color: var(--accent-ink); font-weight: 400; }
-.theme-switch .pdf-pop button.on b { color: var(--accent-ink); }
-.theme-switch .pdf-pop button:hover,
-.theme-switch .pdf-pop button:focus-visible { background: var(--accent-soft); outline: none; }
+.pdf-dock .pdf-pop button small { color: var(--muted); font-size: .8em; }
+.pdf-dock .pdf-pop button.on { background: var(--accent-soft); color: var(--accent-ink); font-weight: 400; }
+.pdf-dock .pdf-pop button.on b { color: var(--accent-ink); }
+.pdf-dock .pdf-pop button:hover,
+.pdf-dock .pdf-pop button:focus-visible { background: var(--accent-soft); outline: none; }
 .pdf-only { display: none; }
 
 /* ====================== 响应式 ====================== */
@@ -782,9 +874,9 @@ footer a:hover { border-bottom-color: var(--accent); }
   transition: background .16s ease, border-color .16s ease, color .16s ease;
 }
 .pg-input:checked + .pg-seal {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--on-accent);
+  background: var(--seal);
+  border-color: var(--seal);
+  color: var(--on-strong);
 }
 .pg-input:focus-visible + .pg-seal {
   outline: 2px solid var(--accent);
@@ -836,8 +928,8 @@ ul.unit-list li a.is-done::after {
   line-height: 18px;
   text-align: center;
   font-size: .66rem; font-weight: 700;
-  color: var(--on-accent);
-  background: var(--accent);
+  color: var(--on-strong);
+  background: var(--seal);
   border-radius: 3px;
 }
 
@@ -981,7 +1073,7 @@ ul.unit-list li a.is-done::after {
   .pdf-only { display: block !important; }
 
   /* 导航、外观切换、进度印章等交互件不进 PDF */
-  .theme-switch, .pdf-pop, .pagenav, .crumb,
+  .pdf-dock, .pdf-pop, .theme-toggle, .pagenav, .crumb,
   .pg-check, .pg-dock, .pg-dialog, audio, video { display: none !important; }
 
   /* 只输出 builder 生成的内容（真题整卷） */
@@ -1019,7 +1111,7 @@ ul.unit-list li a.is-done::after {
       "Songti SC", "SimSun", serif !important;
   }
   html[data-pdf="washi"] h1,
-  html[data-pdf="washi"] h2 { border-bottom: 2px solid var(--accent); padding-bottom: 4px; }
+  html[data-pdf="washi"] h2 { border-bottom: 2px solid var(--seal); padding-bottom: 4px; }
 
   /* ---------- PDF 主题：紧凑速查（小字号 · 省页数） ---------- */
   html[data-pdf="compact"] {
@@ -1039,4 +1131,152 @@ ul.unit-list li a.is-done::after {
   html[data-pdf="compact"] details,
   html[data-pdf="compact"] .card,
   html[data-pdf="compact"] .question-block { padding: 4px 8px !important; margin: 4px 0 !important; }
+}
+
+/* ====================== 工作台左栏（56px 图标条，ADR-0010） ======================
+   全站唯一导航层：收起时 56px 只显图标，hover / 键盘聚焦 / 点击 QY 钉住 时展开成
+   184px 浮层（position:fixed，不挤压正文宽度）。
+   内容让位靠 body.has-rail 的 padding-left，页面结构不动。
+   打印时整条隐藏。 */
+body.has-rail { padding-left: 56px; }
+
+.wb-rail {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  z-index: 40;
+  display: flex; flex-direction: column; gap: 2px;
+  width: 56px;
+  padding: 8px 6px;
+  background: var(--surface-2);
+  border-right: 1px solid var(--border-soft);
+  overflow: hidden;
+  transition: width .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+/* 导航项单独滚动：外观槽固定贴在条底，不会被 14 个模块挤出视口 */
+.wb-rail-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.wb-rail-scroll::-webkit-scrollbar { display: none; }
+.wb-rail::-webkit-scrollbar { display: none; }
+
+.wb-rail:hover,
+.wb-rail:focus-within,
+.wb-rail.is-pinned {
+  width: 184px;
+  background: var(--surface);
+  box-shadow: var(--shadow-hover);
+}
+
+.wb-rail-brand {
+  flex: none;
+  display: flex; align-items: center; justify-content: center;
+  height: 40px; margin-bottom: 4px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: Georgia, "Times New Roman", "Songti SC", serif;
+  font-size: 13px; font-weight: 600; letter-spacing: -.3px;
+  text-decoration: none;
+}
+.wb-rail:hover .wb-rail-brand,
+.wb-rail:focus-within .wb-rail-brand,
+.wb-rail.is-pinned .wb-rail-brand { justify-content: flex-start; padding: 0 12px; }
+
+.wb-rail-group { display: flex; flex-direction: column; gap: 2px; }
+
+.wb-rail-item {
+  flex: none;
+  display: flex; align-items: center; justify-content: center;
+  height: 40px;
+  border-radius: 8px;
+  color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background .14s ease, color .14s ease;
+}
+.wb-rail-item .im { --im-size: 17px; }
+
+.wb-rail:hover .wb-rail-item,
+.wb-rail:focus-within .wb-rail-item,
+.wb-rail.is-pinned .wb-rail-item { justify-content: flex-start; padding: 0 12px; gap: 10px; }
+
+.wb-rail-item:hover { background: var(--accent-soft); color: var(--accent-ink); }
+.wb-rail-item.is-on { background: var(--accent-soft); color: var(--accent-ink); font-weight: 600; }
+
+.wb-rail-t {
+  display: none;
+  font-size: 13.5px;
+  line-height: 1;
+}
+.wb-rail:hover .wb-rail-t,
+.wb-rail:focus-within .wb-rail-t,
+.wb-rail.is-pinned .wb-rail-t { display: inline; }
+
+.wb-rail-sep {
+  flex: none;
+  height: 1px; margin: 6px 8px;
+  background: var(--border-soft);
+}
+
+/* 面包屑（报告外壳与区落地页共用） */
+.wb-crumb {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  font-size: .82rem; color: var(--muted);
+}
+.wb-crumb a { color: var(--muted); text-decoration: none; }
+.wb-crumb a:hover { color: var(--accent); text-decoration: underline; }
+.wb-crumb-sep { opacity: .5; }
+
+@media (max-width: 960px) {
+  body.has-rail { padding-left: 0; }
+  .wb-rail { transform: translateX(-100%); transition: transform .2s ease; }
+  body.nav-open .wb-rail { transform: none; box-shadow: var(--shadow-hover); }
+}
+
+@media print {
+  body.has-rail { padding-left: 0; }
+  .wb-rail { display: none; }
+}
+
+
+/* ====================== 左栏里的外观槽（56px 图标条 / 门户 180px） ====================== */
+.wb-rail .theme-slot,
+.rail .theme-slot {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-soft);
+}
+.wb-rail .theme-slot { padding-left: 0; padding-right: 0; }
+
+/* 56px 收起态：三格竖向（横向放不下），展开后恢复横排 */
+.wb-rail .theme-toggle {
+  grid-template-columns: 1fr;
+  grid-auto-rows: 30px;
+  height: auto;
+}
+.wb-rail .theme-toggle .tt-thumb {
+  top: 3px; bottom: auto; left: 3px; right: 3px;
+  width: auto; height: 30px;
+  transform: translateY(calc(100% * var(--i, 0)));
+}
+.wb-rail:hover .theme-toggle,
+.wb-rail:focus-within .theme-toggle,
+.wb-rail.is-pinned .theme-toggle {
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: auto;
+  height: 34px;
+}
+.wb-rail:hover .theme-toggle .tt-thumb,
+.wb-rail:focus-within .theme-toggle .tt-thumb,
+.wb-rail.is-pinned .theme-toggle .tt-thumb {
+  top: 3px; bottom: 3px; left: 3px; right: auto;
+  width: calc((100% - 6px) / 3); height: auto;
+  transform: translateX(calc(100% * var(--i, 0)));
 }

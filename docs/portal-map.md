@@ -5,9 +5,10 @@
 
 ## 一、门户 `index.html`（唯一首页，零构建、`file://` 直开）
 
-一层 `data-lang`（日语 / 英语）+ 一层 `data-area`（区：`study` / `survey` / `tools` / `snooker`）驱动显隐，状态分别记在
-`localStorage` 的 `jlpt-lang` / `jlpt-area`（`#survey` / `#tools` / `#snooker` 可深链直达对应区）。
-三区共用一条 `:not()` 显隐规则（加第四区只改这一条）。四处内容由生成器写入，**位置之外的 markup 手写安全**：
+一层 `data-area`（区：`study` / `survey` / `tools` / `snooker`）驱动显隐，状态记在 `localStorage` 的 `jlpt-area`（`#survey` / `#tools` / `#snooker` 可深链直达对应区）。
+语言轴已在 `docs/adr/0010` 里移除：日语与英语并列为「语言学习」区里的两个分组小标题，不再有 `data-lang`。
+壳是「左栏 180px + 顶栏 48px + 单列卡片」：左栏常驻（「语言学习」分组可折叠）、卡片右栏是进度胶囊（分母来自 `assets/units.js`，分子来自 `LibProgress`）。
+四个区共用一条 `:not()` 显隐规则；四处生成器标记区（`en:unit-lists` / `en:reading-lists` / `wb:report-list` / `wb:tool-list`）位置之外的手写 markup 安全
 
 | 标记区（`index.html`） | 内容 | 归属工具 | 手改后果 |
 |---|---|---|---|

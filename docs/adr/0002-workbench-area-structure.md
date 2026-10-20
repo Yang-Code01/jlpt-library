@@ -1,6 +1,8 @@
 # 门户首页就地改造为「区」结构（新增 data-area 区开关），不新建工作台页面
 
-Status: accepted
+Status: superseded by [ADR-0010](./0010-workbench-shell.md)
+
+> ⚠️ 本 ADR 的两条结论已被 [ADR-0010](./0010-workbench-shell.md) 推翻：① 「样张 D 侧栏工作台」的否决（门户改为左栏常驻）；② `data-lang` 语言开关的保留（该轴已移除，改为主区分组小标题）。其余条款（单页零构建、生成器标记区、`localStorage` 键、`data-en-key` 107 不变量）继续有效。
 
 门户首页仍是同一个 `index.html`：在既有的 `data-lang`（日语 / 英语语言开关）之上加一层 `data-area`（区开关），语言开关降级为「语言学习区」区内的二级筛选；「调查报告区」接在同一页页尾。选就地改造而非新建首页 / 多页分区，是因为：用户原话是「重新修改 index 页面」；全站零构建、`file://` 优先，多页会引入共享导航与跨页状态同步；且现有不变量（生成器的两个标记区、`en-accept` 的 107 项 `data-en-key`、`progress.js` 的路径末三段 key）在单页里零冲击。
 

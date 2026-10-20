@@ -27,14 +27,27 @@ h1, h2, h3, p { margin: 0; }
   --ty-accent-2:  #ff5c8a;   /* 霓虹粉：连击 / 出错 */
   --ty-good:      #7df0a9;   /* 已敲对 */
   --ty-warn:      #ffd166;   /* 倒数告警 */
+  --ty-line-2:    #3d4d70;   /* hover 边框 */
+  --ty-bg-3:      #0a1120;   /* 题面底 */
+  --ty-bg-4:      #0e1729;
+  --ty-glow-1:    #14253f;   /* 背景光晕 1 */
+  --ty-glow-2:    #1d1430;   /* 背景光晕 2 */
+  --ty-accent-lite:#3ef0d6;  /* 主按钮渐变亮端 */
+  --ty-accent-deep:#1fc4ad;  /* 主按钮渐变深端 */
+  --ty-on-accent: #04231e;   /* 青底上的字 */
+  --ty-accent-2-lite:#ff6f97;
+  --ty-accent-2-deep:#e13c67;
+  --ty-on-accent-2:#2a0412;  /* 粉底上的字 */
+  --ty-ink-strong:#ffffff;   /* 词形主视觉 */
+  --ty-muted-2:   #8493b5;   /* 假名残字 */
   --ty-radius:    14px;
   --ty-flow-ms:   8000ms;    /* 传送带单程时长；由 JS 按难度档改写（档越高越小 = 越快） */
 
   min-height: 100vh;
   padding: 18px clamp(14px, 4vw, 40px) 40px;
   background:
-    radial-gradient(1100px 620px at 78% -12%, #14253f 0%, transparent 62%),
-    radial-gradient(900px 520px at 8% 108%, #1d1430 0%, transparent 60%),
+    radial-gradient(1100px 620px at 78% -12%, var(--ty-glow-1) 0%, transparent 62%),
+    radial-gradient(900px 520px at 8% 108%, var(--ty-glow-2) 0%, transparent 60%),
     var(--ty-bg);
   color: var(--ty-fg);
   font-family: system-ui, -apple-system, "Segoe UI", "Yu Gothic UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
@@ -106,7 +119,7 @@ h1, h2, h3, p { margin: 0; }
   transition: border-color .15s, box-shadow .15s, transform .1s;
 }
 .ty-opt-sub { font-size: 11px; font-weight: 400; color: var(--ty-muted); letter-spacing: .02em; }
-.ty-opt:hover { border-color: #3d4d70; transform: translateY(-1px); }
+.ty-opt:hover { border-color: var(--ty-line-2); transform: translateY(-1px); }
 .ty-opt.is-active {
   border-color: var(--ty-accent);
   box-shadow: inset 0 0 0 1px rgba(53, 224, 200, .35), 0 0 22px rgba(53, 224, 200, .18);
@@ -133,15 +146,15 @@ h1, h2, h3, p { margin: 0; }
 .ty-btn:active { transform: translateY(0); }
 .ty-btn-primary {
   margin-top: 26px;
-  background: linear-gradient(180deg, #3ef0d6, #1fc4ad);
+  background: linear-gradient(180deg, var(--ty-accent-lite), var(--ty-accent-deep));
   border-color: transparent;
-  color: #04231e;
+  color: var(--ty-on-accent);
   box-shadow: 0 6px 26px rgba(53, 224, 200, .3);
 }
 .ty-btn-primary:hover { box-shadow: 0 8px 32px rgba(53, 224, 200, .42); }
 .ty-btn-ghost { background: rgba(255, 255, 255, .03); color: var(--ty-fg); }
-.ty-btn-ghost:hover { border-color: #3d4d70; }
-.ty-btn-danger { background: linear-gradient(180deg, #ff6f97, #e13c67); border-color: transparent; color: #2a0412; }
+.ty-btn-ghost:hover { border-color: var(--ty-line-2); }
+.ty-btn-danger { background: linear-gradient(180deg, var(--ty-accent-2-lite), var(--ty-accent-2-deep)); border-color: transparent; color: var(--ty-on-accent-2); }
 .ty-btn-lg { padding: 13px 34px; font-size: 16px; }
 
 /* 键盘可达：焦点环清晰可见 */
@@ -204,7 +217,7 @@ h1, h2, h3, p { margin: 0; }
   border-radius: 18px;
   background:
     repeating-linear-gradient(90deg, rgba(255, 255, 255, .028) 0 2px, transparent 2px 34px),
-    linear-gradient(180deg, #0a1120, #0e1729 60%, #0a1120);
+    linear-gradient(180deg, var(--ty-bg-3), var(--ty-bg-4) 60%, var(--ty-bg-3));
 }
 /* 传送带上下轨 */
 .ty-lane::before, .ty-lane::after {
@@ -252,7 +265,7 @@ h1, h2, h3, p { margin: 0; }
   font-size: clamp(30px, 6vw, 44px);
   font-weight: 800;
   letter-spacing: .1em;
-  color: #fff;
+  color: var(--ty-ink-strong);
   text-shadow: 0 0 20px rgba(53, 224, 200, .35);
 }
 /* 假名作为 ruby 标注：小一号，居上方，不抢主视觉 */
@@ -271,7 +284,7 @@ h1, h2, h3, p { margin: 0; }
   letter-spacing: .06em;
 }
 .ty-romaji .ty-hit { color: var(--ty-good); text-shadow: 0 0 14px rgba(125, 240, 169, .5); }
-.ty-romaji .ty-rest { color: #8493b5; }
+.ty-romaji .ty-rest { color: var(--ty-muted-2); }
 .ty-echo {
   margin-left: 12px;
   color: var(--ty-accent);

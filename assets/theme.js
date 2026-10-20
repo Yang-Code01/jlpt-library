@@ -1,6 +1,7 @@
 /* 个人工作站 主题切换（浅色/深色）＋ PDF 下载
  * 所有页面共用：在 <head> 中以普通 <script> 引入，
- * 会立即根据 localStorage 恢复主题以避免闪烁，DOM 就绪后在右上角生成切换按钮。
+ * 会立即根据 localStorage 恢复主题以避免闪烁；DOM 就绪后把三档外观控件（图标）挂到
+ * [data-theme-slot]（没有就退回左下角固定），PDF 导出按钮单独留在右上角。
  *
  * PDF 下载走浏览器打印（用户在打印框选「另存为 PDF」），文字可选可搜、振假名不走样。
  * 页面侧接口 window.LibPdf：
@@ -13,7 +14,7 @@
   var KEY = 'jp-lib-theme';
 
   function getSaved() {
-    try { return localStorage.getItem(KEY) || 'eye'; } catch (e) { return 'eye'; }
+    try { return localStorage.getItem(KEY) || 'light'; } catch (e) { return 'light'; }
   }
   function save(v) {
     try { localStorage.setItem(KEY, v); } catch (e) {}
@@ -58,35 +59,81 @@
     else { document.addEventListener('DOMContentLoaded', fn); }
   }
 
-  ready(function () {
+  /* 三档外观：照 MyHOT 的 radiogroup —— 图标 + sr-only 文字 + 滑动指示块。
+     挂在页面给的 [data-theme-slot]（门户左栏底部 / 子页 56px 条底部）；
+     没给 slot 的页面退回左下角固定。 */
+  var MODES = [
+    { id: 'light', label: '浅色', icon: 'sun' },
+    { id: 'eye', label: '护眼', icon: 'eye' },
+    { id: 'dark', label: '深色', icon: 'moon' }
+  ];
+
+  function mountToggle() {
+    var slot = document.querySelector('[data-theme-slot]');
     var box = document.createElement('div');
-    box.className = 'theme-switch';
-    box.setAttribute('role', 'group');
-    box.setAttribute('aria-label', '外观切换');
-    box.innerHTML =
-      '<span class="ts-label">外观</span>' +
-      '<button type="button" data-v="light">浅色</button>' +
-      '<button type="button" data-v="eye">护眼</button>' +
-      '<button type="button" data-v="dark">深色</button>';
-    document.body.appendChild(box);
+    box.className = 'theme-toggle';
+    box.setAttribute('role', 'radiogroup');
+    box.setAttribute('aria-label', '外观');
+
+    var html = '<span class="tt-thumb" aria-hidden="true"></span>';
+    for (var i = 0; i < MODES.length; i++) {
+      html += '<button type="button" role="radio" data-v="' + MODES[i].id + '"' +
+        ' title="' + MODES[i].label + '" aria-checked="false" tabindex="-1">' +
+        '<span class="im im-' + MODES[i].icon + '" aria-hidden="true"></span>' +
+        '<span class="sr-only">' + MODES[i].label + '</span></button>';
+    }
+    box.innerHTML = html;
+    (slot || document.body).appendChild(box);
+    if (!slot) box.classList.add('is-floating');
 
     var btns = box.querySelectorAll('button');
     function sync() {
+      var idx = 0;
       for (var i = 0; i < btns.length; i++) {
-        btns[i].classList.toggle('on', btns[i].getAttribute('data-v') === current);
+        var on = btns[i].getAttribute('data-v') === current;
+        btns[i].classList.toggle('on', on);
+        btns[i].setAttribute('aria-checked', on ? 'true' : 'false');
+        btns[i].setAttribute('tabindex', on ? '0' : '-1');
+        if (on) idx = i;
       }
+      box.style.setProperty('--i', idx);
     }
-    for (var i = 0; i < btns.length; i++) {
-      btns[i].addEventListener('click', function () {
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].addEventListener('click', function () {
         current = this.getAttribute('data-v');
         save(current);
         apply(current);
         sync();
       });
     }
+    /* radiogroup 的键盘规矩：左右方向键在档位间移动 */
+    box.addEventListener('keydown', function (ev) {
+      var delta = ev.key === 'ArrowRight' ? 1 : ev.key === 'ArrowLeft' ? -1 : 0;
+      if (!delta) return;
+      ev.preventDefault();
+      var at = 0;
+      for (var i = 0; i < MODES.length; i++) if (MODES[i].id === current) at = i;
+      var next = MODES[(at + delta + MODES.length) % MODES.length];
+      current = next.id;
+      save(current);
+      apply(current);
+      sync();
+      var focusBtn = box.querySelector('button[data-v="' + current + '"]');
+      if (focusBtn) focusBtn.focus();
+    });
     sync();
+  }
 
-    pdfMount(box);
+  function mountPdfDock() {
+    var dock = document.createElement('div');
+    dock.className = 'pdf-dock';
+    document.body.appendChild(dock);
+    pdfMount(dock);
+  }
+
+  ready(function () {
+    mountToggle();
+    mountPdfDock();
   });
 
   /* ====================== PDF 下载：运行时接口 ====================== */
@@ -141,6 +188,7 @@
     var hide = pdf.state === 'hidden';
     b.hidden = hide;
     if (b.previousSibling) b.previousSibling.hidden = hide;
+    if (b.parentNode && b.parentNode.classList.contains('pdf-dock')) b.parentNode.hidden = hide;
     b.classList.toggle('is-off', pdf.state === 'disabled');
     b.title = pdf.state === 'disabled' ? pdf.msg : '把当前页面导出为 PDF';
     if (hide || pdf.state === 'disabled') pdfClose();
