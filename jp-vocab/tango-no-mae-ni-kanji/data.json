@@ -1,0 +1,442 @@
+{
+  "title": "単語の前に漢字をプラス",
+  "reading": "たんごのまえにかんじをプラス",
+  "meaning_cn": "第7章「語形成」第2課：在词前加汉字（前缀构词）",
+  "audio": false,
+  "categories": [
+    {
+      "name": "非〜（否定）",
+      "reading": "ひ",
+      "cards": [
+        { "id": "1-1", "word": "非常識", "kana": "ひじょうしき", "pos": "複合名詞", "meaning_cn": "缺乏常识", "example_jp": "あの人の行動は非常識だ。", "example_jp_ruby": "あの人の行動は<ruby>非常識<rt>ひじょうしき</rt></ruby>だ。", "example_cn": "那个人的行为缺乏常识。" },
+        { "id": "1-2", "word": "非公式", "kana": "ひこうしき", "pos": "複合名詞", "meaning_cn": "非正式", "example_jp": "これは非公式の情報です。", "example_jp_ruby": "これは<ruby>非公式<rt>ひこうしき</rt></ruby>の情報です。", "example_cn": "这是非正式的消息。" },
+        { "id": "1-3", "word": "非公開", "kana": "ひこうかい", "pos": "複合名詞", "meaning_cn": "不公开", "example_jp": "その会議は非公開で行われた。", "example_jp_ruby": "その会議は<ruby>非公開<rt>ひこうかい</rt></ruby>で行われた。", "example_cn": "那场会议以不公开方式举行。" },
+        { "id": "1-4", "word": "非課税", "kana": "ひかぜい", "pos": "複合名詞", "meaning_cn": "免税、不征税", "example_jp": "この商品は非課税だ。", "example_jp_ruby": "この商品は<ruby>非課税<rt>ひかぜい</rt></ruby>だ。", "example_cn": "这个商品免税。" }
+      ]
+    },
+    {
+      "name": "不〜（否定）",
+      "reading": "ふ",
+      "cards": [
+        { "id": "2-1", "word": "不真面目", "kana": "ふまじめ", "pos": "複合名詞", "meaning_cn": "不认真、不正经", "example_jp": "彼は不真面目な態度で授業に出ている。", "example_jp_ruby": "彼は<ruby>不真面目<rt>ふまじめ</rt></ruby>な態度で授業に出ている。", "example_cn": "他上课态度不认真。" },
+        { "id": "2-2", "word": "不注意", "kana": "ふちゅうい", "pos": "複合名詞", "meaning_cn": "疏忽、不注意", "example_jp": "不注意でミスをした。", "example_jp_ruby": "<ruby>不注意<rt>ふちゅうい</rt></ruby>でミスをした。", "example_cn": "因为疏忽犯了错。" },
+        { "id": "2-3", "word": "不景気", "kana": "ふけいき", "pos": "複合名詞", "meaning_cn": "不景气、萧条", "example_jp": "不景気で会社の売上が減った。", "example_jp_ruby": "<ruby>不景気<rt>ふけいき</rt></ruby>で会社の売上が減った。", "example_cn": "因为经济不景气，公司销售额下降了。" },
+        { "id": "2-4", "word": "不完全", "kana": "ふかんぜん", "pos": "複合名詞", "meaning_cn": "不完全", "example_jp": "この計画はまだ不完全だ。", "example_jp_ruby": "この計画はまだ<ruby>不完全<rt>ふかんぜん</rt></ruby>だ。", "example_cn": "这个计划还不完整。" },
+        { "id": "2-5", "word": "不健康", "kana": "ふけんこう", "pos": "複合名詞", "meaning_cn": "不健康", "example_jp": "毎日カップ麺ばかり食べるのは不健康だ。", "example_jp_ruby": "毎日カップ麺ばかり食べるのは<ruby>不健康<rt>ふけんこう</rt></ruby>だ。", "example_cn": "每天只吃杯面很不健康。" },
+        { "id": "2-6", "word": "不自然", "kana": "ふしぜん", "pos": "複合名詞", "meaning_cn": "不自然", "example_jp": "彼の笑顔はどこか不自然だった。", "example_jp_ruby": "彼の笑顔はどこか<ruby>不自然<rt>ふしぜん</rt></ruby>だった。", "example_cn": "他的笑容总觉得有些不自然。" },
+        { "id": "2-7", "word": "不得意", "kana": "ふとくい", "pos": "複合名詞", "meaning_cn": "不擅长", "example_jp": "私は数学が不得意だ。", "example_jp_ruby": "私は数学が<ruby>不得意<rt>ふとくい</rt></ruby>だ。", "example_cn": "我不擅长数学。" },
+        { "id": "2-8", "word": "不規則", "kana": "ふきそく", "pos": "複合名詞", "meaning_cn": "不规律", "example_jp": "彼の生活は不規則だ。", "example_jp_ruby": "彼の生活は<ruby>不規則<rt>ふきそく</rt></ruby>だ。", "example_cn": "他的生活不规律。" },
+        { "id": "2-9", "word": "不可能", "kana": "ふかのう", "pos": "複合名詞", "meaning_cn": "不可能", "example_jp": "一日で全部終わらせるのは不可能だ。", "example_jp_ruby": "一日で全部終わらせるのは<ruby>不可能<rt>ふかのう</rt></ruby>だ。", "example_cn": "一天之内全部做完是不可能的。" }
+      ]
+    },
+    {
+      "name": "無〜（否定）",
+      "reading": "む",
+      "cards": [
+        { "id": "3-1", "word": "無意識", "kana": "むいしき", "pos": "複合名詞", "meaning_cn": "无意识", "example_jp": "無意識のうちにため息をついた。", "example_jp_ruby": "<ruby>無意識<rt>むいしき</rt></ruby>のうちにため息をついた。", "example_cn": "不知不觉地叹了口气。" },
+        { "id": "3-2", "word": "無関係", "kana": "むかんけい", "pos": "複合名詞", "meaning_cn": "无关", "example_jp": "この事件は私とは無関係だ。", "example_jp_ruby": "この事件は私とは<ruby>無関係<rt>むかんけい</rt></ruby>だ。", "example_cn": "这起事件与我无关。" },
+        { "id": "3-3", "word": "無関心", "kana": "むかんしん", "pos": "複合名詞", "meaning_cn": "不关心", "example_jp": "若者は政治に無関心だと言われる。", "example_jp_ruby": "若者は政治に<ruby>無関心<rt>むかんしん</rt></ruby>だと言われる。", "example_cn": "据说年轻人对政治不关心。" },
+        { "id": "3-4", "word": "無計画", "kana": "むけいかく", "pos": "複合名詞", "meaning_cn": "无计划", "example_jp": "無計画に旅行に出かけた。", "example_jp_ruby": "<ruby>無計画<rt>むけいかく</rt></ruby>に旅行に出かけた。", "example_cn": "毫无计划地出门旅行了。" },
+        { "id": "3-5", "word": "無責任", "kana": "むせきにん", "pos": "複合名詞", "meaning_cn": "不负责任", "example_jp": "そんな無責任な発言は許されない。", "example_jp_ruby": "そんな<ruby>無責任<rt>むせきにん</rt></ruby>な発言は許されない。", "example_cn": "那种不负责任的发言不能允许。" },
+        { "id": "3-6", "word": "無表情", "kana": "むひょうじょう", "pos": "複合名詞", "meaning_cn": "无表情", "example_jp": "彼は無表情のまま座っていた。", "example_jp_ruby": "彼は<ruby>無表情<rt>むひょうじょう</rt></ruby>のまま座っていた。", "example_cn": "他面无表情地坐着。" },
+        { "id": "3-7", "word": "無気力", "kana": "むきりょく", "pos": "複合名詞", "meaning_cn": "无气力、缺乏干劲", "example_jp": "最近、彼は無気力になっている。", "example_jp_ruby": "最近、彼は<ruby>無気力<rt>むきりょく</rt></ruby>になっている。", "example_cn": "最近他变得毫无干劲。" },
+        { "id": "3-8", "word": "無許可", "kana": "むきょか", "pos": "複合名詞", "meaning_cn": "未经许可", "example_jp": "無許可で写真を撮ってはいけない。", "example_jp_ruby": "<ruby>無許可<rt>むきょか</rt></ruby>で写真を撮ってはいけない。", "example_cn": "未经许可不得拍照。" },
+        { "id": "3-9", "word": "無反応", "kana": "むはんのう", "pos": "複合名詞", "meaning_cn": "无反应", "example_jp": "何度呼んでも無反応だった。", "example_jp_ruby": "何度呼んでも<ruby>無反応<rt>むはんのう</rt></ruby>だった。", "example_cn": "叫了好几次都没有反应。" }
+      ]
+    },
+    {
+      "name": "未〜（否定）",
+      "reading": "み",
+      "cards": [
+        { "id": "4-1", "word": "未確認", "kana": "みかくにん", "pos": "複合名詞", "meaning_cn": "未确认", "example_jp": "まだ未確認の情報です。", "example_jp_ruby": "まだ<ruby>未確認<rt>みかくにん</rt></ruby>の情報です。", "example_cn": "这是尚未确认的消息。" },
+        { "id": "4-2", "word": "未解決", "kana": "みかいけつ", "pos": "複合名詞", "meaning_cn": "未解决", "example_jp": "その事件は未解決のままだ。", "example_jp_ruby": "その事件は<ruby>未解決<rt>みかいけつ</rt></ruby>のままだ。", "example_cn": "那起事件仍未解决。" },
+        { "id": "4-3", "word": "未経験", "kana": "みけいけん", "pos": "複合名詞", "meaning_cn": "无经验", "example_jp": "未経験の分野に挑戦したい。", "example_jp_ruby": "<ruby>未経験<rt>みけいけん</rt></ruby>の分野に挑戦したい。", "example_cn": "想挑战没有经验的领域。" },
+        { "id": "4-4", "word": "未開発", "kana": "みかいはつ", "pos": "複合名詞", "meaning_cn": "未开发", "example_jp": "この地域はまだ未開発だ。", "example_jp_ruby": "この地域はまだ<ruby>未開発<rt>みかいはつ</rt></ruby>だ。", "example_cn": "这个地区尚未开发。" },
+        { "id": "4-5", "word": "未発表", "kana": "みはっぴょう", "pos": "複合名詞", "meaning_cn": "未发布", "example_jp": "新商品の詳細は未発表だ。", "example_jp_ruby": "新商品の詳細は<ruby>未発表<rt>みはっぴょう</rt></ruby>だ。", "example_cn": "新商品的详情尚未公布。" },
+        { "id": "4-6", "word": "未完成", "kana": "みかんせい", "pos": "複合名詞", "meaning_cn": "未完成", "example_jp": "この小説は未完成に終わった。", "example_jp_ruby": "この小説は<ruby>未完成<rt>みかんせい</rt></ruby>に終わった。", "example_cn": "这部小说未完成就搁笔了。" }
+      ]
+    },
+    {
+      "name": "総〜／全〜（全体）",
+      "reading": "そう・ぜん",
+      "cards": [
+        { "id": "5-1", "word": "総人数", "kana": "そうにんずう", "pos": "複合名詞", "meaning_cn": "总人数", "example_jp": "このクラブの総人数は三十人だ。", "example_jp_ruby": "このクラブの<ruby>総人数<rt>そうにんずう</rt></ruby>は三十人だ。", "example_cn": "这个社团总人数是三十人。" },
+        { "id": "5-2", "word": "総人口", "kana": "そうじんこう", "pos": "複合名詞", "meaning_cn": "总人口", "example_jp": "この町の総人口は約三万人だ。", "example_jp_ruby": "この町の<ruby>総人口<rt>そうじんこう</rt></ruby>は約三万人だ。", "example_cn": "这个镇的总人口约三万人。" },
+        { "id": "5-3", "word": "総面積", "kana": "そうめんせき", "pos": "複合名詞", "meaning_cn": "总面积", "example_jp": "公園の総面積は百ヘクタールだ。", "example_jp_ruby": "公園の<ruby>総面積<rt>そうめんせき</rt></ruby>は百ヘクタールだ。", "example_cn": "公园的总面积是一百公顷。" },
+        { "id": "5-4", "word": "総復習", "kana": "そうふくしゅう", "pos": "複合名詞", "meaning_cn": "总复习", "example_jp": "試験の前に総復習をした。", "example_jp_ruby": "試験の前に<ruby>総復習<rt>そうふくしゅう</rt></ruby>をした。", "example_cn": "考试前做了总复习。" },
+        { "id": "5-5", "word": "総選挙", "kana": "そうせんきょ", "pos": "複合名詞", "meaning_cn": "大选（总选举）", "example_jp": "来月、総選挙が行われる。", "example_jp_ruby": "来月、<ruby>総選挙<rt>そうせんきょ</rt></ruby>が行われる。", "example_cn": "下个月将举行大选。" },
+        { "id": "5-6", "word": "総収入", "kana": "そうしゅうにゅう", "pos": "複合名詞", "meaning_cn": "总收入", "example_jp": "今年の総収入は増えた。", "example_jp_ruby": "今年の<ruby>総収入<rt>そうしゅうにゅう</rt></ruby>は増えた。", "example_cn": "今年的总收入增加了。" },
+        { "id": "5-7", "word": "全世界", "kana": "ぜんせかい", "pos": "複合名詞", "meaning_cn": "全世界", "example_jp": "そのニュースは全世界に伝わった。", "example_jp_ruby": "そのニュースは<ruby>全世界<rt>ぜんせかい</rt></ruby>に伝わった。", "example_cn": "那条新闻传遍了全世界。" },
+        { "id": "5-8", "word": "全国民", "kana": "ぜんこくみん", "pos": "複合名詞", "meaning_cn": "全体国民", "example_jp": "全国民が選挙に参加した。", "example_jp_ruby": "<ruby>全国民<rt>ぜんこくみん</rt></ruby>が選挙に参加した。", "example_cn": "全体国民都参加了选举。" },
+        { "id": "5-9", "word": "全試合", "kana": "ぜんしあい", "pos": "複合名詞", "meaning_cn": "全部比赛", "example_jp": "彼は全試合に出場した。", "example_jp_ruby": "彼は<ruby>全試合<rt>ぜんしあい</rt></ruby>に出場した。", "example_cn": "他参加了全部比赛。" },
+        { "id": "5-10", "word": "全自動", "kana": "ぜんじどう", "pos": "複合名詞", "meaning_cn": "全自动", "example_jp": "この洗濯機は全自動だ。", "example_jp_ruby": "この洗濯機は<ruby>全自動<rt>ぜんじどう</rt></ruby>だ。", "example_cn": "这台洗衣机是全自动的。" },
+        { "id": "5-11", "word": "全財産", "kana": "ぜんざいさん", "pos": "複合名詞", "meaning_cn": "全部财产", "example_jp": "彼は全財産を失った。", "example_jp_ruby": "彼は<ruby>全財産<rt>ぜんざいさん</rt></ruby>を失った。", "example_cn": "他失去了全部财产。" },
+        { "id": "5-12", "word": "全科目", "kana": "ぜんかもく", "pos": "複合名詞", "meaning_cn": "所有科目", "example_jp": "全科目で八割以上の点を取った。", "example_jp_ruby": "<ruby>全科目<rt>ぜんかもく</rt></ruby>で八割以上の点を取った。", "example_cn": "所有科目都拿到了八成以上的分数。" }
+      ]
+    },
+    {
+      "name": "各〜／諸〜（各个）",
+      "reading": "かく・しょ",
+      "cards": [
+        { "id": "6-1", "word": "各学校", "kana": "かくがっこう", "pos": "複合名詞", "meaning_cn": "各学校", "example_jp": "各学校で説明会が開かれる。", "example_jp_ruby": "<ruby>各学校<rt>かくがっこう</rt></ruby>で説明会が開かれる。", "example_cn": "各学校都会举办说明会。" },
+        { "id": "6-2", "word": "各地域", "kana": "かくちいき", "pos": "複合名詞", "meaning_cn": "各地区", "example_jp": "各地域の文化を大切にする。", "example_jp_ruby": "<ruby>各地域<rt>かくちいき</rt></ruby>の文化を大切にする。", "example_cn": "重视各地区文化。" },
+        { "id": "6-3", "word": "各家庭", "kana": "かくかてい", "pos": "複合名詞", "meaning_cn": "各家庭", "example_jp": "各家庭に資料が配られた。", "example_jp_ruby": "<ruby>各家庭<rt>かくかてい</rt></ruby>に資料が配られた。", "example_cn": "资料被分发到各个家庭。" },
+        { "id": "6-4", "word": "各都市", "kana": "かくとし", "pos": "複合名詞", "meaning_cn": "各城市", "example_jp": "各都市の人口を比べる。", "example_jp_ruby": "<ruby>各都市<rt>かくとし</rt></ruby>の人口を比べる。", "example_cn": "比较各城市的人口。" },
+        { "id": "6-5", "word": "各方面", "kana": "かくほうめん", "pos": "複合名詞", "meaning_cn": "各方面", "example_jp": "各方面から意見が集まった。", "example_jp_ruby": "<ruby>各方面<rt>かくほうめん</rt></ruby>から意見が集まった。", "example_cn": "从各方面收集到了意见。" },
+        { "id": "6-6", "word": "各分野", "kana": "かくぶんや", "pos": "複合名詞", "meaning_cn": "各领域", "example_jp": "各分野の専門家が集まった。", "example_jp_ruby": "<ruby>各分野<rt>かくぶんや</rt></ruby>の専門家が集まった。", "example_cn": "各领域的专家聚集在一起。" },
+        { "id": "6-7", "word": "諸外国", "kana": "しょがいこく", "pos": "複合名詞", "meaning_cn": "各国", "example_jp": "諸外国の例を参考にする。", "example_jp_ruby": "<ruby>諸外国<rt>しょがいこく</rt></ruby>の例を参考にする。", "example_cn": "参考各国的例子。" },
+        { "id": "6-8", "word": "諸条件", "kana": "しょじょうけん", "pos": "複合名詞", "meaning_cn": "各种条件", "example_jp": "諸条件を考えて決める。", "example_jp_ruby": "<ruby>諸条件<rt>しょじょうけん</rt></ruby>を考えて決める。", "example_cn": "综合考虑各种条件后决定。" },
+        { "id": "6-9", "word": "諸問題", "kana": "しょもんだい", "pos": "複合名詞", "meaning_cn": "各种问题", "example_jp": "諸問題を話し合った。", "example_jp_ruby": "<ruby>諸問題<rt>しょもんだい</rt></ruby>を話し合った。", "example_cn": "讨论了各种问题。" },
+        { "id": "6-10", "word": "諸費用", "kana": "しょひよう", "pos": "複合名詞", "meaning_cn": "各项费用", "example_jp": "諸費用を含めた金額だ。", "example_jp_ruby": "<ruby>諸費用<rt>しょひよう</rt></ruby>を含めた金額だ。", "example_cn": "这是包含各项费用的金额。" },
+        { "id": "6-11", "word": "諸事情", "kana": "しょじじょう", "pos": "複合名詞", "meaning_cn": "各种情况", "example_jp": "諸事情により延期します。", "example_jp_ruby": "<ruby>諸事情<rt>しょじじょう</rt></ruby>により延期します。", "example_cn": "因各种情况将延期。" }
+      ]
+    },
+    {
+      "name": "現〜／今〜（现在）",
+      "reading": "げん・こん",
+      "cards": [
+        { "id": "7-1", "word": "現住所", "kana": "げんじゅうしょ", "pos": "複合名詞", "meaning_cn": "现住址", "example_jp": "ここに現住所を書いてください。", "example_jp_ruby": "ここに<ruby>現住所<rt>げんじゅうしょ</rt></ruby>を書いてください。", "example_cn": "请在这里填写现住址。" },
+        { "id": "7-2", "word": "現市長", "kana": "げんしちょう", "pos": "複合名詞", "meaning_cn": "现任市长", "example_jp": "現市長は再選を目指している。", "example_jp_ruby": "<ruby>現市長<rt>げんしちょう</rt></ruby>は再選を目指している。", "example_cn": "现任市长力争连任。" },
+        { "id": "7-3", "word": "現段階", "kana": "げんだんかい", "pos": "複合名詞", "meaning_cn": "现阶段", "example_jp": "現段階では何も決まっていない。", "example_jp_ruby": "<ruby>現段階<rt>げんだんかい</rt></ruby>では何も決まっていない。", "example_cn": "现阶段什么都还没决定。" },
+        { "id": "7-4", "word": "現時点", "kana": "げんじてん", "pos": "複合名詞", "meaning_cn": "目前、现在", "example_jp": "現時点での情報をお伝えします。", "example_jp_ruby": "<ruby>現時点<rt>げんじてん</rt></ruby>での情報をお伝えします。", "example_cn": "为您播报目前的信息。" },
+        { "id": "7-5", "word": "今年度", "kana": "こんねんど", "pos": "複合名詞", "meaning_cn": "本年度", "example_jp": "今年度の予算が決まった。", "example_jp_ruby": "<ruby>今年度<rt>こんねんど</rt></ruby>の予算が決まった。", "example_cn": "本年度的预算确定了。" },
+        { "id": "7-6", "word": "今学期", "kana": "こんがっき", "pos": "複合名詞", "meaning_cn": "本学期", "example_jp": "今学期は日本語の授業を取った。", "example_jp_ruby": "<ruby>今学期<rt>こんがっき</rt></ruby>は日本語の授業を取った。", "example_cn": "本学期选了日语课。" },
+        { "id": "7-7", "word": "今世紀", "kana": "こんせいき", "pos": "複合名詞", "meaning_cn": "本世纪", "example_jp": "今世紀最大の発見だ。", "example_jp_ruby": "<ruby>今世紀<rt>こんせいき</rt></ruby>最大の発見だ。", "example_cn": "这是本世纪最大的发现。" },
+        { "id": "7-8", "word": "今シーズン", "kana": "こんシーズン", "pos": "複合名詞", "meaning_cn": "本赛季", "example_jp": "今シーズンは雪が多い。", "example_jp_ruby": "<ruby>今<rt>こん</rt></ruby>シーズンは雪が多い。", "example_cn": "本赛季雪很多。" }
+      ]
+    },
+    {
+      "name": "前〜／元〜（以前）",
+      "reading": "ぜん・もと",
+      "cards": [
+        { "id": "8-1", "word": "前大統領", "kana": "ぜんだいとうりょう", "pos": "複合名詞", "meaning_cn": "前总统", "example_jp": "前大統領が演説をした。", "example_jp_ruby": "<ruby>前大統領<rt>ぜんだいとうりょう</rt></ruby>が演説をした。", "example_cn": "前总统发表了演讲。" },
+        { "id": "8-2", "word": "前首相", "kana": "ぜんしゅしょう", "pos": "複合名詞", "meaning_cn": "前首相", "example_jp": "前首相は引退した。", "example_jp_ruby": "<ruby>前首相<rt>ぜんしゅしょう</rt></ruby>は引退した。", "example_cn": "前首相引退了。" },
+        { "id": "8-3", "word": "前社長", "kana": "ぜんしゃちょう", "pos": "複合名詞", "meaning_cn": "前社长", "example_jp": "前社長に挨拶に行った。", "example_jp_ruby": "<ruby>前社長<rt>ぜんしゃちょう</rt></ruby>に挨拶に行った。", "example_cn": "去向前社长打了招呼。" },
+        { "id": "8-4", "word": "前会長", "kana": "ぜんかいちょう", "pos": "複合名詞", "meaning_cn": "前会长", "example_jp": "前会長はまだ会社に来ている。", "example_jp_ruby": "<ruby>前会長<rt>ぜんかいちょう</rt></ruby>はまだ会社に来ている。", "example_cn": "前会长还来公司。" },
+        { "id": "8-5", "word": "前年度", "kana": "ぜんねんど", "pos": "複合名詞", "meaning_cn": "上一年度", "example_jp": "前年度の売上を比べる。", "example_jp_ruby": "<ruby>前年度<rt>ぜんねんど</rt></ruby>の売上を比べる。", "example_cn": "比较上一年度的销售额。" },
+        { "id": "8-6", "word": "元大統領", "kana": "もとだいとうりょう", "pos": "複合名詞", "meaning_cn": "前总统（原总统）", "example_jp": "元大統領が来日した。", "example_jp_ruby": "<ruby>元大統領<rt>もとだいとうりょう</rt></ruby>が来日した。", "example_cn": "前总统来日本了。" },
+        { "id": "8-7", "word": "元首相", "kana": "もとしゅしょう", "pos": "複合名詞", "meaning_cn": "前首相（原首相）", "example_jp": "元首相がテレビに出た。", "example_jp_ruby": "<ruby>元首相<rt>もとしゅしょう</rt></ruby>がテレビに出た。", "example_cn": "前首相上了电视。" },
+        { "id": "8-8", "word": "元歌手", "kana": "もとかしゅ", "pos": "複合名詞", "meaning_cn": "原歌手", "example_jp": "彼女は元歌手だ。", "example_jp_ruby": "彼女は<ruby>元歌手<rt>もとかしゅ</rt></ruby>だ。", "example_cn": "她原来是歌手。" },
+        { "id": "8-9", "word": "元スポーツ選手", "kana": "もとスポーツせんしゅ", "pos": "複合名詞", "meaning_cn": "原运动员", "example_jp": "彼は元スポーツ選手だ。", "example_jp_ruby": "彼は<ruby>元スポーツ選手<rt>もとスポーツせんしゅ</rt></ruby>だ。", "example_cn": "他原来是运动员。" },
+        { "id": "8-10", "word": "元夫", "kana": "もとおっと", "pos": "複合名詞", "meaning_cn": "前夫", "example_jp": "元夫と連絡を取った。", "example_jp_ruby": "<ruby>元夫<rt>もとおっと</rt></ruby>と連絡を取った。", "example_cn": "和前夫取得了联系。" },
+        { "id": "8-11", "word": "元妻", "kana": "もとつま", "pos": "複合名詞", "meaning_cn": "前妻", "example_jp": "元妻は別の町で暮らしている。", "example_jp_ruby": "<ruby>元妻<rt>もとつま</rt></ruby>は別の町で暮らしている。", "example_cn": "前妻在另一个城市生活。" }
+      ]
+    },
+    {
+      "name": "真〜／正〜（真正）",
+      "reading": "ま・せい",
+      "cards": [
+        { "id": "9-1", "word": "真新しい", "kana": "まあたらしい", "pos": "複合形容詞", "meaning_cn": "崭新", "example_jp": "真新しい靴を履いて出かけた。", "example_jp_ruby": "<ruby>真新<rt>まあたら</rt></ruby>しい靴を履いて出かけた。", "example_cn": "穿着崭新的鞋子出门了。" },
+        { "id": "9-2", "word": "真夜中", "kana": "まよなか", "pos": "複合名詞", "meaning_cn": "半夜", "example_jp": "真夜中に電話が鳴った。", "example_jp_ruby": "<ruby>真夜中<rt>まよなか</rt></ruby>に電話が鳴った。", "example_cn": "半夜电话响了。" },
+        { "id": "9-3", "word": "真正面", "kana": "ましょうめん", "pos": "複合名詞", "meaning_cn": "正对面", "example_jp": "真正面から相手を見た。", "example_jp_ruby": "<ruby>真正面<rt>ましょうめん</rt></ruby>から相手を見た。", "example_cn": "从正对面看着对方。" },
+        { "id": "9-4", "word": "真後ろ", "kana": "まうしろ", "pos": "複合名詞", "meaning_cn": "正后方", "example_jp": "真後ろから声をかけられた。", "example_jp_ruby": "<ruby>真後<rt>まうし</rt></ruby>ろから声をかけられた。", "example_cn": "从正后方被人叫住了。" },
+        { "id": "9-5", "word": "真下", "kana": "ました", "pos": "複合名詞", "meaning_cn": "正下方", "example_jp": "真下に駅がある。", "example_jp_ruby": "<ruby>真下<rt>ました</rt></ruby>に駅がある。", "example_cn": "正下方就是车站。" },
+        { "id": "9-6", "word": "真上", "kana": "まうえ", "pos": "複合名詞", "meaning_cn": "正上方", "example_jp": "真上に月が見える。", "example_jp_ruby": "<ruby>真上<rt>まうえ</rt></ruby>に月が見える。", "example_cn": "正上方能看到月亮。" },
+        { "id": "9-7", "word": "真四角", "kana": "ましかく", "pos": "複合名詞", "meaning_cn": "正方形、正四方形", "example_jp": "その箱は真四角だ。", "example_jp_ruby": "その箱は<ruby>真四角<rt>ましかく</rt></ruby>だ。", "example_cn": "那个箱子是正方形的。" },
+        { "id": "9-8", "word": "真向かい", "kana": "まむかい", "pos": "複合名詞", "meaning_cn": "正对面", "example_jp": "家の真向かいに店がある。", "example_jp_ruby": "家の<ruby>真向<rt>まむ</rt></ruby>かいに店がある。", "example_cn": "家正对面有家店。" },
+        { "id": "9-9", "word": "正反対", "kana": "せいはんたい", "pos": "複合名詞", "meaning_cn": "完全相反", "example_jp": "二人の意見は正反対だ。", "example_jp_ruby": "二人の意見は<ruby>正反対<rt>せいはんたい</rt></ruby>だ。", "example_cn": "两人的意见完全相反。" },
+        { "id": "9-10", "word": "正三角形", "kana": "せいさんかくけい", "pos": "複合名詞", "meaning_cn": "正三角形", "example_jp": "正三角形を書いてください。", "example_jp_ruby": "<ruby>正三角形<rt>せいさんかくけい</rt></ruby>を書いてください。", "example_cn": "请画一个正三角形。" },
+        { "id": "9-11", "word": "正五角形", "kana": "せいごかくけい", "pos": "複合名詞", "meaning_cn": "正五边形", "example_jp": "正五角形の形をしている。", "example_jp_ruby": "<ruby>正五角形<rt>せいごかくけい</rt></ruby>の形をしている。", "example_cn": "呈正五边形的形状。" },
+        { "id": "9-12", "word": "正社員", "kana": "せいしゃいん", "pos": "複合名詞", "meaning_cn": "正式员工", "example_jp": "正社員として働きたい。", "example_jp_ruby": "<ruby>正社員<rt>せいしゃいん</rt></ruby>として働きたい。", "example_cn": "想作为正式员工工作。" },
+        { "id": "9-13", "word": "正比例", "kana": "せいひれい", "pos": "複合名詞", "meaning_cn": "正比", "example_jp": "時間と距離は正比例する。", "example_jp_ruby": "時間と距離は<ruby>正比例<rt>せいひれい</rt></ruby>する。", "example_cn": "时间与距离成正比。" }
+      ]
+    },
+    {
+      "name": "逆〜／反〜（相反）",
+      "reading": "ぎゃく・はん",
+      "cards": [
+        { "id": "10-1", "word": "逆方向", "kana": "ぎゃくほうこう", "pos": "複合名詞", "meaning_cn": "反方向", "example_jp": "逆方向の電車に乗ってしまった。", "example_jp_ruby": "<ruby>逆方向<rt>ぎゃくほうこう</rt></ruby>の電車に乗ってしまった。", "example_cn": "坐上了反方向的电车。" },
+        { "id": "10-2", "word": "逆輸入", "kana": "ぎゃくゆにゅう", "pos": "複合名詞", "meaning_cn": "逆向进口", "example_jp": "その車は海外から逆輸入された。", "example_jp_ruby": "その車は海外から<ruby>逆輸入<rt>ぎゃくゆにゅう</rt></ruby>された。", "example_cn": "那辆车是从海外逆向进口的。" },
+        { "id": "10-3", "word": "逆コース", "kana": "ぎゃくコース", "pos": "複合名詞", "meaning_cn": "反向路线", "example_jp": "いつもと逆コースで帰った。", "example_jp_ruby": "いつもと<ruby>逆<rt>ぎゃく</rt></ruby>コースで帰った。", "example_cn": "走和平时相反的路线回去了。" },
+        { "id": "10-4", "word": "逆効果", "kana": "ぎゃくこうか", "pos": "複合名詞", "meaning_cn": "反效果", "example_jp": "言いすぎると逆効果になる。", "example_jp_ruby": "言いすぎると<ruby>逆効果<rt>ぎゃくこうか</rt></ruby>になる。", "example_cn": "说得太过会适得其反。" },
+        { "id": "10-5", "word": "反時計回り", "kana": "はんとけいまわり", "pos": "複合名詞", "meaning_cn": "逆时针方向", "example_jp": "反時計回りに回してください。", "example_jp_ruby": "<ruby>反時計回<rt>はんとけいまわ</rt></ruby>りに回してください。", "example_cn": "请逆时针旋转。" },
+        { "id": "10-6", "word": "反社会的", "kana": "はんしゃかいてき", "pos": "複合形容詞", "meaning_cn": "反社会的", "example_jp": "反社会的な行為は許されない。", "example_jp_ruby": "<ruby>反社会的<rt>はんしゃかいてき</rt></ruby>な行為は許されない。", "example_cn": "反社会的行为不被允许。" },
+        { "id": "10-7", "word": "反比例", "kana": "はんぴれい", "pos": "複合名詞", "meaning_cn": "反比", "example_jp": "値段と売上は反比例する。", "example_jp_ruby": "値段と売上は<ruby>反比例<rt>はんぴれい</rt></ruby>する。", "example_cn": "价格与销售额成反比。" }
+      ]
+    },
+    {
+      "name": "別〜／異〜（不同）",
+      "reading": "べつ・い",
+      "cards": [
+        { "id": "11-1", "word": "別方向", "kana": "べつほうこう", "pos": "複合名詞", "meaning_cn": "另一个方向", "example_jp": "彼らは別方向に歩いていった。", "example_jp_ruby": "彼らは<ruby>別方向<rt>べつほうこう</rt></ruby>に歩いていった。", "example_cn": "他们朝另一个方向走去了。" },
+        { "id": "11-2", "word": "別問題", "kana": "べつもんだい", "pos": "複合名詞", "meaning_cn": "另一个问题", "example_jp": "それはまた別問題だ。", "example_jp_ruby": "それはまた<ruby>別問題<rt>べつもんだい</rt></ruby>だ。", "example_cn": "那又是另一个问题。" },
+        { "id": "11-3", "word": "別行動", "kana": "べつこうどう", "pos": "複合名詞", "meaning_cn": "分开行动", "example_jp": "今日は別行動を取る。", "example_jp_ruby": "今日は<ruby>別行動<rt>べつこうどう</rt></ruby>を取る。", "example_cn": "今天分开行动。" },
+        { "id": "11-4", "word": "別世界", "kana": "べっせかい", "pos": "複合名詞", "meaning_cn": "另一个世界", "example_jp": "ここはまるで別世界だ。", "example_jp_ruby": "ここはまるで<ruby>別世界<rt>べっせかい</rt></ruby>だ。", "example_cn": "这里简直是另一个世界。" },
+        { "id": "11-5", "word": "異分野", "kana": "いぶんや", "pos": "複合名詞", "meaning_cn": "不同领域", "example_jp": "異分野の研究者と話す。", "example_jp_ruby": "<ruby>異分野<rt>いぶんや</rt></ruby>の研究者と話す。", "example_cn": "与不同领域的研究者交谈。" },
+        { "id": "11-6", "word": "異文化", "kana": "いぶんか", "pos": "複合名詞", "meaning_cn": "异文化", "example_jp": "異文化を理解することは大切だ。", "example_jp_ruby": "<ruby>異文化<rt>いぶんか</rt></ruby>を理解することは大切だ。", "example_cn": "理解异文化很重要。" },
+        { "id": "11-7", "word": "異民族", "kana": "いみんぞく", "pos": "複合名詞", "meaning_cn": "不同民族", "example_jp": "異民族の文化に触れる。", "example_jp_ruby": "<ruby>異民族<rt>いみんぞく</rt></ruby>の文化に触れる。", "example_cn": "接触不同民族的文化。" },
+        { "id": "11-8", "word": "異業種", "kana": "いぎょうしゅ", "pos": "複合名詞", "meaning_cn": "不同行业", "example_jp": "異業種との交流を深める。", "example_jp_ruby": "<ruby>異業種<rt>いぎょうしゅ</rt></ruby>との交流を深める。", "example_cn": "加深与不同行业的交流。" }
+      ]
+    },
+    {
+      "name": "大〜（おお）",
+      "reading": "おお",
+      "cards": [
+        { "id": "12-1", "word": "大地震", "kana": "おおじしん", "pos": "複合名詞", "meaning_cn": "大地震", "example_jp": "大地震で家が倒れた。", "example_jp_ruby": "<ruby>大地震<rt>おおじしん</rt></ruby>で家が倒れた。", "example_cn": "大地震导致房屋倒塌。" },
+        { "id": "12-2", "word": "大掃除", "kana": "おおそうじ", "pos": "複合名詞", "meaning_cn": "大扫除", "example_jp": "年末に大掃除をした。", "example_jp_ruby": "年末に<ruby>大掃除<rt>おおそうじ</rt></ruby>をした。", "example_cn": "年末做了大扫除。" },
+        { "id": "12-3", "word": "大けが", "kana": "おおけが", "pos": "複合名詞", "meaning_cn": "重伤", "example_jp": "転んで大けがをした。", "example_jp_ruby": "転んで<ruby>大<rt>おお</rt></ruby>けがをした。", "example_cn": "摔倒受了重伤。" },
+        { "id": "12-4", "word": "大雨", "kana": "おおあめ", "pos": "複合名詞", "meaning_cn": "大雨", "example_jp": "大雨で川が増水した。", "example_jp_ruby": "<ruby>大雨<rt>おおあめ</rt></ruby>で川が増水した。", "example_cn": "大雨导致河水上涨。" },
+        { "id": "12-5", "word": "大人数", "kana": "おおにんずう", "pos": "複合名詞", "meaning_cn": "人数众多", "example_jp": "大人数で集まるのは大変だ。", "example_jp_ruby": "<ruby>大人数<rt>おおにんずう</rt></ruby>で集まるのは大変だ。", "example_cn": "很多人聚在一起很辛苦。" },
+        { "id": "12-6", "word": "大騒ぎ", "kana": "おおさわぎ", "pos": "複合名詞", "meaning_cn": "大吵大闹", "example_jp": "小さなことで大騒ぎしないで。", "example_jp_ruby": "小さなことで<ruby>大騒<rt>おおさわ</rt></ruby>ぎしないで。", "example_cn": "别为小事大吵大闹。" },
+        { "id": "12-7", "word": "大違い", "kana": "おおちがい", "pos": "複合名詞", "meaning_cn": "大不相同", "example_jp": "見た目と中身は大違いだ。", "example_jp_ruby": "見た目と中身は<ruby>大違<rt>おおちが</rt></ruby>いだ。", "example_cn": "外观和内容大不相同。" },
+        { "id": "12-8", "word": "大急ぎ", "kana": "おおいそぎ", "pos": "複合名詞", "meaning_cn": "急忙", "example_jp": "大急ぎで駅へ向かった。", "example_jp_ruby": "<ruby>大急<rt>おおいそ</rt></ruby>ぎで駅へ向かった。", "example_cn": "急忙赶往车站。" },
+        { "id": "12-9", "word": "大忙し", "kana": "おおいそがし", "pos": "複合名詞", "meaning_cn": "非常忙碌", "example_jp": "年末は店が大忙しだ。", "example_jp_ruby": "年末は店が<ruby>大忙<rt>おおいそが</rt></ruby>しだ。", "example_cn": "年末店里非常忙。" }
+      ]
+    },
+    {
+      "name": "大〜（だい）",
+      "reading": "だい",
+      "cards": [
+        { "id": "13-1", "word": "大家族", "kana": "だいかぞく", "pos": "複合名詞", "meaning_cn": "大家庭", "example_jp": "彼の家は大家族だ。", "example_jp_ruby": "彼の家は<ruby>大家族<rt>だいかぞく</rt></ruby>だ。", "example_cn": "他家是个大家庭。" },
+        { "id": "13-2", "word": "大問題", "kana": "だいもんだい", "pos": "複合名詞", "meaning_cn": "大问题", "example_jp": "これは会社にとって大問題だ。", "example_jp_ruby": "これは会社にとって<ruby>大問題<rt>だいもんだい</rt></ruby>だ。", "example_cn": "这是公司的大问题。" },
+        { "id": "13-3", "word": "大部分", "kana": "だいぶぶん", "pos": "複合名詞", "meaning_cn": "大部分", "example_jp": "仕事の大部分は終わった。", "example_jp_ruby": "仕事の<ruby>大部分<rt>だいぶぶん</rt></ruby>は終わった。", "example_cn": "工作的大部分已经完成。" },
+        { "id": "13-4", "word": "大画面", "kana": "だいがめん", "pos": "複合名詞", "meaning_cn": "大屏幕", "example_jp": "大画面で映画を見たい。", "example_jp_ruby": "<ruby>大画面<rt>だいがめん</rt></ruby>で映画を見たい。", "example_cn": "想在大屏幕上看电影。" },
+        { "id": "13-5", "word": "大成功", "kana": "だいせいこう", "pos": "複合名詞", "meaning_cn": "大成功", "example_jp": "パーティーは大成功だった。", "example_jp_ruby": "パーティーは<ruby>大成功<rt>だいせいこう</rt></ruby>だった。", "example_cn": "派对非常成功。" },
+        { "id": "13-6", "word": "大満足", "kana": "だいまんぞく", "pos": "複合名詞", "meaning_cn": "非常满足", "example_jp": "味にも値段にも大満足だ。", "example_jp_ruby": "味にも値段にも<ruby>大満足<rt>だいまんぞく</rt></ruby>だ。", "example_cn": "味道和价格都令人非常满意。" },
+        { "id": "13-7", "word": "大人気", "kana": "だいにんき", "pos": "複合名詞", "meaning_cn": "非常受欢迎", "example_jp": "この店は若者に大人気だ。", "example_jp_ruby": "この店は若者に<ruby>大人気<rt>だいにんき</rt></ruby>だ。", "example_cn": "这家店在年轻人中非常受欢迎。" },
+        { "id": "13-8", "word": "大流行", "kana": "だいりゅうこう", "pos": "複合名詞", "meaning_cn": "大流行", "example_jp": "その歌が大流行している。", "example_jp_ruby": "その歌が<ruby>大流行<rt>だいりゅうこう</rt></ruby>している。", "example_cn": "那首歌正在大流行。" },
+        { "id": "13-9", "word": "大活躍", "kana": "だいかつやく", "pos": "複合名詞", "meaning_cn": "大显身手", "example_jp": "彼は試合で大活躍した。", "example_jp_ruby": "彼は試合で<ruby>大活躍<rt>だいかつやく</rt></ruby>した。", "example_cn": "他在比赛中大显身手。" }
+      ]
+    },
+    {
+      "name": "小〜",
+      "reading": "こ",
+      "cards": [
+        { "id": "14-1", "word": "小部屋", "kana": "こべや", "pos": "複合名詞", "meaning_cn": "小房间", "example_jp": "二階に小部屋がある。", "example_jp_ruby": "二階に<ruby>小部屋<rt>こべや</rt></ruby>がある。", "example_cn": "二楼有个小房间。" },
+        { "id": "14-2", "word": "小箱", "kana": "こばこ", "pos": "複合名詞", "meaning_cn": "小盒子", "example_jp": "小箱に指輪を入れた。", "example_jp_ruby": "<ruby>小箱<rt>こばこ</rt></ruby>に指輪を入れた。", "example_cn": "把戒指放进了小盒子。" },
+        { "id": "14-3", "word": "小窓", "kana": "こまど", "pos": "複合名詞", "meaning_cn": "小窗", "example_jp": "屋根に小窓が付いている。", "example_jp_ruby": "屋根に<ruby>小窓<rt>こまど</rt></ruby>が付いている。", "example_cn": "屋顶上有个小窗。" },
+        { "id": "14-4", "word": "小皿", "kana": "こざら", "pos": "複合名詞", "meaning_cn": "小碟子", "example_jp": "小皿に取って食べてください。", "example_jp_ruby": "<ruby>小皿<rt>こざら</rt></ruby>に取って食べてください。", "example_cn": "请盛到小碟子里吃。" },
+        { "id": "14-5", "word": "小石", "kana": "こいし", "pos": "複合名詞", "meaning_cn": "小石头", "example_jp": "川で小石を拾った。", "example_jp_ruby": "川で<ruby>小石<rt>こいし</rt></ruby>を拾った。", "example_cn": "在河边捡了小石头。" },
+        { "id": "14-6", "word": "小鳥", "kana": "ことり", "pos": "複合名詞", "meaning_cn": "小鸟", "example_jp": "庭に小鳥が来た。", "example_jp_ruby": "庭に<ruby>小鳥<rt>ことり</rt></ruby>が来た。", "example_cn": "小鸟飞到院子里来了。" },
+        { "id": "14-7", "word": "小枝", "kana": "こえだ", "pos": "複合名詞", "meaning_cn": "小树枝", "example_jp": "小枝を集めて火を起こした。", "example_jp_ruby": "<ruby>小枝<rt>こえだ</rt></ruby>を集めて火を起こした。", "example_cn": "收集小树枝生了火。" },
+        { "id": "14-8", "word": "小太り", "kana": "こぶとり", "pos": "複合名詞", "meaning_cn": "微胖", "example_jp": "小太りの男性が立っている。", "example_jp_ruby": "<ruby>小太<rt>こぶと</rt></ruby>りの男性が立っている。", "example_cn": "一个微胖的男人站着。" }
+      ]
+    },
+    {
+      "name": "高〜／低〜",
+      "reading": "こう・てい",
+      "cards": [
+        { "id": "15-1", "word": "高収入", "kana": "こうしゅうにゅう", "pos": "複合名詞", "meaning_cn": "高收入", "example_jp": "彼は高収入の仕事に就いた。", "example_jp_ruby": "彼は<ruby>高収入<rt>こうしゅうにゅう</rt></ruby>の仕事に就いた。", "example_cn": "他从事高收入的工作。" },
+        { "id": "15-2", "word": "高学歴", "kana": "こうがくれき", "pos": "複合名詞", "meaning_cn": "高学历", "example_jp": "高学歴でも仕事が見つからない。", "example_jp_ruby": "<ruby>高学歴<rt>こうがくれき</rt></ruby>でも仕事が見つからない。", "example_cn": "即使高学历也找不到工作。" },
+        { "id": "15-3", "word": "高血圧", "kana": "こうけつあつ", "pos": "複合名詞", "meaning_cn": "高血压", "example_jp": "父は高血圧だ。", "example_jp_ruby": "父は<ruby>高血圧<rt>こうけつあつ</rt></ruby>だ。", "example_cn": "父亲有高血压。" },
+        { "id": "15-4", "word": "高カロリー", "kana": "こうカロリー", "pos": "複合名詞", "meaning_cn": "高卡路里", "example_jp": "この料理は高カロリーだ。", "example_jp_ruby": "この料理は<ruby>高<rt>こう</rt></ruby>カロリーだ。", "example_cn": "这道菜卡路里很高。" },
+        { "id": "15-5", "word": "高性能", "kana": "こうせいのう", "pos": "複合名詞", "meaning_cn": "高性能", "example_jp": "このパソコンは高性能だ。", "example_jp_ruby": "このパソコンは<ruby>高性能<rt>こうせいのう</rt></ruby>だ。", "example_cn": "这台电脑性能很高。" },
+        { "id": "15-6", "word": "高機能", "kana": "こうきのう", "pos": "複合名詞", "meaning_cn": "功能强大", "example_jp": "高機能な携帯電話が欲しい。", "example_jp_ruby": "<ruby>高機能<rt>こうきのう</rt></ruby>な携帯電話が欲しい。", "example_cn": "想要功能强大的手机。" },
+        { "id": "15-7", "word": "低レベル", "kana": "ていレベル", "pos": "複合名詞", "meaning_cn": "低水平", "example_jp": "低レベルの質問には答えない。", "example_jp_ruby": "<ruby>低<rt>てい</rt></ruby>レベルの質問には答えない。", "example_cn": "不回答低水平的问题。" },
+        { "id": "15-8", "word": "低価格", "kana": "ていかかく", "pos": "複合名詞", "meaning_cn": "低价格", "example_jp": "低価格で品質のいい商品を探す。", "example_jp_ruby": "<ruby>低価格<rt>ていかかく</rt></ruby>で品質のいい商品を探す。", "example_cn": "寻找价格低品质好的商品。" },
+        { "id": "15-9", "word": "低血圧", "kana": "ていけつあつ", "pos": "複合名詞", "meaning_cn": "低血压", "example_jp": "朝は低血圧で調子が悪い。", "example_jp_ruby": "朝は<ruby>低血圧<rt>ていけつあつ</rt></ruby>で調子が悪い。", "example_cn": "早上低血压状态不好。" },
+        { "id": "15-10", "word": "低カロリー", "kana": "ていカロリー", "pos": "複合名詞", "meaning_cn": "低卡路里", "example_jp": "低カロリーの食事を心がける。", "example_jp_ruby": "<ruby>低<rt>てい</rt></ruby>カロリーの食事を心がける。", "example_cn": "注意吃低卡路里的饮食。" }
+      ]
+    },
+    {
+      "name": "長〜（なが）",
+      "reading": "なが",
+      "cards": [
+        { "id": "16-1", "word": "長持ち", "kana": "ながもち", "pos": "複合名詞", "meaning_cn": "耐用", "example_jp": "この靴は長持ちする。", "example_jp_ruby": "この靴は<ruby>長持<rt>ながも</rt></ruby>ちする。", "example_cn": "这双鞋很耐穿。" },
+        { "id": "16-2", "word": "長続き", "kana": "ながつづき", "pos": "複合名詞", "meaning_cn": "持久", "example_jp": "三日坊主で長続きしない。", "example_jp_ruby": "三日坊主で<ruby>長続<rt>ながつづ</rt></ruby>きしない。", "example_cn": "三分钟热度，坚持不下来。" },
+        { "id": "16-3", "word": "長電話", "kana": "ながでんわ", "pos": "複合名詞", "meaning_cn": "长时间电话", "example_jp": "母と長電話をした。", "example_jp_ruby": "母と<ruby>長電話<rt>ながでんわ</rt></ruby>をした。", "example_cn": "和母亲煲了很长时间电话。" },
+        { "id": "16-4", "word": "長旅", "kana": "ながたび", "pos": "複合名詞", "meaning_cn": "长途旅行", "example_jp": "長旅で疲れた。", "example_jp_ruby": "<ruby>長旅<rt>ながたび</rt></ruby>で疲れた。", "example_cn": "长途旅行很累。" },
+        { "id": "16-5", "word": "長そで", "kana": "ながそで", "pos": "複合名詞", "meaning_cn": "长袖", "example_jp": "今日は長そでを着よう。", "example_jp_ruby": "今日は<ruby>長<rt>なが</rt></ruby>そでを着よう。", "example_cn": "今天穿长袖吧。" }
+      ]
+    },
+    {
+      "name": "長〜（ちょう）／短〜",
+      "reading": "ちょう・たん",
+      "cards": [
+        { "id": "17-1", "word": "長距離", "kana": "ちょうきょり", "pos": "複合名詞", "meaning_cn": "长距离", "example_jp": "長距離を走るのは大変だ。", "example_jp_ruby": "<ruby>長距離<rt>ちょうきょり</rt></ruby>を走るのは大変だ。", "example_cn": "跑长距离很辛苦。" },
+        { "id": "17-2", "word": "長期間", "kana": "ちょうきかん", "pos": "複合名詞", "meaning_cn": "长时间", "example_jp": "長期間の休みを取った。", "example_jp_ruby": "<ruby>長期間<rt>ちょうきかん</rt></ruby>の休みを取った。", "example_cn": "休了长假。" },
+        { "id": "17-3", "word": "長時間", "kana": "ちょうじかん", "pos": "複合名詞", "meaning_cn": "长时间", "example_jp": "長時間座っていると腰が痛い。", "example_jp_ruby": "<ruby>長時間<rt>ちょうじかん</rt></ruby>座っていると腰が痛い。", "example_cn": "坐久了腰疼。" },
+        { "id": "17-4", "word": "短距離", "kana": "たんきょり", "pos": "複合名詞", "meaning_cn": "短距离", "example_jp": "短距離のレースに出た。", "example_jp_ruby": "<ruby>短距離<rt>たんきょり</rt></ruby>のレースに出た。", "example_cn": "参加了短距离比赛。" },
+        { "id": "17-5", "word": "短期間", "kana": "たんきかん", "pos": "複合名詞", "meaning_cn": "短期", "example_jp": "短期間で覚えるのは無理だ。", "example_jp_ruby": "<ruby>短期間<rt>たんきかん</rt></ruby>で覚えるのは無理だ。", "example_cn": "短时间内记住是不可能的。" },
+        { "id": "17-6", "word": "短時間", "kana": "たんじかん", "pos": "複合名詞", "meaning_cn": "短时间", "example_jp": "短時間で終わらせよう。", "example_jp_ruby": "<ruby>短時間<rt>たんじかん</rt></ruby>で終わらせよう。", "example_cn": "用短时间结束吧。" }
+      ]
+    },
+    {
+      "name": "多〜／少〜",
+      "reading": "た・しょう",
+      "cards": [
+        { "id": "18-1", "word": "多目的", "kana": "たもくてき", "pos": "複合名詞", "meaning_cn": "多用途", "example_jp": "この部屋は多目的に使える。", "example_jp_ruby": "この部屋は<ruby>多目的<rt>たもくてき</rt></ruby>に使える。", "example_cn": "这个房间可以多用途使用。" },
+        { "id": "18-2", "word": "多趣味", "kana": "たしゅみ", "pos": "複合名詞", "meaning_cn": "兴趣广泛", "example_jp": "彼は多趣味だ。", "example_jp_ruby": "彼は<ruby>多趣味<rt>たしゅみ</rt></ruby>だ。", "example_cn": "他兴趣广泛。" },
+        { "id": "18-3", "word": "多人数", "kana": "たにんずう", "pos": "複合名詞", "meaning_cn": "人数多", "example_jp": "多人数の前で話すのは苦手だ。", "example_jp_ruby": "<ruby>多人数<rt>たにんずう</rt></ruby>の前で話すのは苦手だ。", "example_cn": "不擅长在很多人面前讲话。" },
+        { "id": "18-4", "word": "多方面", "kana": "たほうめん", "pos": "複合名詞", "meaning_cn": "多方面", "example_jp": "多方面から支援を受けた。", "example_jp_ruby": "<ruby>多方面<rt>たほうめん</rt></ruby>から支援を受けた。", "example_cn": "得到了多方面的支援。" },
+        { "id": "18-5", "word": "多量", "kana": "たりょう", "pos": "複合名詞", "meaning_cn": "大量", "example_jp": "多量の水を飲んだ。", "example_jp_ruby": "<ruby>多量<rt>たりょう</rt></ruby>の水を飲んだ。", "example_cn": "喝了很多水。" },
+        { "id": "18-6", "word": "多国籍", "kana": "たこくせき", "pos": "複合名詞", "meaning_cn": "多国籍", "example_jp": "このチームは多国籍だ。", "example_jp_ruby": "このチームは<ruby>多国籍<rt>たこくせき</rt></ruby>だ。", "example_cn": "这个团队是多国籍的。" },
+        { "id": "18-7", "word": "多用途", "kana": "たようと", "pos": "複合名詞", "meaning_cn": "多种用途", "example_jp": "多用途の道具は便利だ。", "example_jp_ruby": "<ruby>多用途<rt>たようと</rt></ruby>の道具は便利だ。", "example_cn": "多用途工具很方便。" },
+        { "id": "18-8", "word": "少人数", "kana": "しょうにんずう", "pos": "複合名詞", "meaning_cn": "少数人", "example_jp": "少人数のクラスで学ぶ。", "example_jp_ruby": "<ruby>少人数<rt>しょうにんずう</rt></ruby>のクラスで学ぶ。", "example_cn": "在少数人的班级学习。" },
+        { "id": "18-9", "word": "少量", "kana": "しょうりょう", "pos": "複合名詞", "meaning_cn": "少量", "example_jp": "少量のお酒なら大丈夫だ。", "example_jp_ruby": "<ruby>少量<rt>しょうりょう</rt></ruby>のお酒なら大丈夫だ。", "example_cn": "少量酒的话没关系。" }
+      ]
+    },
+    {
+      "name": "重〜／軽〜",
+      "reading": "じゅう・けい",
+      "cards": [
+        { "id": "19-1", "word": "重労働", "kana": "じゅうろうどう", "pos": "複合名詞", "meaning_cn": "重体力劳动", "example_jp": "この仕事は重労働だ。", "example_jp_ruby": "この仕事は<ruby>重労働<rt>じゅうろうどう</rt></ruby>だ。", "example_cn": "这份工作是重体力劳动。" },
+        { "id": "19-2", "word": "重工業", "kana": "じゅうこうぎょう", "pos": "複合名詞", "meaning_cn": "重工业", "example_jp": "この町は重工業が盛んだ。", "example_jp_ruby": "この町は<ruby>重工業<rt>じゅうこうぎょう</rt></ruby>が盛んだ。", "example_cn": "这个城镇重工业发达。" },
+        { "id": "19-3", "word": "重金属", "kana": "じゅうきんぞく", "pos": "複合名詞", "meaning_cn": "重金属", "example_jp": "水に重金属が含まれている。", "example_jp_ruby": "水に<ruby>重金属<rt>じゅうきんぞく</rt></ruby>が含まれている。", "example_cn": "水中含有重金属。" },
+        { "id": "19-4", "word": "軽自動車", "kana": "けいじどうしゃ", "pos": "複合名詞", "meaning_cn": "轻型汽车", "example_jp": "軽自動車を買った。", "example_jp_ruby": "<ruby>軽自動車<rt>けいじどうしゃ</rt></ruby>を買った。", "example_cn": "买了轻型汽车。" },
+        { "id": "19-5", "word": "軽音楽", "kana": "けいおんがく", "pos": "複合名詞", "meaning_cn": "轻音乐", "example_jp": "軽音楽部に入りたい。", "example_jp_ruby": "<ruby>軽音楽<rt>けいおんがく</rt></ruby>部に入りたい。", "example_cn": "想加入轻音乐部。" },
+        { "id": "19-6", "word": "軽工業", "kana": "けいこうぎょう", "pos": "複合名詞", "meaning_cn": "轻工业", "example_jp": "軽工業の製品を輸出する。", "example_jp_ruby": "<ruby>軽工業<rt>けいこうぎょう</rt></ruby>の製品を輸出する。", "example_cn": "出口轻工业产品。" },
+        { "id": "19-7", "word": "軽金属", "kana": "けいきんぞく", "pos": "複合名詞", "meaning_cn": "轻金属", "example_jp": "軽金属で作られた箱だ。", "example_jp_ruby": "<ruby>軽金属<rt>けいきんぞく</rt></ruby>で作られた箱だ。", "example_cn": "这是用轻金属做的箱子。" },
+        { "id": "19-8", "word": "軽犯罪", "kana": "けいはんざい", "pos": "複合名詞", "meaning_cn": "轻微犯罪", "example_jp": "軽犯罪でも罰せられる。", "example_jp_ruby": "<ruby>軽犯罪<rt>けいはんざい</rt></ruby>でも罰せられる。", "example_cn": "即使是轻微犯罪也会受罚。" }
+      ]
+    },
+    {
+      "name": "悪〜／好〜",
+      "reading": "あく・こう",
+      "cards": [
+        { "id": "20-1", "word": "悪趣味", "kana": "あくしゅみ", "pos": "複合名詞", "meaning_cn": "恶趣味", "example_jp": "彼の趣味は悪趣味だ。", "example_jp_ruby": "彼の趣味は<ruby>悪趣味<rt>あくしゅみ</rt></ruby>だ。", "example_cn": "他的爱好很低俗。" },
+        { "id": "20-2", "word": "悪条件", "kana": "あくじょうけん", "pos": "複合名詞", "meaning_cn": "恶劣条件", "example_jp": "悪条件の中で試合をした。", "example_jp_ruby": "<ruby>悪条件<rt>あくじょうけん</rt></ruby>の中で試合をした。", "example_cn": "在恶劣条件下比赛。" },
+        { "id": "20-3", "word": "悪影響", "kana": "あくえいきょう", "pos": "複合名詞", "meaning_cn": "坏影响", "example_jp": "テレビは子どもに悪影響を与える。", "example_jp_ruby": "テレビは子どもに<ruby>悪影響<rt>あくえいきょう</rt></ruby>を与える。", "example_cn": "电视会给孩子带来坏影响。" },
+        { "id": "20-4", "word": "悪天候", "kana": "あくてんこう", "pos": "複合名詞", "meaning_cn": "恶劣天气", "example_jp": "悪天候で飛行機が飛ばない。", "example_jp_ruby": "<ruby>悪天候<rt>あくてんこう</rt></ruby>で飛行機が飛ばない。", "example_cn": "因恶劣天气飞机停飞。" },
+        { "id": "20-5", "word": "好成績", "kana": "こうせいせき", "pos": "複合名詞", "meaning_cn": "好成绩", "example_jp": "彼は好成績で卒業した。", "example_jp_ruby": "彼は<ruby>好成績<rt>こうせいせき</rt></ruby>で卒業した。", "example_cn": "他以好成绩毕业了。" },
+        { "id": "20-6", "word": "好都合", "kana": "こうつごう", "pos": "複合名詞", "meaning_cn": "方便、合适", "example_jp": "土曜日なら好都合だ。", "example_jp_ruby": "土曜日なら<ruby>好都合<rt>こうつごう</rt></ruby>だ。", "example_cn": "星期六的话很方便。" },
+        { "id": "20-7", "word": "好青年", "kana": "こうせいねん", "pos": "複合名詞", "meaning_cn": "好青年", "example_jp": "彼はまじめな好青年だ。", "example_jp_ruby": "彼はまじめな<ruby>好青年<rt>こうせいねん</rt></ruby>だ。", "example_cn": "他是个认真的好青年。" },
+        { "id": "20-8", "word": "好条件", "kana": "こうじょうけん", "pos": "複合名詞", "meaning_cn": "好条件", "example_jp": "好条件の仕事が見つかった。", "example_jp_ruby": "<ruby>好条件<rt>こうじょうけん</rt></ruby>の仕事が見つかった。", "example_cn": "找到了条件很好的工作。" },
+        { "id": "20-9", "word": "好景気", "kana": "こうけいき", "pos": "複合名詞", "meaning_cn": "景气好", "example_jp": "今は好景気だと言われる。", "example_jp_ruby": "今は<ruby>好景気<rt>こうけいき</rt></ruby>だと言われる。", "example_cn": "据说现在是经济景气期。" },
+        { "id": "20-10", "word": "好印象", "kana": "こういんしょう", "pos": "複合名詞", "meaning_cn": "好印象", "example_jp": "彼は面接で好印象を与えた。", "example_jp_ruby": "彼は面接で<ruby>好印象<rt>こういんしょう</rt></ruby>を与えた。", "example_cn": "他在面试中给人留下好印象。" },
+        { "id": "20-11", "word": "好対照", "kana": "こうたいしょう", "pos": "複合名詞", "meaning_cn": "鲜明对比", "example_jp": "二人の性格は好対照だ。", "example_jp_ruby": "二人の性格は<ruby>好対照<rt>こうたいしょう</rt></ruby>だ。", "example_cn": "两人的性格形成鲜明对比。" }
+      ]
+    },
+    {
+      "name": "新〜／旧〜／古〜",
+      "reading": "しん・きゅう・ふる",
+      "cards": [
+        { "id": "21-1", "word": "新発売", "kana": "しんはつばい", "pos": "複合名詞", "meaning_cn": "新发售", "example_jp": "新発売の飲み物を試した。", "example_jp_ruby": "<ruby>新発売<rt>しんはつばい</rt></ruby>の飲み物を試した。", "example_cn": "试了新发售的饮料。" },
+        { "id": "21-2", "word": "新技術", "kana": "しんぎじゅつ", "pos": "複合名詞", "meaning_cn": "新技术", "example_jp": "新技術を開発した。", "example_jp_ruby": "<ruby>新技術<rt>しんぎじゅつ</rt></ruby>を開発した。", "example_cn": "开发了新技术。" },
+        { "id": "21-3", "word": "新政府", "kana": "しんせいふ", "pos": "複合名詞", "meaning_cn": "新政府", "example_jp": "新政府が発足した。", "example_jp_ruby": "<ruby>新政府<rt>しんせいふ</rt></ruby>が発足した。", "example_cn": "新政府成立了。" },
+        { "id": "21-4", "word": "新記録", "kana": "しんきろく", "pos": "複合名詞", "meaning_cn": "新纪录", "example_jp": "彼は新記録を出した。", "example_jp_ruby": "彼は<ruby>新記録<rt>しんきろく</rt></ruby>を出した。", "example_cn": "他创下了新纪录。" },
+        { "id": "21-5", "word": "新学期", "kana": "しんがっき", "pos": "複合名詞", "meaning_cn": "新学期", "example_jp": "新学期が始まった。", "example_jp_ruby": "<ruby>新学期<rt>しんがっき</rt></ruby>が始まった。", "example_cn": "新学期开始了。" },
+        { "id": "21-6", "word": "新年度", "kana": "しんねんど", "pos": "複合名詞", "meaning_cn": "新年度", "example_jp": "新年度の予定を立てる。", "example_jp_ruby": "<ruby>新年度<rt>しんねんど</rt></ruby>の予定を立てる。", "example_cn": "制定新年度的计划。" },
+        { "id": "21-7", "word": "新商品", "kana": "しんしょうひん", "pos": "複合名詞", "meaning_cn": "新商品", "example_jp": "新商品の説明会を開いた。", "example_jp_ruby": "<ruby>新商品<rt>しんしょうひん</rt></ruby>の説明会を開いた。", "example_cn": "举办了新商品说明会。" },
+        { "id": "21-8", "word": "新製品", "kana": "しんせいひん", "pos": "複合名詞", "meaning_cn": "新产品", "example_jp": "新製品の発表会に行った。", "example_jp_ruby": "<ruby>新製品<rt>しんせいひん</rt></ruby>の発表会に行った。", "example_cn": "去参加了新产品发布会。" },
+        { "id": "21-9", "word": "新体制", "kana": "しんたいせい", "pos": "複合名詞", "meaning_cn": "新体制", "example_jp": "新体制で会社を立て直す。", "example_jp_ruby": "<ruby>新体制<rt>しんたいせい</rt></ruby>で会社を立て直す。", "example_cn": "以新体制重整公司。" },
+        { "id": "21-10", "word": "旧正月", "kana": "きゅうしょうがつ", "pos": "複合名詞", "meaning_cn": "旧历新年", "example_jp": "旧正月に家族が集まる。", "example_jp_ruby": "<ruby>旧正月<rt>きゅうしょうがつ</rt></ruby>に家族が集まる。", "example_cn": "旧历新年时家人团聚。" },
+        { "id": "21-11", "word": "旧体制", "kana": "きゅうたいせい", "pos": "複合名詞", "meaning_cn": "旧体制", "example_jp": "旧体制から新しい体制へ移る。", "example_jp_ruby": "<ruby>旧体制<rt>きゅうたいせい</rt></ruby>から新しい体制へ移る。", "example_cn": "从旧体制转向新体制。" },
+        { "id": "21-12", "word": "旧市街", "kana": "きゅうしがい", "pos": "複合名詞", "meaning_cn": "老城区", "example_jp": "旧市街を歩いて観光した。", "example_jp_ruby": "<ruby>旧市街<rt>きゅうしがい</rt></ruby>を歩いて観光した。", "example_cn": "在老城区散步观光。" },
+        { "id": "21-13", "word": "旧姓", "kana": "きゅうせい", "pos": "複合名詞", "meaning_cn": "旧姓（婚前姓）", "example_jp": "旧姓を書く欄がある。", "example_jp_ruby": "<ruby>旧姓<rt>きゅうせい</rt></ruby>を書く欄がある。", "example_cn": "有填写旧姓的栏目。" },
+        { "id": "21-14", "word": "古新聞", "kana": "ふるしんぶん", "pos": "複合名詞", "meaning_cn": "旧报纸", "example_jp": "古新聞を回収に出す。", "example_jp_ruby": "<ruby>古新聞<rt>ふるしんぶん</rt></ruby>を回収に出す。", "example_cn": "把旧报纸拿去回收。" },
+        { "id": "21-15", "word": "古時計", "kana": "ふるとけい", "pos": "複合名詞", "meaning_cn": "旧钟表", "example_jp": "祖父の古時計を直した。", "example_jp_ruby": "祖父の<ruby>古時計<rt>ふるとけい</rt></ruby>を直した。", "example_cn": "修好了祖父的旧钟表。" },
+        { "id": "21-16", "word": "古本", "kana": "ふるほん", "pos": "複合名詞", "meaning_cn": "旧书", "example_jp": "古本屋で本を買った。", "example_jp_ruby": "<ruby>古本<rt>ふるほん</rt></ruby>屋で本を買った。", "example_cn": "在旧书店买了书。" }
+      ]
+    },
+    {
+      "name": "急〜",
+      "reading": "きゅう",
+      "cards": [
+        { "id": "22-1", "word": "急成長", "kana": "きゅうせいちょう", "pos": "複合名詞", "meaning_cn": "快速成长", "example_jp": "その会社は急成長している。", "example_jp_ruby": "その会社は<ruby>急成長<rt>きゅうせいちょう</rt></ruby>している。", "example_cn": "那家公司正在快速成长。" },
+        { "id": "22-2", "word": "急展開", "kana": "きゅうてんかい", "pos": "複合名詞", "meaning_cn": "急剧发展", "example_jp": "事件は急展開を見せた。", "example_jp_ruby": "事件は<ruby>急展開<rt>きゅうてんかい</rt></ruby>を見せた。", "example_cn": "事件出现了急剧发展。" },
+        { "id": "22-3", "word": "急上昇", "kana": "きゅうじょうしょう", "pos": "複合名詞", "meaning_cn": "急剧上升", "example_jp": "気温が急上昇した。", "example_jp_ruby": "気温が<ruby>急上昇<rt>きゅうじょうしょう</rt></ruby>した。", "example_cn": "气温急剧上升。" },
+        { "id": "22-4", "word": "急接近", "kana": "きゅうせっきん", "pos": "複合名詞", "meaning_cn": "迅速接近", "example_jp": "台風が急接近している。", "example_jp_ruby": "台風が<ruby>急接近<rt>きゅうせっきん</rt></ruby>している。", "example_cn": "台风正在迅速接近。" },
+        { "id": "22-5", "word": "急ブレーキ", "kana": "きゅうブレーキ", "pos": "複合名詞", "meaning_cn": "急刹车", "example_jp": "急ブレーキを踏んだ。", "example_jp_ruby": "<ruby>急<rt>きゅう</rt></ruby>ブレーキを踏んだ。", "example_cn": "踩了急刹车。" },
+        { "id": "22-6", "word": "急カーブ", "kana": "きゅうカーブ", "pos": "複合名詞", "meaning_cn": "急转弯", "example_jp": "この先に急カーブがある。", "example_jp_ruby": "この先に<ruby>急<rt>きゅう</rt></ruby>カーブがある。", "example_cn": "前方有急转弯。" },
+        { "id": "22-7", "word": "急テンポ", "kana": "きゅうテンポ", "pos": "複合名詞", "meaning_cn": "快节奏", "example_jp": "曲が急テンポになった。", "example_jp_ruby": "曲が<ruby>急<rt>きゅう</rt></ruby>テンポになった。", "example_cn": "曲子变成了快节奏。" }
+      ]
+    },
+    {
+      "name": "両〜／片〜",
+      "reading": "りょう・かた",
+      "cards": [
+        { "id": "23-1", "word": "両手", "kana": "りょうて", "pos": "複合名詞", "meaning_cn": "双手", "example_jp": "両手で箱を持った。", "example_jp_ruby": "<ruby>両手<rt>りょうて</rt></ruby>で箱を持った。", "example_cn": "用双手抱起了箱子。" },
+        { "id": "23-2", "word": "両足", "kana": "りょうあし", "pos": "複合名詞", "meaning_cn": "双脚", "example_jp": "両足が痛い。", "example_jp_ruby": "<ruby>両足<rt>りょうあし</rt></ruby>が痛い。", "example_cn": "双脚疼。" },
+        { "id": "23-3", "word": "両目", "kana": "りょうめ", "pos": "複合名詞", "meaning_cn": "双眼", "example_jp": "両目を閉じてください。", "example_jp_ruby": "<ruby>両目<rt>りょうめ</rt></ruby>を閉じてください。", "example_cn": "请闭上双眼。" },
+        { "id": "23-4", "word": "両耳", "kana": "りょうみみ", "pos": "複合名詞", "meaning_cn": "双耳", "example_jp": "両耳にイヤホンを付けた。", "example_jp_ruby": "<ruby>両耳<rt>りょうみみ</rt></ruby>にイヤホンを付けた。", "example_cn": "双耳戴上了耳机。" },
+        { "id": "23-5", "word": "両方向", "kana": "りょうほうこう", "pos": "複合名詞", "meaning_cn": "两个方向", "example_jp": "両方向から車が来る。", "example_jp_ruby": "<ruby>両方向<rt>りょうほうこう</rt></ruby>から車が来る。", "example_cn": "两个方向都有车来。" },
+        { "id": "23-6", "word": "両チーム", "kana": "りょうチーム", "pos": "複合名詞", "meaning_cn": "两队", "example_jp": "両チームともよく頑張った。", "example_jp_ruby": "<ruby>両<rt>りょう</rt></ruby>チームともよく頑張った。", "example_cn": "两队都很努力。" },
+        { "id": "23-7", "word": "両ひざ", "kana": "りょうひざ", "pos": "複合名詞", "meaning_cn": "双膝", "example_jp": "両ひざを床についた。", "example_jp_ruby": "<ruby>両<rt>りょう</rt></ruby>ひざを床についた。", "example_cn": "双膝跪在地板上。" },
+        { "id": "23-8", "word": "両わき", "kana": "りょうわき", "pos": "複合名詞", "meaning_cn": "两侧", "example_jp": "両わきに荷物を置いた。", "example_jp_ruby": "<ruby>両<rt>りょう</rt></ruby>わきに荷物を置いた。", "example_cn": "把行李放在两侧。" },
+        { "id": "23-9", "word": "片手", "kana": "かたて", "pos": "複合名詞", "meaning_cn": "一只手", "example_jp": "片手で運ぶのは危ない。", "example_jp_ruby": "<ruby>片手<rt>かたて</rt></ruby>で運ぶのは危ない。", "example_cn": "单手搬运很危险。" },
+        { "id": "23-10", "word": "片足", "kana": "かたあし", "pos": "複合名詞", "meaning_cn": "一只脚", "example_jp": "片足で立ってみて。", "example_jp_ruby": "<ruby>片足<rt>かたあし</rt></ruby>で立ってみて。", "example_cn": "试着单脚站立。" },
+        { "id": "23-11", "word": "片目", "kana": "かため", "pos": "複合名詞", "meaning_cn": "一只眼", "example_jp": "片目をつぶって見る。", "example_jp_ruby": "<ruby>片目<rt>かため</rt></ruby>をつぶって見る。", "example_cn": "闭上一只眼看。" },
+        { "id": "23-12", "word": "片耳", "kana": "かたみみ", "pos": "複合名詞", "meaning_cn": "一只耳朵", "example_jp": "片耳が聞こえにくい。", "example_jp_ruby": "<ruby>片耳<rt>かたみみ</rt></ruby>が聞こえにくい。", "example_cn": "一只耳朵听不清。" },
+        { "id": "23-13", "word": "片ひざ", "kana": "かたひざ", "pos": "複合名詞", "meaning_cn": "单膝", "example_jp": "片ひざを立てて座った。", "example_jp_ruby": "<ruby>片<rt>かた</rt></ruby>ひざを立てて座った。", "example_cn": "单膝立着坐下了。" }
+      ]
+    },
+    {
+      "name": "初〜／再〜",
+      "reading": "はつ・さい",
+      "cards": [
+        { "id": "24-1", "word": "初登場", "kana": "はつとうじょう", "pos": "複合名詞", "meaning_cn": "首次登场", "example_jp": "その歌手が初登場した。", "example_jp_ruby": "その歌手が<ruby>初登場<rt>はつとうじょう</rt></ruby>した。", "example_cn": "那位歌手首次登场。" },
+        { "id": "24-2", "word": "初体験", "kana": "はつたいけん", "pos": "複合名詞", "meaning_cn": "初次体验", "example_jp": "海外旅行は初体験だ。", "example_jp_ruby": "海外旅行は<ruby>初体験<rt>はつたいけん</rt></ruby>だ。", "example_cn": "海外旅行是初次体验。" },
+        { "id": "24-3", "word": "初優勝", "kana": "はつゆうしょう", "pos": "複合名詞", "meaning_cn": "首次夺冠", "example_jp": "チームが初優勝を果たした。", "example_jp_ruby": "チームが<ruby>初優勝<rt>はつゆうしょう</rt></ruby>を果たした。", "example_cn": "队伍首次夺冠。" },
+        { "id": "24-4", "word": "初出場", "kana": "はつしゅつじょう", "pos": "複合名詞", "meaning_cn": "首次出场", "example_jp": "大会に初出場した。", "example_jp_ruby": "大会に<ruby>初出場<rt>はつしゅつじょう</rt></ruby>した。", "example_cn": "首次参加大会。" },
+        { "id": "24-5", "word": "初公開", "kana": "はつこうかい", "pos": "複合名詞", "meaning_cn": "首次公开", "example_jp": "新作映画が初公開された。", "example_jp_ruby": "新作映画が<ruby>初公開<rt>はつこうかい</rt></ruby>された。", "example_cn": "新电影首次公开放映。" },
+        { "id": "24-6", "word": "初舞台", "kana": "はつぶたい", "pos": "複合名詞", "meaning_cn": "首次登台", "example_jp": "彼女は初舞台を踏んだ。", "example_jp_ruby": "彼女は<ruby>初舞台<rt>はつぶたい</rt></ruby>を踏んだ。", "example_cn": "她首次登台演出。" },
+        { "id": "24-7", "word": "再開発", "kana": "さいかいはつ", "pos": "複合名詞", "meaning_cn": "重新开发", "example_jp": "駅前の再開発が進む。", "example_jp_ruby": "駅前の<ruby>再開発<rt>さいかいはつ</rt></ruby>が進む。", "example_cn": "车站前的重新开发正在进行。" },
+        { "id": "24-8", "word": "再就職", "kana": "さいしゅうしょく", "pos": "複合名詞", "meaning_cn": "再就业", "example_jp": "母は再就職した。", "example_jp_ruby": "母は<ruby>再就職<rt>さいしゅうしょく</rt></ruby>した。", "example_cn": "母亲再就业了。" },
+        { "id": "24-9", "word": "再利用", "kana": "さいりよう", "pos": "複合名詞", "meaning_cn": "再利用", "example_jp": "空き瓶を再利用する。", "example_jp_ruby": "空き瓶を<ruby>再利用<rt>さいりよう</rt></ruby>する。", "example_cn": "再利用空瓶子。" },
+        { "id": "24-10", "word": "再出発", "kana": "さいしゅっぱつ", "pos": "複合名詞", "meaning_cn": "重新出发", "example_jp": "新しい目標で再出発する。", "example_jp_ruby": "新しい目標で<ruby>再出発<rt>さいしゅっぱつ</rt></ruby>する。", "example_cn": "以新目标重新出发。" },
+        { "id": "24-11", "word": "再放送", "kana": "さいほうそう", "pos": "複合名詞", "meaning_cn": "重播", "example_jp": "人気ドラマが再放送される。", "example_jp_ruby": "人気ドラマが<ruby>再放送<rt>さいほうそう</rt></ruby>される。", "example_cn": "人气电视剧将重播。" },
+        { "id": "24-12", "word": "再確認", "kana": "さいかくにん", "pos": "複合名詞", "meaning_cn": "再次确认", "example_jp": "予約の時間を再確認した。", "example_jp_ruby": "予約の時間を<ruby>再確認<rt>さいかくにん</rt></ruby>した。", "example_cn": "再次确认了预约时间。" },
+        { "id": "24-13", "word": "再発見", "kana": "さいはっけん", "pos": "複合名詞", "meaning_cn": "重新发现", "example_jp": "町の魅力を再発見した。", "example_jp_ruby": "町の魅力を<ruby>再発見<rt>さいはっけん</rt></ruby>した。", "example_cn": "重新发现了城镇的魅力。" }
+      ]
+    },
+    {
+      "name": "主〜／副〜",
+      "reading": "しゅ・ふく",
+      "cards": [
+        { "id": "25-1", "word": "主原料", "kana": "しゅげんりょう", "pos": "複合名詞", "meaning_cn": "主要原料", "example_jp": "この酒の主原料は米だ。", "example_jp_ruby": "この酒の<ruby>主原料<rt>しゅげんりょう</rt></ruby>は米だ。", "example_cn": "这种酒的主要原料是大米。" },
+        { "id": "25-2", "word": "主成分", "kana": "しゅせいぶん", "pos": "複合名詞", "meaning_cn": "主要成分", "example_jp": "薬の主成分を調べる。", "example_jp_ruby": "薬の<ruby>主成分<rt>しゅせいぶん</rt></ruby>を調べる。", "example_cn": "调查药物的主要成分。" },
+        { "id": "25-3", "word": "主産地", "kana": "しゅさんち", "pos": "複合名詞", "meaning_cn": "主要产地", "example_jp": "りんごの主産地は青森だ。", "example_jp_ruby": "りんごの<ruby>主産地<rt>しゅさんち</rt></ruby>は青森だ。", "example_cn": "苹果的主要产地是青森。" },
+        { "id": "25-4", "word": "副社長", "kana": "ふくしゃちょう", "pos": "複合名詞", "meaning_cn": "副社长", "example_jp": "副社長が会議を進めた。", "example_jp_ruby": "<ruby>副社長<rt>ふくしゃちょう</rt></ruby>が会議を進めた。", "example_cn": "副社长主持了会议。" },
+        { "id": "25-5", "word": "副収入", "kana": "ふくしゅうにゅう", "pos": "複合名詞", "meaning_cn": "副业收入", "example_jp": "副収入を得るために働く。", "example_jp_ruby": "<ruby>副収入<rt>ふくしゅうにゅう</rt></ruby>を得るために働く。", "example_cn": "为获得副业收入而工作。" },
+        { "id": "25-6", "word": "副作用", "kana": "ふくさよう", "pos": "複合名詞", "meaning_cn": "副作用", "example_jp": "薬の副作用が出た。", "example_jp_ruby": "薬の<ruby>副作用<rt>ふくさよう</rt></ruby>が出た。", "example_cn": "药物出现了副作用。" },
+        { "id": "25-7", "word": "副都心", "kana": "ふくとしん", "pos": "複合名詞", "meaning_cn": "副都心", "example_jp": "副都心に新しいビルが建つ。", "example_jp_ruby": "<ruby>副都心<rt>ふくとしん</rt></ruby>に新しいビルが建つ。", "example_cn": "副都心建起了新大楼。" }
+      ]
+    },
+    {
+      "name": "同〜",
+      "reading": "どう",
+      "cards": [
+        { "id": "26-1", "word": "同年齢", "kana": "どうねんれい", "pos": "複合名詞", "meaning_cn": "同年龄", "example_jp": "彼とは同年齢だ。", "example_jp_ruby": "彼とは<ruby>同年齢<rt>どうねんれい</rt></ruby>だ。", "example_cn": "和他同年龄。" },
+        { "id": "26-2", "word": "同価格", "kana": "どうかかく", "pos": "複合名詞", "meaning_cn": "同价格", "example_jp": "同じ性能なら同価格だ。", "example_jp_ruby": "同じ性能なら<ruby>同価格<rt>どうかかく</rt></ruby>だ。", "example_cn": "性能相同的话价格也相同。" },
+        { "id": "26-3", "word": "同程度", "kana": "どうていど", "pos": "複合名詞", "meaning_cn": "同等程度", "example_jp": "二人の実力は同程度だ。", "example_jp_ruby": "二人の実力は<ruby>同程度<rt>どうていど</rt></ruby>だ。", "example_cn": "两人的实力相当。" },
+        { "id": "26-4", "word": "同世代", "kana": "どうせだい", "pos": "複合名詞", "meaning_cn": "同世代", "example_jp": "同世代の友達と話す。", "example_jp_ruby": "<ruby>同世代<rt>どうせだい</rt></ruby>の友達と話す。", "example_cn": "和同世代的朋友聊天。" },
+        { "id": "26-5", "word": "同業者", "kana": "どうぎょうしゃ", "pos": "複合名詞", "meaning_cn": "同行", "example_jp": "同業者と情報交換をする。", "example_jp_ruby": "<ruby>同業者<rt>どうぎょうしゃ</rt></ruby>と情報交換をする。", "example_cn": "和同行交换信息。" }
+      ]
+    },
+    {
+      "name": "最〜／超〜",
+      "reading": "さい・ちょう",
+      "cards": [
+        { "id": "27-1", "word": "最重要", "kana": "さいじゅうよう", "pos": "複合名詞", "meaning_cn": "最重要", "example_jp": "ここが最重要の点だ。", "example_jp_ruby": "ここが<ruby>最重要<rt>さいじゅうよう</rt></ruby>の点だ。", "example_cn": "这是最重要的一点。" },
+        { "id": "27-2", "word": "最前列", "kana": "さいぜんれつ", "pos": "複合名詞", "meaning_cn": "最前排", "example_jp": "最前列の席に座った。", "example_jp_ruby": "<ruby>最前列<rt>さいぜんれつ</rt></ruby>の席に座った。", "example_cn": "坐在了最前排的座位。" },
+        { "id": "27-3", "word": "最優先", "kana": "さいゆうせん", "pos": "複合名詞", "meaning_cn": "最优先", "example_jp": "安全を最優先する。", "example_jp_ruby": "安全を<ruby>最優先<rt>さいゆうせん</rt></ruby>する。", "example_cn": "安全最优先。" },
+        { "id": "27-4", "word": "最有力", "kana": "さいゆうりょく", "pos": "複合名詞", "meaning_cn": "最有希望", "example_jp": "彼が最有力の候補だ。", "example_jp_ruby": "彼が<ruby>最有力<rt>さいゆうりょく</rt></ruby>の候補だ。", "example_cn": "他是最有希望的候选人。" },
+        { "id": "27-5", "word": "超高級", "kana": "ちょうこうきゅう", "pos": "複合名詞", "meaning_cn": "超高级", "example_jp": "超高級の車を買った。", "example_jp_ruby": "<ruby>超高級<rt>ちょうこうきゅう</rt></ruby>の車を買った。", "example_cn": "买了超高级的车。" },
+        { "id": "27-6", "word": "超満員", "kana": "ちょうまんいん", "pos": "複合名詞", "meaning_cn": "满员、超员", "example_jp": "会場は超満員だった。", "example_jp_ruby": "会場は<ruby>超満員<rt>ちょうまんいん</rt></ruby>だった。", "example_cn": "会场爆满。" },
+        { "id": "27-7", "word": "超一流", "kana": "ちょういちりゅう", "pos": "複合名詞", "meaning_cn": "超一流", "example_jp": "彼は超一流の選手だ。", "example_jp_ruby": "彼は<ruby>超一流<rt>ちょういちりゅう</rt></ruby>の選手だ。", "example_cn": "他是超一流选手。" },
+        { "id": "27-8", "word": "超小型", "kana": "ちょうこがた", "pos": "複合名詞", "meaning_cn": "超小型", "example_jp": "超小型のカメラを買った。", "example_jp_ruby": "<ruby>超小型<rt>ちょうこがた</rt></ruby>のカメラを買った。", "example_cn": "买了超小型相机。" },
+        { "id": "27-9", "word": "超大型", "kana": "ちょうおおがた", "pos": "複合名詞", "meaning_cn": "超大型", "example_jp": "超大型の台風が来る。", "example_jp_ruby": "<ruby>超大型<rt>ちょうおおがた</rt></ruby>の台風が来る。", "example_cn": "超大型台风要来了。" },
+        { "id": "27-10", "word": "超高層ビル", "kana": "ちょうこうそうビル", "pos": "複合名詞", "meaning_cn": "超高层建筑", "example_jp": "駅前に超高層ビルが建った。", "example_jp_ruby": "駅前に<ruby>超高層<rt>ちょうこうそう</rt></ruby>ビルが建った。", "example_cn": "车站前建起了超高层建筑。" },
+        { "id": "27-11", "word": "超大作", "kana": "ちょうたいさく", "pos": "複合名詞", "meaning_cn": "超大制作", "example_jp": "その映画は超大作だ。", "example_jp_ruby": "その映画は<ruby>超大作<rt>ちょうたいさく</rt></ruby>だ。", "example_cn": "那部电影是超大制作。" }
+      ]
+    },
+    {
+      "name": "名〜",
+      "reading": "めい",
+      "cards": [
+        { "id": "28-1", "word": "名女優", "kana": "めいじょゆう", "pos": "複合名詞", "meaning_cn": "名女演员", "example_jp": "彼女は名女優だ。", "example_jp_ruby": "彼女は<ruby>名女優<rt>めいじょゆう</rt></ruby>だ。", "example_cn": "她是名女演员。" },
+        { "id": "28-2", "word": "名選手", "kana": "めいせんしゅ", "pos": "複合名詞", "meaning_cn": "名选手", "example_jp": "彼は名選手として知られている。", "example_jp_ruby": "彼は<ruby>名選手<rt>めいせんしゅ</rt></ruby>として知られている。", "example_cn": "他作为名选手广为人知。" },
+        { "id": "28-3", "word": "名場面", "kana": "めいばめん", "pos": "複合名詞", "meaning_cn": "名场面", "example_jp": "映画の名場面を集めた。", "example_jp_ruby": "映画の<ruby>名場面<rt>めいばめん</rt></ruby>を集めた。", "example_cn": "收集了电影的名场面。" },
+        { "id": "28-4", "word": "名勝負", "kana": "めいしょうぶ", "pos": "複合名詞", "meaning_cn": "精彩对决", "example_jp": "両チームによる名勝負だった。", "example_jp_ruby": "両チームによる<ruby>名勝負<rt>めいしょうぶ</rt></ruby>だった。", "example_cn": "这是两队之间的精彩对决。" },
+        { "id": "28-5", "word": "名曲", "kana": "めいきょく", "pos": "複合名詞", "meaning_cn": "名曲", "example_jp": "この曲は名曲だ。", "example_jp_ruby": "この曲は<ruby>名曲<rt>めいきょく</rt></ruby>だ。", "example_cn": "这首曲子是名曲。" },
+        { "id": "28-6", "word": "名演技", "kana": "めいえんぎ", "pos": "複合名詞", "meaning_cn": "精湛演技", "example_jp": "彼の名演技に感動した。", "example_jp_ruby": "彼の<ruby>名演技<rt>めいえんぎ</rt></ruby>に感動した。", "example_cn": "被他精湛的演技打动了。" },
+        { "id": "28-7", "word": "名セリフ", "kana": "めいセリフ", "pos": "複合名詞", "meaning_cn": "经典台词", "example_jp": "その名セリフは今も人気だ。", "example_jp_ruby": "その<ruby>名<rt>めい</rt></ruby>セリフは今も人気だ。", "example_cn": "那句经典台词现在也很受欢迎。" }
+      ]
+    },
+    {
+      "name": "半〜／生〜",
+      "reading": "はん・なま",
+      "cards": [
+        { "id": "29-1", "word": "半ズボン", "kana": "はんズボン", "pos": "複合名詞", "meaning_cn": "短裤", "example_jp": "夏は半ズボンをはく。", "example_jp_ruby": "夏は<ruby>半<rt>はん</rt></ruby>ズボンをはく。", "example_cn": "夏天穿短裤。" },
+        { "id": "29-2", "word": "半世紀", "kana": "はんせいき", "pos": "複合名詞", "meaning_cn": "半个世纪", "example_jp": "この建物は半世紀前のものだ。", "example_jp_ruby": "この建物は<ruby>半世紀<rt>はんせいき</rt></ruby>前のものだ。", "example_cn": "这栋建筑是半个世纪前的东西。" },
+        { "id": "29-3", "word": "半そで", "kana": "はんそで", "pos": "複合名詞", "meaning_cn": "短袖", "example_jp": "半そででは寒い。", "example_jp_ruby": "<ruby>半<rt>はん</rt></ruby>そででは寒い。", "example_cn": "穿短袖会冷。" },
+        { "id": "29-4", "word": "半透明", "kana": "はんとうめい", "pos": "複合名詞", "meaning_cn": "半透明", "example_jp": "半透明のカーテンを買った。", "example_jp_ruby": "<ruby>半透明<rt>はんとうめい</rt></ruby>のカーテンを買った。", "example_cn": "买了半透明的窗帘。" },
+        { "id": "29-5", "word": "半永久的", "kana": "はんえいきゅうてき", "pos": "複合形容詞", "meaning_cn": "半永久性的", "example_jp": "この記録は半永久的に残る。", "example_jp_ruby": "この記録は<ruby>半永久的<rt>はんえいきゅうてき</rt></ruby>に残る。", "example_cn": "这个记录将半永久地保留。" },
+        { "id": "29-6", "word": "生放送", "kana": "なまほうそう", "pos": "複合名詞", "meaning_cn": "直播", "example_jp": "その番組は生放送だ。", "example_jp_ruby": "その番組は<ruby>生放送<rt>なまほうそう</rt></ruby>だ。", "example_cn": "那个节目是直播。" },
+        { "id": "29-7", "word": "生演奏", "kana": "なまえんそう", "pos": "複合名詞", "meaning_cn": "现场演奏", "example_jp": "レストランで生演奏を楽しむ。", "example_jp_ruby": "レストランで<ruby>生演奏<rt>なまえんそう</rt></ruby>を楽しむ。", "example_cn": "在餐厅享受现场演奏。" },
+        { "id": "29-8", "word": "生出演", "kana": "なましゅつえん", "pos": "複合名詞", "meaning_cn": "现场出演", "example_jp": "歌手がテレビに生出演した。", "example_jp_ruby": "歌手がテレビに<ruby>生出演<rt>なましゅつえん</rt></ruby>した。", "example_cn": "歌手现场出演了电视节目。" }
+      ]
+    }
+  ]
+}
