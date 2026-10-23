@@ -15,7 +15,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
-import { buildLexicon, paragraphsOf, resolveAll, plainOf } from './katsuyo.mjs';
+import { buildLexicon, paragraphsOf, resolveAll, plainOf, parseInline } from './katsuyo.mjs';
 import { oldKanaHits } from './aozora.mjs';
 import { buildPayload, generate, pagePathOf } from './jp-reading-gen.mjs';
 
@@ -166,6 +166,18 @@ export function check({ root, works, log, tier2 }) {
     ok(emptyTr.length === 0, `${work.id} 每段都有译文`, emptyTr.length ? '缺第 ' + emptyTr.join('、') + ' 段' : '');
 
     ok(!/[《》]|｜|［＃/.test(stripTags(bodyHtml)), `${work.id} 正文无注記残留`);
+
+    /* 注記转换的另一半：注音没被丢掉、也没被复制。
+       有缓存时逐段数注記原子；没缓存就跳过（Tier 1 不该依赖缓存）。 */
+    const cacheBody = path.join(scratch, 'aozora', work.id + '.txt');
+    if (fs.existsSync(cacheBody)) {
+      const full = paragraphsOf(fs.readFileSync(cacheBody, 'utf8'));
+      const want = full
+        .slice(payload.excerpt.from, payload.excerpt.to)
+        .reduce((n, line) => n + parseInline(line).filter((a) => a.t === 'ruby').length, 0);
+      const got = (bodyHtml.match(/<ruby>/g) || []).length;
+      ok(got === want, `${work.id} ruby 数量 ≡ 原文注記数（${got} / ${want}）`);
+    }
 
     /* 同一个生词在正文里可能出现多次：比的是**不同词**的集合，不是出现次数。 */
     const markedLemmas = [...new Set([...bodyHtml.matchAll(/class="w u"[^>]*data-l="([^"]+)"/g)].map((m) => m[1]))].sort();
