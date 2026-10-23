@@ -24,6 +24,7 @@ export const ITEMS = [
   { id: 'jp-vocab', icon: 'cards', label: '课堂单词', href: 'jp-vocab/index.html', group: 'ja' },
   { id: 'verb', icon: 'swap', label: '动词专练', href: 'verb/index.html', group: 'ja' },
   { id: 'typing', icon: 'keys', label: '打字练习', href: 'typing/index.html', group: 'ja' },
+  { id: 'reading', icon: 'doc', label: '日语阅读', href: 'reading/index.html', group: 'ja' },
   { id: 'en-vocab', icon: 'book', label: '词表资料', href: 'en/1k/01.html', group: 'en' },
   { id: 'en-dictation', icon: 'mic', label: '英语听写', href: 'en/dictation/index.html', group: 'en' },
   { id: 'en-reading', icon: 'doc', label: '阅读精读', href: 'en/reading/index.html', group: 'en' },

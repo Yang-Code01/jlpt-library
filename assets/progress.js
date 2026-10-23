@@ -54,9 +54,10 @@
        日语   n5/grammar/01.html
        英语   en/1k/01.html        （词表，1k–4k 四档）
        英语   reading/1k/01.html   （阅读，en/reading/1k/01.html 的末三段）
+       日语   reading/n3/01.html   （日语阅读，reading/n3/01.html 就是末三段）
      英语模块入口页（en/typing/index.html → typing/index.html）只有两段，
      而档位表（1k–4k）又挡掉了 reading/index.html —— 无需额外的负向断言。 */
-  var RE_UNIT = /^(?:n[1-5]\/[^/]+|en\/(?:1k|2k|3k|4k)|reading\/(?:1k|2k|3k|4k))\/[^/]+\.html$/;
+  var RE_UNIT = /^(?:n[1-5]\/[^/]+|en\/(?:1k|2k|3k|4k)|reading\/(?:1k|2k|3k|4k|n3|n2|n1))\/[^/]+\.html$/;
   var RE_UNIT_JA = /^n[1-5]\/[^/]+\/[^/]+\.html$/;
   function keyOf(p) {
     return String(p || '').split(/[?#]/)[0].split('/').filter(Boolean).slice(-3).join('/');

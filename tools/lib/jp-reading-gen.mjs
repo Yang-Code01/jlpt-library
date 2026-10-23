@@ -168,6 +168,7 @@ export function generate({ root, works, only, log }) {
 
   const written = [];
   const skipped = [];
+  const entries = [];
   for (const work of works) {
     if (only && work.id !== only && work.band !== only) continue;
     const notesFile = path.join(root, 'reading', 'notes', work.id + '.json');
@@ -186,6 +187,7 @@ export function generate({ root, works, only, log }) {
     const payload = buildPayload(work, meta, notes, lex, fs.readFileSync(bodyFile, 'utf8'));
     const changed = writeIfChanged(pagePathOf(root, work), pageHtml(work, payload));
     if (changed) written.push(work.id);
+    entries.push({ work, payload });
     log(
       `  · ${work.id} ${meta.title}　节选 ${payload.excerpt.chars} 字 / ${payload.body.length} 段` +
       `　词表 ${Object.keys(payload.terms).length}　非高频 ${payload.oov.length}` +
@@ -193,5 +195,89 @@ export function generate({ root, works, only, log }) {
     );
   }
   if (skipped.length) log('  跳过：' + skipped.join('、'));
+
+  if (entries.length) {
+    const indexFile = path.join(root, 'reading', 'index.html');
+    if (writeIfChanged(indexFile, renderIndex(entries))) written.push('index');
+    log('  · 篇目页　' + entries.length + ' 篇　' + (written.includes('index') ? '已写' : '无变化'));
+  }
   return { written, skipped };
 }
+
+/* -------------------------------------------------------------- 篇目页 */
+
+const BAND_LABEL = { n3: 'N3 · 入门', n2: 'N2 · 进阶', n1: 'N1 · 挑战' };
+
+function renderIndex(entries) {
+  const total = entries.length;
+  const chars = entries.reduce((n, e) => n + e.payload.excerpt.chars, 0);
+  const oov = entries.reduce((n, e) => n + e.payload.oov.length, 0);
+
+  const bandBlock = (band) => {
+    const rows = entries.filter((e) => e.work.band === band);
+    if (!rows.length) return '';
+    return '<section class="jp-band" aria-label="' + BAND_LABEL[band] + '">' +
+      '<h2 class="jp-band-h">' + BAND_LABEL[band] + '<span class="jp-band-n">' + rows.length + ' 篇</span></h2>' +
+      '<ul class="jp-work-list">' +
+      rows.map((e) => {
+        const p = e.payload;
+        const href = e.work.band + '/' + pad2(e.work.no) + '.html';
+        const key = 'reading/' + href;
+        return '<li class="jp-work" data-key="' + key + '">' +
+          '<a class="jp-work-a" href="' + href + '">' +
+            '<span class="jp-work-title">' + esc(p.work.title) + '</span>' +
+            '<span class="jp-work-kana">' + esc(p.work.kana) + '</span>' +
+            '<span class="jp-work-meta">' + esc(p.work.author) +
+              '　·　' + p.excerpt.chars + ' 字（第 ' + (p.excerpt.from + 1) + '–' + p.excerpt.to + ' 段）' +
+              '　·　非高频词 ' + p.oov.length + '</span>' +
+          '</a>' +
+          '<span class="jp-seal" aria-hidden="true">済</span>' +
+        '</li>';
+      }).join('') +
+      '</ul></section>';
+  };
+
+  return `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日语阅读 · 青空文庫 分级精读 · 个人工作站</title>
+<meta name="description" content="日语阅读：青空文庫 公有领域作品，按 N3–N1 分档节选，振假名保留、点词查读音与释义、逐段中文译文与语法点。">
+<link rel="icon" href="${FAVICON}">
+<link rel="stylesheet" href="../assets/style.css">
+<link rel="stylesheet" href="reading.css">
+<script src="../assets/theme.js"></script>
+</head>
+<body class="has-rail">
+${railHtml({ prefix: '../', active: 'reading' })}
+<div class="jp-wrap">
+  <nav class="jp-crumb">
+    <a href="../index.html">资料库首页</a>
+    <span class="jp-crumb-sep">／</span>
+    <span>日语阅读</span>
+  </nav>
+  <main class="jp-index">
+    <header class="jp-head">
+      <p class="jp-eyebrow">日语阅读 · 青空文庫</p>
+      <h1 class="jp-title">按 N3–N1 分档的精读短篇</h1>
+      <p class="jp-sub">${total} 篇 · ${chars.toLocaleString('en-US')} 字 · 非高频词 ${oov} 个 · 全部公有领域</p>
+      <p class="jp-note">每篇节选 1,200–2,500 字，原文一字未改（只把青空文庫 的注記转成振假名）。
+        正文任意词可点开看读音、词性与释义；非高频词自动高亮；每段「注」里有中文译文、语法点与背景。</p>
+      <p class="jp-meter" id="jpReadDone">已读 0/${total}</p>
+    </header>
+    ${['n3', 'n2', 'n1'].map(bandBlock).join('')}
+    <section class="jp-foot">
+      <p class="jp-credit">正文来自<a href="https://www.aozora.gr.jp/" rel="noopener">青空文庫</a>（公有领域），
+        每篇页脚标有底本、入力校正者与図書カード 链接。词典数据派生自 JMdict（CC BY-SA 4.0），
+        中文释义为本页注释的一部分。站点整体 CC BY-NC 4.0。</p>
+    </section>
+  </main>
+</div>
+<script src="../assets/progress.js"></script>
+<script src="index.js"></script>
+</body>
+</html>`;
+}
+
+export { renderIndex };
