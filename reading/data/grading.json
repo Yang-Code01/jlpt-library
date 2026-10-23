@@ -1,0 +1,35 @@
+{
+  "rule": "按高频词覆盖率排序，均分三段（n3 最高 → n1 最低）；首批为人工定档",
+  "items": [
+    {
+      "id": "n3-01",
+      "band": "n3",
+      "ruleBand": "n3",
+      "rank": 1,
+      "chars": 1723,
+      "tokens": 675,
+      "coverage": 89.2,
+      "oovTypes": 6
+    },
+    {
+      "id": "n2-01",
+      "band": "n2",
+      "ruleBand": "n2",
+      "rank": 2,
+      "chars": 1612,
+      "tokens": 744,
+      "coverage": 87.5,
+      "oovTypes": 11
+    },
+    {
+      "id": "n1-01",
+      "band": "n1",
+      "ruleBand": "n1",
+      "rank": 3,
+      "chars": 1971,
+      "tokens": 741,
+      "coverage": 80.4,
+      "oovTypes": 39
+    }
+  ]
+}

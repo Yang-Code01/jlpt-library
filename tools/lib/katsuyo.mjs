@@ -314,3 +314,8 @@ export function paragraphsOf(body) {
     .map((l) => l.replace(/^[　\s]+/, '').replace(/\s+$/, ''))
     .filter((l) => l && !/^［＃[^］]*］$/.test(l));
 }
+
+/** 一行的「纯文本」：注記剥掉、ruby 只留汉字本体 —— 用来跟页面渲染后的文字对账 */
+export function plainOf(line) {
+  return parseInline(line).map((a) => (a.t === 'ruby' ? a.base : a.s)).join('');
+}

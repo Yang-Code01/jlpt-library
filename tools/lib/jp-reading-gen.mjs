@@ -34,13 +34,15 @@ function writeIfChanged(file, content) {
 }
 
 /** 一段正文 → 每词一个 span，词典形式写进 data-l */
-function renderParagraph(line, lex, terms, oov) {
+function renderParagraph(line, lex, terms, oov, stats) {
   const parts = [];
   for (const atom of parseInline(line)) {
     if (atom.t === 'ruby') {
       const e = lex.forms.get(atom.base);
       const lemma = atom.base;
       if (!terms[lemma]) terms[lemma] = { kana: atom.rt, pos: e ? e.pos : '', en: e ? e.en : '' };
+      stats.tokens++;
+      if (e) stats.known++;
       const hl = !e && atom.base.length >= 2;
       if (hl) oov.add(lemma);
       parts.push(
@@ -51,6 +53,10 @@ function renderParagraph(line, lex, terms, oov) {
       continue;
     }
     for (const t of segment(atom.s, lex)) {
+      if (t.cls !== 'punct') {
+        stats.tokens++;
+        if (t.entry) stats.known++;
+      }
       if (t.entry) {
         if (!terms[t.entry.lemma]) {
           terms[t.entry.lemma] = { kana: t.entry.kana, pos: t.entry.pos, en: t.entry.en };
@@ -91,7 +97,8 @@ export function buildPayload(work, meta, notes, lex, bodyText) {
 
   const terms = {};
   const oov = new Set();
-  const body = picked.map((line) => renderParagraph(line, lex, terms, oov));
+  const stats = { tokens: 0, known: 0 };
+  const body = picked.map((line) => renderParagraph(line, lex, terms, oov, stats));
 
   for (const [k, v] of Object.entries(notes.gloss || {})) {
     if (!terms[k]) terms[k] = { kana: '', pos: '', en: '' };
@@ -117,6 +124,12 @@ export function buildPayload(work, meta, notes, lex, bodyText) {
     },
     terms,
     oov: [...oov],
+    stats: {
+      tokens: stats.tokens,
+      known: stats.known,
+      coverage: stats.tokens ? +(stats.known / stats.tokens * 100).toFixed(1) : 0,
+      oovTypes: oov.size,
+    },
     notes: { intro: notes.intro || '', paras: notes.paras },
     body,
   };
@@ -204,6 +217,32 @@ export function generate({ root, works, only, log }) {
   if (skipped.length) log('  跳过：' + skipped.join('、'));
 
   if (entries.length) {
+    /* 分档数据：人工定档 + 覆盖率排序给出的「规则档」，两者不一致就要在台账里写明。
+       篇数上来后（每档 ≥5）再切到规则分档，切换条件写在 reading/README.md。 */
+    const byCoverage = entries.slice().sort((a, b) => b.payload.stats.coverage - a.payload.stats.coverage);
+    const third = Math.ceil(byCoverage.length / 3);
+    const ruleBand = {};
+    byCoverage.forEach((e, i) => {
+      ruleBand[e.work.id] = i < third ? 'n3' : i < third * 2 ? 'n2' : 'n1';
+    });
+    const grading = byCoverage.map((e, i) => ({
+      id: e.work.id,
+      band: e.work.band,
+      ruleBand: ruleBand[e.work.id],
+      rank: i + 1,
+      chars: e.payload.excerpt.chars,
+      tokens: e.payload.stats.tokens,
+      coverage: e.payload.stats.coverage,
+      oovTypes: e.payload.stats.oovTypes,
+    }));
+    writeIfChanged(
+      path.join(root, 'reading', 'data', 'grading.json'),
+      JSON.stringify({ rule: '按高频词覆盖率排序，均分三段（n3 最高 → n1 最低）；首批为人工定档', items: grading }, null, 2) + String.fromCharCode(10)
+    );
+    for (const g of grading) {
+      log('  · 分档 ' + g.id + '　人工 ' + g.band + '／规则 ' + g.ruleBand + '　覆盖率 ' + g.coverage + '%');
+    }
+
     const indexFile = path.join(root, 'reading', 'index.html');
     if (writeIfChanged(indexFile, renderIndex(entries))) written.push('index');
     log('  · 篇目页　' + entries.length + ' 篇　' + (written.includes('index') ? '已写' : '无变化'));

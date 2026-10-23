@@ -15,7 +15,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
-import { buildLexicon, paragraphsOf, resolveAll } from './katsuyo.mjs';
+import { buildLexicon, paragraphsOf, resolveAll, plainOf } from './katsuyo.mjs';
 import { buildPayload, generate, pagePathOf } from './jp-reading-gen.mjs';
 
 const require = createRequire(import.meta.url);
@@ -289,7 +289,7 @@ export function check({ root, works, log, tier2 }) {
         const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
         const notes = JSON.parse(fs.readFileSync(path.join(notesDir, work.id + '.json'), 'utf8'));
         const full = paragraphsOf(fs.readFileSync(bodyFile, 'utf8'));
-        const want = full.slice(payload.excerpt.from, payload.excerpt.to);
+        const want = full.slice(payload.excerpt.from, payload.excerpt.to).map(plainOf);
 
         const got = payload.body.map(stripTags);
         const sameBody = got.length === want.length && got.every((g, i) => g === want[i]);
@@ -310,6 +310,21 @@ export function check({ root, works, log, tier2 }) {
           `${work.id} 非高频词集合 ≡ 现场重算`
         );
         ok(fresh.excerpt.chars === payload.excerpt.chars, `${work.id} 节选字数 ≡ 现场重算（${fresh.excerpt.chars}）`);
+        ok(
+          JSON.stringify(fresh.stats) === JSON.stringify(payload.stats),
+          `${work.id} 词数/覆盖率 ≡ 现场重算（${fresh.stats.coverage}%）`
+        );
+      }
+      const gradingFile = path.join(root, 'reading', 'data', 'grading.json');
+      if (fs.existsSync(gradingFile)) {
+        const grading = JSON.parse(fs.readFileSync(gradingFile, 'utf8'));
+        const bad = grading.items.filter((g) => {
+          const page = works.find((w) => w.id === g.id);
+          if (!page) return true;
+          const p = readPayload(pagePathOf(root, page));
+          return p.excerpt.chars !== g.chars || p.stats.coverage !== g.coverage || p.stats.oovTypes !== g.oovTypes;
+        });
+        ok(!bad.length, '分档台账（reading/data/grading.json）≡ 各篇实测', bad.map((b) => b.id).join('、'));
       }
     }
   } else {
