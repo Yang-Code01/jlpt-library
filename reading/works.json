@@ -1,0 +1,47 @@
+{
+  "_comment": "日语阅读 · 作品清单（真源，手写）。id = 档位-序号；personId/workId 来自青空文庫 図書カード；kanaType 是入库门槛，不是装饰。fetch 会按 id 命名缓存，gen 只认这张表。",
+  "aozora": {
+    "mirror": "aozorahack/aozorabunko_text",
+    "cardBase": "https://www.aozora.gr.jp/cards"
+  },
+  "jmdict": {
+    "repo": "scriptin/jmdict-simplified",
+    "asset": "jmdict-eng-common",
+    "tag": "3.6.2+20261019180022"
+  },
+  "works": [
+    {
+      "id": "n3-01",
+      "band": "n3",
+      "no": 1,
+      "personId": "000121",
+      "workId": 628,
+      "title": "ごん狐",
+      "kana": "ごんぎつね",
+      "author": "新美南吉",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n2-01",
+      "band": "n2",
+      "no": 1,
+      "personId": "000035",
+      "workId": 1567,
+      "title": "走れメロス",
+      "kana": "はしれメロス",
+      "author": "太宰治",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n1-01",
+      "band": "n1",
+      "no": 1,
+      "personId": "000119",
+      "workId": 624,
+      "title": "山月記",
+      "kana": "さんげつき",
+      "author": "中島敦",
+      "kanaType": "新字新仮名"
+    }
+  ]
+}
