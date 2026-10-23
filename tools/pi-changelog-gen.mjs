@@ -8,15 +8,16 @@
  *   node tools/pi-changelog-gen.mjs probe         # 只探测源文件（找到退出 0，找不到退出 2）
  *   node tools/pi-changelog-gen.mjs <CHANGELOG.md 路径>   # 指定源，重写报告
  *
- * 源默认取本机全局安装的 npm 包（node 所在 nvm 版本的 node_modules，Linux/macOS 走
- * ../lib/node_modules）。找不到就退出 2，tools/test.mjs 据此把这条校验标成 SKIP。
+ * 源默认取本机全局安装的 npm 包（npm 全局前缀 / node 所在 nvm 版本的 node_modules，
+ * Linux/macOS 走 ../lib/node_modules）。多份并存时**取版本最高的那份**，找不到就退出 2，
+ * tools/test.mjs 据此把这条校验标成 SKIP。
  *
- * 报告是「源 → 生成物」而不是手写稿：3131 条原文、289 个折叠块都由 parse() 产出，
+ * 报告是「源 → 生成物」而不是手写稿：3173 条原文、290 个折叠块都由 parse() 产出，
  * 只有 ERAS（六段分期）与 LOCAL（与本机相关的卡片）是手写中文解读。
  */
 import { readFileSync, writeFileSync, existsSync, readdirSync, mkdtempSync, rmSync, statSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { dirname, join } from 'node:path';
+import { delimiter, dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { norm } from './lib/eol.mjs';
@@ -29,33 +30,65 @@ const ARGS = process.argv.slice(2);
 const MODE = ['check', 'probe'].includes(ARGS[0]) ? ARGS[0] : 'write';
 const GIVEN = MODE === 'write' ? ARGS[0] : ARGS[1];
 
-/** 找本机全局安装的 pi 包里的 CHANGELOG.md（nvm / nvm4w / Linux 全局 / 显式路径） */
-function findSource() {
-  if (GIVEN) return existsSync(GIVEN) ? GIVEN : null;
-  if (process.env.PI_CHANGELOG && existsSync(process.env.PI_CHANGELOG)) return process.env.PI_CHANGELOG;
+/** 候选路径：node 同级、PATH 前缀（npm 全局装法）、nvm / nvm4w 各版本 */
+function candidates() {
+  const cands = [];
   const nodeDir = dirname(process.execPath);
-  const cands = [join(nodeDir, REL), join(nodeDir, '..', 'lib', REL)];
-  const nvmRoot = join(process.env.LOCALAPPDATA || '', 'nvm');
-  const nvm4w = join(process.env.APPDATA || '', 'nvm');
-  for (const root of [nvmRoot, nvm4w]) {
+  cands.push(join(nodeDir, REL), join(nodeDir, '..', 'lib', REL));
+  // npm 全局装法：shim 落在前缀根（Windows 的 <前缀>、POSIX 的 <前缀>/bin），包在同级的 node_modules 里
+  for (const d of String(process.env.PATH || '').split(delimiter).filter(Boolean)) {
+    cands.push(join(d, REL), join(d, '..', 'lib', REL));
+  }
+  for (const root of [process.env.LOCALAPPDATA && join(process.env.LOCALAPPDATA, 'nvm'),
+    process.env.APPDATA && join(process.env.APPDATA, 'nvm')]) {
     if (!root || !existsSync(root)) continue;
     for (const d of readdirSync(root)) cands.push(join(root, d, REL));
   }
-  return cands.find((p) => existsSync(p)) || null;
+  return cands;
 }
 
-const MISSING =
-  '找不到 pi 的 CHANGELOG.md（找过 node 同级的 node_modules、nvm/nvm4w 各版本）。\n' +
-  '装好 pi 后重试，或用 PI_CHANGELOG=<路径> / 直接把路径作为参数传进来。';
+/** 数字段比较（'1.10.0' > '1.9.0'；空串按 0 算，永远垫底） */
+function cmpVersion(a, b) {
+  const pa = String(a).match(/\d+/g) || [];
+  const pb = String(b).match(/\d+/g) || [];
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const d = (Number(pa[i]) || 0) - (Number(pb[i]) || 0);
+    if (d) return d;
+  }
+  return 0;
+}
 
-/** 已装包自身的版本（报告头部的「快照版本」用它，别写死） */
-function readPkgVersion(srcPath) {
+/** 已装包自身的版本：package.json 优先，缺了就看 CHANGELOG 的第一个 `## [x.y.z]` */
+function readVersion(srcPath) {
   try {
-    return JSON.parse(readFileSync(join(dirname(srcPath), 'package.json'), 'utf8')).version || '';
+    const v = JSON.parse(readFileSync(join(dirname(srcPath), 'package.json'), 'utf8')).version;
+    if (v) return String(v);
+  } catch { /* 没有 package.json */ }
+  try {
+    const m = readFileSync(srcPath, 'utf8').match(/^## \[?([0-9][^\]\s]*)\]?/m);
+    return m ? m[1] : '';
   } catch {
     return '';
   }
 }
+
+/** 找本机全局安装的 pi 包里的 CHANGELOG.md：多份并存时挑版本最高的。
+    本机就有两份（npm 全局的新版 / nvm 里的旧版），按「先找到的」会解析到旧履历。 */
+function findSource() {
+  if (GIVEN) return existsSync(GIVEN) ? GIVEN : null;
+  if (process.env.PI_CHANGELOG && existsSync(process.env.PI_CHANGELOG)) return process.env.PI_CHANGELOG;
+  let best = null;
+  for (const p of candidates()) {
+    if (!existsSync(p)) continue;
+    const version = readVersion(p);
+    if (!best || cmpVersion(version, best.version) > 0) best = { path: p, version };
+  }
+  return best ? best.path : null;
+}
+
+const MISSING =
+  '找不到 pi 的 CHANGELOG.md（找过 node 同级的 node_modules、PATH 上的 npm 全局前缀、nvm/nvm4w 各版本）。\n' +
+  '装好 pi 后重试，或用 PI_CHANGELOG=<路径> / 直接把路径作为参数传进来。';
 
 const SRC = findSource();
 if (MODE === 'probe') {
@@ -70,7 +103,7 @@ if (!SRC) {
   console.error(MISSING);
   process.exit(2);
 }
-const pkgVersion = readPkgVersion(SRC);
+const pkgVersion = readVersion(SRC);  // 报告头部的「快照版本」：取源包自己的版本，别写死
 
 /* ------------------------------------------------------------------ 解析 */
 
@@ -335,15 +368,16 @@ const ERAS = [
     n: '06',
     title: 'codemode 纪元与 1.x 稳定化',
     from: '0.99.0',
-    to: '1.3.0',
+    to: '1.4.0',
     blurb:
-      '0.99.0 是整个版本史里最大的一次结构变化：codemode（模型写 JS 调工具）、MCP、虚拟模型、分类器模型、system 主题一起来了。此后 1.0 把全屏设为默认，1.0–1.3 的补丁几乎都在做同一件事：**更省 token、更少缓存失效**。',
+      '0.99.0 是整个版本史里最大的一次结构变化：codemode（模型写 JS 调工具）、MCP、虚拟模型、分类器模型、system 主题一起来了。此后 1.0 把全屏设为默认，1.0–1.4 的补丁几乎都在做同一件事：**更省 token、更少缓存失效**，再把 codemode 与压缩这两个瓶颈从「撞上就报错」改成「排队 / 用满模型额度」。',
     bullets: [
       '0.99.0 codemode + MCP + virtual models + classifier models + system 主题；扩展事件里多出 `provider_stream_event` 这类可观测钩子。',
       '0.99.1 GPT-6.1 Sol 成为 OpenAI 默认模型；1.1.0 起 `--tools` 支持 `+name`/`-name` 增量调工具，并通过 OSC 7501 上报运行状态。',
       '1.0.0 全屏成为默认 TUI（`tuiMode: "regular"` 可回退）；codemode 提示词瘦身约 40%（GPT-5.6 单请求约 5,300 → 3,300 token），错误信息改成「教模型怎么恢复」。',
       '1.2.0 给 `settings.json` / `models.json` / keybindings / themes 发布 `$schema`，编辑器里可校验可补全；OpenRouter 按 key 列出可用模型与价格。',
       '1.3.0 把「缓存不失效」做到细处：GPT-6 上中途改思考档不掉缓存、换模型时丢掉上一个模型的思考块而非塞成文本、resume 保留会话中临时启用的工具。',
+      '1.4.0 收尾两个硬失败：codemode 双 worker 满载时脚本改为排队（最多 60 秒，`PI_CODEMODE_MAX_WORKERS` 可抬上限），压缩 / 分支摘要改用模型自己的输出上限而不是固定额度（长思考不再撞「generation hit the token cap」）。',
     ],
     picks: [
       ['0.99.0', 'Codemode and MCP', '模型写 JS 调工具、MCP 接入、虚拟/分类器模型、system 主题。'],
@@ -351,6 +385,7 @@ const ERAS = [
       ['1.1.0', '`--tools +name/-name`', '在默认工具集上做增量增删，不用整份重写。'],
       ['1.2.0', '$schema', '配置文件发布 JSON Schema，编辑器校验与补全。'],
       ['1.3.0', '缓存友好', '改思考档保缓存、换模型清思考块、resume 保留工具。'],
+      ['1.4.0', '排队而非报错', 'codemode 满载排队 60s；摘要用模型输出上限；分类器收图。'],
     ],
   },
 ];
@@ -381,44 +416,52 @@ const LOCAL = [
       '1.3.0 把 `kimi-coding` 换成 Chat Completions，`models.json` 里覆盖它的 `baseUrl` 现在必须带 `/v1`。本机 `wb2api` 等自定义 provider 是 `openai-completions` 且 `baseUrl` 已含 `/v1`（如 `http://127.0.0.1:7863/v1`），不受这条影响；但以后接别的 OpenAI 兼容端点时记得同一条规矩。',
   },
   {
-    v: '1.2.0',
+    v: '1.2.0 / 1.4.0',
     state: 'todo',
     stateLabel: '可考虑',
     title: '`models.json` 现在能挂 `$schema`',
     body:
-      '1.2.0 给 `settings.json`、`models.json`、keybindings、themes 发布了 JSON Schema。本机 `models.json` 有十来个自定义 provider / 模型条目，加一行 `$schema` 就能在编辑器里补全与报错。',
+      '1.2.0 给 `settings.json`、`models.json`、keybindings、themes 发布了 JSON Schema。本机 `models.json` 有十来个自定义 provider / 模型条目，加一行 `$schema` 就能在编辑器里补全与报错。1.4.0 另给了从 schema 生成的 Models Configuration 参考文档，并把 provider 级 `compat` 也接到分类器模型上（`imageInput` / `sendImageOptInHeader`）—— 本机 `wb2api` 这种「代理别人的服务」的端点正好用得上。',
   },
   {
-    v: '0.79.7 / 0.60.0',
+    v: '0.60.0 / 1.4.0',
     state: 'warn',
     stateLabel: '注意',
     title: '`pi update` 只管 pi 自己，包不会顺带升级',
     body:
-      '0.60.0 起启动不再自动更新未锁定的 npm / git 包；0.79.7 起 `pi update` 默认只更新 pi 自身，`--all` 才连 packages 一起。本机装了 `pi-subagents`、`pi-web-access`、`billion-context`、`pi-open-tui` 四个包，需要定期 `pi update --all`。',
+      '0.60.0 起启动不再自动更新未锁定的 npm / git 包；0.79.7 起 `pi update` 默认只更新 pi 自身，`--all` 才连 packages 一起，`--extensions` 只升包。本机装了 8 个 npm 包（pi-mcp-adapter、pi-web-access、@juicesharp/rpiv-ask-user-question、pi-background-tasks、@plannotator/pi-extension、pi-agent-browser-native、context-mode、pi-subagents）+ 1 个本地路径包（`~/.pi/packages/pi-tui`），要定期 `pi update --extensions`。1.4.0 修了 `managed-install.json` 以 UTF-8 BOM 开头时 `pi update` 直接报 “Managed install marker is missing or invalid”（Windows PowerShell 5.1 重写文件会塞 BOM）—— 本机的 `pi` 就是 npm 全局装法，走的正是这条路径。',
   },
   {
-    v: '0.62.0 → 0.87.0',
+    v: '0.62.0 → 1.4.0',
     state: 'warn',
     stateLabel: '注意',
-    title: '本地三个扩展踩在改动最密的接口上',
+    title: '本地扩展踩在改动最密的接口上',
     body:
-      '`herdr-agent-state.ts`、`question.ts`、`questionnaire.ts` 用到扩展上下文与 UI 能力：0.62.0 内置工具渲染接口重写、0.80.4 生命周期钩子（`agent_settled`、`before_provider_request`）、0.87.0 上下文边界、1.2.0 `triggerTurn` 走 `before_agent_start`、1.3.0 扩展 overlay 的 `done()` 只关自己的浮层。升级后若扩展表现异常，先查这几处。',
+      '`herdr-agent-state.ts`（`~/.pi/agent/extensions`）、`~/.pi/packages/pi-tui/extensions` 里的 `open-tui/` 与 `wb-gateway.ts` / `wb-panel.ts` / `wb-model-picker.ts` / `wb-stats.ts`、以及 `@juicesharp/rpiv-ask-user-question` 的 `ask-user-question.ts`，都直接用着扩展上下文与 UI 能力：0.62.0 内置工具渲染接口重写、0.80.4 生命周期钩子（`agent_settled`、`before_provider_request`）、0.87.0 上下文边界、1.2.0 `triggerTurn` 走 `before_agent_start`、1.3.0 扩展 overlay 的 `done()` 只关自己的浮层。1.4.0 把并发 dialog 从「后开的顶掉先开的、先开的 promise 永不 settle」修成可叠加（关掉当前浮层会退回上一个），并放开了扩展 import `@earendil-works/pi-ai/models` 子路径（`clampThinkingLevel` 这类）。升级后若扩展表现异常，先查这几处。',
   },
   {
-    v: '1.0.0 / 1.1.0',
+    v: '0.99.0 → 1.4.0',
     state: 'ok',
     stateLabel: '无影响',
     title: 'codemode 越用越便宜',
     body:
-      'codemode 自 0.99.0 起内置。1.0.0 把提示词压掉约 40% 并让报错自带恢复提示；1.1.0 起可用 `--tools +codemode,-write` 在默认工具集上增量增删；1.0.4 起 `--tools`/`--exclude-tools` 支持 `*` 通配。',
+      'codemode 自 0.99.0 起内置。1.0.0 把提示词压掉约 40% 并让报错自带恢复提示；1.1.0 起可用 `--tools +codemode,-write` 在默认工具集上增量增删；1.0.4 起 `--tools`/`--exclude-tools` 支持 `*` 通配。1.4.0 起两个 worker 都忙时脚本排队最多 60 秒而不是立刻失败（`PI_CODEMODE_MAX_WORKERS` 可抬上限），`models.classify()` 也能收图片。',
   },
   {
-    v: '0.75.5 / 0.76.0 / 0.84.3',
+    v: '1.4.0',
     state: 'live',
     stateLabel: '已生效',
-    title: 'Windows 这三条直接受益',
+    title: '长思考不再让压缩失败',
     body:
-      '0.75.5 文件工具在 Windows 上改用异步文件系统操作；0.76.0 修 Windows / JetBrains 终端里的编辑行为；0.84.3 加入可选的原生 PowerShell 工具（不用再靠 bash 转发）。',
+      '1.4.0 起 `generateSummary()` / `generateSummaryWithUsage()` 忽略 `reserveTokens`，摘要请求直接吃模型自己的输出上限，`compaction.reserveTokens` 退回只管「什么时候开始压缩」；此前思考吃满固定额度会报 “generation hit the token cap”，长会话 + `defaultThinkingLevel: "high"` 时最容易撞。',
+  },
+  {
+    v: '0.75.5 → 1.4.0',
+    state: 'live',
+    stateLabel: '已生效',
+    title: 'Windows 这几条直接受益',
+    body:
+      '0.75.5 文件工具在 Windows 上改用异步文件系统操作；0.76.0 修 Windows / JetBrains 终端里的编辑行为；0.84.3 加入可选的原生 PowerShell 工具（不用再靠 bash 转发）。1.4.0 修 Windows shell 探测：Microsoft Store 的 shell 别名不再被拒、不在 `PATH` 里的 PowerShell 7 能被找到、Windows 不装在 `C:\\Windows` 时旧版 WSL `bash.exe` 启动器也能认出来。',
   },
   {
     v: '0.80.6 / 1.3.0',
@@ -427,6 +470,84 @@ const LOCAL = [
     title: '默认 thinking high，上面的档位都在',
     body:
       '0.80.6 增加 `max` 档、0.80.7 起 Fable 5 支持 `xhigh`/`max`；1.3.0 在 GPT-6（API key）上中途改档不再掉缓存 —— 本机 `defaultThinkingLevel: "high"` 属于中间档，往上还能试 `xhigh`/`max`。',
+  },
+];
+
+/* 1.x 大版本速览：每个 minor 一张卡。line 是这句主线，items 是「英文条目前缀 → 中文一句」，
+   英文原文仍由 parse() 从 CHANGELOG 取（不手抄）；前缀对不上就在 gen 时打警告、
+   tools/tests/test_pi_changelog.js 会报红，逼着补。0.x 每天一版，不进这个模块。 */
+const MAJORS = [
+  {
+    m: '1.4',
+    line: '把两个「撞上就报错」的瓶颈改成排队 / 用满模型额度：codemode 满载不再失败，长思考也不再让摘要失败。',
+    items: [
+      ['Image input for classifiers', '分类器收图：`models.classify()` 在 typesafe / Cloudflare Workers AI / OpenRouter 上接受 `images`'],
+      ['Models Configuration reference', '`models.json` 有了按 schema 生成的字段总参考：provider、model、覆盖项、兼容字段'],
+      ['Summaries without a fixed output cap', '压缩与分支摘要改用模型自己的输出上限，长思考不再把摘要顶到 token cap'],
+      ['Codemode waits for a free worker', 'codemode 满载时脚本排队等空闲 worker，`PI_CODEMODE_MAX_WORKERS` 可抬上限'],
+      ['Rex terminal support', '支持 Rex 终端：OSC 8 超链接、真彩色、内联图片'],
+    ],
+  },
+  {
+    m: '1.3',
+    line: '主题是「缓存不失效」落细：GPT-6 中途改档不掉缓存，换模型清掉旧思考，resume 保留会话中启用的工具。',
+    items: [
+      ['Choose where `/share` uploads', '`/share` 上传到哪儿由 `sessionShareDestination` 定（auto / gist / radius）'],
+      ['Cache-preserving thinking level changes on OpenAI GPT-6', 'GPT-6（API key）上中途改思考档不再让提示缓存失效'],
+      ['Kimi Code over Chat Completions', 'Kimi Code 改走 Chat Completions：中途加工具不再毁缓存；覆盖 `baseUrl` 必须带 `/v1`'],
+      ['Clean model switching', '换模型时丢掉上一个模型的思考块，不再当正文塞给新模型'],
+      ['Resumed sessions keep their active tools', 'resume 恢复会话时保留会话中临时启用的工具'],
+    ],
+  },
+  {
+    m: '1.2',
+    line: '配置开始「可校验」：settings / models / keybindings / themes 发布 JSON Schema；OpenRouter 按 key 列出可用模型与价格。',
+    items: [
+      ['Per-key OpenRouter model lists', 'OpenRouter 按 key 列出可用模型、上下文大小、最大输出与价格（含区域端点）'],
+      ['Published configuration schemas', '`settings.json` / `models.json` / keybindings / themes 加 `$schema`，编辑器里可校验可补全'],
+      ['Clipboard copies over remote sessions', '`PI_CLIPBOARD_OSC52=1` 让远程会话（跳板、mux）也能写进本地剪贴板'],
+      ['Codemode improvements', 'codemode 工具声明带出输入约束（整数、上下限、默认值），行内显示耗时与总时长'],
+      ['`before_agent_start` for extension-triggered runs', '扩展 `triggerTurn` 起的运行也走 `before_agent_start` 那套准备'],
+      ['Published generated configuration schemas for models', 'schema 移到 `https://pi.dev/schemas/*.schema.json`，主题 schema 改名 `theme.schema.json`'],
+      ['Changed `before_agent_start` to also fire', '`before_agent_start` 对 `triggerTurn` 运行也触发，事件按 `messageType` 变成联合类型'],
+      ['Changed the session to count as busy', '运行启动期间（含 `before_agent_start` 处理中）会话算忙：`ctx.isIdle()` 为假，消息进队列'],
+      ['Changed `pi mcp list --json`', '`pi mcp list --json` 对提供资源的 server 只报 `resources: true`，不再给资源数量'],
+    ],
+  },
+  {
+    m: '1.1',
+    line: '把运行状态暴露给终端与面板，并让 `--tools` 支持在默认工具集上做增量增删。',
+    items: [
+      ['Program status reporting', 'OSC 7501 上报运行状态：工作中 / 等对话框 / 等登录 / 完成 / 失败'],
+      ['Claude Haiku 5.5', 'Claude Haiku 5.5（`anthropic/claude-haiku-5-5`），思考可到 `xhigh` / `max`'],
+      ['Adjust default tools with', '`--tools` 支持 `+name` / `-name`：在默认工具集上增删，而不是整份替换'],
+      ['GPT-6 Luna and image classification', 'GPT-6 Luna 可当分类器模型；codemode 的 `classify()` 也能收图'],
+      ['Native llama.cpp decision models', 'llama.cpp 0.6.0+ 上的 Julia-1 / Laya / Kev / lev / OpenJev 原生当分类器跑'],
+    ],
+  },
+  {
+    m: '1.0',
+    line: '第一个 1.x：全屏 TUI 成为默认、codemode 提示词瘦身约 40%，并补上图像生成、Radius 登录与 MCP OAuth 加固。',
+    items: [
+      ['Tool patterns and', '`--tools` / `--exclude-tools` 支持 `*` 通配，新增 `--no-mcp` 一次关掉 MCP 工具'],
+      ['Codemode persists images', 'codemode 里 `tools.read()` 读图片返回 image 块，`image()` 能再显示出来'],
+      ['Azure Foundry Chat Completions', '`azure` provider 也能接 Foundry Chat Completions 部署（起于 `azure/deepseek-v4-pro`）'],
+      ['Codemode images saved to files', '`image()` 同时把图写到临时文件，并在结果里给出路径供后续拿用'],
+      ['Sampling by thinking level', '`samplingParamsByThinkingLevel` 按思考档给 OpenAI 兼容 API 配 temperature / top_p'],
+      ['Nix flake', 'Nix flake：`nix run github:earendil-works/pi/stable` 直接跑最新版'],
+      ['Project overrides for MCP servers', '`.pi/mcp.json` 与 `/mcp` 能按项目开关或改用户级 MCP server 的暴露'],
+      ['MCP Client ID Metadata Documents', '`oauth.clientRegistration: "cimd"`：授权服务器按文档 URL 认 pi，不必动态注册'],
+      ['Tool renderers for any tool', '`pi.registerToolRenderer()` 能给还没注册的工具（如 resume 后的 MCP 工具）画调用'],
+      ['Cloudflare Clef classifiers', 'Cloudflare Clef / Clef Flash 分类器可在 codemode 与扩展里用'],
+      ['Fullscreen by default', 'TUI 默认全屏；`tuiMode: "regular"` 回到终端原生 scrollback'],
+      ['Leaner codemode', 'codemode 提示词省约 40%，报错改成「教模型怎么恢复」'],
+      ['Image generation in codemode', 'codemode 用会话凭据调 `models.generateImages()` 生成图片'],
+      ['Radius in', '`/login` 里一步登录 Radius 并配好它的 MCP server'],
+      ['Anthropic copy code login', '浏览器在另一台机器时，用复制码登录 Anthropic'],
+      ['MCP OAuth hardening', 'MCP OAuth 加固：`authServerMetadataUrl`、RFC 9207 `iss` 校验、按 server 存凭据、step-up 登录保 scopes'],
+      ['Header-only quiet startup', '`quietStartup: "header"` 只留版本与快捷键提示'],
+      ['Renamed the Azure provider', '`azure-openai-responses` 改名 `azure`：`auth.json` / `models.json` / `settings.json` 里的 key 都要改'],
+    ],
   },
 ];
 
@@ -484,6 +605,52 @@ for (const e of ERAS) {
 const CAT_ORDER = ['new', 'added', 'changed', 'fixed', 'breaking', 'removed', 'other'];
 const CAT_LABEL = { new: '新功能', added: '新增', changed: '变更', fixed: '修复', breaking: '破坏性变更', removed: '移除', other: '其他' };
 const catTotals = CAT_ORDER.map((k) => ({ key: k, label: CAT_LABEL[k], n: countByCat[k] || 0 })).filter((c) => c.n);
+
+/* -------------------------------------------------- 1.x 大版本速览：取数 */
+
+const minorOf = (v) => v.split('.').slice(0, 2).join('.');
+const majorCards = [];
+const majorMisses = []; // 源里有、手写表里没对上的条目
+const majorStale = []; // 手写表里有、源里没对上的前缀（源改了措辞就会落到这里）
+
+for (const m of MAJORS) {
+  const vs = versions.filter((v) => minorOf(v.version) === m.m);
+  if (!vs.length) {
+    majorStale.push(`${m.m}（源里没有这个 minor）`);
+    continue;
+  }
+  const used = new Set();
+  const zhOf = (text) => {
+    const t = plain(text);
+    const i = m.items.findIndex(([en], k) => !used.has(k) && t.startsWith(plain(en)));
+    if (i < 0) {
+      majorMisses.push(`${m.m}：${t.slice(0, 70)}`);
+      return '';
+    }
+    used.add(i);
+    return m.items[i][1];
+  };
+  const nf = [];
+  const br = [];
+  for (const v of vs) {
+    for (const s of v.sections) {
+      const bucket = s.key === 'new' ? nf : s.key === 'breaking' ? br : null;
+      if (!bucket) continue;
+      for (const it of s.items) bucket.push({ v: v.version, text: it.text, zh: zhOf(it.text) });
+    }
+  }
+  m.items.forEach(([en], k) => {
+    if (!used.has(k)) majorStale.push(`${m.m}：${en}`);
+  });
+  majorCards.push({ ...m, versions: vs, nf, br, total: vs.reduce((n, v) => n + v.items, 0) });
+}
+
+// 源里出了新的 1.x minor 却没写速览卡 —— 提醒补卡与中文
+const covered = new Set(MAJORS.map((m) => m.m));
+const uncovered = [...new Set(versions.map((v) => minorOf(v.version)))].filter(
+  (m) => /^1\./.test(m) && !covered.has(m)
+);
+if (uncovered.length) majorStale.push(`${uncovered.join('、')}（源里有这个 minor，但没有速览卡）`);
 
 /* ---------------------------------------------------------------- 渲染 */
 
@@ -581,7 +748,7 @@ function renderBreaking() {
   return `<div class="break-note">
     <p>跨大版本升级时真正会咬人的是这 ${breaking.length} 条。历史上最贵的三次是
     <b>0.62.0</b>（14 条，内置工具 ToolDefinition 化）、<b>0.84.0</b>（12 条，全屏 TUI 与扩展渲染接口）、
-    <b>0.32.0 / 0.35.0</b>（队列 API 拆分、hooks→extensions 合并）。只关心从 0.x 上到 1.3.0 的话，按这张表倒序读一遍即可。</p>
+    <b>0.32.0 / 0.35.0</b>（队列 API 拆分、hooks→extensions 合并）。只关心从 0.x 上到 ${esc(newest.version)} 的话，按这张表倒序读一遍即可。</p>
   </div>
   <table class="break-table">
     <thead><tr><th>版本</th><th>日期</th><th>变更内容</th></tr></thead>
@@ -600,6 +767,50 @@ function renderLocal() {
       <p>${inline(l.body)}</p>
     </div>`
   ).join('')}</div>`;
+}
+
+/** 一条：中文一句在上（1.0 这种多版本组带上版本号），CHANGELOG 英文原文在下（原文不手抄） */
+function majorItem(it, withV) {
+  return `<li class="mj-item"><span class="mj-zh">${
+    withV ? `<span class="mj-v">${esc(it.v)}</span>` : ''
+  }${it.zh ? inline(it.zh) : '（源里新增了这条，还没写中文概览）'}</span><span class="mj-en">${inline(it.text)}</span></li>`;
+}
+
+function renderMajor() {
+  return `<div class="major-grid">${majorCards
+    .map((c) => {
+      const first = c.versions[0];
+      const last = c.versions[c.versions.length - 1];
+      const when =
+        c.versions.length > 1
+          ? `${esc(last.date)} → ${esc(first.date)} · ${c.versions.length} 个版本`
+          : `${esc(first.date)} · ${esc(first.version)}`;
+      const withV = c.versions.length > 1;
+      const breaks = c.br.length
+        ? `
+    <div class="mj-breaks"><span class="mj-breaks-h">破坏性变更 · ${c.br.length}</span>
+      <ul class="mj-list">${c.br.map((it) => majorItem(it, withV)).join('')}</ul>
+    </div>`
+        : '';
+      return `<article class="major" id="major-${esc(c.m)}">
+    <header class="major-head">
+      <span class="major-v">${esc(c.m)}</span>
+      <span class="major-date">${when}</span>
+      <span class="major-tags">
+        <span class="major-tag c-new">新功能 ${c.nf.length}</span>
+        <span class="major-tag">共 ${c.total} 条</span>${
+          c.br.length ? `\n        <span class="major-tag c-breaking">破坏性 ${c.br.length}</span>` : ''
+        }
+      </span>
+    </header>
+    <p class="major-line">${inline(c.line)}</p>
+    <ul class="mj-list">${c.nf.map((it) => majorItem(it, withV)).join('')}</ul>${breaks}
+    <footer class="major-foot">本组版本：${c.versions
+      .map((v) => `<a href="#v-${esc(v.version)}">${esc(v.version)}</a>`)
+      .join(' · ')} · <a href="#v-${esc(first.version)}">本组全部 ${c.total} 条原文 ↓</a></footer>
+  </article>`;
+    })
+    .join('\n')}</div>`;
 }
 
 function renderVersion(v) {
@@ -812,6 +1023,33 @@ const html = `<!DOCTYPE html>
   .local-card h4{margin:0 0 6px;font-size:15px}
   .local-card p{margin:0;font-size:13.6px;color:var(--muted);line-height:1.75}
 
+  /* ---------- major（1.x 大版本速览） ---------- */
+  .major-grid{display:flex;flex-direction:column;gap:14px}
+  .major{border:1px solid var(--rule);border-radius:14px;background:var(--panel);padding:18px 20px}
+  .major-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .major-v{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--accent);letter-spacing:-.02em}
+  .major-date{font-family:var(--mono);font-size:11.5px;color:var(--dim)}
+  .major-tags{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+  .major-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--muted);
+    border:1px solid var(--rule);border-radius:999px;padding:2px 9px}
+  .major-tag.c-new{color:var(--new);border-color:color-mix(in srgb,var(--new) 45%,var(--rule))}
+  .major-tag.c-breaking{color:var(--breaking);border-color:color-mix(in srgb,var(--breaking) 45%,var(--rule))}
+  .major-line{margin:8px 0 14px;font-size:14.5px;color:var(--ink);line-height:1.8;max-width:920px}
+  .mj-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+  .mj-item{display:flex;flex-direction:column;gap:3px;padding-left:15px;position:relative}
+  .mj-item::before{content:"·";position:absolute;left:2px;top:-2px;color:var(--accent);font-weight:700}
+  .mj-zh{font-size:13.8px;color:var(--ink);line-height:1.7}
+  .mj-v{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-right:7px;
+    border:1px solid var(--rule);border-radius:4px;padding:1px 5px}
+  .mj-en{font-family:var(--mono);font-size:11.5px;color:var(--dim);line-height:1.7}
+  .mj-en code{color:var(--muted)}
+  .mj-breaks{margin-top:14px;padding-top:12px;border-top:1px dashed var(--rule)}
+  .mj-breaks-h{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--breaking);margin-bottom:9px}
+  .major-foot{margin:14px 0 0;font-family:var(--mono);font-size:11px;color:var(--dim)}
+  .major-foot a{color:var(--muted);text-decoration:none}
+  .major-foot a:hover{color:var(--accent)}
+
   /* ---------- archive ---------- */
   .archive-bar{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;
     position:sticky;top:41px;z-index:15;background:var(--bg);
@@ -891,7 +1129,7 @@ const html = `<!DOCTYPE html>
   <div class="wrap">
     <div class="kicker"><span>Pi Changelog</span><span class="dot"></span><span>${esc(newest.date)} 快照</span></div>
     <h1>pi 更新履历<br><span class="range">${esc(oldest.version)} → ${esc(newest.version)}</span></h1>
-    <p class="lede">十一个月、<b>${versions.length} 个版本</b>、<b>${itemTotal} 条变更</b>。从 2025-11-25 的「TUI + 七个工具」起步，到 2026-10 的 codemode、MCP、虚拟模型与缓存优化。本页把它切成六段来讲，再把 ${breaking.length} 条破坏性变更单列成表，最后附一份全量可检索的版本归档。</p>
+    <p class="lede">十一个月、<b>${versions.length} 个版本</b>、<b>${itemTotal} 条变更</b>。从 2025-11-25 的「TUI + 七个工具」起步，到 2026-10 的 codemode、MCP、虚拟模型与缓存优化。先按 1.x 每个大版本给一张速览（中文一句 + 英文原文），再切成六段讲历史，然后把 ${breaking.length} 条破坏性变更单列成表，最后附一份全量可检索的版本归档。</p>
     <p class="src">数据源：本机 <code>node_modules/@earendil-works/pi-coding-agent/CHANGELOG.md</code>（${esc(pkgVersion || newest.version)}，${(statSync(SRC).size / 1024).toFixed(0)} KB）<br>
     抓取方式：解析 markdown 后整页内联生成，条目原文为英文，分期说明与本机影响为中文整理。</p>
   </div>
@@ -901,10 +1139,11 @@ const html = `<!DOCTYPE html>
   <div class="wrap">
     <a href="#overview"><span class="idx">01</span>总览</a>
     <a href="#cadence"><span class="idx">02</span>发布节奏</a>
-    <a href="#eras"><span class="idx">03</span>六段分期</a>
-    <a href="#breaking"><span class="idx">04</span>破坏性变更</a>
-    <a href="#local"><span class="idx">05</span>与本机</a>
-    <a href="#archive"><span class="idx">06</span>全量归档</a>
+    <a href="#major"><span class="idx">03</span>大版本速览</a>
+    <a href="#eras"><span class="idx">04</span>六段分期</a>
+    <a href="#breaking"><span class="idx">05</span>破坏性变更</a>
+    <a href="#local"><span class="idx">06</span>与本机</a>
+    <a href="#archive"><span class="idx">07</span>全量归档</a>
   </div>
 </nav>
 
@@ -921,6 +1160,12 @@ const html = `<!DOCTYPE html>
     ${renderMonths()}
   </section>
 
+  <section id="major">
+    <div class="sec-head"><h2>1.x 大版本速览</h2><span class="sec-en">Major Releases</span></div>
+    <p class="sec-sub">只收 1.x：${majorCards.length} 个大版本各一张卡，每条新功能写成一句中文，下面紧跟 CHANGELOG 的英文原文（可直接搜关键词）。0.x 一天一版的细节往下看分期与全量归档。</p>
+    ${renderMajor()}
+  </section>
+
   <section id="eras">
     <div class="sec-head"><h2>六段分期</h2><span class="sec-en">Six Eras</span></div>
     <p class="sec-sub">按版本号与日期切成六段，每段给一句主线、几条关键事实和代表版本。想快速了解「pi 是怎么长成现在这样的」，看这一节就够；具体某条改动去最后一节搜。</p>
@@ -935,7 +1180,7 @@ const html = `<!DOCTYPE html>
 
   <section id="local">
     <div class="sec-head"><h2>与本机相关</h2><span class="sec-en">Local Impact</span></div>
-    <p class="sec-sub">下面这些是从这份履历里挑出来、对<b>本机这套配置</b>（pi 1.3.0、Windows、自建 <code>wb2api</code> provider、四个 npm 包 + 三个本地扩展、codemode 开启）真正有影响的条目。</p>
+    <p class="sec-sub">下面这些是从这份履历里挑出来、对<b>本机这套配置</b>（pi ${esc(newest.version)}、Windows、自建 <code>wb2api</code> provider、8 个 npm 包 + 1 个本地包 + 若干本地扩展、codemode 开启）真正有影响的条目。</p>
     ${renderLocal()}
   </section>
 
@@ -949,8 +1194,8 @@ const html = `<!DOCTYPE html>
 
 <footer class="wrap">
   <b>pi 更新履历</b> · ${esc(oldest.version)}（${esc(oldest.date)}）→ ${esc(newest.version)}（${esc(newest.date)}）<br>
-  ${versions.length} 个版本 / ${itemTotal} 条变更 / ${breaking.length} 条破坏性变更 · 由 <code>.scratch/pi-changelog/gen.mjs</code> 从 CHANGELOG.md 生成<br>
-  上游：<a href="https://github.com/earendil-works/pi">github.com/earendil-works/pi</a> · 本报告是 2026-10-15（1.3.0）时点的快照
+  ${versions.length} 个版本 / ${itemTotal} 条变更 / ${breaking.length} 条破坏性变更 · 由 <code>tools/pi-changelog-gen.mjs</code> 从 CHANGELOG.md 生成<br>
+  上游：<a href="https://github.com/earendil-works/pi">github.com/earendil-works/pi</a> · 本报告是 ${esc(newest.date)}（${esc(newest.version)}）时点的快照
 </footer>
 
 <script>
@@ -1032,6 +1277,18 @@ const html = `<!DOCTYPE html>
 </html>
 `;
 
+/** 1.x 速览缺中文 / 手写前缀失配的提醒：写盘后与 check 后都打一遍（不阻止退出） */
+function warnMajor() {
+  if (majorMisses.length) {
+    console.log(`⚠ ${majorMisses.length} 条 1.x 新功能 / 破坏性变更还没有中文概览（补 MAJORS）：`);
+    for (const s of majorMisses) console.log(`  - ${s}`);
+  }
+  if (majorStale.length) {
+    console.log(`⚠ ${majorStale.length} 条 MAJORS 里的英文前缀在源里没对上（源可能改了措辞）：`);
+    for (const s of majorStale) console.log(`  - ${s}`);
+  }
+}
+
 /** 落盘 + 补站点外壳（add-shell 幂等）；file 可指向临时文件，check 也走这条路 */
 function finish(file) {
   writeFileSync(file, html);
@@ -1074,6 +1331,7 @@ if (MODE === 'check') {
     console.log(
       `✓ pi 更新履历报告与生成器一致（${versions.length} 版本 / ${itemTotal} 条 / ${breaking.length} 条破坏性变更）`
     );
+    warnMajor();
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
@@ -1083,4 +1341,5 @@ if (MODE === 'check') {
     `wrote ${OUT}  (${(Buffer.byteLength(html) / 1024).toFixed(0)} KB, ${versions.length} versions, ${itemTotal} entries, ${breaking.length} breaking)`
   );
   console.log('加壳完成（add-shell 已补站点外壳）');
+  warnMajor();
 }
