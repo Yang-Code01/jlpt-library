@@ -10,27 +10,18 @@
    ========================================================================== */
 import fs from 'node:fs';
 import path from 'node:path';
-import { pickEol, toEol } from './eol.mjs';
+import { writePreservingEol } from './eol.mjs';
 import { buildLexicon, segment, parseInline, paragraphsOf } from './katsuyo.mjs';
 import { railHtml, prefixOf, activeOf } from '../shell.mjs';
 import { FAVICON } from '../brand.mjs';
 
 const pad2 = (n) => String(n).padStart(2, '0');
 
-export const esc = (s) =>
+const esc = (s) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 export function pagePathOf(root, work) {
   return path.join(root, 'reading', work.band, pad2(work.no) + '.html');
-}
-
-function writeIfChanged(file, content) {
-  const eol = fs.existsSync(file) ? pickEol(fs.readFileSync(file, 'utf8')) : '\n';
-  const next = toEol(content, eol);
-  if (fs.existsSync(file) && fs.readFileSync(file, 'utf8') === next) return false;
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, next);
-  return true;
 }
 
 /** 一段正文 → 每词一个 span，词典形式写进 data-l */
@@ -179,7 +170,7 @@ ${scriptTag}
 }
 
 /** gen 子命令：逐篇组装并写页面（幂等：内容没变不落盘） */
-export function generate({ root, works, only, log }) {
+export function generate({ root, works, only, log, dryRun = false }) {
   const scratch = path.join(root, '.scratch', 'jp-reading');
   const dictFile = path.join(scratch, 'jmdict-eng-common.json');
   if (!fs.existsSync(dictFile)) throw new Error('缺 JMdict 缓存：先跑 node tools/jp-reading.mjs fetch');
@@ -205,7 +196,7 @@ export function generate({ root, works, only, log }) {
     const notes = JSON.parse(fs.readFileSync(notesFile, 'utf8'));
     const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
     const payload = buildPayload(work, meta, notes, lex, fs.readFileSync(bodyFile, 'utf8'));
-    const changed = writeIfChanged(pagePathOf(root, work), pageHtml(work, payload));
+    const changed = writePreservingEol(pagePathOf(root, work), pageHtml(work, payload), { dry: dryRun });
     if (changed) written.push(work.id);
     entries.push({ work, payload });
     log(
@@ -235,16 +226,17 @@ export function generate({ root, works, only, log }) {
       coverage: e.payload.stats.coverage,
       oovTypes: e.payload.stats.oovTypes,
     }));
-    writeIfChanged(
+    writePreservingEol(
       path.join(root, 'reading', 'data', 'grading.json'),
-      JSON.stringify({ rule: '按高频词覆盖率排序，均分三段（n3 最高 → n1 最低）；首批为人工定档', items: grading }, null, 2) + String.fromCharCode(10)
+      JSON.stringify({ rule: '按高频词覆盖率排序，均分三段（n3 最高 → n1 最低）；首批为人工定档', items: grading }, null, 2) + String.fromCharCode(10),
+      { dry: dryRun }
     );
     for (const g of grading) {
       log('  · 分档 ' + g.id + '　人工 ' + g.band + '／规则 ' + g.ruleBand + '　覆盖率 ' + g.coverage + '%');
     }
 
     const indexFile = path.join(root, 'reading', 'index.html');
-    if (writeIfChanged(indexFile, renderIndex(entries))) written.push('index');
+    if (writePreservingEol(indexFile, renderIndex(entries), { dry: dryRun })) written.push('index');
     log('  · 篇目页　' + entries.length + ' 篇　' + (written.includes('index') ? '已写' : '无变化'));
   }
   return { written, skipped };

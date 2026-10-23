@@ -258,8 +258,9 @@ export function check({ root, works, log, tier2 }) {
   if (!fs.existsSync(dictFile)) {
     log('· 跳过「生成器幂等」与「活用用例」：缺 JMdict 缓存（node tools/jp-reading.mjs fetch --insecure）');
   } else {
-    const r = generate({ root, works, only: null, log: () => {} });
-    ok(r.written.length === 0, `生成器幂等：重跑不产生改动`, '改动了 ' + r.written.join('、'));
+    /* dryRun：只算「会不会变」，绝不落盘 —— check 的承诺是只校验、不改文件。 */
+    const r = generate({ root, works, only: null, log: () => {}, dryRun: true });
+    ok(r.written.length === 0, '生成物 ≡ 真源（gen 重跑不会有任何改动）', '会改动 ' + r.written.join('、'));
   }
 
   /* ---- 6. 活用／分词固定用例 ---- */

@@ -24,7 +24,7 @@ import https from 'node:https';
 import zlib from 'node:zlib';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import { pickEol, toEol } from './lib/eol.mjs';
+import { writePreservingEol } from './lib/eol.mjs';
 import { parseAozora, oldKanaHits, rubyCount, kanjiRate, decodeSjis } from './lib/aozora.mjs';
 import { generate } from './lib/jp-reading-gen.mjs';
 import { runCheckCli } from './lib/jp-reading-check.mjs';
@@ -156,15 +156,6 @@ function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
-function writeIfChanged(file, content) {
-  const eol = fs.existsSync(file) ? pickEol(fs.readFileSync(file, 'utf8')) : '\n';
-  const next = toEol(content, eol);
-  if (fs.existsSync(file) && fs.readFileSync(file, 'utf8') === next) return false;
-  ensureDir(path.dirname(file));
-  fs.writeFileSync(file, next);
-  return true;
-}
-
 /* ------------------------------------------------------------------ fetch */
 
 async function fetchDict() {
@@ -239,8 +230,8 @@ async function fetchWork(work) {
   };
 
   ensureDir(AOZORA_DIR);
-  writeIfChanged(txtFile, p.body);
-  writeIfChanged(metaFile, JSON.stringify(meta, null, 2) + '\n');
+  writePreservingEol(txtFile, p.body);
+  writePreservingEol(metaFile, JSON.stringify(meta, null, 2) + '\n');
   return { meta, wrote: true };
 }
 
