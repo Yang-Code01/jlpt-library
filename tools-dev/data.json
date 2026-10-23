@@ -4,9 +4,22 @@
     "pi 扩展",
     "TUI",
     "网关",
-    "离线脚本"
+    "离线脚本",
+    "CLI 指南"
   ],
   "tools": [
+    {
+      "id": "copilot-cli-guide",
+      "title": "GitHub Copilot CLI 场景化使用指南",
+      "tags": [
+        "CLI 指南"
+      ],
+      "status": "可用",
+      "version": "1.0.100",
+      "updated": "2026-10-20",
+      "summary": "覆盖会话、模型、权限、扩展和排障的可搜索离线指南，按常见任务快速定位 Copilot CLI 命令与配置。",
+      "page": "copilot-cli-guide.html"
+    },
     {
       "id": "wb2api",
       "title": "WorkBuddy2API：额度转 OpenAI / Anthropic 网关",
