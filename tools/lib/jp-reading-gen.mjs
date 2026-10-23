@@ -41,9 +41,10 @@ function renderParagraph(line, lex, terms, oov) {
       const e = lex.forms.get(atom.base);
       const lemma = atom.base;
       if (!terms[lemma]) terms[lemma] = { kana: atom.rt, pos: e ? e.pos : '', en: e ? e.en : '' };
-      if (!e) oov.add(lemma);
+      const hl = !e && atom.base.length >= 2;
+      if (hl) oov.add(lemma);
       parts.push(
-        '<span class="w' + (e ? '' : ' u') + '" data-l="' + esc(lemma) + '"' + (e ? '' : ' data-o="1"') + '>' +
+        '<span class="w' + (hl ? ' u' : '') + '" data-l="' + esc(lemma) + '"' + (hl ? ' data-o="1"' : '') + '>' +
           '<ruby>' + esc(atom.base) + '<rt>' + esc(atom.rt) + '</rt></ruby>' +
         '</span>'
       );
@@ -56,9 +57,15 @@ function renderParagraph(line, lex, terms, oov) {
         }
         parts.push('<span class="w" data-l="' + esc(t.entry.lemma) + '">' + esc(t.surface) + '</span>');
       } else if (t.cls === 'kanji') {
-        oov.add(t.surface);
+        /* 未収録的**单字**多是切词失败的碎片（連・頗・斥…），不是词汇项：
+           只让它可点（看得到「未収録」提示），不进高亮集合，否则满屏飘红。 */
+        const highlight = t.surface.length >= 2;
+        if (highlight) oov.add(t.surface);
         if (!terms[t.surface]) terms[t.surface] = { kana: '', pos: '', en: '' };
-        parts.push('<span class="w u" data-l="' + esc(t.surface) + '" data-o="1">' + esc(t.surface) + '</span>');
+        parts.push(
+          '<span class="w' + (highlight ? ' u' : '') + '" data-l="' + esc(t.surface) + '"' +
+          (highlight ? ' data-o="1"' : '') + '>' + esc(t.surface) + '</span>'
+        );
       } else {
         parts.push(esc(t.surface));
       }

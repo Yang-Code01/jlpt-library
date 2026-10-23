@@ -280,8 +280,11 @@ export function resolveAll(text, lex) {
 
 /* ------------------------------------------------- 青空文庫 内联记号解析 */
 
-const RE_RUBY = /｜([^《》\n]+)《([^》\n]+)》|([\u3400-\u9fff\u3005]+)《([^》\n]+)》/g;
-const RE_NOTE = /［＃[^］]*］/g;
+const RE_RUBY = /｜([^《》\n]+)《([^》\n]+)》|([\u3400-\u9fff\u3005※]+)《([^》\n]+)》/g;
+const RE_NOTE = /［＃[^］]*］/g;   // 字下げ・傍点・見出し注記：排版指令，整体丢掉
+/* 外字：青空文庫 用「※［＃「埒のつくり＋虎」…］」表示无法录入的字。
+   把注記去掉、**留下 ※** —— 直接删掉会在正文里留一个看不见的洞，
+   读者会以为是自己漏看了字。 */
 
 /**
  * 把一行正文拆成原子：
@@ -290,7 +293,7 @@ const RE_NOTE = /［＃[^］]*］/g;
  * ［＃…］（字下げ・傍点・見出し注記）整体丢弃 —— 它们是排版指令，不是正文。
  */
 export function parseInline(line) {
-  const s = line.replace(RE_NOTE, '');
+  const s = line.replace(/※［＃[^］]*］/g, '※').replace(RE_NOTE, '');
   const atoms = [];
   let last = 0;
   RE_RUBY.lastIndex = 0;

@@ -283,6 +283,8 @@ window.WB_UNITS = {
     "en/reading/4k/07.html"
   ],
   "jp-reading": [
+    "reading/n1/01.html",
+    "reading/n2/01.html",
     "reading/n3/01.html"
   ],
 };

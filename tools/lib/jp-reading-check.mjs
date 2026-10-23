@@ -148,13 +148,15 @@ export function check({ root, works, log, tier2 }) {
 
     ok(!/[《》]|｜|［＃/.test(stripTags(bodyHtml)), `${work.id} 正文无注記残留`);
 
-    const marked = bodyHtml.match(/data-o="1"/g) || [];
-    ok(marked.length === payload.oov.length, `${work.id} 页面高亮词数 ≡ 载荷 oov（${marked.length} / ${payload.oov.length}）`);
-    const markedLemmas = [...bodyHtml.matchAll(/class="w u"[^>]*data-l="([^"]+)"/g)].map((m) => m[1]);
-    const sameSet = markedLemmas.length === payload.oov.length &&
-      payload.oov.every((w) => markedLemmas.includes(w)) &&
-      new Set(markedLemmas).size === markedLemmas.length;
-    ok(sameSet, `${work.id} 高亮词集合 ≡ oov 集合（无重复、无遗漏）`);
+    /* 同一个生词在正文里可能出现多次：比的是**不同词**的集合，不是出现次数。 */
+    const markedLemmas = [...new Set([...bodyHtml.matchAll(/class="w u"[^>]*data-l="([^"]+)"/g)].map((m) => m[1]))].sort();
+    const wantOov = payload.oov.slice().sort();
+    ok(
+      markedLemmas.length === wantOov.length && markedLemmas.every((w, i) => w === wantOov[i]),
+      `${work.id} 高亮词集合 ≡ 载荷 oov（${markedLemmas.length} / ${wantOov.length}）`,
+      '只在页面：' + markedLemmas.filter((w) => !wantOov.includes(w)).join('、') +
+      ' 只在载荷：' + wantOov.filter((w) => !markedLemmas.includes(w)).join('、')
+    );
 
     ok(BANDS.has(payload.work.band), `${work.id} 档位合法（${payload.work.band}）`);
     ok(payload.excerpt.chars >= 1200 && payload.excerpt.chars <= 2500, `${work.id} 节选字数在 1200–2500（${payload.excerpt.chars}）`);
