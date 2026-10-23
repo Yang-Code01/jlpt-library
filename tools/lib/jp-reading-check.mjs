@@ -16,6 +16,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { buildLexicon, paragraphsOf, resolveAll, plainOf } from './katsuyo.mjs';
+import { oldKanaHits } from './aozora.mjs';
 import { buildPayload, generate, pagePathOf } from './jp-reading-gen.mjs';
 
 const require = createRequire(import.meta.url);
@@ -113,6 +114,24 @@ export function check({ root, works, log, tier2 }) {
       ok(hasPage && hasNotes, `${id} 已完成（验收要求三篇齐）`);
     }
   }
+
+  /* ---- 1b. 台账：来源与许可必须写清楚（不是"以后再补"） ---- */
+  const readmeFile = path.join(root, 'reading', 'README.md');
+  const readme = fs.existsSync(readmeFile) ? fs.readFileSync(readmeFile, 'utf8') : '';
+  ok(!!readme, 'reading/README.md 存在');
+  for (const [label, needle] of [
+    ['青空文庫 来源', '青空文庫'],
+    ['JMdict 许可', 'CC BY-SA'],
+    ['站点许可', 'CC BY-NC'],
+    ['生成用法', 'jp-reading.mjs'],
+  ]) {
+    ok(readme.includes(needle), `台账标了${label}`);
+  }
+
+  /* ---- 1c. 旧仮名闸门：三个固定样本（不靠缓存） ---- */
+  ok(oldKanaHits('けふの空は美し。').length > 0, '旧仮名样本被闸门拦住（けふ）');
+  ok(oldKanaHits('むかしは、私たちの村のちかくの。').length === 0, '新仮名样本放行');
+  ok(oldKanaHits('こないだうなぎをぬすんだ').length === 0, '子串陷阱不被误判（だ＋うなぎ）');
 
   /* ---- 2. file:// 守卫：新目录里不许出现 fetch/XHR ---- */
   const jsFiles = [`reading/${'reading'}.js`].concat(

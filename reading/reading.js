@@ -107,6 +107,8 @@
           bibRow('入力', w.input) +
           bibRow('校正', w.proof) +
           bibRow('文字遣い', w.kanaType) +
+          bibRow('公開', w.released) +
+          bibRow('最終修正', w.revised) +
         '</dl>' +
         '<p class="jp-credit">' +
           '正文来自<a href="' + esc(w.cardUrl) + '" rel="noopener">青空文庫 図書カード</a>（公有领域，原文一字未改；' +
