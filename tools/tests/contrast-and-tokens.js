@@ -77,6 +77,7 @@ for (const [name, t] of Object.entries(themes)) {
 const CSS_FILES = [
   'assets/style.css',
   'en/reader.css',
+  'reading/reading.css',
   'en/unit.css',
   'jp-vocab/vocab.css',
   'typing/typing.css',

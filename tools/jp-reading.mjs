@@ -26,6 +26,8 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { pickEol, toEol } from './lib/eol.mjs';
 import { parseAozora, oldKanaHits, rubyCount, kanjiRate, decodeSjis } from './lib/aozora.mjs';
+import { generate } from './lib/jp-reading-gen.mjs';
+import { runCheckCli } from './lib/jp-reading-check.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MANIFEST = path.join(ROOT, 'reading', 'works.json');
@@ -288,6 +290,21 @@ async function cmdFetch() {
   return 0;
 }
 
+/* ------------------------------------------------------------------- gen */
+
+async function cmdGen() {
+  log('■ gen　注释真源 + 缓存正文 → 页面');
+  const r = generate({ root: ROOT, works: manifest.works, only: ONLY, log });
+  if (!r.written.length && !r.skipped.length) log('  全部已是最新。');
+  return 0;
+}
+
+/* ------------------------------------------------------------------- check */
+
+async function cmdCheck() {
+  return runCheckCli({ root: ROOT, works: manifest.works, log, tier2: has("--tier2") });
+}
+
 /* ------------------------------------------------------------------ 入口 */
 
 let manifest;
@@ -298,10 +315,10 @@ try {
   process.exit(2);
 }
 
-const CMDS = { fetch: cmdFetch };
+const CMDS = { fetch: cmdFetch, gen: cmdGen, check: cmdCheck };
 
 if (!CMDS[MODE]) {
-  warn(`未知子命令「${MODE}」。可用：fetch（gen / check 在后续票里接）`);
+  warn(`未知子命令「${MODE}」。可用：fetch · gen · check`);
   process.exit(2);
 }
 

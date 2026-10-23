@@ -137,6 +137,7 @@ const CHECKS = [
   { cmd: ['node', 'tools/en-accept.mjs'],         name: '英语侧整合验收',     needs: ['ecdict'] },
   { cmd: ['node', 'tools/en-typing.mjs', 'check'], name: '英语搭配清单',      needs: [] },
   { cmd: ['node', 'tools/listening-handout.mjs'], name: '听力注音讲义齐套',    needs: [] },
+  { cmd: ['node', 'tools/jp-reading.mjs', 'check'], name: '日语阅读（真源 ≡ 生成物）', needs: [] },
 ];
 
 /* ---------------------------------------------------------------- 执行 */
