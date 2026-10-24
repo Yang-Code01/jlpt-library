@@ -309,8 +309,21 @@ async function cmdVerify() {
       log('  – ' + work.id + ' 未缓存，跳过');
       continue;
     }
-    const src = await findSourceText(work);
-    const raw = decodeSjis(await get(src.download));
+    let src;
+    let raw;
+    try {
+      src = await findSourceText(work);
+      raw = decodeSjis(await get(src.download));
+    } catch (e) {
+      if (/rate limit/i.test(e.message) || e.status === 403) {
+        warn('');
+        warn('✗ 碰到 GitHub API 限流（免认证 60 次/小时）。');
+        warn('  换个网络、等一小时，或设 GITHUB_TOKEN 后重跑：');
+        warn('  GITHUB_TOKEN=… node tools/jp-reading.mjs verify');
+        return 2;   // 2 = 跳过（缺外部条件），不算「原文不一致」
+      }
+      throw e;
+    }
     const upstream = parseAozora(raw).body;
     const cached = fs.readFileSync(bodyFile, 'utf8');
     const same = upstream === cached;
