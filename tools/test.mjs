@@ -171,6 +171,12 @@ function done(label, ok, out, ms) {
   results.push({ label, state: ok ? 'pass' : 'fail', out });
 }
 
+/** 失败时回放的输出尾部：去空尾行、取最后 n 行（失败诊断与 QUIET 无关） */
+function tailOf(out, n) {
+  const lines = String(out || '').replace(/\s+$/, '').split(String.fromCharCode(10));
+  return lines.slice(-n).join(String.fromCharCode(10));
+}
+
 /* 套件 */
 console.log(`${c.b}■ 逻辑套件${c.x} ${c.d}(${SUITES.length} 个)${c.x}`);
 for (const s of SUITES) {
@@ -182,7 +188,7 @@ for (const s of SUITES) {
   const t0 = Date.now();
   const r = run('node', [s.f, ...(s.args ? s.args() : [])]);
   done(`${s.name}  ${c.d}${s.f}${c.x}`, r.code === 0, r.out, Date.now() - t0);
-  if (r.code !== 0 && !QUIET) console.log(c.d + r.out.split('\n').slice(-12).join('\n') + c.x);
+  if (r.code !== 0) console.log(c.d + tailOf(r.out, 20) + c.x);
 }
 
 /* 静态校验 */
@@ -198,7 +204,7 @@ for (const k of CHECKS) {
     ? (() => { try { return { code: 0, out: String(k.fn()) }; } catch (e) { return { code: 1, out: String(e.message) }; } })()
     : run(k.cmd[0], k.cmd.slice(1));
   done(label0, r.code === 0, r.out, Date.now() - t0);
-  if (r.code !== 0 && !QUIET) console.log(c.d + r.out.split('\n').slice(-12).join('\n') + c.x);
+  if (r.code !== 0) console.log(c.d + tailOf(r.out, 20) + c.x);
 }
 
 if (LIST) process.exit(0);
