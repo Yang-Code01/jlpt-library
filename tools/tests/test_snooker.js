@@ -128,15 +128,24 @@ try {
   for (const e of withR) {
     const rs = e.rounds;
     ok(rs.every((x) => x.n > 0 && x.cn && x.played <= x.n), '轮次场次合法 · ' + e.en);
-    /* 资格赛常常是几轮同场次（128 强 / 96 强 都是 32 场），不能要求「每轮都是上一轮的一半」；
-       但从第一处真减半开始，尾段必然严格对半，总数 = 尾段首轮场次 ×2 −1。 */
-    ok(rs.every((x, i) => i === 0 || rs[i - 1].n >= x.n), '轮次场次不递增 · ' + e.en);
+    /* 轮次表有两种形状，不能用一个「不递增」一刀切：
+       · 正常站：8,4,2,1（逐级对半）
+       · 带预赛的站：3,64,32,16,8,4,2,1（131 强先打 3 场 play-in，再进 128 强）——
+         预赛轮的场次**比后面少**，所以旧断言「不递增」在这类站上必然误报（2026-10 的
+         International Championship 就踩了这条，CI 红、main 也红）。
+       真正的不变式是三条：主赛段从末尾起逐级对半、末轮是决赛 1 场、预赛轮不超过它喂的那一轮。 */
     let k = 0;
     for (let i = rs.length - 1; i > 0; i--) {
       if (rs[i - 1].n === rs[i].n * 2) k = i - 1; else break;
     }
-    const tot = rs.slice(k).reduce((a, x) => a + x.n, 0);
-    ok(tot === rs[k].n * 2 - 1, '尾段总场次 = 首轮场次 ×2 −1 · ' + e.en, String(tot));
+    const mainDraw = rs.slice(k);
+    ok(rs[rs.length - 1].n === 1, '末轮是决赛（1 场） · ' + e.en, String(rs[rs.length - 1].n));
+    ok(mainDraw.every((x, i) => i === 0 || mainDraw[i - 1].n === x.n * 2),
+      '主赛段逐级对半 · ' + e.en, mainDraw.map((x) => x.n).join(','));
+    ok(rs.slice(0, k).every((x) => x.n <= rs[k].n),
+      '预赛轮场次不超过它所喂的那一轮 · ' + e.en, rs.slice(0, k).map((x) => x.n).join(','));
+    const tot = mainDraw.reduce((a, x) => a + x.n, 0);
+    ok(tot === rs[k].n * 2 - 1, '主赛段总场次 = 首轮场次 ×2 −1 · ' + e.en, String(tot));
     ok(rs.some((x) => x.played < x.n) || rs.every((x) => x.played === x.n), '未打完的轮次存在或全部完赛');
   }
 } catch (e) { ok(false, '读取快照失败', String(e.message).slice(0, 120)); }
