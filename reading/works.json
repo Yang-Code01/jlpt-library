@@ -1,0 +1,179 @@
+{
+  "_comment": "日语阅读 · 作品清单（真源，手写）。id = 档位-序号；personId/workId 来自青空文庫 図書カード；kanaType 是入库门槛，不是装饰。fetch 会按 id 命名缓存，gen 只认这张表。",
+  "aozora": {
+    "mirror": "aozorahack/aozorabunko_text",
+    "cardBase": "https://www.aozora.gr.jp/cards"
+  },
+  "jmdict": {
+    "repo": "scriptin/jmdict-simplified",
+    "asset": "jmdict-eng-common",
+    "tag": "3.6.2+20261019180022"
+  },
+  "works": [
+    {
+      "id": "n1-01",
+      "band": "n1",
+      "no": 1,
+      "personId": "000119",
+      "workId": 624,
+      "title": "山月記",
+      "kana": "さんげつき",
+      "author": "中島敦",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n1-02",
+      "band": "n1",
+      "no": 2,
+      "personId": "000119",
+      "workId": 621,
+      "title": "名人伝",
+      "kana": "めいじんでん",
+      "author": "中島敦",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n1-03",
+      "band": "n1",
+      "no": 3,
+      "personId": "000148",
+      "workId": 773,
+      "title": "こころ",
+      "kana": "こころ",
+      "author": "夏目漱石",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n1-04",
+      "band": "n1",
+      "no": 4,
+      "personId": "000119",
+      "workId": 622,
+      "title": "文字禍",
+      "kana": "もじか",
+      "author": "中島敦",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n1-05",
+      "band": "n1",
+      "no": 5,
+      "personId": "000081",
+      "workId": 456,
+      "title": "銀河鉄道の夜",
+      "kana": "ぎんがてつどうのよる",
+      "author": "宮沢賢治",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n2-01",
+      "band": "n2",
+      "no": 1,
+      "personId": "000035",
+      "workId": 1567,
+      "title": "走れメロス",
+      "kana": "はしれメロス",
+      "author": "太宰治",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n2-02",
+      "band": "n2",
+      "no": 2,
+      "personId": "000879",
+      "workId": 42,
+      "title": "鼻",
+      "kana": "はな",
+      "author": "芥川竜之介",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n2-03",
+      "band": "n2",
+      "no": 3,
+      "personId": "000074",
+      "workId": 424,
+      "title": "檸檬",
+      "kana": "れもん",
+      "author": "梶井基次郎",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n2-04",
+      "band": "n2",
+      "no": 4,
+      "personId": "000879",
+      "workId": 179,
+      "title": "藪の中",
+      "kana": "やぶのなか",
+      "author": "芥川竜之介",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n2-05",
+      "band": "n2",
+      "no": 5,
+      "personId": "000035",
+      "workId": 275,
+      "title": "女生徒",
+      "kana": "じょせいと",
+      "author": "太宰治",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n3-01",
+      "band": "n3",
+      "no": 1,
+      "personId": "000121",
+      "workId": 628,
+      "title": "ごん狐",
+      "kana": "ごんぎつね",
+      "author": "新美南吉",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n3-02",
+      "band": "n3",
+      "no": 2,
+      "personId": "000121",
+      "workId": 637,
+      "title": "手袋を買いに",
+      "kana": "てぶくろをかいに",
+      "author": "新美南吉",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n3-03",
+      "band": "n3",
+      "no": 3,
+      "personId": "000879",
+      "workId": 92,
+      "title": "蜘蛛の糸",
+      "kana": "くものいと",
+      "author": "芥川竜之介",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n3-04",
+      "band": "n3",
+      "no": 4,
+      "personId": "000081",
+      "workId": 43754,
+      "title": "注文の多い料理店",
+      "kana": "ちゅうもんのおおいりょうりてん",
+      "author": "宮沢賢治",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n3-05",
+      "band": "n3",
+      "no": 5,
+      "personId": "000879",
+      "workId": 43015,
+      "title": "杜子春",
+      "kana": "とししゅん",
+      "author": "芥川竜之介",
+      "kanaType": "新字新仮名"
+    }
+  ]
+}

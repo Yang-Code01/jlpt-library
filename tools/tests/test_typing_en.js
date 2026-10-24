@@ -377,7 +377,7 @@ section('H 门户入口、日语打字页与内核默认值不受影响');
   const portal = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
   ok(portal.indexOf('href="en/typing/index.html"') >= 0, '门户有英语打字入口');
   /* ADR-0010：编号入口行已退休，入口断言改为卡片 href（上面两条「有入口」已覆盖） */
-  ok((portal.match(/<article class="card"/g) || []).length === 11, '语言学习区 11 张模块卡');
+  ok((portal.match(/<article class="card"/g) || []).length === 12, '语言学习区 12 张模块卡');
   ok(fs.existsSync(path.join(ROOT, 'en/typing/index.html')), '英语打字页文件存在');
   ok(fs.existsSync(path.join(ROOT, 'en/typing/words.js')) && fs.existsSync(path.join(ROOT, 'en/typing/cfg.js')),
     '词池与语言层脚本存在');

@@ -1,0 +1,403 @@
+/* ============================================================================
+   日语阅读 · 阅读页样式
+   只许用令牌（tools/tests/contrast-and-tokens.js 会抓裸色值）。
+   竖向节奏与英文阅读页对齐：正文 18px/1.95，注释 14px/1.75。
+   ========================================================================== */
+
+.jp-wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 28px 20px 72px;
+}
+
+.jp-crumb {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+.jp-crumb a { color: var(--accent); text-decoration: none; }
+.jp-crumb a:hover { text-decoration: underline; }
+.jp-crumb-sep { margin: 0 6px; color: var(--border); }
+
+/* ---------------------------------------------------------------- 页头 */
+
+.jp-head { margin-bottom: 22px; }
+
+.jp-eyebrow {
+  margin: 0 0 8px;
+  font-size: 12.5px;
+  letter-spacing: .08em;
+  color: var(--accent);
+}
+
+.jp-title {
+  margin: 0 0 10px;
+  font-size: 30px;
+  line-height: 1.35;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.jp-yomi {
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.jp-sub {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.jp-note {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+}
+
+.jp-empty { padding: 24px; color: var(--muted); }
+
+/* ---------------------------------------------------------------- 卡片 */
+
+.jp-card {
+  padding: 16px 18px;
+  margin-bottom: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.jp-card-h {
+  margin: 0 0 8px;
+  font-size: 13px;
+  letter-spacing: .06em;
+  color: var(--accent);
+}
+
+.jp-intro p {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.85;
+  color: var(--ink);
+}
+.jp-intro p:last-child { margin-bottom: 0; }
+
+/* ---------------------------------------------------------------- 正文 */
+
+.jp-body { margin-bottom: 28px; }
+
+.jp-para {
+  position: relative;
+  padding: 2px 40px 2px 0;
+  margin-bottom: 18px;
+}
+
+.jp-line {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.95;
+  color: var(--ink);
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+/* 词：可点，但没有下划线噪点；悬停才显形 */
+.jp-line .w {
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color .12s ease;
+}
+.jp-line .w:hover,
+.jp-line .w:focus-visible {
+  background: var(--accent-soft);
+  outline: none;
+}
+
+/* 非高频词：由生成器标记（data-o），视图层不改判据 */
+.jp-line .w.u {
+  background: var(--amber-l);
+  box-shadow: inset 0 -1px 0 var(--amber-line);
+}
+.jp-line .w.u:hover { background: var(--amber-soft); }
+
+.jp-line ruby { ruby-position: over; }
+.jp-line rt {
+  font-size: .52em;
+  color: var(--muted);
+  letter-spacing: .02em;
+}
+
+/* 注 按钮：贴在段落右侧 */
+.jp-note-btn {
+  position: absolute;
+  top: 4px;
+  right: 0;
+  min-width: 30px;
+  height: 24px;
+  padding: 0 6px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--accent);
+  background: var(--surface);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--radius-chip);
+  cursor: pointer;
+}
+.jp-note-btn:hover { background: var(--accent-soft); }
+.jp-note-btn[aria-expanded="true"] {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- 注释 */
+
+.jp-note-body {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+}
+
+.jp-note-sec { margin-bottom: 10px; }
+.jp-note-sec:last-child { margin-bottom: 0; }
+
+.jp-note-sec h3 {
+  margin: 0 0 4px;
+  font-size: 11.5px;
+  letter-spacing: .08em;
+  color: var(--muted);
+}
+
+.jp-note-sec p,
+.jp-note-sec li {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--ink);
+}
+
+.jp-note-sec p { margin: 0; }
+.jp-note-sec ul { margin: 0; padding-left: 1.1em; }
+.jp-note-sec li { margin-bottom: 6px; }
+.jp-note-sec li:last-child { margin-bottom: 0; }
+
+.jp-sen-jp {
+  display: block;
+  font-size: 13px;
+  color: var(--accent-ink);
+  margin-bottom: 2px;
+}
+
+/* ---------------------------------------------------------------- 弹层 */
+
+.jp-pop {
+  position: absolute;
+  z-index: 50;
+  width: 260px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-hover);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.jp-pop-h {
+  font-size: 17px;
+  font-weight: 650;
+  color: var(--ink);
+  margin-bottom: 2px;
+}
+
+.jp-pop-kana {
+  margin-left: 8px;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.jp-pop-form,
+.jp-pop-pos,
+.jp-pop-zh,
+.jp-pop-en,
+.jp-pop-miss {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+
+.jp-pop-form { color: var(--accent-ink); }
+.jp-pop-pos { color: var(--muted); font-size: 12px; }
+.jp-pop-zh { color: var(--ink); }
+.jp-pop-en { color: var(--muted); }
+.jp-pop-miss { color: var(--red); font-size: 12px; }
+
+/* ---------------------------------------------------------------- 页脚 */
+
+.jp-foot {
+  margin-top: 32px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.jp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.jp-btn {
+  display: inline-block;
+  padding: 8px 14px;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--accent);
+  background: var(--surface);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  text-decoration: none;
+}
+.jp-btn:hover { background: var(--accent-soft); }
+.jp-btn[data-done="1"] {
+  color: var(--on-strong);
+  background: var(--seal);
+  border-color: var(--seal);
+}
+.jp-btn-quiet { color: var(--muted); border-color: var(--border); }
+
+.jp-tip { font-size: 12px; color: var(--muted); }
+
+.jp-bib { margin: 0 0 12px; font-size: 12.5px; }
+
+.jp-bib-row {
+  display: flex;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px dotted var(--border-soft);
+}
+.jp-bib-row:last-child { border-bottom: 0; }
+
+.jp-bib dt {
+  flex: 0 0 84px;
+  color: var(--muted);
+}
+.jp-bib dd { margin: 0; color: var(--ink); }
+
+.jp-credit {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.jp-credit a { color: var(--accent); }
+
+/* ---------------------------------------------------------------- 窄屏 */
+
+@media (max-width: 640px) {
+  .jp-wrap { padding: 18px 14px 56px; }
+  .jp-title { font-size: 24px; }
+  .jp-line { font-size: 17px; line-height: 1.9; }
+  .jp-para { padding-right: 34px; }
+  .jp-pop { width: 220px; }
+}
+
+/* ---------------------------------------------------------------- 篇目页 */
+
+.jp-index .jp-head { margin-bottom: 26px; }
+
+.jp-meter {
+  display: inline-block;
+  margin: 12px 0 0;
+  padding: 4px 12px;
+  font-size: 12.5px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--radius-pill);
+}
+
+.jp-band { margin-bottom: 26px; }
+
+.jp-band-h {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 10px;
+  font-size: 15px;
+  letter-spacing: .04em;
+  color: var(--ink);
+  border-bottom: 1px solid var(--border-soft);
+  padding-bottom: 8px;
+}
+
+.jp-band-n { font-size: 12px; color: var(--muted); font-weight: 400; }
+
+.jp-work-list { margin: 0; padding: 0; list-style: none; }
+
+.jp-work {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.jp-work + .jp-work { border-top: 1px dotted var(--border-soft); }
+
+.jp-work-a {
+  flex: 1 1 auto;
+  display: block;
+  padding: 12px 8px 12px 6px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-sm);
+}
+.jp-work-a:hover { background: var(--accent-soft); }
+
+.jp-work-title {
+  display: inline-block;
+  margin-right: 8px;
+  font-size: 17px;
+  font-weight: 650;
+  color: var(--accent-ink);
+}
+
+.jp-work-kana { font-size: 12px; color: var(--muted); }
+
+.jp-work-meta {
+  display: block;
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+/* 済 章：读完才显示（reading/index.js 加 is-done） */
+.jp-seal {
+  flex: 0 0 auto;
+  align-self: center;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--seal);
+  border: 1px solid var(--seal);
+  border-radius: var(--radius-chip);
+  opacity: .18;
+  transition: opacity .15s ease;
+}
+
+.jp-work.is-done .jp-seal { opacity: 1; }
+.jp-work.is-done .jp-work-title { color: var(--muted); }

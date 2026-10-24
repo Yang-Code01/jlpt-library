@@ -280,7 +280,7 @@ section('F 门户英语面：阅读行与总分母');
   const prog = d.querySelectorAll('[data-en-prog]').map((s) => s.textContent);
   /* ADR-0010：语言学习区改成模块卡片，旧的编号入口行（.path-row）已退休 */
   const raw = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
-  eq((raw.match(/<article class="card"/g) || []).length, 11, '语言学习区 11 张模块卡');
+  eq((raw.match(/<article class="card"/g) || []).length, 12, '语言学习区 12 张模块卡');
   ok(/<article class="card"[\s\S]{0,700}?href="en\/reading\/index\.html"/.test(raw), '阅读精读卡片存在');
   ok(prog.some((t) => t === '已看 0/8'), '阅读 1k 档分组计数 已看 0/8', prog.join(' | '));
   ok(prog.some((t) => t === '已看 0/20'), '词表 1k 档分组计数 已看 0/20', prog.join(' | '));

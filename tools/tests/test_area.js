@@ -44,12 +44,12 @@ eq(count(/class="tab[^"]*" data-tag="/g), 7, '类型筛选 7 个标签');
 ok(/class="tab is-on" data-tag="全部"/.test(html), '默认「全部」');
 ok(/data-rail-toggle/.test(html), '窄屏有抽屉开关');
 
-/* 4. 卡片：11 张，右栏有进度胶囊或规模徽章，进度分母由 data-units 指认 */
-eq(count(/<article class="card"/g), 11, '语言学习区 11 张卡');
-eq(count(/data-units="/g), 3, '3 张卡挂了 data-units（ja / en-vocab / en-reading）');
+/* 4. 卡片：12 张，右栏有进度胶囊或规模徽章，进度分母由 data-units 指认 */
+eq(count(/<article class="card"/g), 12, '语言学习区 12 张卡');
+eq(count(/data-units="/g), 4, '4 张卡挂了 data-units（ja / jp-reading / en-vocab / en-reading）');
 ok(/data-units="ja"/.test(html) && /data-units="en-vocab"/.test(html) && /data-units="en-reading"/.test(html),
   'data-units 三个桶齐备');
-eq(count(/class="prog-pill"/g), 3, '3 个进度胶囊');
+eq(count(/class="prog-pill"/g), 4, '4 个进度胶囊');
 ok(html.includes('assets/portal.js'), '接入 assets/portal.js');
 ok(html.includes('assets/units.js'), '接入 assets/units.js（生成的分母清单）');
 

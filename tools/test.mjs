@@ -68,6 +68,7 @@ const SUITES = [
   { f: 'tools/tests/test_area.js',           name: '工作台区状态机',        needs: [] },
   { f: 'tools/tests/test_snooker.js',        name: '斯诺克排名解析',        needs: [] },
   { f: 'tools/tests/test_tools_dev.js',     name: '工具开发区（生成/校验/打包）', needs: [] },
+  { f: 'tools/tests/test_pi_changelog.js',  name: 'pi 更新履历源探测',      needs: [] },
   { f: 'tools/tests/icon-set.js',            name: '图标集 / 品牌标记',      needs: [] },
   { f: 'tools/tests/test_progress.js',       name: '进度脚本',              needs: [] },
   { f: 'tools/tests/test_reading.js',        name: '阅读页',                needs: [] },
@@ -136,6 +137,7 @@ const CHECKS = [
   { cmd: ['node', 'tools/en-accept.mjs'],         name: '英语侧整合验收',     needs: ['ecdict'] },
   { cmd: ['node', 'tools/en-typing.mjs', 'check'], name: '英语搭配清单',      needs: [] },
   { cmd: ['node', 'tools/listening-handout.mjs'], name: '听力注音讲义齐套',    needs: [] },
+  { cmd: ['node', 'tools/jp-reading.mjs', 'check'], name: '日语阅读（真源 ≡ 生成物）', needs: [] },
 ];
 
 /* ---------------------------------------------------------------- 执行 */
@@ -169,6 +171,12 @@ function done(label, ok, out, ms) {
   results.push({ label, state: ok ? 'pass' : 'fail', out });
 }
 
+/** 失败时回放的输出尾部：去空尾行、取最后 n 行（失败诊断与 QUIET 无关） */
+function tailOf(out, n) {
+  const lines = String(out || '').replace(/\s+$/, '').split(String.fromCharCode(10));
+  return lines.slice(-n).join(String.fromCharCode(10));
+}
+
 /* 套件 */
 console.log(`${c.b}■ 逻辑套件${c.x} ${c.d}(${SUITES.length} 个)${c.x}`);
 for (const s of SUITES) {
@@ -180,7 +188,7 @@ for (const s of SUITES) {
   const t0 = Date.now();
   const r = run('node', [s.f, ...(s.args ? s.args() : [])]);
   done(`${s.name}  ${c.d}${s.f}${c.x}`, r.code === 0, r.out, Date.now() - t0);
-  if (r.code !== 0 && !QUIET) console.log(c.d + r.out.split('\n').slice(-12).join('\n') + c.x);
+  if (r.code !== 0) console.log(c.d + tailOf(r.out, 20) + c.x);
 }
 
 /* 静态校验 */
@@ -196,7 +204,7 @@ for (const k of CHECKS) {
     ? (() => { try { return { code: 0, out: String(k.fn()) }; } catch (e) { return { code: 1, out: String(e.message) }; } })()
     : run(k.cmd[0], k.cmd.slice(1));
   done(label0, r.code === 0, r.out, Date.now() - t0);
-  if (r.code !== 0 && !QUIET) console.log(c.d + r.out.split('\n').slice(-12).join('\n') + c.x);
+  if (r.code !== 0) console.log(c.d + tailOf(r.out, 20) + c.x);
 }
 
 if (LIST) process.exit(0);

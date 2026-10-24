@@ -13,6 +13,7 @@
      ja           n1..n5 下 basics/grammar/vocab 的单元页（168）
      en-vocab     en/1k..4k 的单元页（77）
      en-reading   en/reading/<band>/*.html（30，不含 index.html）
+     jp-reading   reading/<n3|n2|n1>/*.html（篇目正文，不含 index.html）
 
    ⚠ 只收「单元页」，不收目录页（index.html）与其它入口页。
    ========================================================================== */
@@ -63,8 +64,19 @@ function scan() {
     }
   }
 
+  const jpReading = [];
+  for (const band of ['n3', 'n2', 'n1']) {
+    const dir = path.join(ROOT, 'reading', band);
+    if (!fs.existsSync(dir)) continue;
+    for (const f of listDir(dir)) {
+      if (f.isFile() && f.name.endsWith('.html') && f.name !== 'index.html') {
+        jpReading.push(`reading/${band}/${f.name}`);
+      }
+    }
+  }
+
   const sort = (a) => a.sort((x, y) => x.localeCompare(y, 'en', { numeric: true }));
-  return { ja: sort(ja), 'en-vocab': sort(enVocab), 'en-reading': sort(enReading) };
+  return { ja: sort(ja), 'en-vocab': sort(enVocab), 'en-reading': sort(enReading), 'jp-reading': sort(jpReading) };
 }
 
 function render(data) {

@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>pi 更新履历 · 0.10.0 → 1.3.0 · 2026-10-15</title>
-<meta name="description" content="pi（@earendil-works/pi-coding-agent）289 个版本的更新履历整理：按六段分期回顾、121 条破坏性变更清单、全量可检索归档。">
+<title>pi 更新履历 · 0.10.0 → 1.4.0 · 2026-10-21</title>
+<meta name="description" content="pi（@earendil-works/pi-coding-agent）290 个版本的更新履历整理：按六段分期回顾、121 条破坏性变更清单、全量可检索归档。">
 <style>
   :root{
     --bg:#0b0f14; --bg2:#0e141b; --panel:#121a23; --panel2:#16202b;
@@ -138,6 +138,33 @@
   .local-warn .local-state{color:var(--breaking);border-color:color-mix(in srgb,var(--breaking) 50%,var(--rule))}
   .local-card h4{margin:0 0 6px;font-size:15px}
   .local-card p{margin:0;font-size:13.6px;color:var(--muted);line-height:1.75}
+
+  /* ---------- major（1.x 大版本速览） ---------- */
+  .major-grid{display:flex;flex-direction:column;gap:14px}
+  .major{border:1px solid var(--rule);border-radius:14px;background:var(--panel);padding:18px 20px}
+  .major-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .major-v{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--accent);letter-spacing:-.02em}
+  .major-date{font-family:var(--mono);font-size:11.5px;color:var(--dim)}
+  .major-tags{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+  .major-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:var(--muted);
+    border:1px solid var(--rule);border-radius:999px;padding:2px 9px}
+  .major-tag.c-new{color:var(--new);border-color:color-mix(in srgb,var(--new) 45%,var(--rule))}
+  .major-tag.c-breaking{color:var(--breaking);border-color:color-mix(in srgb,var(--breaking) 45%,var(--rule))}
+  .major-line{margin:8px 0 14px;font-size:14.5px;color:var(--ink);line-height:1.8;max-width:920px}
+  .mj-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px}
+  .mj-item{display:flex;flex-direction:column;gap:3px;padding-left:15px;position:relative}
+  .mj-item::before{content:"·";position:absolute;left:2px;top:-2px;color:var(--accent);font-weight:700}
+  .mj-zh{font-size:13.8px;color:var(--ink);line-height:1.7}
+  .mj-v{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-right:7px;
+    border:1px solid var(--rule);border-radius:4px;padding:1px 5px}
+  .mj-en{font-family:var(--mono);font-size:11.5px;color:var(--dim);line-height:1.7}
+  .mj-en code{color:var(--muted)}
+  .mj-breaks{margin-top:14px;padding-top:12px;border-top:1px dashed var(--rule)}
+  .mj-breaks-h{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--breaking);margin-bottom:9px}
+  .major-foot{margin:14px 0 0;font-family:var(--mono);font-size:11px;color:var(--dim)}
+  .major-foot a{color:var(--muted);text-decoration:none}
+  .major-foot a:hover{color:var(--accent)}
 
   /* ---------- archive ---------- */
   .archive-bar{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;
@@ -275,10 +302,10 @@
 <!-- wb:shell:bar:end -->
 <header>
   <div class="wrap">
-    <div class="kicker"><span>Pi Changelog</span><span class="dot"></span><span>2026-10-15 快照</span></div>
-    <h1>pi 更新履历<br><span class="range">0.10.0 → 1.3.0</span></h1>
-    <p class="lede">十一个月、<b>289 个版本</b>、<b>3131 条变更</b>。从 2025-11-25 的「TUI + 七个工具」起步，到 2026-10 的 codemode、MCP、虚拟模型与缓存优化。本页把它切成六段来讲，再把 121 条破坏性变更单列成表，最后附一份全量可检索的版本归档。</p>
-    <p class="src">数据源：本机 <code>node_modules/@earendil-works/pi-coding-agent/CHANGELOG.md</code>（1.3.0，629 KB）<br>
+    <div class="kicker"><span>Pi Changelog</span><span class="dot"></span><span>2026-10-21 快照</span></div>
+    <h1>pi 更新履历<br><span class="range">0.10.0 → 1.4.0</span></h1>
+    <p class="lede">十一个月、<b>290 个版本</b>、<b>3173 条变更</b>。从 2025-11-25 的「TUI + 七个工具」起步，到 2026-10 的 codemode、MCP、虚拟模型与缓存优化。先按 1.x 每个大版本给一张速览（中文一句 + 英文原文），再切成六段讲历史，然后把 121 条破坏性变更单列成表，最后附一份全量可检索的版本归档。</p>
+    <p class="src">数据源：本机 <code>node_modules/@earendil-works/pi-coding-agent/CHANGELOG.md</code>（1.4.0，639 KB）<br>
     抓取方式：解析 markdown 后整页内联生成，条目原文为英文，分期说明与本机影响为中文整理。</p>
   </div>
 </header>
@@ -287,28 +314,29 @@
   <div class="wrap">
     <a href="#overview"><span class="idx">01</span>总览</a>
     <a href="#cadence"><span class="idx">02</span>发布节奏</a>
-    <a href="#eras"><span class="idx">03</span>六段分期</a>
-    <a href="#breaking"><span class="idx">04</span>破坏性变更</a>
-    <a href="#local"><span class="idx">05</span>与本机</a>
-    <a href="#archive"><span class="idx">06</span>全量归档</a>
+    <a href="#major"><span class="idx">03</span>大版本速览</a>
+    <a href="#eras"><span class="idx">04</span>六段分期</a>
+    <a href="#breaking"><span class="idx">05</span>破坏性变更</a>
+    <a href="#local"><span class="idx">06</span>与本机</a>
+    <a href="#archive"><span class="idx">07</span>全量归档</a>
   </div>
 </nav>
 
 <main class="wrap">
   <section id="overview">
     <div class="sec-head"><h2>总览</h2><span class="sec-en">Overview</span></div>
-    <p class="sec-sub">289 个版本按类别拆开的条目数分布，以及最直观的几个数：发版最密集的是 2025 年 12 月（一个版本号体系里能连发 75 版），最近一个月回落到每周 1–2 版。</p>
+    <p class="sec-sub">290 个版本按类别拆开的条目数分布，以及最直观的几个数：发版最密集的是 2025 年 12 月（一个版本号体系里能连发 75 版），最近一个月回落到每周 1–2 版。</p>
     <div class="stats"><div class="stat">
         <span class="stat-label">版本总数</span>
-        <span class="stat-num">289</span>
-        <span class="stat-sub">0.10.0 → 1.3.0</span>
+        <span class="stat-num">290</span>
+        <span class="stat-sub">0.10.0 → 1.4.0</span>
       </div><div class="stat">
         <span class="stat-label">时间跨度</span>
         <span class="stat-num">11 个月</span>
         <span class="stat-sub">2025-11 → 2026-10</span>
       </div><div class="stat">
         <span class="stat-label">条目总数</span>
-        <span class="stat-num">3131</span>
+        <span class="stat-num">3173</span>
         <span class="stat-sub">按分类拆分</span>
       </div><div class="stat">
         <span class="stat-label">破坏性变更</span>
@@ -320,8 +348,8 @@
         <span class="stat-sub">2025-12 发了 75 个版本</span>
       </div><div class="stat">
         <span class="stat-label">最近一版</span>
-        <span class="stat-num">1.3.0</span>
-        <span class="stat-sub">2026-10-15</span>
+        <span class="stat-num">1.4.0</span>
+        <span class="stat-sub">2026-10-21</span>
       </div></div>
   </section>
 
@@ -373,16 +401,94 @@
         <span class="m-n">9</span>
         <span class="m-bar" style="height:12%"></span>
         <span class="m-x">26/09</span>
-      </div><div class="m-col" title="2026-10：8 个版本">
-        <span class="m-n">8</span>
-        <span class="m-bar" style="height:11%"></span>
+      </div><div class="m-col" title="2026-10：9 个版本">
+        <span class="m-n">9</span>
+        <span class="m-bar" style="height:12%"></span>
         <span class="m-x">26/10</span>
       </div></div>
     <div class="cadence-note">
       <p>0.x 阶段几乎「一天一版」，2025-12 一个月发了 75 个版本；进入 1.x 后节奏落到每周 1–2 个功能版。</p>
-      <div class="cat-chips"><span class="c-chip c-new"><b>327</b>新功能</span><span class="c-chip c-added"><b>710</b>新增</span><span class="c-chip c-changed"><b>221</b>变更</span><span class="c-chip c-fixed"><b>1576</b>修复</span><span class="c-chip c-breaking"><b>121</b>破坏性变更</span><span class="c-chip c-removed"><b>13</b>移除</span><span class="c-chip c-other"><b>163</b>其他</span></div>
+      <div class="cat-chips"><span class="c-chip c-new"><b>332</b>新功能</span><span class="c-chip c-added"><b>715</b>新增</span><span class="c-chip c-changed"><b>228</b>变更</span><span class="c-chip c-fixed"><b>1601</b>修复</span><span class="c-chip c-breaking"><b>121</b>破坏性变更</span><span class="c-chip c-removed"><b>13</b>移除</span><span class="c-chip c-other"><b>163</b>其他</span></div>
     </div>
   </div>
+  </section>
+
+  <section id="major">
+    <div class="sec-head"><h2>1.x 大版本速览</h2><span class="sec-en">Major Releases</span></div>
+    <p class="sec-sub">只收 1.x：5 个大版本各一张卡，每条新功能写成一句中文，下面紧跟 CHANGELOG 的英文原文（可直接搜关键词）。0.x 一天一版的细节往下看分期与全量归档。</p>
+    <div class="major-grid"><article class="major" id="major-1.4">
+    <header class="major-head">
+      <span class="major-v">1.4</span>
+      <span class="major-date">2026-10-21 · 1.4.0</span>
+      <span class="major-tags">
+        <span class="major-tag c-new">新功能 5</span>
+        <span class="major-tag">共 42 条</span>
+      </span>
+    </header>
+    <p class="major-line">把两个「撞上就报错」的瓶颈改成排队 / 用满模型额度：codemode 满载不再失败，长思考也不再让摘要失败。</p>
+    <ul class="mj-list"><li class="mj-item"><span class="mj-zh">分类器收图：<code>models.classify()</code> 在 typesafe / Cloudflare Workers AI / OpenRouter 上接受 <code>images</code></span><span class="mj-en"><b>Image input for classifiers</b>: codemode <code>models.classify()</code> accepts <code>images</code> for TypeSafe's Jev and Cloudflare's Clef models on <code>typesafe</code>, <code>cloudflare-workers-ai</code>, and OpenRouter. See Use classifier models and Codemode.</span></li><li class="mj-item"><span class="mj-zh"><code>models.json</code> 有了按 schema 生成的字段总参考：provider、model、覆盖项、兼容字段</span><span class="mj-en"><b>Models Configuration reference</b>: every provider, model, model override, and compatibility field of <code>models.json</code>, generated from its schema. See Models Configuration.</span></li><li class="mj-item"><span class="mj-zh">压缩与分支摘要改用模型自己的输出上限，长思考不再把摘要顶到 token cap</span><span class="mj-en"><b>Summaries without a fixed output cap</b>: compaction and branch summaries use the model's output limit, so long reasoning no longer makes them fail. See Compaction.</span></li><li class="mj-item"><span class="mj-zh">codemode 满载时脚本排队等空闲 worker，<code>PI_CODEMODE_MAX_WORKERS</code> 可抬上限</span><span class="mj-en"><b>Codemode waits for a free worker</b>: parallel scripts and in-process subagents queue instead of failing, and <code>PI_CODEMODE_MAX_WORKERS</code> raises the limit. See Codemode limits.</span></li><li class="mj-item"><span class="mj-zh">支持 Rex 终端：OSC 8 超链接、真彩色、内联图片</span><span class="mj-en"><b>Rex terminal support</b>: OSC 8 hyperlinks, truecolor, and inline images.</span></li></ul>
+    <footer class="major-foot">本组版本：<a href="#v-1.4.0">1.4.0</a> · <a href="#v-1.4.0">本组全部 42 条原文 ↓</a></footer>
+  </article>
+<article class="major" id="major-1.3">
+    <header class="major-head">
+      <span class="major-v">1.3</span>
+      <span class="major-date">2026-10-15 · 1.3.0</span>
+      <span class="major-tags">
+        <span class="major-tag c-new">新功能 5</span>
+        <span class="major-tag">共 32 条</span>
+      </span>
+    </header>
+    <p class="major-line">主题是「缓存不失效」落细：GPT-6 中途改档不掉缓存，换模型清掉旧思考，resume 保留会话中启用的工具。</p>
+    <ul class="mj-list"><li class="mj-item"><span class="mj-zh"><code>/share</code> 上传到哪儿由 <code>sessionShareDestination</code> 定（auto / gist / radius）</span><span class="mj-en"><b>Choose where <code>/share</code> uploads</b>: <code>sessionShareDestination</code> selects <code>auto</code>, <code>gist</code>, or <code>radius</code>. See Sessions and context and Export or share a session.</span></li><li class="mj-item"><span class="mj-zh">GPT-6（API key）上中途改思考档不再让提示缓存失效</span><span class="mj-en"><b>Cache-preserving thinking level changes on OpenAI GPT-6</b>: changing the thinking level mid-session with an API key keeps the prompt cache.</span></li><li class="mj-item"><span class="mj-zh">Kimi Code 改走 Chat Completions：中途加工具不再毁缓存；覆盖 <code>baseUrl</code> 必须带 <code>/v1</code></span><span class="mj-en"><b>Kimi Code over Chat Completions</b>: tools added mid-conversation no longer invalidate the prompt cache. <code>models.json</code> base URL overrides must now include <code>/v1</code>. See Providers.</span></li><li class="mj-item"><span class="mj-zh">换模型时丢掉上一个模型的思考块，不再当正文塞给新模型</span><span class="mj-en"><b>Clean model switching</b>: thinking from a previous model is dropped instead of being shown to the new model as text.</span></li><li class="mj-item"><span class="mj-zh">resume 恢复会话时保留会话中临时启用的工具</span><span class="mj-en"><b>Resumed sessions keep their active tools</b>: <code>--tools +name</code>/<code>-name</code> applies on top of them. See Tools.</span></li></ul>
+    <footer class="major-foot">本组版本：<a href="#v-1.3.0">1.3.0</a> · <a href="#v-1.3.0">本组全部 32 条原文 ↓</a></footer>
+  </article>
+<article class="major" id="major-1.2">
+    <header class="major-head">
+      <span class="major-v">1.2</span>
+      <span class="major-date">2026-10-12 · 1.2.0</span>
+      <span class="major-tags">
+        <span class="major-tag c-new">新功能 5</span>
+        <span class="major-tag">共 43 条</span>
+        <span class="major-tag c-breaking">破坏性 4</span>
+      </span>
+    </header>
+    <p class="major-line">配置开始「可校验」：settings / models / keybindings / themes 发布 JSON Schema；OpenRouter 按 key 列出可用模型与价格。</p>
+    <ul class="mj-list"><li class="mj-item"><span class="mj-zh">OpenRouter 按 key 列出可用模型、上下文大小、最大输出与价格（含区域端点）</span><span class="mj-en"><b>Per-key OpenRouter model lists</b>: with an OpenRouter key, Pi lists only the models that key may use, with the key's context size, max output, and prices, including regional endpoints set in <code>models.json</code>. See OpenRouter.</span></li><li class="mj-item"><span class="mj-zh"><code>settings.json</code> / <code>models.json</code> / keybindings / themes 加 <code>$schema</code>，编辑器里可校验可补全</span><span class="mj-en"><b>Published configuration schemas</b>: add <code>$schema</code> to <code>settings.json</code>, <code>models.json</code>, keybindings, and themes for editor validation and completion. See Settings, Models, Keybindings, and Themes.</span></li><li class="mj-item"><span class="mj-zh"><code>PI_CLIPBOARD_OSC52=1</code> 让远程会话（跳板、mux）也能写进本地剪贴板</span><span class="mj-en"><b>Clipboard copies over remote sessions</b>: <code>PI_CLIPBOARD_OSC52=1</code> sends copied text to a remote client's clipboard when Pi cannot detect the remote session, such as a multiplexer attached from another machine. See Pi Process Configuration.</span></li><li class="mj-item"><span class="mj-zh">codemode 工具声明带出输入约束（整数、上下限、默认值），行内显示耗时与总时长</span><span class="mj-en"><b>Codemode improvements</b>: tool declarations show input constraints such as integer, minimum/maximum, and default, and codemode rows show elapsed and total time. See Codemode.</span></li><li class="mj-item"><span class="mj-zh">扩展 <code>triggerTurn</code> 起的运行也走 <code>before_agent_start</code> 那套准备</span><span class="mj-en"><b><code>before_agent_start</code> for extension-triggered runs</b>: runs started by <code>pi.sendMessage(..., { triggerTurn: true })</code> go through the same setup as prompts. See Events and concurrency.</span></li></ul>
+    <div class="mj-breaks"><span class="mj-breaks-h">破坏性变更 · 4</span>
+      <ul class="mj-list"><li class="mj-item"><span class="mj-zh">schema 移到 <code>https://pi.dev/schemas/*.schema.json</code>，主题 schema 改名 <code>theme.schema.json</code></span><span class="mj-en">Published generated configuration schemas for models, settings, keybindings, and themes at <code>https://pi.dev/schemas/*.schema.json</code>. The theme schema moved to <code>https://pi.dev/schemas/theme.schema.json</code>; themes loaded during startup now receive the same schema validation as later reloads. Update theme <code>$schema</code> references, define reusable colors under <code>vars</code>, and remove unsupported metadata (<a class="ref" href="https://github.com/earendil-works/pi/pull/9880" target="_blank" rel="noopener">#9880</a>, <a class="ref" href="https://github.com/earendil-works/pi/pull/10751" target="_blank" rel="noopener">#10751</a> by <a class="ref who" href="https://github.com/christianklotz" target="_blank" rel="noopener">@christianklotz</a>)</span></li><li class="mj-item"><span class="mj-zh"><code>before_agent_start</code> 对 <code>triggerTurn</code> 运行也触发，事件按 <code>messageType</code> 变成联合类型</span><span class="mj-en">Changed <code>before_agent_start</code> to also fire for runs started by <code>pi.sendMessage(..., { triggerTurn: true })</code> while idle. <code>BeforeAgentStartEvent</code> is now a union on <code>messageType</code>: <code>&quot;user&quot;</code> events carry <code>prompt</code> and <code>images</code>, and <code>&quot;custom&quot;</code> events carry the starting <code>message</code> and no <code>prompt</code>. Messages returned by handlers are added to both kinds of run, and pending <code>deliverAs: &quot;nextTurn&quot;</code> messages are delivered with the custom-message run. Handlers that should act only on user prompts must check <code>event.messageType === &quot;user&quot;</code> (<a class="ref" href="https://github.com/earendil-works/pi/issues/10267" target="_blank" rel="noopener">#10267</a>, <a class="ref" href="https://github.com/earendil-works/pi/issues/5581" target="_blank" rel="noopener">#5581</a>, <a class="ref" href="https://github.com/earendil-works/pi/pull/10739" target="_blank" rel="noopener">#10739</a> by <a class="ref who" href="https://github.com/davidbrai" target="_blank" rel="noopener">@davidbrai</a>)</span></li><li class="mj-item"><span class="mj-zh">运行启动期间（含 <code>before_agent_start</code> 处理中）会话算忙：<code>ctx.isIdle()</code> 为假，消息进队列</span><span class="mj-en">Changed the session to count as busy while a run starts, including during <code>before_agent_start</code> handlers: <code>ctx.isIdle()</code> is false, <code>pi.sendMessage()</code> queues into the starting run instead of starting a second run that failed with &quot;Agent is already processing&quot;, <code>pi.sendUserMessage()</code> requires <code>deliverAs</code>, and an abort requested meanwhile aborts the run once it starts (<a class="ref" href="https://github.com/earendil-works/pi/pull/10739" target="_blank" rel="noopener">#10739</a> by <a class="ref who" href="https://github.com/davidbrai" target="_blank" rel="noopener">@davidbrai</a>)</span></li><li class="mj-item"><span class="mj-zh"><code>pi mcp list --json</code> 对提供资源的 server 只报 <code>resources: true</code>，不再给资源数量</span><span class="mj-en">Changed <code>pi mcp list --json</code> to report <code>resources: true</code> for servers that offer resources instead of <code>resources</code> and <code>resourceTemplates</code> counts; Pi no longer lists resources when connecting (<a class="ref" href="https://github.com/earendil-works/pi/issues/10526" target="_blank" rel="noopener">#10526</a>)</span></li></ul>
+    </div>
+    <footer class="major-foot">本组版本：<a href="#v-1.2.0">1.2.0</a> · <a href="#v-1.2.0">本组全部 43 条原文 ↓</a></footer>
+  </article>
+<article class="major" id="major-1.1">
+    <header class="major-head">
+      <span class="major-v">1.1</span>
+      <span class="major-date">2026-10-07 · 1.1.0</span>
+      <span class="major-tags">
+        <span class="major-tag c-new">新功能 5</span>
+        <span class="major-tag">共 38 条</span>
+      </span>
+    </header>
+    <p class="major-line">把运行状态暴露给终端与面板，并让 <code>--tools</code> 支持在默认工具集上做增量增删。</p>
+    <ul class="mj-list"><li class="mj-item"><span class="mj-zh">OSC 7501 上报运行状态：工作中 / 等对话框 / 等登录 / 完成 / 失败</span><span class="mj-en"><b>Program status reporting</b>: terminals and agent dashboards that support OSC 7501 see whether Pi is working, blocked on a dialog or login, done, or failed. See Program status.</span></li><li class="mj-item"><span class="mj-zh">Claude Haiku 5.5（<code>anthropic/claude-haiku-5-5</code>），思考可到 <code>xhigh</code> / <code>max</code></span><span class="mj-en"><b>Claude Haiku 5.5</b>: <code>anthropic/claude-haiku-5-5</code>, with adaptive thinking up to <code>xhigh</code>/<code>max</code> effort.</span></li><li class="mj-item"><span class="mj-zh"><code>--tools</code> 支持 <code>+name</code> / <code>-name</code>：在默认工具集上增删，而不是整份替换</span><span class="mj-en"><b>Adjust default tools with <code>+name</code>/<code>-name</code></b>: <code>--tools</code> entries like <code>pi -t +codemode,-write</code> change the default selection instead of replacing it. See Tools.</span></li><li class="mj-item"><span class="mj-zh">GPT-6 Luna 可当分类器模型；codemode 的 <code>classify()</code> 也能收图</span><span class="mj-en"><b>GPT-6 Luna and image classification</b>: OpenAI's GPT-6 Luna is available as a classifier model through the Decisions API, and codemode's <code>models.classify()</code> accepts images for classifiers that support them. See Use classifier models.</span></li><li class="mj-item"><span class="mj-zh">llama.cpp 0.6.0+ 上的 Julia-1 / Laya / Kev / lev / OpenJev 原生当分类器跑</span><span class="mj-en"><b>Native llama.cpp decision models</b>: Julia-1, Laya, Kev, lev, and OpenJev served by llama.cpp 0.6.0 or later run natively as classifiers through <code>/v1/systemone</code>. See Classification.</span></li></ul>
+    <footer class="major-foot">本组版本：<a href="#v-1.1.0">1.1.0</a> · <a href="#v-1.1.0">本组全部 38 条原文 ↓</a></footer>
+  </article>
+<article class="major" id="major-1.0">
+    <header class="major-head">
+      <span class="major-v">1.0</span>
+      <span class="major-date">2026-10-01 → 2026-10-05 · 5 个版本</span>
+      <span class="major-tags">
+        <span class="major-tag c-new">新功能 17</span>
+        <span class="major-tag">共 83 条</span>
+        <span class="major-tag c-breaking">破坏性 1</span>
+      </span>
+    </header>
+    <p class="major-line">第一个 1.x：全屏 TUI 成为默认、codemode 提示词瘦身约 40%，并补上图像生成、Radius 登录与 MCP OAuth 加固。</p>
+    <ul class="mj-list"><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.4</span><code>--tools</code> / <code>--exclude-tools</code> 支持 <code>*</code> 通配，新增 <code>--no-mcp</code> 一次关掉 MCP 工具</span><span class="mj-en"><b>Tool patterns and <code>--no-mcp</code></b>: <code>--tools</code> and <code>--exclude-tools</code> accept <code>*</code> patterns, for example <code>--tools read,codemode,'mcp__radius__*'</code> keeps only one MCP server's tools. <code>--tools</code> now keeps MCP tools unless an entry starts with <code>mcp__</code>, and <code>--no-mcp</code> turns off MCP for one run. See Tools and MCP tools.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.4</span>codemode 里 <code>tools.read()</code> 读图片返回 image 块，<code>image()</code> 能再显示出来</span><span class="mj-en"><b>Codemode persists images</b>: <code>tools.read()</code> on an image file now gives back an image block that <code>image()</code> can show. See Call tools.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.3</span><code>azure</code> provider 也能接 Foundry Chat Completions 部署（起于 <code>azure/deepseek-v4-pro</code>）</span><span class="mj-en"><b>Azure Foundry Chat Completions</b> — The <code>azure</code> provider (renamed from <code>azure-openai-responses</code>) now also serves Foundry Chat Completions deployments, starting with <code>azure/deepseek-v4-pro</code>. See Azure OpenAI.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.3</span><code>image()</code> 同时把图写到临时文件，并在结果里给出路径供后续拿用</span><span class="mj-en"><b>Codemode images saved to files</b> — <code>image()</code> also writes each image to a temp file and names the path in the result, so later turns can copy or move generated images. See Generate images.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.2</span><code>samplingParamsByThinkingLevel</code> 按思考档给 OpenAI 兼容 API 配 temperature / top_p</span><span class="mj-en"><b>Sampling by thinking level</b> — <code>samplingParamsByThinkingLevel</code> in <code>models.json</code> sets sampling parameters such as <code>temperature</code> and <code>top_p</code> for each thinking level on OpenAI-compatible APIs. See Configure sampling by thinking level.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.1</span>Nix flake：<code>nix run github:earendil-works/pi/stable</code> 直接跑最新版</span><span class="mj-en"><b>Nix flake</b> — <code>nix run github:earendil-works/pi/stable</code> runs the latest release, and <code>nix profile add github:earendil-works/pi/stable</code> installs it. See Install pi.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.1</span><code>.pi/mcp.json</code> 与 <code>/mcp</code> 能按项目开关或改用户级 MCP server 的暴露</span><span class="mj-en"><b>Project overrides for MCP servers</b> — <code>.pi/mcp.json</code> and <code>/mcp</code> can enable, disable, or change the exposure of a user-level server for one project. See Configure servers.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.1</span><code>oauth.clientRegistration: &quot;cimd&quot;</code>：授权服务器按文档 URL 认 pi，不必动态注册</span><span class="mj-en"><b>MCP Client ID Metadata Documents</b> — <code>oauth.clientRegistration: &quot;cimd&quot;</code> lets authorization servers allow pi by its document URL instead of dynamic registration. See Authenticate with OAuth.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.1</span><code>pi.registerToolRenderer()</code> 能给还没注册的工具（如 resume 后的 MCP 工具）画调用</span><span class="mj-en"><b>Tool renderers for any tool</b> — <code>pi.registerToolRenderer()</code> draws calls to tools that are not registered yet, such as MCP tools in resumed sessions. See Tool rendering.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.1</span>Cloudflare Clef / Clef Flash 分类器可在 codemode 与扩展里用</span><span class="mj-en"><b>Cloudflare Clef classifiers</b> — <code>@cf/cloudflare/clef</code> and <code>@cf/cloudflare/clef-flash</code> are usable from codemode scripts and extensions. See Use classifier models.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.0</span>TUI 默认全屏；<code>tuiMode: &quot;regular&quot;</code> 回到终端原生 scrollback</span><span class="mj-en"><b>Fullscreen by default</b> — The TUI now runs fullscreen. Set <code>tuiMode</code> to <code>&quot;regular&quot;</code> to keep the terminal's normal scrollback. See Terminal and display.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.0</span>codemode 提示词省约 40%，报错改成「教模型怎么恢复」</span><span class="mj-en"><b>Leaner codemode</b> — About 40% fewer prompt tokens, and errors that tell the model how to recover. See Codemode.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.0</span>codemode 用会话凭据调 <code>models.generateImages()</code> 生成图片</span><span class="mj-en"><b>Image generation in codemode</b> — Scripts call <code>models.generateImages()</code> with the session's credentials. See Generate images and Use image models.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.0</span><code>/login</code> 里一步登录 Radius 并配好它的 MCP server</span><span class="mj-en"><b>Radius in <code>/login</code></b> — Sign in with Radius and set up its MCP server in one step. See Radius.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.0</span>浏览器在另一台机器时，用复制码登录 Anthropic</span><span class="mj-en"><b>Anthropic copy code login</b> — Sign in when the browser runs on another machine. See Authenticate interactively.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.0</span>MCP OAuth 加固：<code>authServerMetadataUrl</code>、RFC 9207 <code>iss</code> 校验、按 server 存凭据、step-up 登录保 scopes</span><span class="mj-en"><b>MCP OAuth hardening</b> — <code>oauth.authServerMetadataUrl</code>, RFC 9207 <code>iss</code> checks, credentials per server, and step-up sign-in that keeps granted scopes. See Authenticate with OAuth.</span></li><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.0</span><code>quietStartup: &quot;header&quot;</code> 只留版本与快捷键提示</span><span class="mj-en"><b>Header-only quiet startup</b> — <code>quietStartup: &quot;header&quot;</code> keeps the version and key hints and hides the rest. See Terminal and display.</span></li></ul>
+    <div class="mj-breaks"><span class="mj-breaks-h">破坏性变更 · 1</span>
+      <ul class="mj-list"><li class="mj-item"><span class="mj-zh"><span class="mj-v">1.0.3</span><code>azure-openai-responses</code> 改名 <code>azure</code>：<code>auth.json</code> / <code>models.json</code> / <code>settings.json</code> 里的 key 都要改</span><span class="mj-en">Renamed the Azure provider from <code>azure-openai-responses</code> to <code>azure</code>. Rename the provider key in <code>auth.json</code> (or run <code>/login</code> again), in <code>models.json</code>, and in <code>settings.json</code> (<code>defaultProvider</code>, <code>enabledModels</code> patterns, and <code>modelThinkingLevels</code> keys). Sessions that used the old provider fall back to another model when resumed, and their prompt cache is not reused. The <code>AZURE_OPENAI_*</code> environment variables are unchanged (<a class="ref" href="https://github.com/earendil-works/pi/pull/9714" target="_blank" rel="noopener">#9714</a> by <a class="ref who" href="https://github.com/jsanter27" target="_blank" rel="noopener">@jsanter27</a>)</span></li></ul>
+    </div>
+    <footer class="major-foot">本组版本：<a href="#v-1.0.4">1.0.4</a> · <a href="#v-1.0.3">1.0.3</a> · <a href="#v-1.0.2">1.0.2</a> · <a href="#v-1.0.1">1.0.1</a> · <a href="#v-1.0.0">1.0.0</a> · <a href="#v-1.0.4">本组全部 83 条原文 ↓</a></footer>
+  </article></div>
   </section>
 
   <section id="eras">
@@ -541,11 +647,11 @@
       <span class="era-n">06</span>
       <div class="era-title">
         <h3>codemode 纪元与 1.x 稳定化</h3>
-        <span class="era-meta">0.99.0 – 1.3.0 · 2026-09-29 → 2026-10-15 · 11 个版本 · 291 条</span>
+        <span class="era-meta">0.99.0 – 1.4.0 · 2026-09-29 → 2026-10-21 · 12 个版本 · 333 条</span>
       </div>
     </div>
-    <p class="era-blurb">0.99.0 是整个版本史里最大的一次结构变化：codemode（模型写 JS 调工具）、MCP、虚拟模型、分类器模型、system 主题一起来了。此后 1.0 把全屏设为默认，1.0–1.3 的补丁几乎都在做同一件事：**更省 token、更少缓存失效**。</p>
-    <ul class="era-points"><li>0.99.0 codemode + MCP + virtual models + classifier models + system 主题；扩展事件里多出 <code>provider_stream_event</code> 这类可观测钩子。</li><li>0.99.1 GPT-6.1 Sol 成为 OpenAI 默认模型；1.1.0 起 <code>--tools</code> 支持 <code>+name</code>/<code>-name</code> 增量调工具，并通过 OSC 7501 上报运行状态。</li><li>1.0.0 全屏成为默认 TUI（<code>tuiMode: &quot;regular&quot;</code> 可回退）；codemode 提示词瘦身约 40%（GPT-5.6 单请求约 5,300 → 3,300 token），错误信息改成「教模型怎么恢复」。</li><li>1.2.0 给 <code>settings.json</code> / <code>models.json</code> / keybindings / themes 发布 <code>$schema</code>，编辑器里可校验可补全；OpenRouter 按 key 列出可用模型与价格。</li><li>1.3.0 把「缓存不失效」做到细处：GPT-6 上中途改思考档不掉缓存、换模型时丢掉上一个模型的思考块而非塞成文本、resume 保留会话中临时启用的工具。</li></ul>
+    <p class="era-blurb">0.99.0 是整个版本史里最大的一次结构变化：codemode（模型写 JS 调工具）、MCP、虚拟模型、分类器模型、system 主题一起来了。此后 1.0 把全屏设为默认，1.0–1.4 的补丁几乎都在做同一件事：**更省 token、更少缓存失效**，再把 codemode 与压缩这两个瓶颈从「撞上就报错」改成「排队 / 用满模型额度」。</p>
+    <ul class="era-points"><li>0.99.0 codemode + MCP + virtual models + classifier models + system 主题；扩展事件里多出 <code>provider_stream_event</code> 这类可观测钩子。</li><li>0.99.1 GPT-6.1 Sol 成为 OpenAI 默认模型；1.1.0 起 <code>--tools</code> 支持 <code>+name</code>/<code>-name</code> 增量调工具，并通过 OSC 7501 上报运行状态。</li><li>1.0.0 全屏成为默认 TUI（<code>tuiMode: &quot;regular&quot;</code> 可回退）；codemode 提示词瘦身约 40%（GPT-5.6 单请求约 5,300 → 3,300 token），错误信息改成「教模型怎么恢复」。</li><li>1.2.0 给 <code>settings.json</code> / <code>models.json</code> / keybindings / themes 发布 <code>$schema</code>，编辑器里可校验可补全；OpenRouter 按 key 列出可用模型与价格。</li><li>1.3.0 把「缓存不失效」做到细处：GPT-6 上中途改思考档不掉缓存、换模型时丢掉上一个模型的思考块而非塞成文本、resume 保留会话中临时启用的工具。</li><li>1.4.0 收尾两个硬失败：codemode 双 worker 满载时脚本改为排队（最多 60 秒，<code>PI_CODEMODE_MAX_WORKERS</code> 可抬上限），压缩 / 分支摘要改用模型自己的输出上限而不是固定额度（长思考不再撞「generation hit the token cap」）。</li></ul>
     <div class="picks"><div class="pick">
         <span class="pick-v">0.99.0</span>
         <span class="pick-t">Codemode and MCP</span>
@@ -566,6 +672,10 @@
         <span class="pick-v">1.3.0</span>
         <span class="pick-t">缓存友好</span>
         <span class="pick-zh">改思考档保缓存、换模型清思考块、resume 保留工具。</span>
+      </div><div class="pick">
+        <span class="pick-v">1.4.0</span>
+        <span class="pick-t">排队而非报错</span>
+        <span class="pick-zh">codemode 满载排队 60s；摘要用模型输出上限；分类器收图。</span>
       </div></div>
   </article>
   </section>
@@ -576,7 +686,7 @@
     <div class="break-note">
     <p>跨大版本升级时真正会咬人的是这 121 条。历史上最贵的三次是
     <b>0.62.0</b>（14 条，内置工具 ToolDefinition 化）、<b>0.84.0</b>（12 条，全屏 TUI 与扩展渲染接口）、
-    <b>0.32.0 / 0.35.0</b>（队列 API 拆分、hooks→extensions 合并）。只关心从 0.x 上到 1.3.0 的话，按这张表倒序读一遍即可。</p>
+    <b>0.32.0 / 0.35.0</b>（队列 API 拆分、hooks→extensions 合并）。只关心从 0.x 上到 1.4.0 的话，按这张表倒序读一遍即可。</p>
   </div>
   <table class="break-table">
     <thead><tr><th>版本</th><th>日期</th><th>变更内容</th></tr></thead>
@@ -1070,7 +1180,7 @@
 
   <section id="local">
     <div class="sec-head"><h2>与本机相关</h2><span class="sec-en">Local Impact</span></div>
-    <p class="sec-sub">下面这些是从这份履历里挑出来、对<b>本机这套配置</b>（pi 1.3.0、Windows、自建 <code>wb2api</code> provider、四个 npm 包 + 三个本地扩展、codemode 开启）真正有影响的条目。</p>
+    <p class="sec-sub">下面这些是从这份履历里挑出来、对<b>本机这套配置</b>（pi 1.4.0、Windows、自建 <code>wb2api</code> provider、8 个 npm 包 + 1 个本地包 + 若干本地扩展、codemode 开启）真正有影响的条目。</p>
     <div class="local-grid"><div class="local-card local-live">
       <div class="local-top">
         <span class="local-v">1.0.0</span>
@@ -1094,39 +1204,46 @@
       <p>1.3.0 把 <code>kimi-coding</code> 换成 Chat Completions，<code>models.json</code> 里覆盖它的 <code>baseUrl</code> 现在必须带 <code>/v1</code>。本机 <code>wb2api</code> 等自定义 provider 是 <code>openai-completions</code> 且 <code>baseUrl</code> 已含 <code>/v1</code>（如 <code>http://127.0.0.1:7863/v1</code>），不受这条影响；但以后接别的 OpenAI 兼容端点时记得同一条规矩。</p>
     </div><div class="local-card local-todo">
       <div class="local-top">
-        <span class="local-v">1.2.0</span>
+        <span class="local-v">1.2.0 / 1.4.0</span>
         <span class="local-state">可考虑</span>
       </div>
       <h4><code>models.json</code> 现在能挂 <code>$schema</code></h4>
-      <p>1.2.0 给 <code>settings.json</code>、<code>models.json</code>、keybindings、themes 发布了 JSON Schema。本机 <code>models.json</code> 有十来个自定义 provider / 模型条目，加一行 <code>$schema</code> 就能在编辑器里补全与报错。</p>
+      <p>1.2.0 给 <code>settings.json</code>、<code>models.json</code>、keybindings、themes 发布了 JSON Schema。本机 <code>models.json</code> 有十来个自定义 provider / 模型条目，加一行 <code>$schema</code> 就能在编辑器里补全与报错。1.4.0 另给了从 schema 生成的 Models Configuration 参考文档，并把 provider 级 <code>compat</code> 也接到分类器模型上（<code>imageInput</code> / <code>sendImageOptInHeader</code>）—— 本机 <code>wb2api</code> 这种「代理别人的服务」的端点正好用得上。</p>
     </div><div class="local-card local-warn">
       <div class="local-top">
-        <span class="local-v">0.79.7 / 0.60.0</span>
+        <span class="local-v">0.60.0 / 1.4.0</span>
         <span class="local-state">注意</span>
       </div>
       <h4><code>pi update</code> 只管 pi 自己，包不会顺带升级</h4>
-      <p>0.60.0 起启动不再自动更新未锁定的 npm / git 包；0.79.7 起 <code>pi update</code> 默认只更新 pi 自身，<code>--all</code> 才连 packages 一起。本机装了 <code>pi-subagents</code>、<code>pi-web-access</code>、<code>billion-context</code>、<code>pi-open-tui</code> 四个包，需要定期 <code>pi update --all</code>。</p>
+      <p>0.60.0 起启动不再自动更新未锁定的 npm / git 包；0.79.7 起 <code>pi update</code> 默认只更新 pi 自身，<code>--all</code> 才连 packages 一起，<code>--extensions</code> 只升包。本机装了 8 个 npm 包（pi-mcp-adapter、pi-web-access、@juicesharp/rpiv-ask-user-question、pi-background-tasks、@plannotator/pi-extension、pi-agent-browser-native、context-mode、pi-subagents）+ 1 个本地路径包（<code>~/.pi/packages/pi-tui</code>），要定期 <code>pi update --extensions</code>。1.4.0 修了 <code>managed-install.json</code> 以 UTF-8 BOM 开头时 <code>pi update</code> 直接报 “Managed install marker is missing or invalid”（Windows PowerShell 5.1 重写文件会塞 BOM）—— 本机的 <code>pi</code> 就是 npm 全局装法，走的正是这条路径。</p>
     </div><div class="local-card local-warn">
       <div class="local-top">
-        <span class="local-v">0.62.0 → 0.87.0</span>
+        <span class="local-v">0.62.0 → 1.4.0</span>
         <span class="local-state">注意</span>
       </div>
-      <h4>本地三个扩展踩在改动最密的接口上</h4>
-      <p><code>herdr-agent-state.ts</code>、<code>question.ts</code>、<code>questionnaire.ts</code> 用到扩展上下文与 UI 能力：0.62.0 内置工具渲染接口重写、0.80.4 生命周期钩子（<code>agent_settled</code>、<code>before_provider_request</code>）、0.87.0 上下文边界、1.2.0 <code>triggerTurn</code> 走 <code>before_agent_start</code>、1.3.0 扩展 overlay 的 <code>done()</code> 只关自己的浮层。升级后若扩展表现异常，先查这几处。</p>
+      <h4>本地扩展踩在改动最密的接口上</h4>
+      <p><code>herdr-agent-state.ts</code>（<code>~/.pi/agent/extensions</code>）、<code>~/.pi/packages/pi-tui/extensions</code> 里的 <code>open-tui/</code> 与 <code>wb-gateway.ts</code> / <code>wb-panel.ts</code> / <code>wb-model-picker.ts</code> / <code>wb-stats.ts</code>、以及 <code>@juicesharp/rpiv-ask-user-question</code> 的 <code>ask-user-question.ts</code>，都直接用着扩展上下文与 UI 能力：0.62.0 内置工具渲染接口重写、0.80.4 生命周期钩子（<code>agent_settled</code>、<code>before_provider_request</code>）、0.87.0 上下文边界、1.2.0 <code>triggerTurn</code> 走 <code>before_agent_start</code>、1.3.0 扩展 overlay 的 <code>done()</code> 只关自己的浮层。1.4.0 把并发 dialog 从「后开的顶掉先开的、先开的 promise 永不 settle」修成可叠加（关掉当前浮层会退回上一个），并放开了扩展 import <code>@earendil-works/pi-ai/models</code> 子路径（<code>clampThinkingLevel</code> 这类）。升级后若扩展表现异常，先查这几处。</p>
     </div><div class="local-card local-ok">
       <div class="local-top">
-        <span class="local-v">1.0.0 / 1.1.0</span>
+        <span class="local-v">0.99.0 → 1.4.0</span>
         <span class="local-state">无影响</span>
       </div>
       <h4>codemode 越用越便宜</h4>
-      <p>codemode 自 0.99.0 起内置。1.0.0 把提示词压掉约 40% 并让报错自带恢复提示；1.1.0 起可用 <code>--tools +codemode,-write</code> 在默认工具集上增量增删；1.0.4 起 <code>--tools</code>/<code>--exclude-tools</code> 支持 <code>*</code> 通配。</p>
+      <p>codemode 自 0.99.0 起内置。1.0.0 把提示词压掉约 40% 并让报错自带恢复提示；1.1.0 起可用 <code>--tools +codemode,-write</code> 在默认工具集上增量增删；1.0.4 起 <code>--tools</code>/<code>--exclude-tools</code> 支持 <code>*</code> 通配。1.4.0 起两个 worker 都忙时脚本排队最多 60 秒而不是立刻失败（<code>PI_CODEMODE_MAX_WORKERS</code> 可抬上限），<code>models.classify()</code> 也能收图片。</p>
     </div><div class="local-card local-live">
       <div class="local-top">
-        <span class="local-v">0.75.5 / 0.76.0 / 0.84.3</span>
+        <span class="local-v">1.4.0</span>
         <span class="local-state">已生效</span>
       </div>
-      <h4>Windows 这三条直接受益</h4>
-      <p>0.75.5 文件工具在 Windows 上改用异步文件系统操作；0.76.0 修 Windows / JetBrains 终端里的编辑行为；0.84.3 加入可选的原生 PowerShell 工具（不用再靠 bash 转发）。</p>
+      <h4>长思考不再让压缩失败</h4>
+      <p>1.4.0 起 <code>generateSummary()</code> / <code>generateSummaryWithUsage()</code> 忽略 <code>reserveTokens</code>，摘要请求直接吃模型自己的输出上限，<code>compaction.reserveTokens</code> 退回只管「什么时候开始压缩」；此前思考吃满固定额度会报 “generation hit the token cap”，长会话 + <code>defaultThinkingLevel: &quot;high&quot;</code> 时最容易撞。</p>
+    </div><div class="local-card local-live">
+      <div class="local-top">
+        <span class="local-v">0.75.5 → 1.4.0</span>
+        <span class="local-state">已生效</span>
+      </div>
+      <h4>Windows 这几条直接受益</h4>
+      <p>0.75.5 文件工具在 Windows 上改用异步文件系统操作；0.76.0 修 Windows / JetBrains 终端里的编辑行为；0.84.3 加入可选的原生 PowerShell 工具（不用再靠 bash 转发）。1.4.0 修 Windows shell 探测：Microsoft Store 的 shell 别名不再被拒、不在 <code>PATH</code> 里的 PowerShell 7 能被找到、Windows 不装在 <code>C:\Windows</code> 时旧版 WSL <code>bash.exe</code> 启动器也能认出来。</p>
     </div><div class="local-card local-ok">
       <div class="local-top">
         <span class="local-v">0.80.6 / 1.3.0</span>
@@ -1139,7 +1256,7 @@
 
   <section id="archive">
     <div class="sec-head"><h2>全量归档</h2><span class="sec-en">Full Archive</span></div>
-    <p class="sec-sub">289 个版本、3131 条变更，按月分组。点版本号展开条目；搜索框匹配版本号、日期与条目正文，按 <code>/</code> 可直接聚焦。</p>
+    <p class="sec-sub">290 个版本、3173 条变更，按月分组。点版本号展开条目；搜索框匹配版本号、日期与条目正文，按 <code>/</code> 可直接聚焦。</p>
     <div class="archive-bar">
       <input class="search" id="search" type="search" placeholder="搜版本号 / 日期 / 关键词（按 / 聚焦）" autocomplete="off">
       <div class="chips" id="cat-chips">
@@ -1150,14 +1267,34 @@
         <button type="button" class="chip" data-cat="fixed">修复</button>
         <button type="button" class="chip breaking" data-cat="breaking">破坏性变更</button>
       </div>
-      <div class="chips" id="era-chips"><button type="button" class="chip on" data-era-filter="all">全时期</button><button type="button" class="chip" data-era-filter="E1">01 0.10.0–0.30.2</button><button type="button" class="chip" data-era-filter="E2">02 0.31.0–0.50.9</button><button type="button" class="chip" data-era-filter="E3">03 0.51.0–0.65.2</button><button type="button" class="chip" data-era-filter="E4">04 0.66.0–0.80.10</button><button type="button" class="chip" data-era-filter="E5">05 0.81.0–0.87.1</button><button type="button" class="chip" data-era-filter="E6">06 0.99.0–1.3.0</button></div>
+      <div class="chips" id="era-chips"><button type="button" class="chip on" data-era-filter="all">全时期</button><button type="button" class="chip" data-era-filter="E1">01 0.10.0–0.30.2</button><button type="button" class="chip" data-era-filter="E2">02 0.31.0–0.50.9</button><button type="button" class="chip" data-era-filter="E3">03 0.51.0–0.65.2</button><button type="button" class="chip" data-era-filter="E4">04 0.66.0–0.80.10</button><button type="button" class="chip" data-era-filter="E5">05 0.81.0–0.87.1</button><button type="button" class="chip" data-era-filter="E6">06 0.99.0–1.4.0</button></div>
       <div class="archive-tools">
         <span class="hit" id="hit"></span>
         <button type="button" class="chip" id="expand">全部展开</button>
         <button type="button" class="chip" id="collapse">全部收起</button>
       </div>
     </div>
-    <div class="archive" id="archive"><div class="month"><div class="month-head"><span>2026-10</span><em>8 个版本</em></div><details class="ver" id="v-1.3.0" data-era="E6" data-cats="new added changed fixed">
+    <div class="archive" id="archive"><div class="month"><div class="month-head"><span>2026-10</span><em>9 个版本</em></div><details class="ver" id="v-1.4.0" data-era="E6" data-cats="new added changed fixed">
+    <summary>
+      <span class="v-tag">1.4.0</span>
+      <span class="v-date">2026-10-21</span>
+      <span class="v-counts"><span class="vc c-new">新功能 5</span><span class="vc c-added">新增 5</span><span class="vc c-changed">变更 7</span><span class="vc c-fixed">修复 25</span></span>
+      <span class="v-peek">Image input for classifiers</span>
+    </summary>
+    <div class="v-body"><div class="block">
+      <h4 class="block-h c-new">新功能<span>5</span></h4>
+      <ul class="block-list"><li><b>Image input for classifiers</b>: codemode <code>models.classify()</code> accepts <code>images</code> for TypeSafe's Jev and Cloudflare's Clef models on <code>typesafe</code>, <code>cloudflare-workers-ai</code>, and OpenRouter. See Use classifier models and Codemode.</li><li><b>Models Configuration reference</b>: every provider, model, model override, and compatibility field of <code>models.json</code>, generated from its schema. See Models Configuration.</li><li><b>Summaries without a fixed output cap</b>: compaction and branch summaries use the model's output limit, so long reasoning no longer makes them fail. See Compaction.</li><li><b>Codemode waits for a free worker</b>: parallel scripts and in-process subagents queue instead of failing, and <code>PI_CODEMODE_MAX_WORKERS</code> raises the limit. See Codemode limits.</li><li><b>Rex terminal support</b>: OSC 8 hyperlinks, truecolor, and inline images.</li></ul>
+    </div><div class="block">
+      <h4 class="block-h c-added">新增<span>5</span></h4>
+      <ul class="block-list"><li>Added a Models Configuration reference generated from the <code>models.json</code> schema, listing all provider, model, model override, and compatibility fields (<a class="ref" href="https://github.com/earendil-works/pi/issues/10790" target="_blank" rel="noopener">#10790</a>)</li><li>Codemode <code>models.classify()</code> now accepts <code>images</code> for TypeSafe's Jev and Cloudflare's Clef models on <code>typesafe</code>, <code>cloudflare-workers-ai</code>, and OpenRouter, and lists Clef Omni and Jev 1.14 on Workers AI.</li><li>Provider-level <code>compat</code> in <code>models.json</code> now also applies to classifier models, with the System One fields <code>imageInput</code> and <code>sendImageOptInHeader</code> for proxies that serve another service's classifiers. Extension classifier models accept <code>compat</code> too.</li><li>Added <code>MiniMax-M3.1-Flash</code> to the <code>minimax</code> and <code>minimax-cn</code> providers, with thinking levels low through max (<a class="ref" href="https://github.com/earendil-works/pi/issues/11121" target="_blank" rel="noopener">#11121</a>)</li><li>Added support for the Rex terminal: OSC 8 hyperlinks, truecolor, and inline images (<a class="ref" href="https://github.com/earendil-works/pi/issues/11131" target="_blank" rel="noopener">#11131</a>, <a class="ref" href="https://github.com/earendil-works/pi/pull/11150" target="_blank" rel="noopener">#11150</a> by <a class="ref who" href="https://github.com/petrroll" target="_blank" rel="noopener">@petrroll</a>, <a class="ref" href="https://github.com/earendil-works/pi/pull/11183" target="_blank" rel="noopener">#11183</a> by <a class="ref who" href="https://github.com/nihaals" target="_blank" rel="noopener">@nihaals</a>)</li></ul>
+    </div><div class="block">
+      <h4 class="block-h c-changed">变更<span>7</span></h4>
+      <ul class="block-list"><li>Provider attribution headers now come from pi-ai's client identity. Extensions' <code>before_provider_headers</code> handlers no longer see the OpenRouter, NVIDIA NIM, and OpenCode attribution headers; returning <code>null</code> for one still removes it. Cloudflare requests send pi's detailed <code>User-Agent</code> instead of <code>pi-coding-agent</code>, as do GitHub release checks for tool downloads, and OpenCode requests send <code>x-opencode-client</code> whenever attribution is enabled, not only with a session.</li><li><code>generateSummary()</code> and <code>generateSummaryWithUsage()</code> now ignore their <code>reserveTokens</code> parameter. Summary requests use the model's output limit instead.</li><li>Changed the default GitHub Copilot model from <code>gpt-5.4</code>, which Copilot retired, to <code>gpt-6.1-sol</code>.</li><li>Changed the default NVIDIA model to <code>nvidia/nemotron-3.5-super-vl-120b-a12b</code> (<a class="ref" href="https://github.com/earendil-works/pi/pull/10910" target="_blank" rel="noopener">#10910</a> by <a class="ref who" href="https://github.com/cv" target="_blank" rel="noopener">@cv</a>)</li><li>Changed the default Xiaomi model to <code>mimo-v2.6-pro</code> for the <code>xiaomi</code> and Xiaomi Token Plan providers, since <code>mimo-v2.5-pro</code> left the catalog.</li><li>Grok 4.3 and Grok 4.5 on the <code>xai</code> provider now offer the <code>xhigh</code> thinking level.</li><li>Sign in with ChatGPT: ChatGPT Business workspace usage-limit errors are not retried and tell the user to ask their workspace admin to increase the limit.</li></ul>
+    </div><div class="block">
+      <h4 class="block-h c-fixed">修复<span>25</span></h4>
+      <ul class="block-list"><li>Fixed compaction and branch summaries failing with &quot;generation hit the token cap&quot; when reasoning used most of the fixed summary output limit. Summaries now use the model's output limit, and <code>compaction.reserveTokens</code> only controls when compaction starts (<a class="ref" href="https://github.com/earendil-works/pi/issues/9512" target="_blank" rel="noopener">#9512</a>, <a class="ref" href="https://github.com/earendil-works/pi/issues/9075" target="_blank" rel="noopener">#9075</a>).</li><li>Fixed <code>models.schema.json</code> missing descriptions for provider and model fields, so editors showed no hints for them (<a class="ref" href="https://github.com/earendil-works/pi/issues/10790" target="_blank" rel="noopener">#10790</a>)</li><li>Fixed <code>pi update</code> failing with &quot;Managed install marker is missing or invalid&quot; when <code>managed-install.json</code> starts with a UTF-8 BOM, which Windows PowerShell 5.1 adds when it rewrites the file.</li><li>Fixed HTML export showing literal asterisks for Markdown bold and italic next to CJK punctuation (<a class="ref" href="https://github.com/earendil-works/pi/issues/3353" target="_blank" rel="noopener">#3353</a>, <a class="ref" href="https://github.com/earendil-works/pi/issues/10154" target="_blank" rel="noopener">#10154</a>)</li><li>Fixed the terminal staying in mouse-tracking, focus-reporting, Kitty keyboard, and alternate-screen modes when pi exits without its normal terminal teardown, which flooded the shell prompt with escape sequences (<a class="ref" href="https://github.com/earendil-works/pi/issues/11170" target="_blank" rel="noopener">#11170</a>)</li><li>Fixed concurrent extension <code>select</code>/<code>confirm</code>/<code>input</code>/<code>editor</code> dialogs and inline <code>custom()</code> components in interactive mode: a second dialog replaced the first and the first promise never settled; closing the visible dialog now shows the previous one again (<a class="ref" href="https://github.com/earendil-works/pi/issues/11166" target="_blank" rel="noopener">#11166</a>, <a class="ref" href="https://github.com/earendil-works/pi/issues/9909" target="_blank" rel="noopener">#9909</a>)</li><li>Fixed pasting in the shell hanging after copying text in pi and suspending it with Ctrl+Z on Linux: the background <code>wl-copy</code>/<code>xclip</code>/<code>xsel</code> process that keeps serving the clipboard was suspended along with pi (<a class="ref" href="https://github.com/earendil-works/pi/issues/11179" target="_blank" rel="noopener">#11179</a>)</li><li>Fixed codemode scripts failing immediately when both codemode workers are busy, for example with parallel codemode calls or in-process subagents. Scripts now wait up to 60 seconds for a free worker, and <code>PI_CODEMODE_MAX_WORKERS</code> raises the limit of two workers (<a class="ref" href="https://github.com/earendil-works/pi/issues/11184" target="_blank" rel="noopener">#11184</a>)</li><li>Fixed extensions failing to load when importing <code>@earendil-works/pi-ai/models</code> (e.g. for <code>clampThinkingLevel</code>) by exposing the subpath through the extension loader aliases and virtual modules (<a class="ref" href="https://github.com/earendil-works/pi/issues/11156" target="_blank" rel="noopener">#11156</a>)</li><li>Fixed <code>mcp.json</code> files that start with a UTF-8 BOM failing to parse, which skipped all their MCP servers and made <code>pi mcp add</code>/<code>pi mcp remove</code> fail (<a class="ref" href="https://github.com/earendil-works/pi/issues/11191" target="_blank" rel="noopener">#11191</a>)</li><li>Fixed <code>/compact &lt;instructions&gt;</code> ignoring the instructions when summarizing the start of a turn that compaction splits. When the split turn was the only new content since the last compaction, the instructions were ignored entirely (<a class="ref" href="https://github.com/earendil-works/pi/issues/11058" target="_blank" rel="noopener">#11058</a>)</li><li>Fixed resumed sessions and <code>/tree</code> navigation leaving extension tools inactive when the branch recorded its tools before they were registered, such as tools from extensions installed after the session started. Extension tools the branch never added or removed are now active unless they are registered with <code>defaultActive: false</code> (<a class="ref" href="https://github.com/earendil-works/pi/issues/11062" target="_blank" rel="noopener">#11062</a>, <a class="ref" href="https://github.com/earendil-works/pi/issues/11075" target="_blank" rel="noopener">#11075</a>)</li><li>Fixed sessions breaking after recovery from a response cut off at the output limit: the truncated tool call was omitted but its tool results were kept, so providers rejected every later request (<a class="ref" href="https://github.com/earendil-works/pi/issues/11227" target="_blank" rel="noopener">#11227</a>, <a class="ref" href="https://github.com/earendil-works/pi/pull/11233" target="_blank" rel="noopener">#11233</a> by <a class="ref who" href="https://github.com/petrroll" target="_blank" rel="noopener">@petrroll</a>)</li><li>Fixed the <code>grep</code> tool following <code>RIPGREP_CONFIG_PATH</code>, where options such as <code>--fixed-strings</code> silently changed regex searches into literal ones. The tool now runs <code>rg --no-config</code> (<a class="ref" href="https://github.com/earendil-works/pi/issues/11203" target="_blank" rel="noopener">#11203</a>, <a class="ref" href="https://github.com/earendil-works/pi/pull/11230" target="_blank" rel="noopener">#11230</a> by <a class="ref who" href="https://github.com/petrroll" target="_blank" rel="noopener">@petrroll</a>)</li><li>Fixed Windows shell detection rejecting runnable Microsoft Store shell aliases (<a class="ref" href="https://github.com/earendil-works/pi/pull/9504" target="_blank" rel="noopener">#9504</a> by <a class="ref who" href="https://github.com/petrroll" target="_blank" rel="noopener">@petrroll</a>)</li><li>Fixed Windows shell detection missing PowerShell outside <code>PATH</code> and the legacy WSL <code>bash.exe</code> launcher when Windows is not installed in <code>C:\Windows</code>. pi now checks <code>%ProgramFiles%\PowerShell\7</code>, <code>%SystemRoot%\System32\WindowsPowerShell\v1.0</code>, and <code>%SystemRoot%</code> (<a class="ref" href="https://github.com/earendil-works/pi/pull/9501" target="_blank" rel="noopener">#9501</a> by <a class="ref who" href="https://github.com/petrroll" target="_blank" rel="noopener">@petrroll</a>)</li><li>Fixed GitHub Copilot sessions with large request bodies, such as many images, failing with HTTP 413 <code>failed to parse request</code> instead of compacting and retrying (<a class="ref" href="https://github.com/earendil-works/pi/pull/11016" target="_blank" rel="noopener">#11016</a> by <a class="ref who" href="https://github.com/petrroll" target="_blank" rel="noopener">@petrroll</a>)</li><li>Fixed the <code>openai-codex</code> provider offering <code>gpt-5.5</code> and <code>gpt-5.3-codex-spark</code>, which always fail for ChatGPT accounts (<a class="ref" href="https://github.com/earendil-works/pi/pull/11173" target="_blank" rel="noopener">#11173</a> by <a class="ref who" href="https://github.com/lucasmeijer" target="_blank" rel="noopener">@lucasmeijer</a>)</li><li>Fixed whitespace-only tool output (for example a bare <code>\r\n</code> from bash) making OpenAI Completions, OpenAI Responses, and Google requests fail with a 400 (<a class="ref" href="https://github.com/earendil-works/pi/issues/8720" target="_blank" rel="noopener">#8720</a>)</li><li>Fixed automatic retry not triggering for more gateway upstream failures, <code>stream disconnected before completion</code> errors relayed by Codex CLI proxies, and transient Google Vertex OAuth token refresh failures, and retrying errors because of digits inside request ids or byte counts (<a class="ref" href="https://github.com/earendil-works/pi/issues/10920" target="_blank" rel="noopener">#10920</a>, <a class="ref" href="https://github.com/earendil-works/pi/issues/11057" target="_blank" rel="noopener">#11057</a>, <a class="ref" href="https://github.com/earendil-works/pi/issues/10996" target="_blank" rel="noopener">#10996</a>)</li><li>Fixed OpenAI Responses models losing the prompt cache on every deferred tool load after a tool was removed (<a class="ref" href="https://github.com/earendil-works/pi/issues/10940" target="_blank" rel="noopener">#10940</a>)</li><li>Fixed Cloudflare Workers AI classifier pricing: Clef Flash costs $0.038 and Jev $0.042 per million input tokens instead of Jev being listed as free.</li><li>Fixed an unclosed <code>$$</code> display-math block swallowing or corrupting every Markdown table after it (<a class="ref" href="https://github.com/earendil-works/pi/issues/11159" target="_blank" rel="noopener">#11159</a>)</li><li>Fixed Markdown bold and italic not rendering next to CJK punctuation (<a class="ref" href="https://github.com/earendil-works/pi/pull/10730" target="_blank" rel="noopener">#10730</a> by <a class="ref who" href="https://github.com/theBucky" target="_blank" rel="noopener">@theBucky</a>)</li><li>Fixed <code>@</code> file autocomplete returning no results for queries containing regex metacharacters such as <code>[</code> or <code>(</code> (<a class="ref" href="https://github.com/earendil-works/pi/issues/10972" target="_blank" rel="noopener">#10972</a>)</li></ul>
+    </div></div>
+  </details><details class="ver" id="v-1.3.0" data-era="E6" data-cats="new added changed fixed">
     <summary>
       <span class="v-tag">1.3.0</span>
       <span class="v-date">2026-10-15</span>
@@ -5559,9 +5696,9 @@ echo &quot;You are running on Android in Termux.&quot; &gt; ~/.pi/agent/AGENTS.m
 </main>
 
 <footer class="wrap">
-  <b>pi 更新履历</b> · 0.10.0（2025-11-25）→ 1.3.0（2026-10-15）<br>
-  289 个版本 / 3131 条变更 / 121 条破坏性变更 · 由 <code>.scratch/pi-changelog/gen.mjs</code> 从 CHANGELOG.md 生成<br>
-  上游：<a href="https://github.com/earendil-works/pi">github.com/earendil-works/pi</a> · 本报告是 2026-10-15（1.3.0）时点的快照
+  <b>pi 更新履历</b> · 0.10.0（2025-11-25）→ 1.4.0（2026-10-21）<br>
+  290 个版本 / 3173 条变更 / 121 条破坏性变更 · 由 <code>tools/pi-changelog-gen.mjs</code> 从 CHANGELOG.md 生成<br>
+  上游：<a href="https://github.com/earendil-works/pi">github.com/earendil-works/pi</a> · 本报告是 2026-10-21（1.4.0）时点的快照
 </footer>
 
 <script>
