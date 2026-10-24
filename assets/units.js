@@ -286,11 +286,17 @@ window.WB_UNITS = {
     "reading/n1/01.html",
     "reading/n1/02.html",
     "reading/n1/03.html",
+    "reading/n1/04.html",
+    "reading/n1/05.html",
     "reading/n2/01.html",
     "reading/n2/02.html",
     "reading/n2/03.html",
+    "reading/n2/04.html",
+    "reading/n2/05.html",
     "reading/n3/01.html",
     "reading/n3/02.html",
-    "reading/n3/03.html"
+    "reading/n3/03.html",
+    "reading/n3/04.html",
+    "reading/n3/05.html"
   ],
 };

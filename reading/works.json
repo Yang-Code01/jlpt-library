@@ -44,6 +44,28 @@
       "kanaType": "新字新仮名"
     },
     {
+      "id": "n1-04",
+      "band": "n1",
+      "no": 4,
+      "personId": "000119",
+      "workId": 622,
+      "title": "文字禍",
+      "kana": "もじか",
+      "author": "中島敦",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n1-05",
+      "band": "n1",
+      "no": 5,
+      "personId": "000081",
+      "workId": 456,
+      "title": "銀河鉄道の夜",
+      "kana": "ぎんがてつどうのよる",
+      "author": "宮沢賢治",
+      "kanaType": "新字新仮名"
+    },
+    {
       "id": "n2-01",
       "band": "n2",
       "no": 1,
@@ -77,6 +99,28 @@
       "kanaType": "新字新仮名"
     },
     {
+      "id": "n2-04",
+      "band": "n2",
+      "no": 4,
+      "personId": "000879",
+      "workId": 179,
+      "title": "藪の中",
+      "kana": "やぶのなか",
+      "author": "芥川竜之介",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n2-05",
+      "band": "n2",
+      "no": 5,
+      "personId": "000035",
+      "workId": 275,
+      "title": "女生徒",
+      "kana": "じょせいと",
+      "author": "太宰治",
+      "kanaType": "新字新仮名"
+    },
+    {
       "id": "n3-01",
       "band": "n3",
       "no": 1,
@@ -106,6 +150,28 @@
       "workId": 92,
       "title": "蜘蛛の糸",
       "kana": "くものいと",
+      "author": "芥川竜之介",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n3-04",
+      "band": "n3",
+      "no": 4,
+      "personId": "000081",
+      "workId": 43754,
+      "title": "注文の多い料理店",
+      "kana": "ちゅうもんのおおいりょうりてん",
+      "author": "宮沢賢治",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n3-05",
+      "band": "n3",
+      "no": 5,
+      "personId": "000879",
+      "workId": 43015,
+      "title": "杜子春",
+      "kana": "とししゅん",
       "author": "芥川竜之介",
       "kanaType": "新字新仮名"
     }

@@ -243,8 +243,17 @@ async function cmdFetch() {
   await fetchDict();
 
   const rows = [];
+  const failed = [];
   for (const work of targets) {
-    const r = await fetchWork(work);
+    let r;
+    try {
+      r = await fetchWork(work);
+    } catch (e) {
+      /* 单篇失败不该让整批停下：记下来，跑完再一起报。 */
+      failed.push({ id: work.id, title: work.title, message: e.message.split(String.fromCharCode(10))[0] });
+      warn('  ! ' + work.id + ' ' + work.title + '：' + e.message.split(String.fromCharCode(10))[0]);
+      continue;
+    }
     if (r.wrote) {
       const m = r.meta;
       rows.push(m);
@@ -274,7 +283,8 @@ async function cmdFetch() {
   }
   const missing = manifest.works.filter((w) => !all.some((m) => m.id === w.id));
   if (missing.length) {
-    log(`未缓存：${missing.map((w) => w.id).join('、')}`);
+    log('未缓存：' + missing.map((w) => w.id).join('、'));
+    for (const f of failed) log('  ✗ ' + f.id + ' ' + f.title + '：' + f.message);
     return 1;
   }
   log(all.length + ' 篇齐备。');
