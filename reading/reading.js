@@ -152,7 +152,7 @@
   function showPop(span) {
     var lemma = span.getAttribute('data-l');
     var t = P.terms[lemma] || {};
-    var surface = (span.textContent || '').trim();
+    var surface = (span.getAttribute('data-s') || span.textContent || '').trim();
     var miss = span.classList.contains('u') || (!t.pos && !t.en && !t.zh);
     var h = '<div class="jp-pop-h">' + esc(lemma);
     if (t.kana && t.kana !== lemma) h += '<span class="jp-pop-kana">' + esc(t.kana) + '</span>';
@@ -161,6 +161,11 @@
     h += '<p class="jp-pop-pos">' + esc(t.pos || '—') + '</p>';
     if (t.zh) h += '<p class="jp-pop-zh">' + esc(t.zh) + '</p>';
     if (t.en) h += '<p class="jp-pop-en">' + esc(t.en) + '</p>';
+    if (!t.zh && !miss) {
+      h += '<p class="jp-pop-miss">中文释义未収録' +
+        (/^[぀-ヿー]+$/.test(lemma) ? '（假名词多同音异义，按语境理解）' : '') +
+        '</p>';
+    }
     if (miss) {
       h += '<p class="jp-pop-miss">' +
         (span.classList.contains('u') ? '词典里没有这一条（多为专名或方言词），中文释义未収録。' : '中文释义未収録，先看上面的读音与英文释义。') +

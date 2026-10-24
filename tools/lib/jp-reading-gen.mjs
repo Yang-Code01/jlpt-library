@@ -20,6 +20,17 @@ const pad2 = (n) => String(n).padStart(2, '0');
 const esc = (s) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+/** 共享中文词表（reading/data/zh-gloss.json，键＝辞書形）。缺文件就当空表，不阻止生成。 */
+export function loadZhGloss(root) {
+  const f = path.join(root, 'reading', 'data', 'zh-gloss.json');
+  if (!fs.existsSync(f)) return {};
+  try {
+    return JSON.parse(fs.readFileSync(f, 'utf8'));
+  } catch (e) {
+    throw new Error('reading/data/zh-gloss.json 不是合法 JSON：' + e.message);
+  }
+}
+
 export function pagePathOf(root, work) {
   return path.join(root, 'reading', work.band, pad2(work.no) + '.html');
 }
@@ -37,7 +48,7 @@ function renderParagraph(line, lex, terms, oov, stats) {
       const hl = !e && atom.base.length >= 2;
       if (hl) oov.add(lemma);
       parts.push(
-        '<span class="w' + (hl ? ' u' : '') + '" data-l="' + esc(lemma) + '"' + (hl ? ' data-o="1"' : '') + '>' +
+        '<span class="w' + (hl ? ' u' : '') + '" data-l="' + esc(lemma) + '" data-s="' + esc(atom.base) + '"' + (hl ? ' data-o="1"' : '') + '>' +
           '<ruby>' + esc(atom.base) + '<rt>' + esc(atom.rt) + '</rt></ruby>' +
         '</span>'
       );
@@ -52,7 +63,7 @@ function renderParagraph(line, lex, terms, oov, stats) {
         if (!terms[t.entry.lemma]) {
           terms[t.entry.lemma] = { kana: t.entry.kana, pos: t.entry.pos, en: t.entry.en };
         }
-        parts.push('<span class="w" data-l="' + esc(t.entry.lemma) + '">' + esc(t.surface) + '</span>');
+        parts.push('<span class="w" data-l="' + esc(t.entry.lemma) + '" data-s="' + esc(t.surface) + '">' + esc(t.surface) + '</span>');
       } else if (t.cls === 'kanji') {
         /* 未収録的**单字**多是切词失败的碎片（連・頗・斥…），不是词汇项：
            只让它可点（看得到「未収録」提示），不进高亮集合，否则满屏飘红。 */
@@ -60,7 +71,7 @@ function renderParagraph(line, lex, terms, oov, stats) {
         if (highlight) oov.add(t.surface);
         if (!terms[t.surface]) terms[t.surface] = { kana: '', pos: '', en: '' };
         parts.push(
-          '<span class="w' + (highlight ? ' u' : '') + '" data-l="' + esc(t.surface) + '"' +
+          '<span class="w' + (highlight ? ' u' : '') + '" data-l="' + esc(t.surface) + '" data-s="' + esc(t.surface) + '"' +
           (highlight ? ' data-o="1"' : '') + '>' + esc(t.surface) + '</span>'
         );
       } else {
@@ -72,7 +83,7 @@ function renderParagraph(line, lex, terms, oov, stats) {
 }
 
 /** 缓存正文 + 注释真源 → 页面载荷（纯函数，check 也会用它算期望值） */
-export function buildPayload(work, meta, notes, lex, bodyText) {
+export function buildPayload(work, meta, notes, lex, bodyText, zhMap = {}) {
   const full = paragraphsOf(bodyText);
   const [fromRaw, toRaw] = (notes.excerpt && notes.excerpt.paras) || [0, full.length];
   const from = Math.max(0, fromRaw || 0);
@@ -90,6 +101,11 @@ export function buildPayload(work, meta, notes, lex, bodyText) {
   const oov = new Set();
   const stats = { tokens: 0, known: 0 };
   const body = picked.map((line) => renderParagraph(line, lex, terms, oov, stats));
+
+  /* 中文来源三层：本篇生词表 > 共享中文词表 > （没有就只显示英文与读音） */
+  for (const k of Object.keys(terms)) {
+    if (!terms[k].zh && zhMap[k]) terms[k].zh = zhMap[k];
+  }
 
   for (const [k, v] of Object.entries(notes.gloss || {})) {
     if (!terms[k]) terms[k] = { kana: '', pos: '', en: '' };
@@ -176,6 +192,7 @@ export function generate({ root, works, only, log, dryRun = false }) {
   if (!fs.existsSync(dictFile)) throw new Error('缺 JMdict 缓存：先跑 node tools/jp-reading.mjs fetch');
   const dict = JSON.parse(fs.readFileSync(dictFile, 'utf8'));
   const lex = buildLexicon(dict.words);
+  const zhMap = loadZhGloss(root);
 
   const written = [];
   const skipped = [];
@@ -195,7 +212,7 @@ export function generate({ root, works, only, log, dryRun = false }) {
     }
     const notes = JSON.parse(fs.readFileSync(notesFile, 'utf8'));
     const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
-    const payload = buildPayload(work, meta, notes, lex, fs.readFileSync(bodyFile, 'utf8'));
+    const payload = buildPayload(work, meta, notes, lex, fs.readFileSync(bodyFile, 'utf8'), zhMap);
     const changed = writePreservingEol(pagePathOf(root, work), pageHtml(work, payload), { dry: dryRun });
     if (changed) written.push(work.id);
     entries.push({ work, payload });

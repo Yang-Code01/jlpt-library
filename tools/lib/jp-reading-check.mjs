@@ -17,7 +17,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { buildLexicon, paragraphsOf, resolveAll, plainOf, parseInline } from './katsuyo.mjs';
 import { oldKanaHits } from './aozora.mjs';
-import { buildPayload, generate, pagePathOf } from './jp-reading-gen.mjs';
+import { buildPayload, generate, pagePathOf, loadZhGloss } from './jp-reading-gen.mjs';
 
 const require = createRequire(import.meta.url);
 const H = require('../tests/dom.js');
@@ -115,6 +115,18 @@ export function check({ root, works, log, tier2 }) {
     }
   }
 
+  /* ---- 1a. 共享中文词表：存在且不是空壳 ---- */
+  const zhFile = path.join(root, 'reading', 'data', 'zh-gloss.json');
+  let zhSize = 0;
+  if (fs.existsSync(zhFile)) {
+    try {
+      zhSize = Object.keys(JSON.parse(fs.readFileSync(zhFile, 'utf8'))).length;
+    } catch (e) {
+      ok(false, 'reading/data/zh-gloss.json 可解析', e.message);
+    }
+  }
+  ok(zhSize >= 200, `共享中文词表条目 ≥ 200（${zhSize}）`);
+
   /* ---- 1b. 台账：来源与许可必须写清楚（不是"以后再补"） ---- */
   const readmeFile = path.join(root, 'reading', 'README.md');
   const readme = fs.existsSync(readmeFile) ? fs.readFileSync(readmeFile, 'utf8') : '';
@@ -188,6 +200,14 @@ export function check({ root, works, log, tier2 }) {
       '只在页面：' + markedLemmas.filter((w) => !wantOov.includes(w)).join('、') +
       ' 只在载荷：' + wantOov.filter((w) => !markedLemmas.includes(w)).join('、')
     );
+
+    /* 中文覆盖：带汉字的词条必须有中文（新篇进来会在这里报缺哪几个，逼着补词表）；
+       纯假名词条同音异义多，只守一条下限，避免退化回"只有英文"。 */
+    const termEntries = Object.entries(payload.terms);
+    const kanjiNoZh = termEntries
+      .filter(([k, v]) => /[㐀-鿿]/.test(k) && v.pos && !v.zh)
+      .map(([k]) => k);
+    ok(!kanjiNoZh.length, `${work.id} 带汉字的词条都有中文释义`, kanjiNoZh.join('、'));
 
     ok(BANDS.has(payload.work.band), `${work.id} 档位合法（${payload.work.band}）`);
     ok(payload.excerpt.chars >= 1200 && payload.excerpt.chars <= 2500, `${work.id} 节选字数在 1200–2500（${payload.excerpt.chars}）`);
@@ -332,7 +352,7 @@ export function check({ root, works, log, tier2 }) {
           ok(true, `${work.id} 正文 ≡ 缓存原文（${want.length} 段）`);
         }
 
-        const fresh = buildPayload(work, meta, notes, lex, fs.readFileSync(bodyFile, 'utf8'));
+        const fresh = buildPayload(work, meta, notes, lex, fs.readFileSync(bodyFile, 'utf8'), loadZhGloss(root));
         ok(
           JSON.stringify(fresh.terms) === JSON.stringify(payload.terms),
           `${work.id} 词表 ≡ 现场重算（词典更新请重跑 gen）`
