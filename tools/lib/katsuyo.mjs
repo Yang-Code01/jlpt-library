@@ -64,6 +64,24 @@ const POS_ZH = {
 };
 for (const t of GODAN_TAGS) POS_ZH[t] = '動詞';
 
+/* JMdict 的标签远不止上面这些（adj-pn=連体詞、vz=サ変ずる、n-suf=接尾辞…）。
+   精确表没命中时按前缀兜底，否则这些词的词性会整个变空、连带中文门禁也看不见它们。 */
+const POS_FALLBACK = [
+  [/^adj-pn$/, '連体詞'], [/^adj-f$/, '連体詞'], [/^adj-na$/, '形容動詞'], [/^adj-i/, '形容詞'], [/^adj/, '形容詞'],
+  [/^vz$/, '動詞'], [/^v[1-9]?/, '動詞'], [/^vs/, '動詞'], [/^vk$/, '動詞'], [/^vi$/, '動詞'], [/^vt$/, '動詞'],
+  [/^n-adv$/, '副詞'], [/^n-t$/, '名詞'], [/^n-suf$/, '接尾辞'], [/^n-pref$/, '接頭辞'], [/^n/, '名詞'],
+  [/^adv/, '副詞'], [/^exp/, '慣用句'], [/^prt/, '助詞'], [/^conj/, '接続詞'], [/^int/, '感動詞'],
+  [/^ctr/, '助数詞'], [/^pref/, '接頭辞'], [/^suf/, '接尾辞'], [/^num/, '数詞'], [/^cop/, '指定詞'], [/^aux/, '助動詞'],
+];
+
+function posZh(tags) {
+  for (const t of tags) if (POS_ZH[t]) return POS_ZH[t];
+  for (const t of tags) {
+    for (const [re, zh] of POS_FALLBACK) if (re.test(t)) return zh;
+  }
+  return '';
+}
+
 /** 词性标签 → 活用类 */
 function classOfTag(tag) {
   if (GODAN_TAGS.includes(tag)) return 'godan';
@@ -111,15 +129,15 @@ export function buildLexicon(words) {
     const tags = [...new Set((w.sense || []).flatMap((s) => s.partOfSpeech || []))];
     const gloss = (w.sense || [])[0]?.gloss?.[0]?.text || '';
     const cls = classOfTag(tags.find((t) => classOfTag(t)) || '');
-    const posZh = POS_ZH[tags[0]] || '';
+    const posLabel = posZh(tags);
     const entry = {
       lemma: kanji[0] || kana[0],
       kana: kana[0],
-      pos: posZh,
+      pos: posLabel,
       en: gloss.length > 70 ? gloss.slice(0, 68) + '…' : gloss,
       cls,
       tails: [],
-      score: (/助詞|助動詞|接続詞|感動詞|指定詞/.test(posZh) ? 4 : 0) +
+      score: (/助詞|助動詞|接続詞|感動詞|指定詞/.test(posLabel) ? 4 : 0) +
         ((w.kanji || [])[0]?.common === true ? 2 : 0) +
         ((w.kana || [])[0]?.common === true ? 1 : 0),
     };
