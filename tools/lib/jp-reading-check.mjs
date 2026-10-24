@@ -356,6 +356,32 @@ export function check({ root, works, log, tier2 }) {
           `${work.id} 非高频词集合 ≡ 现场重算`
         );
         ok(fresh.excerpt.chars === payload.excerpt.chars, `${work.id} 节选字数 ≡ 现场重算（${fresh.excerpt.chars}）`);
+
+        /* 注音对整：页面上的 <ruby>base<rt>rt</rt></ruby> 必须与原文注記一一对应（汉字与读音都不能串位） */
+        const srcRuby = [];
+        for (const line of full.slice(payload.excerpt.from, payload.excerpt.to)) {
+          for (const a of parseInline(line, notes.gaiji || {})) {
+            if (a.t === 'ruby') srcRuby.push(a.base + '《' + a.rt + '》');
+          }
+        }
+        const pageHtml = payload.body.join('');
+        const pageRuby = [...pageHtml.matchAll(new RegExp('<ruby>([^<]*)<rt>([^<]*)<\/rt><\/ruby>', 'g'))]
+          .map((m) => m[1] + '《' + m[2] + '》');
+        ok(
+          JSON.stringify(srcRuby) === JSON.stringify(pageRuby),
+          `${work.id} 注音对整（${pageRuby.length} 处）`,
+          srcRuby.length !== pageRuby.length
+            ? '注音数量 ' + pageRuby.length + ' / ' + srcRuby.length
+            : '串位：' + pageRuby.find((x, i) => x !== srcRuby[i])
+        );
+
+        /* 节选边界：最后一段必须停在句子末尾（或是小标题），不能把句子切成两半 */
+        const lastPlain = plainOf(full[payload.excerpt.to - 1], notes.gaiji || {}).trim();
+        ok(
+          /[。」』？！…）】]$/.test(lastPlain) || lastPlain.length <= 12,
+          `${work.id} 节选结尾是句子边界`,
+          '结尾：「' + lastPlain.slice(-18) + '」'
+        );
         ok(
           JSON.stringify(fresh.stats) === JSON.stringify(payload.stats),
           `${work.id} 词数/覆盖率 ≡ 现场重算（${fresh.stats.coverage}%）`

@@ -291,6 +291,56 @@ async function cmdFetch() {
   return 0;
 }
 
+/* ----------------------------------------------------------------- verify */
+
+/**
+ * 原文保真校验：重新从镜像取一次正文，与缓存逐字比对。
+ * 这是唯一能证明「页面上的日文 == 青空文庫 的日文」的办法 ——
+ * check 的 Tier 2 只能证明「页面 ≡ 缓存」，证明不了「缓存 ≡ 上游」。
+ */
+async function cmdVerify() {
+  log('■ verify　缓存正文 ≡ 上游原文（需联网）');
+  const targets = manifest.works.filter((w) => !ONLY || w.id === ONLY || w.band === ONLY);
+  const bad = [];
+  for (const work of targets) {
+    const bodyFile = path.join(AOZORA_DIR, work.id + '.txt');
+    const metaFile = path.join(AOZORA_DIR, work.id + '.json');
+    if (!fs.existsSync(bodyFile) || !fs.existsSync(metaFile)) {
+      log('  – ' + work.id + ' 未缓存，跳过');
+      continue;
+    }
+    const src = await findSourceText(work);
+    const raw = decodeSjis(await get(src.download));
+    const upstream = parseAozora(raw).body;
+    const cached = fs.readFileSync(bodyFile, 'utf8');
+    const same = upstream === cached;
+    const sha = crypto.createHash('sha256').update(upstream).digest('hex');
+    const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
+    if (!same) {
+      const a = upstream.split(String.fromCharCode(10));
+      const b = cached.split(String.fromCharCode(10));
+      let i = 0;
+      while (i < Math.max(a.length, b.length) && a[i] === b[i]) i++;
+      bad.push(work.id + ' 第 ' + (i + 1) + ' 行起不同');
+      log('  ✗ ' + work.id + ' ' + work.title + '：第 ' + (i + 1) + ' 行起不同');
+      log('      上游：' + String(a[i] || '（无）').slice(0, 60));
+      log('      缓存：' + String(b[i] || '（无）').slice(0, 60));
+    } else if (meta.sha256 !== sha) {
+      bad.push(work.id + ' sha256 不一致（缓存元数据过期）');
+      log('  ! ' + work.id + ' 正文相同但 meta.sha256 对不上');
+    } else {
+      log('  ✓ ' + work.id + ' ' + work.title + '　' + meta.chars + ' 字　sha256 ' + sha.slice(0, 12) + '…');
+    }
+  }
+  log('');
+  if (bad.length) {
+    log('✗ ' + bad.length + ' 篇与上游不一致');
+    return 1;
+  }
+  log('✓ 全部与上游逐字一致（' + targets.length + ' 篇）');
+  return 0;
+}
+
 /* ------------------------------------------------------------------- gen */
 
 async function cmdGen() {
@@ -316,10 +366,10 @@ try {
   process.exit(2);
 }
 
-const CMDS = { fetch: cmdFetch, gen: cmdGen, check: cmdCheck };
+const CMDS = { fetch: cmdFetch, gen: cmdGen, check: cmdCheck, verify: cmdVerify };
 
 if (!CMDS[MODE]) {
-  warn(`未知子命令「${MODE}」。可用：fetch · gen · check`);
+  warn(`未知子命令「${MODE}」。可用：fetch · verify · gen · check`);
   process.exit(2);
 }
 
