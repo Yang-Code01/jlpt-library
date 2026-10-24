@@ -367,6 +367,25 @@ export function check({ root, works, log, tier2 }) {
         const pageHtml = payload.body.join('');
         const pageRuby = [...pageHtml.matchAll(new RegExp('<ruby>([^<]*)<rt>([^<]*)<\/rt><\/ruby>', 'g'))]
           .map((m) => m[1] + '《' + m[2] + '》');
+        /* 独立于解析器的第二道：页面上的每个 漢字《かんじ》 必须能在原文段落里**当作字符串**找到
+           （允许带 ｜ 起点记号）。这样即使 parseInline 的 ｜ 切分有 bug、两边同时错，也会被抓住。 */
+        /* 期望文本按**文档化的两条规则**从原文变换而来：外字按 gaiji 表还原、其余注記指令丢弃。
+           这里刻意不复用 parseInline（它负责切注音），以免两边同时错；只做两次正则替换。 */
+        const GA = notes.gaiji || {};
+        const srcText = full
+          .slice(payload.excerpt.from, payload.excerpt.to)
+          .map((l) => l
+            .replace(/※［＃「([^」]+)」[^］]*］/g, (m, d) => GA[d] || '※')
+            .replace(/［＃[^］]*］/g, ''))
+          .join(String.fromCharCode(10));
+        const orphan = pageRuby.filter((pair) => {
+          const i = pair.indexOf('《');
+          const base = pair.slice(0, i);
+          const rt = pair.slice(i + 1, -1);
+          return !srcText.includes(base + '《' + rt + '》') && !srcText.includes('｜' + base + '《' + rt + '》');
+        });
+        ok(!orphan.length, `${work.id} 逐处注音在原文中可查（${pageRuby.length} 处）`, orphan.slice(0, 4).join(' '));
+
         ok(
           JSON.stringify(srcRuby) === JSON.stringify(pageRuby),
           `${work.id} 注音对整（${pageRuby.length} 处）`,
