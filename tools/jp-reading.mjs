@@ -277,7 +277,7 @@ async function cmdFetch() {
     log(`未缓存：${missing.map((w) => w.id).join('、')}`);
     return 1;
   }
-  log('三篇齐备。');
+  log(all.length + ' 篇齐备。');
   return 0;
 }
 

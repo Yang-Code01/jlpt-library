@@ -11,14 +11,36 @@
   },
   "works": [
     {
-      "id": "n3-01",
-      "band": "n3",
+      "id": "n1-01",
+      "band": "n1",
       "no": 1,
-      "personId": "000121",
-      "workId": 628,
-      "title": "ごん狐",
-      "kana": "ごんぎつね",
-      "author": "新美南吉",
+      "personId": "000119",
+      "workId": 624,
+      "title": "山月記",
+      "kana": "さんげつき",
+      "author": "中島敦",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n1-02",
+      "band": "n1",
+      "no": 2,
+      "personId": "000119",
+      "workId": 621,
+      "title": "名人伝",
+      "kana": "めいじんでん",
+      "author": "中島敦",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n1-03",
+      "band": "n1",
+      "no": 3,
+      "personId": "000148",
+      "workId": 773,
+      "title": "こころ",
+      "kana": "こころ",
+      "author": "夏目漱石",
       "kanaType": "新字新仮名"
     },
     {
@@ -33,14 +55,58 @@
       "kanaType": "新字新仮名"
     },
     {
-      "id": "n1-01",
-      "band": "n1",
+      "id": "n2-02",
+      "band": "n2",
+      "no": 2,
+      "personId": "000879",
+      "workId": 42,
+      "title": "鼻",
+      "kana": "はな",
+      "author": "芥川竜之介",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n2-03",
+      "band": "n2",
+      "no": 3,
+      "personId": "000074",
+      "workId": 424,
+      "title": "檸檬",
+      "kana": "れもん",
+      "author": "梶井基次郎",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n3-01",
+      "band": "n3",
       "no": 1,
-      "personId": "000119",
-      "workId": 624,
-      "title": "山月記",
-      "kana": "さんげつき",
-      "author": "中島敦",
+      "personId": "000121",
+      "workId": 628,
+      "title": "ごん狐",
+      "kana": "ごんぎつね",
+      "author": "新美南吉",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n3-02",
+      "band": "n3",
+      "no": 2,
+      "personId": "000121",
+      "workId": 637,
+      "title": "手袋を買いに",
+      "kana": "てぶくろをかいに",
+      "author": "新美南吉",
+      "kanaType": "新字新仮名"
+    },
+    {
+      "id": "n3-03",
+      "band": "n3",
+      "no": 3,
+      "personId": "000879",
+      "workId": 92,
+      "title": "蜘蛛の糸",
+      "kana": "くものいと",
+      "author": "芥川竜之介",
       "kanaType": "新字新仮名"
     }
   ]

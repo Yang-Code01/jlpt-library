@@ -209,7 +209,7 @@ function grammarAt(text, i) {
 }
 
 /** 假名表层一律用假名当词条：否则「の」会以「乃」、「こと」会以「琴」的身份出现 */
-function displayEntry(surface, entry) {
+export function displayEntry(surface, entry) {
   if (!entry) return entry;
   if (classOf(surface[0]) !== 'kana' || /[㐀-鿿]/.test(surface)) return entry;
   return { ...entry, lemma: surface, kana: surface };
@@ -261,7 +261,7 @@ export function segment(text, lex) {
       out.push({
         surface,
         cls,
-        entry: best.kind === 'stem' ? best.e : displayEntry(surface, best.e),
+        entry: best.e,
         inflected: best.kind === 'stem',
       });
       i += best.len;
@@ -310,8 +310,13 @@ const RE_NOTE = /［＃[^］]*］/g;   // 字下げ・傍点・見出し注記�
  *   { t:'ruby', base, rt }    带注音的汉字串（青空文庫 注記 → 页面的 <ruby>）
  * ［＃…］（字下げ・傍点・見出し注記）整体丢弃 —— 它们是排版指令，不是正文。
  */
-export function parseInline(line) {
-  const s = line.replace(/※［＃[^］]*］/g, '※').replace(RE_NOTE, '');
+export function parseInline(line, gaiji = {}) {
+  const s = line
+    .replace(/※［＃([^］]*)］/g, (m, desc) => {
+      const q = (desc.match(/^「([^」]+)」/) || [])[1];
+      return (q && gaiji[q]) || '※';
+    })
+    .replace(RE_NOTE, '');
   const atoms = [];
   let last = 0;
   RE_RUBY.lastIndex = 0;
@@ -334,6 +339,6 @@ export function paragraphsOf(body) {
 }
 
 /** 一行的「纯文本」：注記剥掉、ruby 只留汉字本体 —— 用来跟页面渲染后的文字对账 */
-export function plainOf(line) {
-  return parseInline(line).map((a) => (a.t === 'ruby' ? a.base : a.s)).join('');
+export function plainOf(line, gaiji) {
+  return parseInline(line, gaiji).map((a) => (a.t === 'ruby' ? a.base : a.s)).join('');
 }

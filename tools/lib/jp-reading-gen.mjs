@@ -11,7 +11,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { writePreservingEol } from './eol.mjs';
-import { buildLexicon, segment, parseInline, paragraphsOf } from './katsuyo.mjs';
+import { buildLexicon, segment, parseInline, paragraphsOf, displayEntry } from './katsuyo.mjs';
 import { railHtml, prefixOf, activeOf } from '../shell.mjs';
 import { FAVICON } from '../brand.mjs';
 
@@ -31,14 +31,28 @@ export function loadZhGloss(root) {
   }
 }
 
+const ESC_CLOSE = '<' + String.fromCharCode(92) + '/';
+
+/** 从已生成的页面里读回载荷（--only 重跑篇目页时要用，也供 check 使用） */
+export function readPayload(file) {
+  const html = fs.readFileSync(file, 'utf8');
+  const at = html.indexOf('window.JP_READING = ');
+  if (at < 0) throw new Error('页面里没有 window.JP_READING：' + file);
+  const start = at + 'window.JP_READING = '.length;
+  const end = html.indexOf('</script>', start);
+  let raw = html.slice(start, end).trim();
+  if (raw.endsWith(';')) raw = raw.slice(0, -1);
+  return JSON.parse(raw.split(ESC_CLOSE).join('</'));
+}
+
 export function pagePathOf(root, work) {
   return path.join(root, 'reading', work.band, pad2(work.no) + '.html');
 }
 
 /** 一段正文 → 每词一个 span，词典形式写进 data-l */
-function renderParagraph(line, lex, terms, oov, stats) {
+function renderParagraph(line, lex, terms, oov, stats, gaiji) {
   const parts = [];
-  for (const atom of parseInline(line)) {
+  for (const atom of parseInline(line, gaiji)) {
     if (atom.t === 'ruby') {
       const e = lex.forms.get(atom.base);
       const lemma = atom.base;
@@ -60,10 +74,12 @@ function renderParagraph(line, lex, terms, oov, stats) {
         if (t.entry) stats.known++;
       }
       if (t.entry) {
-        if (!terms[t.entry.lemma]) {
-          terms[t.entry.lemma] = { kana: t.entry.kana, pos: t.entry.pos, en: t.entry.en };
+        /* 显示用词条：假名表层用假名（否则「ように」会顶着「容認」出现），汉字表层用辞書形。 */
+        const shown = displayEntry(t.surface, t.entry);
+        if (!terms[shown.lemma]) {
+          terms[shown.lemma] = { kana: shown.kana, pos: shown.pos, en: shown.en };
         }
-        parts.push('<span class="w" data-l="' + esc(t.entry.lemma) + '" data-s="' + esc(t.surface) + '">' + esc(t.surface) + '</span>');
+        parts.push('<span class="w" data-l="' + esc(shown.lemma) + '" data-s="' + esc(t.surface) + '">' + esc(t.surface) + '</span>');
       } else if (t.cls === 'kanji') {
         /* 未収録的**单字**多是切词失败的碎片（連・頗・斥…），不是词汇项：
            只让它可点（看得到「未収録」提示），不进高亮集合，否则满屏飘红。 */
@@ -100,7 +116,7 @@ export function buildPayload(work, meta, notes, lex, bodyText, zhMap = {}) {
   const terms = {};
   const oov = new Set();
   const stats = { tokens: 0, known: 0 };
-  const body = picked.map((line) => renderParagraph(line, lex, terms, oov, stats));
+  const body = picked.map((line) => renderParagraph(line, lex, terms, oov, stats, notes.gaiji || {}));
 
   /* 中文来源三层：本篇生词表 > 共享中文词表 > （没有就只显示英文与读音） */
   for (const k of Object.keys(terms)) {
@@ -223,6 +239,21 @@ export function generate({ root, works, only, log, dryRun = false }) {
     );
   }
   if (skipped.length) log('  跳过：' + skipped.join('、'));
+
+  /* --only 只重生成一篇时，篇目页仍然要列全部已有篇目：按磁盘重读，而不是用本次的 entries。 */
+  const allEntries = works
+    .map((w) => {
+      const page = pagePathOf(root, w);
+      if (!fs.existsSync(page)) return null;
+      const hit = entries.find((e) => e.work.id === w.id);
+      return hit || { work: w, payload: readPayload(page) };
+    })
+    .filter(Boolean);
+
+  if (allEntries.length) {
+    entries.length = 0;
+    entries.push(...allEntries);
+  }
 
   if (entries.length) {
     /* 分档数据：人工定档 + 覆盖率排序给出的「规则档」，两者不一致就要在台账里写明。

@@ -17,12 +17,13 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { buildLexicon, paragraphsOf, resolveAll, plainOf, parseInline } from './katsuyo.mjs';
 import { oldKanaHits } from './aozora.mjs';
-import { buildPayload, generate, pagePathOf, loadZhGloss } from './jp-reading-gen.mjs';
+import { buildPayload, generate, pagePathOf, loadZhGloss, readPayload } from './jp-reading-gen.mjs';
+
+export { readPayload };
 
 const require = createRequire(import.meta.url);
 const H = require('../tests/dom.js');
 
-const ESC_CLOSE = '<' + String.fromCharCode(92) + '/';
 const BANDS = new Set(['n3', 'n2', 'n1']);
 
 const decode = (s) =>
@@ -31,17 +32,6 @@ const decode = (s) =>
     .replace(/&#39;/g, "'").replace(/&amp;/g, '&');
 
 const stripTags = (s) => decode(String(s).replace(/<rt>[^<]*<\/rt>/g, '').replace(/<[^>]+>/g, ''));
-
-export function readPayload(file) {
-  const html = fs.readFileSync(file, 'utf8');
-  const at = html.indexOf('window.JP_READING = ');
-  if (at < 0) throw new Error('页面里没有 window.JP_READING：' + file);
-  const start = at + 'window.JP_READING = '.length;
-  const end = html.indexOf('</script>', start);
-  let raw = html.slice(start, end).trim();
-  if (raw.endsWith(';')) raw = raw.slice(0, -1);
-  return JSON.parse(raw.split(ESC_CLOSE).join('</'));
-}
 
 function sandbox(rel) {
   const abs = path.join(process.cwd(), ...rel.split('/'));
@@ -186,7 +176,7 @@ export function check({ root, works, log, tier2 }) {
       const full = paragraphsOf(fs.readFileSync(cacheBody, 'utf8'));
       const want = full
         .slice(payload.excerpt.from, payload.excerpt.to)
-        .reduce((n, line) => n + parseInline(line).filter((a) => a.t === 'ruby').length, 0);
+        .reduce((n, line) => n + parseInline(line, notes.gaiji || {}).filter((a) => a.t === 'ruby').length, 0);
       const got = (bodyHtml.match(/<ruby>/g) || []).length;
       ok(got === want, `${work.id} ruby 数量 ≡ 原文注記数（${got} / ${want}）`);
     }
@@ -204,8 +194,12 @@ export function check({ root, works, log, tier2 }) {
     /* 中文覆盖：带汉字的词条必须有中文（新篇进来会在这里报缺哪几个，逼着补词表）；
        纯假名词条同音异义多，只守一条下限，避免退化回"只有英文"。 */
     const termEntries = Object.entries(payload.terms);
+    /* 只对「汉字确实出现在正文里」的词条提要求：切词会把假名粘到汉字词条上
+       （ように→容認、らち→拉致），那种词条要中文没有意义，它根本不是正文里的词。 */
+    const bodyText = stripTags(bodyHtml);   // 去掉 <rt> 读音与标签，只留正文文字
+    const appears = (lemma) => bodyText.includes(lemma) || (lemma.length > 1 && bodyText.includes(lemma.slice(0, -1)));
     const kanjiNoZh = termEntries
-      .filter(([k, v]) => /[㐀-鿿]/.test(k) && v.pos && !v.zh)
+      .filter(([k, v]) => /[㐀-鿿]/.test(k) && v.pos && !v.zh && appears(k))
       .map(([k]) => k);
     ok(!kanjiNoZh.length, `${work.id} 带汉字的词条都有中文释义`, kanjiNoZh.join('、'));
 
@@ -341,7 +335,7 @@ export function check({ root, works, log, tier2 }) {
         const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
         const notes = JSON.parse(fs.readFileSync(path.join(notesDir, work.id + '.json'), 'utf8'));
         const full = paragraphsOf(fs.readFileSync(bodyFile, 'utf8'));
-        const want = full.slice(payload.excerpt.from, payload.excerpt.to).map(plainOf);
+        const want = full.slice(payload.excerpt.from, payload.excerpt.to).map((l) => plainOf(l, notes.gaiji || {}));
 
         const got = payload.body.map(stripTags);
         const sameBody = got.length === want.length && got.every((g, i) => g === want[i]);
