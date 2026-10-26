@@ -71,6 +71,14 @@ function scaffold() {
   );
   fs.copyFileSync(DATA, path.join(TMP, 'tools-dev', 'pi-toolchain.data.json'));
   fs.writeFileSync(path.join(TMP, 'tools-dev', 'pi-toolchain.html'), fs.readFileSync(PAGE));
+  /* 真源里有指向同目录其他详情页的 <REPO> 出处（例如 pi-tui.html）：
+     沙箱要能把它们也还原成真实文件，否则 A6 会把沙箱误判成出处不可达。 */
+  const pageRefs = (/<REPO>\/tools-dev\/([-a-z0-9.]+\.html)/g);
+  const dataText = fs.readFileSync(DATA, 'utf8');
+  for (const m of dataText.matchAll(pageRefs)) {
+    const src = path.join(ROOT, 'tools-dev', m[1]);
+    if (fs.existsSync(src)) fs.copyFileSync(src, path.join(TMP, 'tools-dev', m[1]));
+  }
 }
 const pageIn = () => path.join(TMP, 'tools-dev', 'pi-toolchain.html');
 const dataIn = () => path.join(TMP, 'tools-dev', 'pi-toolchain.data.json');

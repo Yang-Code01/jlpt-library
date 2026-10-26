@@ -544,6 +544,699 @@
           "choice": "命令表只记「是什么」，参数按需回去看示例，不在这里猜"
         }
       ]
+    },
+    {
+      "id": "pi-mcp-adapter",
+      "kind": "package",
+      "name": "pi-mcp-adapter",
+      "version": "6.0.0",
+      "versionFrom": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/package.json",
+      "provider": "npm:pi-mcp-adapter",
+      "summary": "接管 MCP：把 MCP server 的工具接进 pi，替代 pi 内置的那套 MCP 实现。",
+      "scenes": [
+        {
+          "text": "内置 MCP 实现不够用（导入登录、按项目禁用、面板与语义检索）时换这个适配器",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:19"
+        }
+      ],
+      "commands": [
+        {
+          "name": "/mcp-adapter",
+          "args": "",
+          "purpose": "交互面板与首次运行引导",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:140"
+        },
+        {
+          "name": "/mcp",
+          "args": "",
+          "purpose": "同 /mcp-adapter",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:141"
+        },
+        {
+          "name": "/mcp-adapter setup",
+          "args": "",
+          "purpose": "引导式配置：导入、最小 .mcp.json、精选 server、配置路径自检",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:142"
+        },
+        {
+          "name": "/mcp-adapter jev setup",
+          "args": "",
+          "purpose": "限制哪些 server 可以共享语义检索数据",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:143"
+        },
+        {
+          "name": "/mcp-adapter edit",
+          "args": "[project|global]",
+          "purpose": "打开 .mcp.json 或全局 mcp.json 的编辑器",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:144"
+        },
+        {
+          "name": "/mcp-adapter tools",
+          "args": "",
+          "purpose": "列出全部工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:145"
+        },
+        {
+          "name": "/mcp-adapter prompts",
+          "args": "",
+          "purpose": "列出已注册成斜杠命令的 MCP prompt",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:146"
+        },
+        {
+          "name": "/mcp-adapter reconnect",
+          "args": "",
+          "purpose": "重连全部 server",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:147"
+        },
+        {
+          "name": "/mcp-adapter reconnect",
+          "args": "<server>",
+          "purpose": "只连/重连一个 server",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:148"
+        },
+        {
+          "name": "/mcp-adapter disable",
+          "args": "<server>",
+          "purpose": "在项目级覆盖层里禁用（要 /reload 生效）",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:149"
+        },
+        {
+          "name": "/mcp-adapter enable",
+          "args": "<server>",
+          "purpose": "通过项目级覆盖层启用（要 /reload 生效）",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:150"
+        },
+        {
+          "name": "/mcp-adapter logout",
+          "args": "<server>",
+          "purpose": "清掉该 server 存的 OAuth 凭据并断开",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:151"
+        },
+        {
+          "name": "/mcp-auth",
+          "args": "[<server>]",
+          "purpose": "打开 OAuth 选择器，或给指定 server 做授权",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:152-153"
+        },
+        {
+          "name": "mcp",
+          "args": "{ search }",
+          "purpose": "按关键词搜工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:106"
+        },
+        {
+          "name": "mcp",
+          "args": "{ tool, args }",
+          "purpose": "直接调一个 MCP 工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:117"
+        }
+      ],
+      "config": [
+        {
+          "key": "settings.autoAuth",
+          "meaning": "为 true 时 mcp 调用会在需要时自动走 OAuth 并重试一次",
+          "default": "文档未载",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:155"
+        }
+      ],
+      "env": [],
+      "files": [
+        {
+          "path": "<PI_HOME>/mcp.json",
+          "meaning": "MCP server 清单（本机只登记了 rea）"
+        },
+        {
+          "path": "~/.config/mcp/mcp.json",
+          "meaning": "全局 MCP 配置（/mcp-adapter edit global 打开）"
+        },
+        {
+          "path": "<REPO>/.pi/mcp-adapter.json",
+          "meaning": "项目级覆盖层：disable / enable 写在这里"
+        }
+      ],
+      "inDocTotal": 15,
+      "undocumented": []
+    },
+    {
+      "id": "pi-web-access",
+      "kind": "package",
+      "name": "pi-web-access",
+      "version": "0.44.0",
+      "versionFrom": "<PI_HOME>/npm/node_modules/pi-web-access/package.json",
+      "provider": "npm:pi-web-access",
+      "summary": "给 pi 加联网能力：搜索、取页面、克隆 GitHub 仓库、读 PDF、看 YouTube 与本地视频。",
+      "scenes": [
+        {
+          "text": "查资料：先搜索再抓原文",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:148-152"
+        },
+        {
+          "text": "把一个 GitHub 仓库直接拉进来读",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:155"
+        },
+        {
+          "text": "看 YouTube 视频或本地录屏，问里面讲了什么",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:158-161"
+        }
+      ],
+      "commands": [
+        {
+          "name": "web_search",
+          "args": "{ queries[], numResults, recencyFilter, provider }",
+          "purpose": "联网搜索；可一次给多个查询",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:166"
+        },
+        {
+          "name": "fetch_content",
+          "args": "{ url | urls[], mode, prompt }",
+          "purpose": "抓页面/仓库/PDF/视频；readable、raw、answer 三种模式",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:198"
+        },
+        {
+          "name": "get_search_content",
+          "args": "{ responseId, url | urlIndex, findText }",
+          "purpose": "取回已存结果的分页内容，或直接定位段落",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:230"
+        },
+        {
+          "name": "source_check",
+          "args": "{ claim, queries[] }",
+          "purpose": "为一条论断收集来源，并给出带精确引文的结构化证据",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:245"
+        },
+        {
+          "name": "/websearch",
+          "args": "<query>",
+          "purpose": "在会话里直接发起搜索",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:411"
+        },
+        {
+          "name": "/curator",
+          "args": "",
+          "purpose": "打开搜索结果的策展界面",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:424"
+        },
+        {
+          "name": "/search",
+          "args": "",
+          "purpose": "搜索的设置/历史入口",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:437"
+        },
+        {
+          "name": "/google-account",
+          "args": "",
+          "purpose": "Google 账号相关的搜索配置",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:441"
+        }
+      ],
+      "config": [
+        {
+          "key": "web-search.json",
+          "meaning": "搜索提供方与抓取配置；未指定 PI_CODING_AGENT_DIR 时默认读 ~/.pi/agent/web-search.json",
+          "default": "~/.pi/agent/web-search.json",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:459"
+        }
+      ],
+      "env": [
+        {
+          "name": "BRAVE_API_KEY",
+          "meaning": "Brave 搜索的密钥",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:281"
+        },
+        {
+          "name": "DATALAB_API_KEY",
+          "meaning": "PDF 转换（Datalab/Marker）的密钥，也可写在配置里",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:365"
+        },
+        {
+          "name": "NO_PROXY",
+          "meaning": "命中这些主机的请求绕过代理（localhost、127.0.0.1、[::1] 默认就绕）",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:390"
+        },
+        {
+          "name": "PI_CODING_AGENT_DIR",
+          "meaning": "覆盖默认配置目录（影响 web-search.json 位置）",
+          "src": "<PI_HOME>/npm/node_modules/pi-web-access/README.md:459"
+        }
+      ],
+      "files": [
+        {
+          "path": "<PI_HOME>/web-search.json",
+          "meaning": "搜索提供方与抓取配置"
+        }
+      ],
+      "inDocTotal": 8,
+      "undocumented": []
+    },
+    {
+      "id": "rpiv-ask-user-question",
+      "kind": "package",
+      "name": "@juicesharp/rpiv-ask-user-question",
+      "version": "2.15.0",
+      "versionFrom": "<PI_HOME>/npm/node_modules/@juicesharp/rpiv-ask-user-question/package.json",
+      "provider": "npm:@juicesharp/rpiv-ask-user-question",
+      "summary": "给模型一个结构化问卷工具：本该猜的时候改成给你 2-4 个带说明的选项。",
+      "scenes": [
+        {
+          "text": "任务里埋着真决策（比如选哪种缓存策略）时，让模型停下来问你而不是替你选",
+          "src": "<PI_HOME>/npm/node_modules/@juicesharp/rpiv-ask-user-question/README.md:24-28"
+        },
+        {
+          "text": "一次问清最多四个问题，提交前一屏复核",
+          "src": "<PI_HOME>/npm/node_modules/@juicesharp/rpiv-ask-user-question/README.md:43"
+        }
+      ],
+      "commands": [
+        {
+          "name": "ask_user_question",
+          "args": "{ questions[] }",
+          "purpose": "弹结构化问卷；可选项带 preview，支持自定义答案与逐题备注",
+          "src": "<PI_HOME>/npm/node_modules/@juicesharp/rpiv-ask-user-question/README.md:28"
+        }
+      ],
+      "config": [
+        {
+          "key": "collapseKey",
+          "meaning": "收起/展开对话框的键；\"off\" 关掉快捷键",
+          "default": "ctrl+]",
+          "src": "<PI_HOME>/npm/node_modules/@juicesharp/rpiv-ask-user-question/README.md:54"
+        },
+        {
+          "key": "notesKey",
+          "meaning": "打开备注编辑器的键",
+          "default": "n",
+          "src": "<PI_HOME>/npm/node_modules/@juicesharp/rpiv-ask-user-question/README.md:55"
+        },
+        {
+          "key": "guidance.description",
+          "meaning": "整体替换模型看到的工具描述（不合并）",
+          "default": "内置描述",
+          "src": "<PI_HOME>/npm/node_modules/@juicesharp/rpiv-ask-user-question/README.md:56"
+        },
+        {
+          "key": "guidance.promptSnippet",
+          "meaning": "系统提示里那一行描述，决定模型多主动地问",
+          "default": "内置片段",
+          "src": "<PI_HOME>/npm/node_modules/@juicesharp/rpiv-ask-user-question/README.md:57"
+        },
+        {
+          "key": "guidance.promptGuidelines",
+          "meaning": "给模型的使用准则列表",
+          "default": "内置 4 条",
+          "src": "<PI_HOME>/npm/node_modules/@juicesharp/rpiv-ask-user-question/README.md:58"
+        }
+      ],
+      "env": [],
+      "files": [
+        {
+          "path": "~/.config/rpiv-ask-user-question/config.json",
+          "meaning": "可选配置；只读不写，JSON 坏了就退回默认值"
+        }
+      ],
+      "inDocTotal": 1,
+      "undocumented": []
+    },
+    {
+      "id": "plannotator",
+      "kind": "package",
+      "name": "@plannotator/pi-extension",
+      "version": "0.28.30",
+      "versionFrom": "<PI_HOME>/npm/node_modules/@plannotator/pi-extension/package.json",
+      "provider": "npm:@plannotator/pi-extension",
+      "summary": "计划评审与代码评审界面：带批注的计划、可批注的助手消息、代码与 PR 评审。",
+      "scenes": [
+        {
+          "text": "先让代理写一份计划，你在界面上批注再批准",
+          "src": "<PI_HOME>/npm/node_modules/@plannotator/pi-extension/README.md:114"
+        },
+        {
+          "text": "开评审界面看当前改动、别的 worktree 或一个 PR",
+          "src": "<PI_HOME>/npm/node_modules/@plannotator/pi-extension/README.md:402"
+        }
+      ],
+      "commands": [
+        {
+          "name": "/plannotator-plan-mode",
+          "args": "",
+          "purpose": "切换计划模式：代理写 markdown 计划并提交路径",
+          "src": "<PI_HOME>/npm/node_modules/@plannotator/pi-extension/README.md:401"
+        },
+        {
+          "name": "/plannotator-review",
+          "args": "[DIRECTORY | PR_URL]",
+          "purpose": "打开代码评审界面",
+          "src": "<PI_HOME>/npm/node_modules/@plannotator/pi-extension/README.md:402"
+        },
+        {
+          "name": "/plannotator-annotate",
+          "args": "<file>",
+          "purpose": "在批注界面打开 markdown 文件",
+          "src": "<PI_HOME>/npm/node_modules/@plannotator/pi-extension/README.md:403"
+        },
+        {
+          "name": "/plannotator-last",
+          "args": "",
+          "purpose": "批注最后一条助手消息",
+          "src": "<PI_HOME>/npm/node_modules/@plannotator/pi-extension/README.md:404"
+        },
+        {
+          "name": "plannotator",
+          "args": "",
+          "purpose": "工具：打开/列出/关闭评审（关掉时由斜杠命令代替）",
+          "src": "<PI_HOME>/npm/node_modules/@plannotator/pi-extension/README.md:406"
+        },
+        {
+          "name": "plannotator_inbox",
+          "args": "",
+          "purpose": "工具：往 Inbox 写、从 Inbox 读",
+          "src": "<PI_HOME>/npm/node_modules/@plannotator/pi-extension/README.md:387"
+        },
+        {
+          "name": "pi --plan",
+          "args": "",
+          "purpose": "直接以计划模式启动",
+          "src": "<PI_HOME>/npm/node_modules/@plannotator/pi-extension/README.md:412"
+        }
+      ],
+      "config": [
+        {
+          "key": "per-phase behavior",
+          "meaning": "按阶段配置行为（计划模式各阶段的开关）",
+          "default": "文档未载",
+          "src": "<PI_HOME>/npm/node_modules/@plannotator/pi-extension/README.md:163"
+        }
+      ],
+      "env": [
+        {
+          "name": "PLANNOTATOR_AGENT_TOOL",
+          "meaning": "设成 0 可以让 plannotator 工具不进模型的工具列表",
+          "src": "<PI_HOME>/npm/node_modules/@plannotator/pi-extension/README.md:90"
+        }
+      ],
+      "files": [
+        {
+          "path": "<PI_HOME>/npm/node_modules/@plannotator/pi-extension/",
+          "meaning": "包目录：扩展入口、内置技能与图表引擎"
+        }
+      ],
+      "inDocTotal": 7,
+      "undocumented": [
+        {
+          "topic": "plannotator 与 plannotator_inbox 的完整参数表没有集中在 README 里",
+          "srcA": "<PI_HOME>/npm/node_modules/@plannotator/pi-extension/README.md:371-392",
+          "srcB": "<PI_HOME>/npm/node_modules/@plannotator/pi-extension/README.md:397-406",
+          "choice": "命令表只记用途，参数按需回去看章节"
+        }
+      ]
+    },
+    {
+      "id": "pi-agent-browser-native",
+      "kind": "package",
+      "name": "pi-agent-browser-native",
+      "version": "0.9.6",
+      "versionFrom": "<PI_HOME>/npm/node_modules/pi-agent-browser-native/package.json",
+      "provider": "npm:pi-agent-browser-native",
+      "summary": "把 agent-browser 包成 pi 的原生工具：点控件、填表单、读页面、存文件。",
+      "scenes": [
+        {
+          "text": "要看或操作真网页：打开、快照、点击、填表",
+          "src": "<PI_HOME>/npm/node_modules/pi-agent-browser-native/README.md:39"
+        },
+        {
+          "text": "固定步骤用 batch --bail，循环与分支用 agent_browser_code",
+          "src": "<PI_HOME>/npm/node_modules/pi-agent-browser-native/README.md:43-44"
+        }
+      ],
+      "commands": [
+        {
+          "name": "agent_browser",
+          "args": "{ args[] }",
+          "purpose": "单条浏览器命令，或固定的 batch --bail 序列",
+          "src": "<PI_HOME>/npm/node_modules/pi-agent-browser-native/README.md:43"
+        },
+        {
+          "name": "agent_browser_code",
+          "args": "{ code }",
+          "purpose": "同一个浏览器里跑 JS 循环与分支",
+          "src": "<PI_HOME>/npm/node_modules/pi-agent-browser-native/README.md:44"
+        },
+        {
+          "name": "agent_browser_tools",
+          "args": "{ enable[] }",
+          "purpose": "按需打开 action / qa / electron / source / network 工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-agent-browser-native/README.md:45"
+        },
+        {
+          "name": "agent_browser_web_search",
+          "args": "",
+          "purpose": "可选：走 Exa 或 Brave 的搜索",
+          "src": "<PI_HOME>/npm/node_modules/pi-agent-browser-native/README.md:46"
+        },
+        {
+          "name": "pi-agent-browser-doctor",
+          "args": "",
+          "purpose": "诊断 npm/PATH 与二进制安装",
+          "src": "<PI_HOME>/npm/node_modules/pi-agent-browser-native/README.md:94"
+        }
+      ],
+      "config": [],
+      "env": [],
+      "files": [
+        {
+          "path": "<PI_HOME>/npm/node_modules/pi-agent-browser-native/",
+          "meaning": "包目录：dist 扩展与 docs"
+        }
+      ],
+      "inDocTotal": 5,
+      "undocumented": [
+        {
+          "topic": "本机探测：agent-browser 二进制不在 PATH，工具调用直接返回 missing-binary（README 要求另装 npm install -g agent-browser）",
+          "srcA": "<PI_HOME>/npm/node_modules/pi-agent-browser-native/README.md:14",
+          "srcB": "",
+          "choice": "按「装了包但没装二进制」如实记录，不写成可用"
+        }
+      ]
+    },
+    {
+      "id": "pi-compact-transcript",
+      "kind": "package",
+      "name": "pi-compact-transcript",
+      "version": "0.12.0",
+      "versionFrom": "<PI_HOME>/npm/node_modules/pi-compact-transcript/package.json",
+      "provider": "npm:pi-compact-transcript",
+      "summary": "把转录压紧：思考摘要折叠起来，工具调用只留一行预览。",
+      "scenes": [
+        {
+          "text": "长会话里不想被大段思考与工具输出刷屏",
+          "src": "<PI_HOME>/npm/node_modules/pi-compact-transcript/README.md:7-11"
+        }
+      ],
+      "commands": [
+        {
+          "name": "/compact-transcript",
+          "args": "",
+          "purpose": "开关切换",
+          "src": "<PI_HOME>/npm/node_modules/pi-compact-transcript/README.md:89"
+        },
+        {
+          "name": "/compact-transcript",
+          "args": "on|off",
+          "purpose": "显式设置",
+          "src": "<PI_HOME>/npm/node_modules/pi-compact-transcript/README.md:90"
+        },
+        {
+          "name": "/compact-transcript status",
+          "args": "",
+          "purpose": "看当前状态",
+          "src": "<PI_HOME>/npm/node_modules/pi-compact-transcript/README.md:91"
+        }
+      ],
+      "config": [
+        {
+          "key": "summaryStyle",
+          "meaning": "plain / quote / off：活动摘要的样式或隐藏",
+          "default": "plain",
+          "src": "<PI_HOME>/npm/node_modules/pi-compact-transcript/README.md:81"
+        },
+        {
+          "key": "highlightToolActions",
+          "meaning": "加粗工具名与 shell 命令，方便扫读",
+          "default": "false",
+          "src": "<PI_HOME>/npm/node_modules/pi-compact-transcript/README.md:82"
+        },
+        {
+          "key": "enabled",
+          "meaning": "默认开关；会话里的 /compact-transcript 优先级最高",
+          "default": "true",
+          "src": "<PI_HOME>/npm/node_modules/pi-compact-transcript/README.md:84"
+        }
+      ],
+      "env": [],
+      "files": [
+        {
+          "path": "~/.pi/agent/compact-transcript.json",
+          "meaning": "用户级配置"
+        },
+        {
+          "path": "<REPO>/.pi/compact-transcript.json",
+          "meaning": "项目级配置（项目未被信任时忽略）"
+        }
+      ],
+      "inDocTotal": 3,
+      "undocumented": []
+    },
+    {
+      "id": "pi-working-status",
+      "kind": "package",
+      "name": "@yusukeshib/pi-working-status",
+      "version": "0.1.1",
+      "versionFrom": "<PI_HOME>/npm/node_modules/@yusukeshib/pi-working-status/package.json",
+      "provider": "npm:@yusukeshib/pi-working-status",
+      "summary": "把 pi 那句 Working... 换成一行实时状态，跟着一轮里的每个阶段变。",
+      "scenes": [],
+      "commands": [
+        {
+          "name": "/working-status",
+          "args": "[on|off]",
+          "purpose": "开关这一行状态显示",
+          "src": "<PI_HOME>/npm/node_modules/@yusukeshib/pi-working-status/README.md:61"
+        }
+      ],
+      "config": [],
+      "env": [],
+      "files": [
+        {
+          "path": "<PI_HOME>/npm/node_modules/@yusukeshib/pi-working-status/",
+          "meaning": "包目录：extensions 与预览图"
+        }
+      ],
+      "inDocTotal": 1,
+      "undocumented": [
+        {
+          "topic": "README 只有 3KB：除一个开关命令外没有配置项，也没有使用场景，属薄条目",
+          "srcA": "<PI_HOME>/npm/node_modules/@yusukeshib/pi-working-status/README.md:1",
+          "srcB": "",
+          "choice": "如实呈现为薄条目，不补写场景"
+        }
+      ]
+    },
+    {
+      "id": "pi-tui-plus",
+      "kind": "package",
+      "name": "pi-tui-plus",
+      "version": "0.4.1",
+      "versionFrom": "~/.pi/packages/pi-tui/package.json",
+      "provider": "本地路径 ~/.pi/packages/pi-tui",
+      "summary": "pi-open-tui 的自有分支：Starship 风格底栏、可点模型选择器、网关积分状态行。",
+      "scenes": [
+        {
+          "text": "想换掉默认 TUI：底栏分段、光标样式、图标与遥测都能配",
+          "src": "~/.pi/packages/pi-tui/README.zh-CN.md:9"
+        }
+      ],
+      "commands": [
+        {
+          "name": "/open-tui",
+          "args": "",
+          "purpose": "打开设置窗口：常规 / 外观 / 底栏 / 遥测四页",
+          "src": "~/.pi/packages/pi-tui/README.zh-CN.md:54"
+        }
+      ],
+      "config": [
+        {
+          "key": "cursorStyle",
+          "meaning": "光标样式（示例值 block）",
+          "default": "block",
+          "src": "~/.pi/packages/pi-tui/README.zh-CN.md:61"
+        },
+        {
+          "key": "footerSegments",
+          "meaning": "底栏显示哪些段：cwd / gitBranch / gitStatus / runtime / context / tokens / cost / extensionStatuses 等",
+          "default": "文档未载",
+          "src": "~/.pi/packages/pi-tui/README.zh-CN.md:65-78"
+        }
+      ],
+      "env": [],
+      "files": [
+        {
+          "path": "~/.pi/agent/open-tui.json",
+          "meaning": "设置文件的落点"
+        }
+      ],
+      "inDocTotal": 1,
+      "undocumented": [
+        {
+          "topic": "本页与工具开发区的 pi-tui-plus 详情页内容重叠，这里只保留「手册视角」的最小条目",
+          "srcA": "~/.pi/packages/pi-tui/README.zh-CN.md:1",
+          "srcB": "<REPO>/tools-dev/pi-tui.html",
+          "choice": "详情、下载与源码仍以工具开发区那页为准"
+        }
+      ]
+    },
+    {
+      "id": "mcp-rea",
+      "kind": "mcp",
+      "name": "rea",
+      "version": "",
+      "provider": "stdio（由 pi-mcp-adapter 接管）",
+      "summary": "本机唯一登记的 MCP server：以 stdio 启动的 rea-agents，逆向工程与运行时证据类工具都在它那边。",
+      "scenes": [],
+      "commands": [
+        {
+          "name": "mcp",
+          "args": "{ action: \"list\" }",
+          "purpose": "列出该 server 暴露的工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:145"
+        },
+        {
+          "name": "mcp",
+          "args": "{ describe }",
+          "purpose": "看某个工具的参数",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:106"
+        },
+        {
+          "name": "mcp",
+          "args": "{ tool, args }",
+          "purpose": "调用一个工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:117"
+        }
+      ],
+      "config": [
+        {
+          "key": "mcpServers.rea.type",
+          "meaning": "stdio：由 pi 起子进程，不用 HTTP",
+          "default": "stdio",
+          "src": "<PI_HOME>/mcp.json"
+        },
+        {
+          "key": "mcpServers.rea.command / args",
+          "meaning": "node 可执行文件 + rea-agents 的 mcp 入口脚本（npx 缓存路径）",
+          "default": "文档未载",
+          "src": "<PI_HOME>/mcp.json"
+        },
+        {
+          "key": "builtin:mcp",
+          "meaning": "settings.json 的 extensions 里用 -builtin:mcp 关掉 pi 内置 MCP，能力交给适配器",
+          "default": "已禁用（本机）",
+          "src": "<PI_HOME>/settings.json"
+        }
+      ],
+      "env": [],
+      "files": [
+        {
+          "path": "<PI_HOME>/mcp.json",
+          "meaning": "MCP server 登记处"
+        }
+      ],
+      "inDocTotal": 3,
+      "undocumented": [
+        {
+          "topic": "rea 自己的工具面不在 pi 的任何文档里，只有 mcp list 能看到；本页只记录它被怎样接进 pi",
+          "srcA": "<PI_HOME>/mcp.json",
+          "srcB": "<PI_HOME>/npm/node_modules/pi-mcp-adapter/README.md:19",
+          "choice": "不抄第三方 server 的工具清单，读者用 mcp list 自查"
+        }
+      ]
     }
   ]
 }
