@@ -4,6 +4,7 @@
  *
  *   node tools/snooker.mjs                  # 抓 → 数据有变才写文件（无变则原样退出 0）
  *   node tools/snooker.mjs --check          # 只比对不写；有漂移 / 校验不过退出 1（给 CI 用）
+ *   node tools/snooker.mjs --heal           # 离线：把「已结束但 >15 场」的站按冻结口径重裁并写盘
  *   node tools/snooker.mjs --local <file>   # 用本地已存的页面代替联网（离线调试 / 单测）
  *   --local-cal <f> --local-fin <f> --local-ev <f>    # 同上，分别替换赛历页 / 冠军页 / 单站对阵页
  *   --out <f>    只给 --check 用：把「本次要写入的产物」导到该文件，便于与入库文件逐字比（不写它）
@@ -590,6 +591,22 @@ function frozen(e) {
   return ms.length > 0 && ms.every((m) => m.st === 'done' && m.p1.n && m.p2.n);
 }
 
+/* 冻结自愈：frozen() 是**算出来的**（决赛轮打完 + 日期已过），一旦为真这一站就不再重抓
+   （见 attachEvents 里的 continue）。于是「冻结前抓到的全量场次」会永久躺在快照里：
+   北爱尔兰公开赛 2026 就这样留下 127 场，而 checkData 要求已结束站 ≤15 场。
+   写盘/比对前统一按冻结口径重裁一遍，幂等；只动「今天 > 结束日」的站，未开赛站不碰。 */
+function healFinished(calendar) {
+  const today = todayIso();
+  let healed = 0;
+  for (const e of calendar || []) {
+    const ms = e.matches || [];
+    if (!e.e || !(today > e.e) || ms.length <= 15) continue;
+    const cut = cutFrozenMatches(ms);
+    if (cut.length < ms.length) { e.matches = cut; healed++; }
+  }
+  return healed;
+}
+
 /* 该站多久抓一次：赛周内 10min（要留住开赛时间）；距开赛 ≤7 天 6h；其余 24h。
    CI 每 10 分钟一轮，合起来约 300 次/天，比每轮全量抓（432 次/天）省。 */
 /* 这一站多久该抓一次（分层）。三个坑：
@@ -891,6 +908,18 @@ async function main() {
   /* --check 可配 --out <文件> 把「本次要写入的产物」导到临时文件，好和 committed 文件逐字比。
      不带这个开关时行为与原来一模一样：写入路径就是 OUT。 */
   const outPath = opt(OUT_ARG) ? resolve(opt(OUT_ARG)) : OUT;
+
+  /* --heal：不联网，只把已入库快照里「已结束却存着全量场次」的站重裁后写回。
+     存在意义：frozen() 的站不再重抓，联网路径永远碰不到它们。 */
+  if (flag('--heal')) {
+    const data = readDataFile(outPath);
+    if (!data) { console.error(`无法解析数据文件：${outPath}`); return 1; }
+    const n = healFinished(data.calendar || []);
+    if (!n) { console.log('已无需要重裁的站点（已结束站均 ≤15 场）'); return 0; }
+    writeFileSync(outPath, toJsFile(data));
+    console.log(`已按冻结口径重裁 ${n} 站并写入 ${outPath}`);
+    return 0;
+  }
   const readOnly = !!check || !!stdout;
   if (readOnly && !existsSync(outPath)) {
     throw new Error(`要写入的文件不存在（${OUT_ARG}）：${outPath}`);
@@ -971,6 +1000,10 @@ async function main() {
   const next = beforeSnap && JSON.stringify(snapOf(built)) === beforeSnap
     ? buildData(ranking, calendar, existing.updated, existing, ranking1y, updated1y) : built;
 
+  /* 写盘/比对前统一自愈：冻结站可能存着冻结前的全量场次（见 healFinished） */
+  const healed = healFinished(next.calendar);
+  if (healed) warn(`自愈：${healed} 个已结束站被重裁回冻结口径`);
+
   if (stdout) { process.stdout.write(toJsFile(next)); return 0; }
 
   const bad = checkData(next);
@@ -993,7 +1026,7 @@ async function main() {
 }
 
 /* 供离线单测 import 用（直接 node 跑时照旧执行 main） */
-export { parseEvent, parseMatch, parseRank, parseRank1y, toJsFile, loadFund, parseCalendar, parseIcs, parseFinals, pickEvents, toEvents, buildData, frozen, dueAt, fetchBucket, last16Id, cutFrozenMatches, sameData, checkData, CITY_CN, TZ };
+export { parseEvent, parseMatch, parseRank, parseRank1y, toJsFile, loadFund, parseCalendar, parseIcs, parseFinals, pickEvents, toEvents, buildData, frozen, dueAt, fetchBucket, last16Id, cutFrozenMatches, healFinished, sameData, checkData, CITY_CN, TZ };
 
 const invokedDirectly = (() => {
   try { return process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]); }

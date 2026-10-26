@@ -174,9 +174,16 @@ console.log(JSON.stringify({
         tbd: ni.matches.filter((m) => m.st === 'tbd').length,
         timed: ni.matches.filter((m) => m.ses && m.ses.length).length },
   sh: { m: sh.matches.length, done: sh.matches.filter((m) => m.st === 'done').length, cut: last16Id(sh.rounds) },
-  frozenDone: frozen(doneEv), frozenNoFinal: frozen(noFinal), frozenLive: frozen(liveEv)
+  frozenDone: frozen(doneEv), frozenNoFinal: frozen(noFinal), frozenLive: frozen(liveEv),
+  /* 天梯图几何要「64 强全量的真实样本」。不能吃已入库快照：已结束站的快照按
+     契约只留 15 场，拿它测 32×6 的几何必然失真（历史上正是靠脏数据蒙对的）。 */
+  niFull: ni
 }));`;
-  const pr = spawnSync(process.execPath, ['--input-type=module', '-e', probe], { encoding: 'utf8' });
+  const pr = spawnSync(process.execPath, ['--input-type=module', '-e', probe], {
+    encoding: 'utf8',
+    /* niFull 要带回来给天梯图几何用，127 场的 JSON 远超默认 maxBuffer */
+    maxBuffer: 32 * 1024 * 1024,
+  });
   ok(pr.status === 0, '能 import 生成器并解析样本页', (pr.stderr || '').slice(0, 300));
   let ev = null;
   try { ev = JSON.parse(pr.stdout); } catch (e) { ok(false, '样本解析结果应是 JSON', (pr.stdout || '').slice(0, 200)); }
@@ -206,7 +213,7 @@ console.log(JSON.stringify({
   ok(T && typeof T.render === 'function', '天梯图组件导出 render');
   if (T && DD) {
     const eSH = DD.calendar.find((x) => x.en === 'Shanghai Masters');
-    const eNI = DD.calendar.find((x) => x.en === 'Northern Ireland Open');
+    const eNI = ev && ev.niFull;   /* 夹具里的全量北爱（127 场），不是已入库快照 */
     if (eSH && eSH.matches && eSH.matches.length) {
       const g = T.geometry(T.buildTree(eSH), 8);
       ok(g.rows === 8, '上海（16 强起）8 行', String(g.rows));
@@ -406,6 +413,47 @@ try { fs.unlinkSync(tmp); fs.unlinkSync(tiny); } catch {}
   });
   ok(entries.length >= 20 && badVal.length === 0, '总奖金手工表每条都是正数',
     entries.length + ' 条，异常：' + badVal.map(([k]) => k).join(','));
+}
+
+/* ============ G. 冻结自愈：healFinished ============
+ * frozen() 是算出来的，一旦为真这一站就不再重抓；它存着的可能是「冻结前抓到的全量场次」。
+ * 北爱尔兰公开赛 2026 就这么留下 127 场。这里钉住：>15 场会被重裁回冻结口径、幂等、
+ * 未结束的站不碰。不钉住的话，下次快照又会把脏数据带回来而没人发现。 */
+{
+  const code = [
+    "import fs from 'fs'; import vm from 'vm';",
+    "import { healFinished } from " + JSON.stringify(new URL('file://' + TOOL).href) + ';',
+    "const ctx = { window: {} }; vm.createContext(ctx);",
+    "vm.runInContext(fs.readFileSync(" + JSON.stringify(DATA) + ", 'utf8'), ctx);",
+    "const cal = ctx.window.SNOOKER.calendar;",
+    "const ni = cal.find((e) => e.en === 'Northern Ireland Open');",
+    "const out = { found: !!ni, base: ni ? (ni.matches || []).length : -1 };",
+    "if (ni) {",
+    "  const dirty = JSON.parse(JSON.stringify(ni));",
+    "  const base = dirty.matches.length;",
+    "  for (let i = base; i < 127; i++) dirty.matches.push({ r: 11, n: 16, p1: { n: 'x' + i }, p2: { n: 'y' + i }, st: 'done' });",
+    "  out.dirtyLen = dirty.matches.length;",
+    "  out.healed = healFinished([dirty]);",
+    "  out.afterLen = dirty.matches.length;",
+    "  out.again = healFinished([dirty]);",
+    "  const future = { e: '2999-01-01', matches: Array.from({ length: 130 }, (_, i) => ({ r: 11, n: 16, p1: { n: 'a' + i }, p2: { n: 'b' + i }, st: 'done' })) };",
+    "  out.futureTouched = healFinished([future]);",
+    "}",
+    "process.stdout.write(JSON.stringify(out));",
+  ].join(String.fromCharCode(10));
+  const r = spawnSync(process.execPath, ['--input-type=module', '-e', code], { encoding: 'utf8' });
+  let o = null;
+  try { o = JSON.parse(r.stdout || 'null'); } catch {}
+  ok(r.status === 0 && !!o, 'healFinished 可对已入库快照运行', (r.stderr || '').slice(0, 300));
+  if (o) {
+    ok(o.found, '快照里应有 Northern Ireland Open（自愈的实证对象）');
+    ok(o.base > 0 && o.base <= 15, '已入库的已结束站应 ≤15 场（实际 ' + o.base + '）');
+    ok(o.dirtyLen === 127, '造的脏数据应是 127 场（实际 ' + o.dirtyLen + '）');
+    ok(o.healed === 1, '已结束站 >15 场时 healFinished 应重裁 1 站（实际 ' + o.healed + '）');
+    ok(o.afterLen === o.base, '重裁后应回到 ' + o.base + ' 场（实际 ' + o.afterLen + '）');
+    ok(o.again === 0, '重裁必须幂等：再跑一次不应再改（实际 ' + o.again + '）');
+    ok(o.futureTouched === 0, '未结束的站不应被重裁（实际 ' + o.futureTouched + '）');
+  }
 }
 
 /* ===================== 结论 ===================== */

@@ -159,7 +159,10 @@ if (hasPiHome) {
   ok(deadSrc.status === 1, `出处不可达时 check 必须 exit 1（实际 ${deadSrc.status}）`);
   ok(/A6/.test(deadSrc.stdout || ''), `失败信息应点名 A6（实际：${deadSrc.stdout}）`);
 } else {
-  /* 本机没有 pi：这时候要验的是「A6 走跳过而不是假装通过」 */
+  /* 本机没有 pi：这时候要验的是「A6 走跳过而不是假装通过」。
+     必须先重搭沙箱 —— 上面的改坏用例（例如 A8 那条）会留下被改过的真源，
+     若不重建，这里测的就是它们而不是「干净副本 + 无 pi」（CI 上就是这么红的）。 */
+  scaffold();
   const r2 = spawnSync(process.execPath, [path.join(TMP, 'tools', 'pi-toolchain-gen.mjs'), 'check'], {
     cwd: TMP,
     encoding: 'utf8',
