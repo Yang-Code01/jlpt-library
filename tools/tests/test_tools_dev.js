@@ -118,7 +118,7 @@ function makeSandbox() {
     '<!DOCTYPE html>\n<html>\n<head>\n<style>\n</style>\n</head>\n<body>\n<main id="tool-pane">\n<!-- wb:tool-list:start -->\n<!-- wb:tool-list:end -->\n</main>\n</body>\n</html>\n',
     'utf8'
   );
-  fs.writeFileSync(path.join(tmp, 'tools-dev', 'demo.html'), '<!DOCTYPE html><title>demo</title>\n', 'utf8');
+  fs.writeFileSync(path.join(tmp, 'tools-dev', 'demo.html'), '<!DOCTYPE html><title>demo</title>\n<a class="back-btn" href="../index.html#tools" data-back="top">x</a>\n', 'utf8');
   fs.writeFileSync(path.join(tmp, 'tools-dev', 'data.json'), JSON.stringify({
     tags: ['脚本'],
     tools: [{
@@ -160,13 +160,26 @@ function makeSandbox() {
   c = chk('');
   eq(c.code, 0, '重新 pack 后 check 恢复通过');
 
-  /* 详情页里的下载链接是手写的：指向不存在的包（升版后忘改）→ 失败 */
+  /* 详情页里的下载链接是手写的（不经过 gen），升版后最容易留下一个 404 的旧包名；
+     右上角返回按钮同样是每页必有的入口，缺了就把读者困在子页。 */
   const pagePath = path.join(tmp, 'tools-dev', 'demo.html');
-  fs.writeFileSync(pagePath, '<!DOCTYPE html><title>demo</title>\n<a href="downloads/demo-9.9.9.zip">x</a>\n', 'utf8');
+  const BACK = '<a class="back-btn" href="../index.html#tools" data-back="top">← 回到工具开发</a>\n';
+  const page = (extra = '') => `<!DOCTYPE html><title>demo</title>\n${BACK}${extra}`;
+
+  /* 缺右上角返回按钮 → 失败 */
+  fs.writeFileSync(pagePath, '<!DOCTYPE html><title>demo</title>\n', 'utf8');
+  c = chk('');
+  eq(c.code, 1, '详情页缺返回按钮，check 必须失败');
+  ok(/返回按钮/.test(c.out), `失败原因应当提到返回按钮：${c.out.trim()}`);
+  fs.writeFileSync(pagePath, page('<a href="downloads/demo-0.1.0.zip" download>x</a>\n'), 'utf8');
+  c = chk('');
+  eq(c.code, 0, '补回返回按钮后 check 恢复通过');
+
+  fs.writeFileSync(pagePath, page('<a href="downloads/demo-9.9.9.zip">x</a>\n'), 'utf8');
   c = chk('');
   eq(c.code, 1, '详情页下载链接指向不存在的包，check 必须失败');
   ok(/下载链接/.test(c.out), `失败原因应当提到下载链接：${c.out.trim()}`);
-  fs.writeFileSync(pagePath, '<!DOCTYPE html><title>demo</title>\n<a href="downloads/demo-0.1.0.zip" download>x</a>\n', 'utf8');
+  fs.writeFileSync(pagePath, page('<a href="downloads/demo-0.1.0.zip" download>x</a>\n'), 'utf8');
   c = chk('');
   eq(c.code, 0, '下载链接正确时 check 恢复通过');
 
@@ -235,7 +248,7 @@ function makeSandbox() {
   ok(/详情页/.test(c.out), `失败原因应当提到详情页：${c.out.trim()}`);
 
   /* 清单区被手改 → 失败 */
-  fs.writeFileSync(path.join(tmp, 'tools-dev', 'demo.html'), '<!DOCTYPE html><title>demo</title>\n', 'utf8');
+  fs.writeFileSync(path.join(tmp, 'tools-dev', 'demo.html'), '<!DOCTYPE html><title>demo</title>\n<a class="back-btn" href="../index.html#tools" data-back="top">x</a>\n', 'utf8');
   const idxPath = path.join(tmp, 'index.html');
   fs.writeFileSync(idxPath, fs.readFileSync(idxPath, 'utf8').replace('示例工具', '被手改的标题'), 'utf8');
   c = chk('');

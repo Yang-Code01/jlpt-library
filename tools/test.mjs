@@ -50,6 +50,16 @@ function probePiChangelog() {
   return r.status === 0;
 }
 
+/* 《Pi 工具链手册》要对照本机已装包：探测逻辑同样委托给生成器的 probe 子命令 */
+function probePiToolchain() {
+  const r = spawnSync(process.execPath, ['tools/pi-toolchain-gen.mjs', 'probe'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    timeout: 30000,
+  });
+  return r.status === 0;
+}
+
 const DEP = {
   ecdict: { ok: fs.existsSync(ECDICT),
     why: '缺 .scratch/en-module/research/ecdict.csv（见 en/README 的「数据来源」）' },
@@ -60,6 +70,8 @@ const DEP = {
     why: '缺 exam/data/N2/2010-07.js 之类的明文卷（须在 exam/ 里跑 node gen-exam-data.js 生成）' },
   pi: { ok: probePiChangelog(),
     why: '本机没装 pi（找不到 @earendil-works/pi-coding-agent/CHANGELOG.md；可用 PI_CHANGELOG=<路径> 指定）' },
+  plugins: { ok: probePiToolchain(),
+    why: '本机没有可探测的 pi 安装（缺 ~/.pi/agent/settings.json 或 pi 核心包；手册的版本基线与出处无法核对）' },
 };
 
 /* ---------------------------------------------------------------- 清单 */
@@ -69,6 +81,7 @@ const SUITES = [
   { f: 'tools/tests/test_snooker.js',        name: '斯诺克排名解析',        needs: [] },
   { f: 'tools/tests/test_tools_dev.js',     name: '工具开发区（生成/校验/打包）', needs: [] },
   { f: 'tools/tests/test_pi_changelog.js',  name: 'pi 更新履历源探测',      needs: [] },
+  { f: 'tools/tests/test_pi_toolchain.js',   name: 'pi 工具链手册（生成/校验）', needs: [] },
   { f: 'tools/tests/icon-set.js',            name: '图标集 / 品牌标记',      needs: [] },
   { f: 'tools/tests/test_progress.js',       name: '进度脚本',              needs: [] },
   { f: 'tools/tests/test_reading.js',        name: '阅读页',                needs: [] },
@@ -132,6 +145,7 @@ const CHECKS = [
   { cmd: ['node', 'tools/research.mjs', 'check'], name: '调查报告清单自洽',   needs: [] },
   { cmd: ['node', 'tools/tools.mjs', 'check'], name: '工具开发清单自洽',   needs: [] },
   { cmd: ['node', 'tools/pi-changelog-gen.mjs', 'check'], name: 'pi 更新履历报告', needs: ['pi'] },
+  { cmd: ['node', 'tools/pi-toolchain-gen.mjs', 'check'], name: 'pi 工具链手册', needs: ['plugins'] },
   { cmd: ['node', 'tools/check-exam-data.js'],    name: '真题全库审计',       needs: ['plain'] },
   { cmd: ['node', 'jp-vocab/gen.js', 'check'], name: '课堂单词数据',         needs: [] },
   { cmd: ['node', 'tools/en-accept.mjs'],         name: '英语侧整合验收',     needs: ['ecdict'] },
