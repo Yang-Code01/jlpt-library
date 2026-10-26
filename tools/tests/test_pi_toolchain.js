@@ -222,6 +222,13 @@ const noBack = check(TMP);
 ok(noBack.status === 1, `删掉返回门户链接后 check 必须 exit 1（实际 ${noBack.status}）`);
 ok(/A11/.test(noBack.stdout || ''), `失败信息应点名 A11（实际：${noBack.stdout}）`);
 
+/* 改坏 9：只删右上角按钮、保留页脚链接（A11 两个入口都要在） */
+scaffold();
+writePage(readPage().replace(/<a class="back-btn"[\s\S]*?<\/a>\n/, ''));
+const noTop = check(TMP);
+ok(noTop.status === 1, `只删右上角按钮时 check 必须 exit 1（实际 ${noTop.status}）`);
+ok(/A11/.test(noTop.stdout || ''), `失败信息应点名 A11（实际：${noTop.stdout}）`);
+
 /* ---------------------------------------------------------------- 汇总 */
 if (fails.length) {
   console.error(`\n✗ ${fails.length} 项失败（通过 ${pass} 项）：`);

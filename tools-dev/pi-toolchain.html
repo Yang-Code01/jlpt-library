@@ -9,11 +9,13 @@
 :root{
   --bg:#0f1115; --panel:#161a21; --ink:#e7ecf3; --muted:#9aa6b6; --rule:#26303c;
   --accent:#5ec8c8; --accent-ink:#04212a; --badge:#2a3644;
+  --glow:rgba(94,200,200,.20); --glow-hi:rgba(94,200,200,.42); --scan:rgba(127,180,190,.06);
 }
 @media (prefers-color-scheme: light){
   :root{
     --bg:#f6f7f9; --panel:#ffffff; --ink:#1b2129; --muted:#5b6673; --rule:#dfe4ea;
     --accent:#0b7a86; --accent-ink:#ffffff; --badge:#eceff3;
+    --glow:rgba(11,122,134,.14); --glow-hi:rgba(11,122,134,.28); --scan:rgba(11,122,134,.05);
   }
 }
 *{box-sizing:border-box}
@@ -34,9 +36,13 @@ h3{font-size:16px;margin:22px 0 4px}
 h4{font-size:13px;margin:16px 0 6px;color:var(--muted);text-transform:none;letter-spacing:.02em}
 .layout{display:block}
 .shell{display:grid;grid-template-columns:236px minmax(0,1fr);gap:34px;align-items:start}
-@media (max-width:900px){.shell{grid-template-columns:1fr}}
+@media (max-width:900px){.shell{grid-template-columns:minmax(0,1fr)}}
 .toc{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;
-  position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;font-size:13px}
+  position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;font-size:13px;min-width:0}
+.toc a{overflow-wrap:anywhere}
+/* 宽表格在窄屏上自己滚，不把整页据宽 */
+.tw{overflow-x:auto;max-width:100%}
+.tw table{min-width:0}
 .toc h2{font-size:12px;margin:0 0 8px;border:0;padding:0;color:var(--muted);letter-spacing:.06em}
 .toc ul{margin:0;padding-left:0;list-style:none}
 .toc>ul>li{margin:6px 0 0}
@@ -77,9 +83,59 @@ td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
 .filter-note{color:var(--muted);font-size:12.5px;margin:0 0 10px}
 .note{color:var(--muted);font-size:13px}
 footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:var(--muted);font-size:12.5px}
+
+/* ------------------------------------------------------------------ 回门户按钮
+   固定右上角，仪表盘味道：直角切角 + 发丝边框 + 窄字重等宽字 + 状态点。
+   纯 HTML/CSS/内联 SVG，file 协议直接可用；无 JS 也在；不把任何内容默认藏起来（A10）。 */
+.back-btn{
+  position:fixed;top:14px;right:16px;z-index:60;
+  display:inline-flex;align-items:center;gap:9px;
+  padding:8px 13px 8px 10px;
+  color:var(--ink);text-decoration:none;
+  background-color:var(--panel);
+  background-image:repeating-linear-gradient(0deg,var(--scan) 0 1px,transparent 1px 3px);
+  border:1px solid var(--accent);
+  border-radius:2px;
+  font-family:"Cascadia Code",Consolas,ui-monospace,monospace;
+  font-size:12.5px;font-weight:600;letter-spacing:.1em;
+  clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px));
+  box-shadow:0 0 0 1px var(--glow),0 8px 26px rgba(0,0,0,.28),inset 0 0 22px -14px var(--glow-hi);
+  backdrop-filter:blur(6px);
+  transition:color .16s,border-color .16s,box-shadow .16s,transform .16s
+}
+/* HUD 角标：屏角两条 L 形线，贴切角内侧（切角会裁掉外圈） */
+.back-btn::before,.back-btn::after{content:"";position:absolute;width:8px;height:8px;
+  border:1px solid var(--accent);opacity:.85}
+.back-btn::before{left:3px;top:3px;border-right:0;border-bottom:0}
+.back-btn::after{right:3px;bottom:3px;border-left:0;border-top:0}
+.back-btn:hover{color:var(--accent);text-decoration:none;transform:translateX(-2px);
+  box-shadow:0 0 0 1px var(--glow-hi),0 0 20px var(--glow),0 8px 26px rgba(0,0,0,.28),inset 0 0 26px -12px var(--glow-hi)}
+.back-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.back-btn:hover .bk-txt{color:var(--accent)}
+.back-btn .bk-ico{color:var(--accent);flex:0 0 auto;filter:drop-shadow(0 0 4px var(--glow-hi))}
+.back-btn .bk-txt{line-height:1.1}
+.back-btn .bk-en{font-size:9.5px;letter-spacing:.22em;color:var(--muted);opacity:.9;
+  border-left:1px solid var(--rule);padding-left:9px;margin-left:1px}
+.back-btn .bk-dot{width:5px;height:5px;background:var(--accent);border-radius:50%;
+  box-shadow:0 0 7px var(--accent);animation:bkpulse 2.4s ease-in-out infinite}
+@keyframes bkpulse{0%,100%{opacity:.4;transform:scale(.9)}50%{opacity:1;transform:scale(1.1)}}
+@media (prefers-reduced-motion:reduce){.back-btn .bk-dot{animation:none;opacity:1;transform:none}.back-btn{transition:none}}
+@media (max-width:640px){
+  .back-btn{top:10px;right:10px;gap:7px;padding:7px 10px 7px 8px;font-size:11.5px}
+  .back-btn .bk-en{padding-left:7px;letter-spacing:.16em}
+}
 </style>
 </head>
 <body>
+<a class="back-btn" href="../index.html#tools" data-back="top" aria-label="回到工具开发清单" title="回到工具开发清单">
+<svg class="bk-ico" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false">
+<path d="M20 12H7.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="square"/>
+<path d="M11.6 6.4 6 12l5.6 5.6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="miter"/>
+</svg>
+<span class="bk-dot" aria-hidden="true"></span>
+<span class="bk-txt">返回工具区</span>
+<span class="bk-en">TOOLS</span>
+</a>
 <div class="wrap">
 
 <header class="top">
@@ -123,7 +179,7 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 
 <section id="sec-terms">
 <h2>术语速查</h2>
-<table>
+<div class="tw"><table>
 <thead><tr><th>词</th><th>本页的用法</th></tr></thead>
 <tbody>
 <tr><td>包（package）</td><td>pi 用 `pi install` 装进来的 npm 包或本地路径包，靠 package.json 的 `pi` 字段声明要加载什么。</td></tr>
@@ -134,7 +190,7 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td>工具（tool）</td><td>模型在会话里能直接调用的函数。可能由 pi 核心提供，也可能由某个包注册。</td></tr>
 <tr><td>真源 / 生成物</td><td>真源是 data.json（手改这个）；生成物是这一页（重跑生成器才变）。</td></tr>
 </tbody>
-</table>
+</table></div>
 </section>
 
 <div class="toolbar">
@@ -146,7 +202,7 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <section data-section="core" id="sec-core">
 <h2>pi 自身命令面</h2>
 <article class="entry" id="item-pi-cli" data-kind="core"><h3><a href="#item-pi-cli">pi 命令行：子命令与 flag</a></h3><p class="entry-meta"><span class="meta-k">来自</span> pi 核心<span class="meta-k">版本</span> <code>1.4.0</code></p><p class="entry-summary">pi 自己的命令行面：顶层子命令加全部 flag，收自 docs/cli.md。</p><details class="fold" data-fold="rows"><summary>共 82 行，展开查看</summary>
-<table class="rows">
+<div class="tw"><table class="rows">
 <thead><tr><th>命令 / flag</th><th>参数形态</th><th>作用</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>pi</code></td><td><code>pi [options] [--] [@files...] [messages...]</code></td><td>主入口：无参数且 stdin/stdout 是终端时进 TUI</td><td>cli.md:8</td></tr>
@@ -232,9 +288,9 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td><code>--exposure</code>（mcp add）</td><td><code>--exposure &lt;mode&gt;</code></td><td>设置 MCP 工具暴露模式</td><td>cli.md:331</td></tr>
 <tr><td><code>--description</code>（mcp add）</td><td><code>--description &lt;text&gt;</code></td><td>设置 server 描述</td><td>cli.md:331</td></tr>
 </tbody>
-</table>
+</table></div>
 </details></article>
-<article class="entry" id="item-pi-slash" data-kind="core"><h3><a href="#item-pi-slash">pi 斜杠命令</a></h3><p class="entry-meta"><span class="meta-k">来自</span> pi 核心<span class="meta-k">版本</span> <code>1.4.0</code></p><p class="entry-summary">会话里能敲的斜杠命令全表，收自 docs/slash-commands.md。</p><table class="rows">
+<article class="entry" id="item-pi-slash" data-kind="core"><h3><a href="#item-pi-slash">pi 斜杠命令</a></h3><p class="entry-meta"><span class="meta-k">来自</span> pi 核心<span class="meta-k">版本</span> <code>1.4.0</code></p><p class="entry-summary">会话里能敲的斜杠命令全表，收自 docs/slash-commands.md。</p><div class="tw"><table class="rows">
 <thead><tr><th>命令</th><th>作用</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>/settings</code></td><td>打开设置</td><td>slash-commands.md:11</td></tr>
@@ -266,8 +322,8 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td>每个 prompt 模板</td><td>以模板名作为命令</td><td>slash-commands.md:57</td></tr>
 <tr><td><code>/skill:name</code></td><td>skill 命令（<code>enableSkillCommands</code> 开启时）</td><td>slash-commands.md:58</td></tr>
 </tbody>
-</table></article>
-<article class="entry" id="item-pi-env" data-kind="core"><h3><a href="#item-pi-env">pi 环境变量</a></h3><p class="entry-meta"><span class="meta-k">来自</span> pi 核心<span class="meta-k">版本</span> <code>1.4.0</code></p><p class="entry-summary">pi 认的环境变量与默认值，收自 docs/environment-variables.md。</p><table class="rows">
+</table></div></article>
+<article class="entry" id="item-pi-env" data-kind="core"><h3><a href="#item-pi-env">pi 环境变量</a></h3><p class="entry-meta"><span class="meta-k">来自</span> pi 核心<span class="meta-k">版本</span> <code>1.4.0</code></p><p class="entry-summary">pi 认的环境变量与默认值，收自 docs/environment-variables.md。</p><div class="tw"><table class="rows">
 <thead><tr><th>变量</th><th>含义</th><th>默认值</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>AI_AGENT=pi</code></td><td>通用进程标记，供工具识别启动者</td><td>由 CLI/RPC 入口自动设为 <code>pi</code></td><td>environment-variables.md:15</td></tr>
@@ -297,9 +353,9 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td><code>VISUAL</code>, <code>EDITOR</code></td><td><code>externalEditor</code> 未设置时的外部编辑器回退</td><td>文档未载（按 shell 环境）</td><td>environment-variables.md:98</td></tr>
 <tr><td><code>HTTP_PROXY</code>, <code>HTTPS_PROXY</code></td><td>出站 HTTP 代理</td><td>文档未载</td><td>environment-variables.md:99</td></tr>
 </tbody>
-</table></article>
+</table></div></article>
 <article class="entry" id="item-pi-settings" data-kind="core"><h3><a href="#item-pi-settings">settings.json 配置键</a></h3><p class="entry-meta"><span class="meta-k">来自</span> pi 核心<span class="meta-k">版本</span> <code>1.4.0</code></p><p class="entry-summary">settings.json 里能写的键（含嵌套路径），收自 docs/settings.md。</p><details class="fold" data-fold="rows"><summary>共 72 行，展开查看</summary>
-<table class="rows">
+<div class="tw"><table class="rows">
 <thead><tr><th>键（含嵌套路径）</th><th>含义</th><th>默认值</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>defaultProvider</code></td><td>启动时的 AI provider</td><td>自动（文档写 Automatic）</td><td>settings.md:13</td></tr>
@@ -375,13 +431,13 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td><code>enableAnalytics</code></td><td>选择加入分析数据共享（当前仅实验性首次运行设置使用）</td><td><code>false</code></td><td>settings.md:171</td></tr>
 <tr><td><code>warnings.anthropicExtraUsage</code></td><td>Anthropic 订阅认证可能产生额外计费时告警</td><td><code>true</code></td><td>settings.md:172</td></tr>
 </tbody>
-</table>
+</table></div>
 </details></article>
 </section>
 <section data-section="package" id="sec-packages">
 <h2>包与扩展</h2>
 <article class="entry" id="item-context-mode" data-kind="package"><h3><a href="#item-context-mode">context-mode</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:context-mode<span class="meta-k">版本</span> <code>1.0.169</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/package.json</span></p><p class="entry-summary">把代码执行搬进隔离沙箱、只把 stdout 倒回上下文的 MCP 插件，用来省上下文窗口。</p><h4>使用场景</h4><ul class="scenes"><li>日志、接口响应、快照这类大输出：在沙箱里跑代码分析，只把结论写回上下文 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1178</span></li><li>大段 markdown 切块进 SQLite FTS5，按需检索而不是整篇读进上下文 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1188</span></li><li>超出 5KB 且给了 intent 时自动转成「索引全文 + 按意图取相关片段」 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1184</span></li></ul>
-<table class="cmd">
+<div class="tw"><table class="cmd">
 <thead><tr><th>名称</th><th>参数</th><th>作用</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>ctx_batch_execute</code></td><td><code></code></td><td>一次调用跑多条命令 + 多个检索查询；I/O 型任务可开 concurrency 1-8</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1165</span></td></tr>
@@ -400,22 +456,22 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td><code>context-mode upgrade</code></td><td><code></code></td><td>终端里升级</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1450</span></td></tr>
 <tr><td><code>context-mode insight</code></td><td><code></code></td><td>打开托管的 Insight 面板</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1451</span></td></tr>
 </tbody>
-</table>
-<h4>环境变量</h4><table class="env">
+</table></div>
+<h4>环境变量</h4><div class="tw"><table class="env">
 <thead><tr><th>变量</th><th>含义</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>CONTEXT_MODE_DIR</code></td><td>存储根目录；sessions 与 content 都在它下面。空值视为未设置，非空必须是绝对路径（~ 不展开）</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1600</span></td></tr>
 <tr><td><code>CONTEXT_MODE_EXTERNAL_MCP_NUDGE_EVERY</code></td><td>每隔多少次工具调用重注入「把大 payload 包进 ctx_execute」的提示；范围 1-100，非法值回落 10</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1606</span></td></tr>
 </tbody>
-</table>
-<h4>相关文件</h4><table>
+</table></div>
+<h4>相关文件</h4><div class="tw"><table>
 <thead><tr><th>路径</th><th>含义</th></tr></thead>
 <tbody>
 <tr><td><code>&lt;PI_HOME&gt;/npm/node_modules/context-mode/</code></td><td>包目录：pi 侧扩展入口与 8 个内置技能都在这里</td></tr>
 </tbody>
-</table></article>
+</table></div></article>
 <article class="entry" id="item-pi-subagents" data-kind="package"><h3><a href="#item-pi-subagents">pi-subagents</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:pi-subagents<span class="meta-k">版本</span> <code>0.82.1</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/package.json</span></p><p class="entry-summary">把活派给子 Pi 会话：单个委派，或脚本化的多代理工作流。</p><h4>使用场景</h4><ul class="scenes"><li>实现完先让 reviewer 子代理过一遍再总结 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:52</span></li><li>同一改动并行跑多个 reviewer（正确性 / 测试 / 清理） <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:81</span></li><li>决策本身没底时让 oracle 挑刺，再决定要不要动手 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:78</span></li><li>要跑长活时丢到后台，主线继续 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:87</span></li></ul>
-<table class="cmd">
+<div class="tw"><table class="cmd">
 <thead><tr><th>名称</th><th>参数</th><th>作用</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>subagents_enable</code></td><td><code></code></td><td>载入器：授权委派后，下一次模型请求才拿到完整 subagent schema</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:47</span></td></tr>
@@ -426,22 +482,22 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td><code>/parallel-review</code></td><td><code></code></td><td>打包好的并行评审快捷方式</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:93</span></td></tr>
 <tr><td><code>/review-loop</code></td><td><code></code></td><td>打包好的评审循环快捷方式</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:93</span></td></tr>
 </tbody>
-</table>
-<table class="cfg">
+</table></div>
+<div class="tw"><table class="cfg">
 <thead><tr><th>键</th><th>含义</th><th>默认值</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>toolActivation</code></td><td>控制全新会话是直接拿到 subagent，还是先只给 subagents_enable 载入器</td><td><code>文档未载</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:47</span></td></tr>
 <tr><td><code>maxSubagentSpawnsPerRun</code></td><td>一棵运行树里累计允许的逻辑子代理数，与并发数和会话级预算分开算</td><td><code>64</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:103</span></td></tr>
 </tbody>
-</table>
-<h4>相关文件</h4><table>
+</table></div>
+<h4>相关文件</h4><div class="tw"><table>
 <thead><tr><th>路径</th><th>含义</th></tr></thead>
 <tbody>
 <tr><td><code>&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/</code></td><td>包目录：bundle 入口、13 份 agent 定义、prompts 与 docs 都在这里</td></tr>
 </tbody>
-</table></article>
+</table></div></article>
 <article class="entry" id="item-pi-background-tasks" data-kind="package"><h3><a href="#item-pi-background-tasks">pi-background-tasks</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:pi-background-tasks<span class="meta-k">版本</span> <code>2.6.10</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/package.json</span></p><p class="entry-summary">后台跑长命令、派只读代理、跑本机取证的 Pi 子进程，以及固定用途的 Fusion 多模型流程。</p><h4>使用场景</h4><ul class="scenes"><li>起 dev server、watch、跑长测试这类不阻塞对话的活 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:186</span></li><li>让只读代理带着当前会话的上下文去调研，主进程继续干别的 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:187</span></li><li>同一决策要三份独立意见：Fusion 合成 / 调查 / 研究 / 评审 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:189-192</span></li></ul>
-<table class="cmd">
+<div class="tw"><table class="cmd">
 <thead><tr><th>名称</th><th>参数</th><th>作用</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>bg_delegate</code></td><td><code></code></td><td>README 公共工具清单里登记的工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:48</span></td></tr>
@@ -467,8 +523,8 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td><code>/logs</code></td><td><code></code></td><td>README 公共命令清单里登记的斜杠命令</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:46</span></td></tr>
 <tr><td><code>/tasks</code></td><td><code></code></td><td>README 公共命令清单里登记的斜杠命令</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:46</span></td></tr>
 </tbody>
-</table>
-<table class="cfg">
+</table></div>
+<div class="tw"><table class="cfg">
 <thead><tr><th>键</th><th>含义</th><th>默认值</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>tool:bg_delegate</code></td><td>受 feature:delegate 控制</td><td><code>yes</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:57</span></td></tr>
@@ -477,21 +533,21 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td><code>tool:fusion_reason</code></td><td>受 feature:fusion 控制</td><td><code>yes</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:61</span></td></tr>
 <tr><td><code>dock:ctrl+alt+b</code></td><td>footer 任务的快捷键</td><td><code>no</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:64</span></td></tr>
 </tbody>
-</table>
-<h4>环境变量</h4><table class="env">
+</table></div>
+<h4>环境变量</h4><div class="tw"><table class="env">
 <thead><tr><th>变量</th><th>含义</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>PI_BG_FEATURES</code></td><td>严格的白名单集合，从 process / delegate / fusion / attested 等里选，用来关掉不想要的能力面</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:167</span></td></tr>
 </tbody>
-</table>
-<h4>相关文件</h4><table>
+</table></div>
+<h4>相关文件</h4><div class="tw"><table>
 <thead><tr><th>路径</th><th>含义</th></tr></thead>
 <tbody>
 <tr><td><code>&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/</code></td><td>包目录：dist 扩展、docs、以及 BACKGROUND-TASKS-INSTRUCTIONS.md 都在这里</td></tr>
 </tbody>
-</table></article>
+</table></div></article>
 <article class="entry" id="item-pi-mcp-adapter" data-kind="package"><h3><a href="#item-pi-mcp-adapter">pi-mcp-adapter</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:pi-mcp-adapter<span class="meta-k">版本</span> <code>6.0.0</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-mcp-adapter/package.json</span></p><p class="entry-summary">接管 MCP：把 MCP server 的工具接进 pi，替代 pi 内置的那套 MCP 实现。</p><h4>使用场景</h4><ul class="scenes"><li>内置 MCP 实现不够用（导入登录、按项目禁用、面板与语义检索）时换这个适配器 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-mcp-adapter/README.md:19</span></li></ul>
-<table class="cmd">
+<div class="tw"><table class="cmd">
 <thead><tr><th>名称</th><th>参数</th><th>作用</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>/mcp-adapter</code></td><td><code></code></td><td>交互面板与首次运行引导</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-mcp-adapter/README.md:140</span></td></tr>
@@ -510,23 +566,23 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td><code>mcp</code></td><td><code>{ search }</code></td><td>按关键词搜工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-mcp-adapter/README.md:106</span></td></tr>
 <tr><td><code>mcp</code></td><td><code>{ tool, args }</code></td><td>直接调一个 MCP 工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-mcp-adapter/README.md:117</span></td></tr>
 </tbody>
-</table>
-<table class="cfg">
+</table></div>
+<div class="tw"><table class="cfg">
 <thead><tr><th>键</th><th>含义</th><th>默认值</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>settings.autoAuth</code></td><td>为 true 时 mcp 调用会在需要时自动走 OAuth 并重试一次</td><td><code>文档未载</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-mcp-adapter/README.md:155</span></td></tr>
 </tbody>
-</table>
-<h4>相关文件</h4><table>
+</table></div>
+<h4>相关文件</h4><div class="tw"><table>
 <thead><tr><th>路径</th><th>含义</th></tr></thead>
 <tbody>
 <tr><td><code>&lt;PI_HOME&gt;/mcp.json</code></td><td>MCP server 清单（本机只登记了 rea）</td></tr>
 <tr><td><code>~/.config/mcp/mcp.json</code></td><td>全局 MCP 配置（/mcp-adapter edit global 打开）</td></tr>
 <tr><td><code>&lt;REPO&gt;/.pi/mcp-adapter.json</code></td><td>项目级覆盖层：disable / enable 写在这里</td></tr>
 </tbody>
-</table></article>
+</table></div></article>
 <article class="entry" id="item-pi-web-access" data-kind="package"><h3><a href="#item-pi-web-access">pi-web-access</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:pi-web-access<span class="meta-k">版本</span> <code>0.44.0</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-web-access/package.json</span></p><p class="entry-summary">给 pi 加联网能力：搜索、取页面、克隆 GitHub 仓库、读 PDF、看 YouTube 与本地视频。</p><h4>使用场景</h4><ul class="scenes"><li>查资料：先搜索再抓原文 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-web-access/README.md:148-152</span></li><li>把一个 GitHub 仓库直接拉进来读 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-web-access/README.md:155</span></li><li>看 YouTube 视频或本地录屏，问里面讲了什么 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-web-access/README.md:158-161</span></li></ul>
-<table class="cmd">
+<div class="tw"><table class="cmd">
 <thead><tr><th>名称</th><th>参数</th><th>作用</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>web_search</code></td><td><code>{ queries[], numResults, recencyFilter, provider }</code></td><td>联网搜索；可一次给多个查询</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-web-access/README.md:166</span></td></tr>
@@ -538,14 +594,14 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td><code>/search</code></td><td><code></code></td><td>搜索的设置/历史入口</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-web-access/README.md:437</span></td></tr>
 <tr><td><code>/google-account</code></td><td><code></code></td><td>Google 账号相关的搜索配置</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-web-access/README.md:441</span></td></tr>
 </tbody>
-</table>
-<table class="cfg">
+</table></div>
+<div class="tw"><table class="cfg">
 <thead><tr><th>键</th><th>含义</th><th>默认值</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>web-search.json</code></td><td>搜索提供方与抓取配置；未指定 PI_CODING_AGENT_DIR 时默认读 ~/.pi/agent/web-search.json</td><td><code>~/.pi/agent/web-search.json</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-web-access/README.md:459</span></td></tr>
 </tbody>
-</table>
-<h4>环境变量</h4><table class="env">
+</table></div>
+<h4>环境变量</h4><div class="tw"><table class="env">
 <thead><tr><th>变量</th><th>含义</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>BRAVE_API_KEY</code></td><td>Brave 搜索的密钥</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-web-access/README.md:281</span></td></tr>
@@ -553,21 +609,21 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td><code>NO_PROXY</code></td><td>命中这些主机的请求绕过代理（localhost、127.0.0.1、[::1] 默认就绕）</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-web-access/README.md:390</span></td></tr>
 <tr><td><code>PI_CODING_AGENT_DIR</code></td><td>覆盖默认配置目录（影响 web-search.json 位置）</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-web-access/README.md:459</span></td></tr>
 </tbody>
-</table>
-<h4>相关文件</h4><table>
+</table></div>
+<h4>相关文件</h4><div class="tw"><table>
 <thead><tr><th>路径</th><th>含义</th></tr></thead>
 <tbody>
 <tr><td><code>&lt;PI_HOME&gt;/web-search.json</code></td><td>搜索提供方与抓取配置</td></tr>
 </tbody>
-</table></article>
+</table></div></article>
 <article class="entry" id="item-rpiv-ask-user-question" data-kind="package"><h3><a href="#item-rpiv-ask-user-question">@juicesharp/rpiv-ask-user-question</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:@juicesharp/rpiv-ask-user-question<span class="meta-k">版本</span> <code>2.15.0</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/@juicesharp/rpiv-ask-user-question/package.json</span></p><p class="entry-summary">给模型一个结构化问卷工具：本该猜的时候改成给你 2-4 个带说明的选项。</p><h4>使用场景</h4><ul class="scenes"><li>任务里埋着真决策（比如选哪种缓存策略）时，让模型停下来问你而不是替你选 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/@juicesharp/rpiv-ask-user-question/README.md:24-28</span></li><li>一次问清最多四个问题，提交前一屏复核 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/@juicesharp/rpiv-ask-user-question/README.md:43</span></li></ul>
-<table class="cmd">
+<div class="tw"><table class="cmd">
 <thead><tr><th>名称</th><th>参数</th><th>作用</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>ask_user_question</code></td><td><code>{ questions[] }</code></td><td>弹结构化问卷；可选项带 preview，支持自定义答案与逐题备注</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/@juicesharp/rpiv-ask-user-question/README.md:28</span></td></tr>
 </tbody>
-</table>
-<table class="cfg">
+</table></div>
+<div class="tw"><table class="cfg">
 <thead><tr><th>键</th><th>含义</th><th>默认值</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>collapseKey</code></td><td>收起/展开对话框的键；&quot;off&quot; 关掉快捷键</td><td><code>ctrl+]</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/@juicesharp/rpiv-ask-user-question/README.md:54</span></td></tr>
@@ -576,15 +632,15 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td><code>guidance.promptSnippet</code></td><td>系统提示里那一行描述，决定模型多主动地问</td><td><code>内置片段</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/@juicesharp/rpiv-ask-user-question/README.md:57</span></td></tr>
 <tr><td><code>guidance.promptGuidelines</code></td><td>给模型的使用准则列表</td><td><code>内置 4 条</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/@juicesharp/rpiv-ask-user-question/README.md:58</span></td></tr>
 </tbody>
-</table>
-<h4>相关文件</h4><table>
+</table></div>
+<h4>相关文件</h4><div class="tw"><table>
 <thead><tr><th>路径</th><th>含义</th></tr></thead>
 <tbody>
 <tr><td><code>~/.config/rpiv-ask-user-question/config.json</code></td><td>可选配置；只读不写，JSON 坏了就退回默认值</td></tr>
 </tbody>
-</table></article>
+</table></div></article>
 <article class="entry" id="item-plannotator" data-kind="package"><h3><a href="#item-plannotator">@plannotator/pi-extension</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:@plannotator/pi-extension<span class="meta-k">版本</span> <code>0.28.30</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/@plannotator/pi-extension/package.json</span></p><p class="entry-summary">计划评审与代码评审界面：带批注的计划、可批注的助手消息、代码与 PR 评审。</p><h4>使用场景</h4><ul class="scenes"><li>先让代理写一份计划，你在界面上批注再批准 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/@plannotator/pi-extension/README.md:114</span></li><li>开评审界面看当前改动、别的 worktree 或一个 PR <span class="src">&lt;PI_HOME&gt;/npm/node_modules/@plannotator/pi-extension/README.md:402</span></li></ul>
-<table class="cmd">
+<div class="tw"><table class="cmd">
 <thead><tr><th>名称</th><th>参数</th><th>作用</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>/plannotator-plan-mode</code></td><td><code></code></td><td>切换计划模式：代理写 markdown 计划并提交路径</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/@plannotator/pi-extension/README.md:401</span></td></tr>
@@ -595,27 +651,27 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td><code>plannotator_inbox</code></td><td><code></code></td><td>工具：往 Inbox 写、从 Inbox 读</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/@plannotator/pi-extension/README.md:387</span></td></tr>
 <tr><td><code>pi --plan</code></td><td><code></code></td><td>直接以计划模式启动</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/@plannotator/pi-extension/README.md:412</span></td></tr>
 </tbody>
-</table>
-<table class="cfg">
+</table></div>
+<div class="tw"><table class="cfg">
 <thead><tr><th>键</th><th>含义</th><th>默认值</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>per-phase behavior</code></td><td>按阶段配置行为（计划模式各阶段的开关）</td><td><code>文档未载</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/@plannotator/pi-extension/README.md:163</span></td></tr>
 </tbody>
-</table>
-<h4>环境变量</h4><table class="env">
+</table></div>
+<h4>环境变量</h4><div class="tw"><table class="env">
 <thead><tr><th>变量</th><th>含义</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>PLANNOTATOR_AGENT_TOOL</code></td><td>设成 0 可以让 plannotator 工具不进模型的工具列表</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/@plannotator/pi-extension/README.md:90</span></td></tr>
 </tbody>
-</table>
-<h4>相关文件</h4><table>
+</table></div>
+<h4>相关文件</h4><div class="tw"><table>
 <thead><tr><th>路径</th><th>含义</th></tr></thead>
 <tbody>
 <tr><td><code>&lt;PI_HOME&gt;/npm/node_modules/@plannotator/pi-extension/</code></td><td>包目录：扩展入口、内置技能与图表引擎</td></tr>
 </tbody>
-</table></article>
+</table></div></article>
 <article class="entry" id="item-pi-agent-browser-native" data-kind="package"><h3><a href="#item-pi-agent-browser-native">pi-agent-browser-native</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:pi-agent-browser-native<span class="meta-k">版本</span> <code>0.9.6</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-agent-browser-native/package.json</span></p><p class="entry-summary">把 agent-browser 包成 pi 的原生工具：点控件、填表单、读页面、存文件。</p><h4>使用场景</h4><ul class="scenes"><li>要看或操作真网页：打开、快照、点击、填表 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-agent-browser-native/README.md:39</span></li><li>固定步骤用 batch --bail，循环与分支用 agent_browser_code <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-agent-browser-native/README.md:43-44</span></li></ul>
-<table class="cmd">
+<div class="tw"><table class="cmd">
 <thead><tr><th>名称</th><th>参数</th><th>作用</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>agent_browser</code></td><td><code>{ args[] }</code></td><td>单条浏览器命令，或固定的 batch --bail 序列</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-agent-browser-native/README.md:43</span></td></tr>
@@ -624,99 +680,99 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td><code>agent_browser_web_search</code></td><td><code></code></td><td>可选：走 Exa 或 Brave 的搜索</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-agent-browser-native/README.md:46</span></td></tr>
 <tr><td><code>pi-agent-browser-doctor</code></td><td><code></code></td><td>诊断 npm/PATH 与二进制安装</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-agent-browser-native/README.md:94</span></td></tr>
 </tbody>
-</table>
-<h4>相关文件</h4><table>
+</table></div>
+<h4>相关文件</h4><div class="tw"><table>
 <thead><tr><th>路径</th><th>含义</th></tr></thead>
 <tbody>
 <tr><td><code>&lt;PI_HOME&gt;/npm/node_modules/pi-agent-browser-native/</code></td><td>包目录：dist 扩展与 docs</td></tr>
 </tbody>
-</table></article>
+</table></div></article>
 <article class="entry" id="item-pi-compact-transcript" data-kind="package"><h3><a href="#item-pi-compact-transcript">pi-compact-transcript</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:pi-compact-transcript<span class="meta-k">版本</span> <code>0.12.0</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-compact-transcript/package.json</span></p><p class="entry-summary">把转录压紧：思考摘要折叠起来，工具调用只留一行预览。</p><h4>使用场景</h4><ul class="scenes"><li>长会话里不想被大段思考与工具输出刷屏 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-compact-transcript/README.md:7-11</span></li></ul>
-<table class="cmd">
+<div class="tw"><table class="cmd">
 <thead><tr><th>名称</th><th>参数</th><th>作用</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>/compact-transcript</code></td><td><code></code></td><td>开关切换</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-compact-transcript/README.md:89</span></td></tr>
 <tr><td><code>/compact-transcript</code></td><td><code>on|off</code></td><td>显式设置</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-compact-transcript/README.md:90</span></td></tr>
 <tr><td><code>/compact-transcript status</code></td><td><code></code></td><td>看当前状态</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-compact-transcript/README.md:91</span></td></tr>
 </tbody>
-</table>
-<table class="cfg">
+</table></div>
+<div class="tw"><table class="cfg">
 <thead><tr><th>键</th><th>含义</th><th>默认值</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>summaryStyle</code></td><td>plain / quote / off：活动摘要的样式或隐藏</td><td><code>plain</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-compact-transcript/README.md:81</span></td></tr>
 <tr><td><code>highlightToolActions</code></td><td>加粗工具名与 shell 命令，方便扫读</td><td><code>false</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-compact-transcript/README.md:82</span></td></tr>
 <tr><td><code>enabled</code></td><td>默认开关；会话里的 /compact-transcript 优先级最高</td><td><code>true</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-compact-transcript/README.md:84</span></td></tr>
 </tbody>
-</table>
-<h4>相关文件</h4><table>
+</table></div>
+<h4>相关文件</h4><div class="tw"><table>
 <thead><tr><th>路径</th><th>含义</th></tr></thead>
 <tbody>
 <tr><td><code>~/.pi/agent/compact-transcript.json</code></td><td>用户级配置</td></tr>
 <tr><td><code>&lt;REPO&gt;/.pi/compact-transcript.json</code></td><td>项目级配置（项目未被信任时忽略）</td></tr>
 </tbody>
-</table></article>
-<article class="entry" id="item-pi-working-status" data-kind="package"><h3><a href="#item-pi-working-status">@yusukeshib/pi-working-status</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:@yusukeshib/pi-working-status<span class="meta-k">版本</span> <code>0.1.1</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/@yusukeshib/pi-working-status/package.json</span></p><p class="entry-summary">把 pi 那句 Working... 换成一行实时状态，跟着一轮里的每个阶段变。</p><table class="cmd">
+</table></div></article>
+<article class="entry" id="item-pi-working-status" data-kind="package"><h3><a href="#item-pi-working-status">@yusukeshib/pi-working-status</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:@yusukeshib/pi-working-status<span class="meta-k">版本</span> <code>0.1.1</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/@yusukeshib/pi-working-status/package.json</span></p><p class="entry-summary">把 pi 那句 Working... 换成一行实时状态，跟着一轮里的每个阶段变。</p><div class="tw"><table class="cmd">
 <thead><tr><th>名称</th><th>参数</th><th>作用</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>/working-status</code></td><td><code>[on|off]</code></td><td>开关这一行状态显示</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/@yusukeshib/pi-working-status/README.md:61</span></td></tr>
 </tbody>
-</table>
-<h4>相关文件</h4><table>
+</table></div>
+<h4>相关文件</h4><div class="tw"><table>
 <thead><tr><th>路径</th><th>含义</th></tr></thead>
 <tbody>
 <tr><td><code>&lt;PI_HOME&gt;/npm/node_modules/@yusukeshib/pi-working-status/</code></td><td>包目录：extensions 与预览图</td></tr>
 </tbody>
-</table></article>
+</table></div></article>
 <article class="entry" id="item-pi-tui-plus" data-kind="package"><h3><a href="#item-pi-tui-plus">pi-tui-plus</a></h3><p class="entry-meta"><span class="meta-k">来自</span> 本地路径 ~/.pi/packages/pi-tui<span class="meta-k">版本</span> <code>0.4.1</code><span class="meta-k">版本源</span> <span class="src">~/.pi/packages/pi-tui/package.json</span></p><p class="entry-summary">pi-open-tui 的自有分支：Starship 风格底栏、可点模型选择器、网关积分状态行。</p><h4>使用场景</h4><ul class="scenes"><li>想换掉默认 TUI：底栏分段、光标样式、图标与遥测都能配 <span class="src">~/.pi/packages/pi-tui/README.zh-CN.md:9</span></li></ul>
-<table class="cmd">
+<div class="tw"><table class="cmd">
 <thead><tr><th>名称</th><th>参数</th><th>作用</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>/open-tui</code></td><td><code></code></td><td>打开设置窗口：常规 / 外观 / 底栏 / 遥测四页</td><td><span class="src">~/.pi/packages/pi-tui/README.zh-CN.md:54</span></td></tr>
 </tbody>
-</table>
-<table class="cfg">
+</table></div>
+<div class="tw"><table class="cfg">
 <thead><tr><th>键</th><th>含义</th><th>默认值</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>cursorStyle</code></td><td>光标样式（示例值 block）</td><td><code>block</code></td><td><span class="src">~/.pi/packages/pi-tui/README.zh-CN.md:61</span></td></tr>
 <tr><td><code>footerSegments</code></td><td>底栏显示哪些段：cwd / gitBranch / gitStatus / runtime / context / tokens / cost / extensionStatuses 等</td><td><code>文档未载</code></td><td><span class="src">~/.pi/packages/pi-tui/README.zh-CN.md:65-78</span></td></tr>
 </tbody>
-</table>
-<h4>相关文件</h4><table>
+</table></div>
+<h4>相关文件</h4><div class="tw"><table>
 <thead><tr><th>路径</th><th>含义</th></tr></thead>
 <tbody>
 <tr><td><code>~/.pi/agent/open-tui.json</code></td><td>设置文件的落点</td></tr>
 </tbody>
-</table></article>
+</table></div></article>
 </section>
 <section data-section="mcp" id="sec-mcp">
 <h2>MCP server</h2>
-<article class="entry" id="item-mcp-rea" data-kind="mcp"><h3><a href="#item-mcp-rea">rea</a></h3><p class="entry-meta"><span class="meta-k">来自</span> stdio（由 pi-mcp-adapter 接管）</p><p class="entry-summary">本机唯一登记的 MCP server：以 stdio 启动的 rea-agents，逆向工程与运行时证据类工具都在它那边。</p><table class="cmd">
+<article class="entry" id="item-mcp-rea" data-kind="mcp"><h3><a href="#item-mcp-rea">rea</a></h3><p class="entry-meta"><span class="meta-k">来自</span> stdio（由 pi-mcp-adapter 接管）</p><p class="entry-summary">本机唯一登记的 MCP server：以 stdio 启动的 rea-agents，逆向工程与运行时证据类工具都在它那边。</p><div class="tw"><table class="cmd">
 <thead><tr><th>名称</th><th>参数</th><th>作用</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>mcp</code></td><td><code>{ action: &quot;list&quot; }</code></td><td>列出该 server 暴露的工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-mcp-adapter/README.md:145</span></td></tr>
 <tr><td><code>mcp</code></td><td><code>{ describe }</code></td><td>看某个工具的参数</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-mcp-adapter/README.md:106</span></td></tr>
 <tr><td><code>mcp</code></td><td><code>{ tool, args }</code></td><td>调用一个工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-mcp-adapter/README.md:117</span></td></tr>
 </tbody>
-</table>
-<table class="cfg">
+</table></div>
+<div class="tw"><table class="cfg">
 <thead><tr><th>键</th><th>含义</th><th>默认值</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>mcpServers.rea.type</code></td><td>stdio：由 pi 起子进程，不用 HTTP</td><td><code>stdio</code></td><td><span class="src">&lt;PI_HOME&gt;/mcp.json</span></td></tr>
 <tr><td><code>mcpServers.rea.command / args</code></td><td>node 可执行文件 + rea-agents 的 mcp 入口脚本（npx 缓存路径）</td><td><code>文档未载</code></td><td><span class="src">&lt;PI_HOME&gt;/mcp.json</span></td></tr>
 <tr><td><code>builtin:mcp</code></td><td>settings.json 的 extensions 里用 -builtin:mcp 关掉 pi 内置 MCP，能力交给适配器</td><td><code>已禁用（本机）</code></td><td><span class="src">&lt;PI_HOME&gt;/settings.json</span></td></tr>
 </tbody>
-</table>
-<h4>相关文件</h4><table>
+</table></div>
+<h4>相关文件</h4><div class="tw"><table>
 <thead><tr><th>路径</th><th>含义</th></tr></thead>
 <tbody>
 <tr><td><code>&lt;PI_HOME&gt;/mcp.json</code></td><td>MCP server 登记处</td></tr>
 </tbody>
-</table></article>
+</table></div></article>
 </section>
 <section data-section="skill" id="sec-skills">
 <h2>技能清单</h2>
 <article class="entry" id="item-skills" data-kind="skill"><h3><a href="#item-skills">技能清单（全量）</a></h3><p class="entry-meta"><span class="meta-k">来自</span> 多个来源</p><p class="entry-summary">这台机器上 pi 能加载的全部技能，按来源分组：用户级目录、pi 自带目录、各包内置。</p><details class="fold" data-fold="rows"><summary>共 69 行，展开查看</summary>
-<table class="rows">
+<div class="tw"><table class="rows">
 <thead><tr><th>技能</th><th>一句话</th><th>触发方式</th><th>来源</th></tr></thead>
 <tbody>
 <tr><td>anatomy</td><td>画等轴测 SVG 技术图解，带交互动效，可出 A4 PDF</td><td><code>/skill:anatomy</code>；描述含 isometric illustration / explainer 等</td><td>用户级 · ~/.agents/skills/</td></tr>
@@ -789,12 +845,12 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td>pi-subagents</td><td>经操作者许可把工作委派给 pi 子代理</td><td><code>/skill:pi-subagents</code>；&quot;operator asks for it&quot;（描述原文：after the operator asks for it）</td><td>包内置 · pi-subagents</td></tr>
 <tr><td>plannotator</td><td>Plannotator 使用参考：计划/代码评审、标注、导出、Inbox</td><td>仅 <code>/skill:plannotator</code>（<code>disable-model-invocation: true</code>）</td><td>包内置 · @plannotator/pi-extension</td></tr>
 </tbody>
-</table>
+</table></div>
 </details></article>
 </section>
 <section data-section="tool" id="sec-tools">
 <h2>内置工具</h2>
-<article class="entry" id="item-tools-core" data-kind="tool"><h3><a href="#item-tools-core">pi 核心提供的工具</a></h3><p class="entry-meta"><span class="meta-k">来自</span> pi 核心<span class="meta-k">版本</span> <code>1.4.0</code></p><p class="entry-summary">不装任何包也有的工具：文件读写、搜索、shell、以及随包附带的那几类。</p><table class="rows">
+<article class="entry" id="item-tools-core" data-kind="tool"><h3><a href="#item-tools-core">pi 核心提供的工具</a></h3><p class="entry-meta"><span class="meta-k">来自</span> pi 核心<span class="meta-k">版本</span> <code>1.4.0</code></p><p class="entry-summary">不装任何包也有的工具：文件读写、搜索、shell、以及随包附带的那几类。</p><div class="tw"><table class="rows">
 <thead><tr><th>工具名</th><th>作用</th><th>提供者</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>read</code></td><td>读文本/图片文件，支持 offset/limit，图片以附件返回</td><td>pi 核心</td><td><code>pi 核心包内/dist/core/tools/read.js:51</code>；导出 <code>index.js:8</code></td></tr>
@@ -809,9 +865,9 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td><code>codemode</code></td><td>用脚本批量/编排调用工具，减少往返</td><td>pi 核心</td><td>名称定义 <code>pi 核心包内/dist/extensions/codemode/tool.js:32</code>（<code>CODEMODE_TOOL_NAME</code>），定义体 <code>:256</code>；注册 <code>pi 核心包内/dist/extensions/codemode/index.js:19</code></td></tr>
 <tr><td><code>mcp__&lt;server&gt;__&lt;tool&gt;</code></td><td>静态 MCP 服务器的每个工具逐个代理成独立 pi 工具（名字由 server/tool 生成，冲突加哈希后缀）</td><td>pi 核心</td><td>注册逻辑 <code>pi 核心包内/dist/extensions/mcp/index.js:283</code>（<code>registerTools</code>）→ <code>:336</code>/<code>:377</code> 的 <code>pi.registerTool(definition)</code>；名字正则渲染器 <code>:279-282</code>；<code>registerCommand(&quot;mcp&quot;)</code> 在 <code>:1121</code></td></tr>
 </tbody>
-</table></article>
+</table></div></article>
 <article class="entry" id="item-tools-packages" data-kind="tool"><h3><a href="#item-tools-packages">包提供的工具</a></h3><p class="entry-meta"><span class="meta-k">来自</span> 各包</p><p class="entry-summary">装包之后多出来的工具，每行标提供者 —— 用来判断「不装这个包还剩下什么」。</p><details class="fold" data-fold="rows"><summary>共 50 行，展开查看</summary>
-<table class="rows">
+<div class="tw"><table class="rows">
 <thead><tr><th>工具名</th><th>作用</th><th>提供者</th><th>出处</th></tr></thead>
 <tbody>
 <tr><td><code>bg_run</code></td><td>后台跑一条长命令，立即返回 task ID 与输出路径</td><td>pi-background-tasks</td><td><code>包内src/extension.ts:958-959</code></td></tr>
@@ -865,13 +921,13 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td><code>plannotator_submit_plan</code></td><td>提交计划文件给用户评审</td><td>@plannotator/pi-extension</td><td>名字常量 <code>包内tool-scope.ts:5</code>；注册 <code>包内index.ts:1772-1773</code></td></tr>
 <tr><td><code>plannotator_inbox</code></td><td>读写 Plannotator Inbox：非阻塞地收人稍后回答的问题与消息</td><td>@plannotator/pi-extension</td><td>名字常量 <code>包内generated/inbox/connection.ts:36</code>（<code>INBOX_TOOL_NAME</code>）；注册 <code>包内inbox.ts:169-170</code></td></tr>
 </tbody>
-</table>
+</table></div>
 </details></article>
 </section>
 
 <section id="sec-undoc">
 <h2>文档未载 / 两处矛盾</h2>
-<table>
+<div class="tw"><table>
 <thead><tr><th>主题</th><th>出处 A</th><th>出处 B</th><th>取舍</th></tr></thead>
 <tbody>
 <tr><td><code>pi mcp</code> 子命令集合：synopsis 只写 <code>list|login|logout</code>，正文另有 <code>add</code>/<code>remove</code></td><td><span class="src">&lt;PI_CORE&gt;/docs/cli.md:16</span></td><td><span class="src">&lt;PI_CORE&gt;/docs/cli.md:324、&lt;PI_CORE&gt;/docs/cli.md:326</span></td><td>两处并列保留，未替读者取舍</td></tr>
@@ -900,7 +956,7 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <tr><td>pi-tui-plus：本页与工具开发区的 pi-tui-plus 详情页内容重叠，这里只保留「手册视角」的最小条目</td><td><span class="src">~/.pi/packages/pi-tui/README.zh-CN.md:1</span></td><td><span class="src">&lt;REPO&gt;/tools-dev/pi-tui.html</span></td><td>详情、下载与源码仍以工具开发区那页为准</td></tr>
 <tr><td>rea：rea 自己的工具面不在 pi 的任何文档里，只有 mcp list 能看到；本页只记录它被怎样接进 pi</td><td><span class="src">&lt;PI_HOME&gt;/mcp.json</span></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-mcp-adapter/README.md:19</span></td><td>不抄第三方 server 的工具清单，读者用 mcp list 自查</td></tr>
 </tbody>
-</table>
+</table></div>
 </section>
 
 <section id="sec-update">

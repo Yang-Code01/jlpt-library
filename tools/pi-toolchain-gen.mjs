@@ -87,11 +87,11 @@ const TERMS = [
 function table(head, rows, cls = '') {
   if (!rows.length) return '';
   return (
-    `<table${cls ? ` class="${cls}"` : ''}>\n<thead><tr>` +
+    `<div class="tw"><table${cls ? ` class="${cls}"` : ''}>\n<thead><tr>` +
     head.map((h) => `<th>${esc(h)}</th>`).join('') +
     '</tr></thead>\n<tbody>\n' +
     rows.map((r) => '<tr>' + r.map((c) => `<td>${c}</td>`).join('') + '</tr>').join('\n') +
-    '\n</tbody>\n</table>'
+    '\n</tbody>\n</table></div>'
   );
 }
 
@@ -285,11 +285,13 @@ const CSS = `
 :root{
   --bg:#0f1115; --panel:#161a21; --ink:#e7ecf3; --muted:#9aa6b6; --rule:#26303c;
   --accent:#5ec8c8; --accent-ink:#04212a; --badge:#2a3644;
+  --glow:rgba(94,200,200,.20); --glow-hi:rgba(94,200,200,.42); --scan:rgba(127,180,190,.06);
 }
 @media (prefers-color-scheme: light){
   :root{
     --bg:#f6f7f9; --panel:#ffffff; --ink:#1b2129; --muted:#5b6673; --rule:#dfe4ea;
     --accent:#0b7a86; --accent-ink:#ffffff; --badge:#eceff3;
+    --glow:rgba(11,122,134,.14); --glow-hi:rgba(11,122,134,.28); --scan:rgba(11,122,134,.05);
   }
 }
 *{box-sizing:border-box}
@@ -310,9 +312,13 @@ h3{font-size:16px;margin:22px 0 4px}
 h4{font-size:13px;margin:16px 0 6px;color:var(--muted);text-transform:none;letter-spacing:.02em}
 .layout{display:block}
 .shell{display:grid;grid-template-columns:236px minmax(0,1fr);gap:34px;align-items:start}
-@media (max-width:900px){.shell{grid-template-columns:1fr}}
+@media (max-width:900px){.shell{grid-template-columns:minmax(0,1fr)}}
 .toc{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;
-  position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;font-size:13px}
+  position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;font-size:13px;min-width:0}
+.toc a{overflow-wrap:anywhere}
+/* 宽表格在窄屏上自己滚，不把整页据宽 */
+.tw{overflow-x:auto;max-width:100%}
+.tw table{min-width:0}
 .toc h2{font-size:12px;margin:0 0 8px;border:0;padding:0;color:var(--muted);letter-spacing:.06em}
 .toc ul{margin:0;padding-left:0;list-style:none}
 .toc>ul>li{margin:6px 0 0}
@@ -353,6 +359,47 @@ td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
 .filter-note{color:var(--muted);font-size:12.5px;margin:0 0 10px}
 .note{color:var(--muted);font-size:13px}
 footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:var(--muted);font-size:12.5px}
+
+/* ------------------------------------------------------------------ 回门户按钮
+   固定右上角，仪表盘味道：直角切角 + 发丝边框 + 窄字重等宽字 + 状态点。
+   纯 HTML/CSS/内联 SVG，file 协议直接可用；无 JS 也在；不把任何内容默认藏起来（A10）。 */
+.back-btn{
+  position:fixed;top:14px;right:16px;z-index:60;
+  display:inline-flex;align-items:center;gap:9px;
+  padding:8px 13px 8px 10px;
+  color:var(--ink);text-decoration:none;
+  background-color:var(--panel);
+  background-image:repeating-linear-gradient(0deg,var(--scan) 0 1px,transparent 1px 3px);
+  border:1px solid var(--accent);
+  border-radius:2px;
+  font-family:"Cascadia Code",Consolas,ui-monospace,monospace;
+  font-size:12.5px;font-weight:600;letter-spacing:.1em;
+  clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px));
+  box-shadow:0 0 0 1px var(--glow),0 8px 26px rgba(0,0,0,.28),inset 0 0 22px -14px var(--glow-hi);
+  backdrop-filter:blur(6px);
+  transition:color .16s,border-color .16s,box-shadow .16s,transform .16s
+}
+/* HUD 角标：屏角两条 L 形线，贴切角内侧（切角会裁掉外圈） */
+.back-btn::before,.back-btn::after{content:"";position:absolute;width:8px;height:8px;
+  border:1px solid var(--accent);opacity:.85}
+.back-btn::before{left:3px;top:3px;border-right:0;border-bottom:0}
+.back-btn::after{right:3px;bottom:3px;border-left:0;border-top:0}
+.back-btn:hover{color:var(--accent);text-decoration:none;transform:translateX(-2px);
+  box-shadow:0 0 0 1px var(--glow-hi),0 0 20px var(--glow),0 8px 26px rgba(0,0,0,.28),inset 0 0 26px -12px var(--glow-hi)}
+.back-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.back-btn:hover .bk-txt{color:var(--accent)}
+.back-btn .bk-ico{color:var(--accent);flex:0 0 auto;filter:drop-shadow(0 0 4px var(--glow-hi))}
+.back-btn .bk-txt{line-height:1.1}
+.back-btn .bk-en{font-size:9.5px;letter-spacing:.22em;color:var(--muted);opacity:.9;
+  border-left:1px solid var(--rule);padding-left:9px;margin-left:1px}
+.back-btn .bk-dot{width:5px;height:5px;background:var(--accent);border-radius:50%;
+  box-shadow:0 0 7px var(--accent);animation:bkpulse 2.4s ease-in-out infinite}
+@keyframes bkpulse{0%,100%{opacity:.4;transform:scale(.9)}50%{opacity:1;transform:scale(1.1)}}
+@media (prefers-reduced-motion:reduce){.back-btn .bk-dot{animation:none;opacity:1;transform:none}.back-btn{transition:none}}
+@media (max-width:640px){
+  .back-btn{top:10px;right:10px;gap:7px;padding:7px 10px 7px 8px;font-size:11.5px}
+  .back-btn .bk-en{padding-left:7px;letter-spacing:.16em}
+}
 `;
 
 const SCRIPT = `
@@ -471,6 +518,15 @@ function renderPage(data) {
 <style>${CSS}</style>
 </head>
 <body>
+<a class="back-btn" href="../index.html#tools" data-back="top" aria-label="回到工具开发清单" title="回到工具开发清单">
+<svg class="bk-ico" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false">
+<path d="M20 12H7.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="square"/>
+<path d="M11.6 6.4 6 12l5.6 5.6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="miter"/>
+</svg>
+<span class="bk-dot" aria-hidden="true"></span>
+<span class="bk-txt">返回工具区</span>
+<span class="bk-en">TOOLS</span>
+</a>
 <div class="wrap">
 
 <header class="top">
@@ -628,7 +684,10 @@ const ASSERTIONS = [
         const asSegment = new RegExp(`[\\\\/]${esc2}[\\\\/]`, 'i');
         if (asSegment.test(html)) hits.push(`用户名路径段 ${user}`);
       }
-      if (/[A-Za-z]:[\\/]/.test(html)) hits.push('盘符路径');
+      /* file:// 与 https:// 自带「字母 + 冒号 + 斜杠」，会被盘符正则误伤：
+         先取掉协议前缀再查。 */
+      const noSchemes = html.replace(/file:\/\//g, 'file:').replace(/https?:\/\//g, 'http:');
+      if (/[A-Za-z]:[\\/]/.test(noSchemes)) hits.push('盘符路径');
       if (HOMEDIR && html.includes(HOMEDIR)) hits.push('本机 home');
       if (/AppData/i.test(html)) hits.push('AppData');
       return hits.length ? `出现 ${hits.join('、')}` : null;
@@ -762,20 +821,30 @@ const ASSERTIONS = [
       const body = html.slice(html.indexOf('<body'));
       const markup = body.slice(0, body.indexOf('<script'));
       if (/<[a-z][^>]*\shidden[\s>=]/i.test(markup)) return '标记里有默认 hidden 的元素';
-      if (/display\s*:\s*none/i.test(html)) return '样式里有 display:none';
+      /* 只查样式块与内联 style：正文里提到「display: none」是为了解释为什么不那么干，
+         扫全文会把注释当成违规（这个误报真的发生过一次）。 */
+      const styleBlock = (html.match(/<style>[\s\S]*?<\/style>/g) || []).join('\n');
+      if (/display\s*:\s*none/i.test(styleBlock)) return '样式块里有 display:none';
+      if (/style="[^"]*display\s*:\s*none/i.test(markup)) return '内联 style 里有 display:none';
       if (/class="[^"]*is-filtered/.test(markup)) return '标记里有默认 is-filtered';
       return null;
     },
   },
   {
     id: 'A11',
-    label: '回得去：详情页必须链回门户工具区（tools-dev 下每页都这么干）',
+    label: '回得去：右上角固定按钮 + 页脚链接都要链回门户工具区',
     run(html) {
       /* 详情页是从门户清单点进来的，回不去就等于把读者困在子页。
-         另外三个详情页（pi-tui / wb2api / copilot-cli-guide）都有这一条。 */
-      if (!/<a href="\.\.\/index\.html#tools">/.test(html)) {
-        return '找不到返回门户的链接（应为 <a href="../index.html#tools">）';
+         右边这个按钮与页脚链接是两个独立入口，任一丢了就算回归。 */
+      if (!/<a[^>]+class="back-btn"[^>]+href="\.\.\/index\.html#tools"/.test(html)) {
+        return '右上角缺返回按钮（应为 <a class="back-btn" href="../index.html#tools">）';
       }
+      if (!/data-back="top"/.test(html)) return '返回按钮缺 data-back="top" 标记';
+      if (!/<a href="\.\.\/index\.html#tools">/.test(html)) {
+        return '页脚缺返回链接（应为 <a href="../index.html#tools">）';
+      }
+      /* 按钮必须带图标（内联 SVG）—— 无图标就不是“按钮级”入口了 */
+      if (!/class="back-btn"[\s\S]{0,600}?<svg/.test(html)) return '返回按钮里找不到内联 SVG 图标';
       return null;
     },
   },
