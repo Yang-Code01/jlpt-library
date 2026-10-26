@@ -11,6 +11,10 @@
       "label": "全部"
     },
     {
+      "id": "core",
+      "label": "核心命令"
+    },
+    {
       "id": "package",
       "label": "包与扩展"
     },
@@ -1237,6 +1241,2154 @@
           "choice": "不抄第三方 server 的工具清单，读者用 mcp list 自查"
         }
       ]
+    },
+    {
+      "id": "pi-cli",
+      "kind": "core",
+      "name": "pi 命令行：子命令与 flag",
+      "version": "1.4.0",
+      "provider": "pi 核心",
+      "summary": "pi 自己的命令行面：顶层子命令加全部 flag，收自 docs/cli.md。",
+      "scenes": [],
+      "commands": [],
+      "config": [],
+      "env": [],
+      "files": [],
+      "tableHead": [
+        "命令 / flag",
+        "参数形态",
+        "作用",
+        "出处"
+      ],
+      "rows": [
+        [
+          "`pi`",
+          "`pi [options] [--] [@files...] [messages...]`",
+          "主入口：无参数且 stdin/stdout 是终端时进 TUI",
+          "cli.md:8"
+        ],
+        [
+          "`@path`",
+          "`@<相对路径>`",
+          "把文本文件或图片并入首个 prompt；相对 cwd 解析",
+          "cli.md:35"
+        ],
+        [
+          "`--`",
+          "分隔符",
+          "终止选项解析，使 prompt 可以 `-` 开头",
+          "cli.md:37"
+        ],
+        [
+          "`pi install`",
+          "`pi install <source> [options]`",
+          "安装包",
+          "cli.md:9"
+        ],
+        [
+          "`pi remove`",
+          "`pi remove <source> [options]`",
+          "移除包及其 settings 条目",
+          "cli.md:10"
+        ],
+        [
+          "`pi uninstall`",
+          "`pi uninstall <source> [options]`",
+          "`remove` 的别名",
+          "cli.md:11"
+        ],
+        [
+          "`pi update`",
+          "`pi update [target] [options]`",
+          "无 target 时更新 pi 自身",
+          "cli.md:12"
+        ],
+        [
+          "`pi list`",
+          "`pi list`",
+          "列出已配置的包",
+          "cli.md:13"
+        ],
+        [
+          "`pi config`",
+          "`pi config [options]`",
+          "配置哪些包资源被加载",
+          "cli.md:14"
+        ],
+        [
+          "`pi auth`",
+          "`pi auth <check|print-api-key|print-bearer-token> [options]`",
+          "凭据检查/打印",
+          "cli.md:15"
+        ],
+        [
+          "`pi mcp`",
+          "`pi mcp <list|login|logout> [options]`",
+          "MCP 管理入口（synopsis 仅列三个子命令）",
+          "cli.md:16"
+        ],
+        [
+          "`-p`, `--print`",
+          "无值",
+          "跑完 prompt，把最终助手文本写到 stdout 后退出",
+          "cli.md:45"
+        ],
+        [
+          "`--mode text`",
+          "字面量",
+          "文本输出；但 stdin/stdout 是终端时仍开 TUI",
+          "cli.md:46"
+        ],
+        [
+          "`--mode json`",
+          "字面量",
+          "输出 JSONL 事件到 stdout 后退出",
+          "cli.md:47"
+        ],
+        [
+          "`--mode rpc`",
+          "字面量",
+          "从 stdin 读 JSONL 命令，向 stdout 写响应与事件",
+          "cli.md:48"
+        ],
+        [
+          "`--export`",
+          "`--export <input> [output]`",
+          "把会话文件导出为 HTML 后退出；省略 output 时自行推导",
+          "cli.md:49"
+        ],
+        [
+          "`--provider`",
+          "`--provider <name>`",
+          "把 `--model` 查找限制到单一 provider；必须配 `--model`",
+          "cli.md:63"
+        ],
+        [
+          "`--model`",
+          "`--model <pattern>`",
+          "精确 ID 或模糊 ID/name 匹配，支持 `provider/id` 与 `:<thinking>` 后缀",
+          "cli.md:65"
+        ],
+        [
+          "`--api-key`",
+          "`--api-key <key>`",
+          "非持久化 API key 覆盖；需先经 `--model`/`--models` 选定模型",
+          "cli.md:67"
+        ],
+        [
+          "`--thinking`",
+          "`--thinking <off|minimal|low|medium|high|xhigh|max>`",
+          "设置思考等级，覆盖 `--model` 后缀并按模型能力 clamp",
+          "cli.md:69"
+        ],
+        [
+          "`--models`",
+          "`--models <patterns>`",
+          "逗号分隔的启动/循环模型范围，支持精确 ID、模糊、大小写不敏感 glob 与 `:<thinking>`",
+          "cli.md:71"
+        ],
+        [
+          "`--list-models`",
+          "`--list-models [search]`",
+          "列出可用模型（可模糊过滤）后退出",
+          "cli.md:73"
+        ],
+        [
+          "`-c`, `--continue`",
+          "无值",
+          "继续当前项目最近的会话",
+          "cli.md:86"
+        ],
+        [
+          "`-r`, `--resume`",
+          "无值",
+          "打开会话选择器",
+          "cli.md:88"
+        ],
+        [
+          "`--session`",
+          "`--session <path|id>`",
+          "按路径/精确 ID/部分 ID 打开；优先当前项目，跨项目匹配会提示 fork",
+          "cli.md:90"
+        ],
+        [
+          "`--session-id`",
+          "`--session-id <id>`",
+          "打开指定项目会话 ID，不存在则创建；字符限于字母数字 `.` `_` `-`",
+          "cli.md:92"
+        ],
+        [
+          "`--fork`",
+          "`--fork <path|id>`",
+          "把已有会话 fork 成当前项目的新会话",
+          "cli.md:94"
+        ],
+        [
+          "`--session-dir`",
+          "`--session-dir <dir>`",
+          "覆盖存储与查找；优先于 `PI_CODING_AGENT_SESSION_DIR` 与 `sessionDir`",
+          "cli.md:96"
+        ],
+        [
+          "`--no-session`",
+          "无值",
+          "使用不落盘的内存会话",
+          "cli.md:98"
+        ],
+        [
+          "`-n`, `--name`",
+          "`--name <name>`",
+          "设置会话显示名",
+          "cli.md:100"
+        ],
+        [
+          "`-t`, `--tools`",
+          "`--tools <list>`",
+          "以逗号分隔的 allowlist 替换默认工具选择；条目可为名字或含 `*` 的模式",
+          "cli.md:119"
+        ],
+        [
+          "`-xt`, `--exclude-tools`",
+          "`--exclude-tools <list>`",
+          "在其他所有选择选项（含 MCP）之后禁用指定工具",
+          "cli.md:121"
+        ],
+        [
+          "`-nbt`, `--no-builtin-tools`",
+          "无值",
+          "关默认内置工具，保留扩展与自定义工具",
+          "cli.md:123"
+        ],
+        [
+          "`-nt`, `--no-tools`",
+          "无值",
+          "内置/扩展/自定义/MCP 全部关闭启动",
+          "cli.md:125"
+        ],
+        [
+          "`-e`, `--extension`",
+          "`--extension <path>`",
+          "加载扩展文件/目录或内置扩展（如 `builtin:mcp`）；可重复",
+          "cli.md:194"
+        ],
+        [
+          "`-ne`, `--no-extensions`",
+          "无值",
+          "关发现/配置/内置扩展；显式 `-e` 仍加载",
+          "cli.md:196"
+        ],
+        [
+          "`--no-mcp`",
+          "无值",
+          "本次运行关内置 MCP 支持（无服务器、无 MCP 工具、无 `/mcp`）",
+          "cli.md:198"
+        ],
+        [
+          "`--skill`",
+          "`--skill <path>`",
+          "加载 skill 文件/目录；可重复",
+          "cli.md:200"
+        ],
+        [
+          "`-ns`, `--no-skills`",
+          "无值",
+          "关发现/配置的 skills；显式 `--skill` 仍加载",
+          "cli.md:202"
+        ],
+        [
+          "`--prompt-template`",
+          "`--prompt-template <path>`",
+          "加载 prompt 模板文件/目录；可重复",
+          "cli.md:204"
+        ],
+        [
+          "`-np`, `--no-prompt-templates`",
+          "无值",
+          "关发现/配置的模板；显式路径仍加载",
+          "cli.md:206"
+        ],
+        [
+          "`--theme`",
+          "`--theme <path>`",
+          "加载主题文件/目录；可重复",
+          "cli.md:208"
+        ],
+        [
+          "`--use-theme`",
+          "`--use-theme <name[/name]>`",
+          "选定本次运行的初始交互主题",
+          "cli.md:210"
+        ],
+        [
+          "`--no-themes`",
+          "无值",
+          "关发现/配置的主题；显式 `--theme` 仍加载",
+          "cli.md:212"
+        ],
+        [
+          "`-nc`, `--no-context-files`",
+          "无值",
+          "关 `AGENTS.md` 与 `CLAUDE.md` 发现",
+          "cli.md:214"
+        ],
+        [
+          "`--system-prompt`",
+          "`--system-prompt <text|path>`",
+          "用文本或已存在文件内容替换默认系统提示",
+          "cli.md:229"
+        ],
+        [
+          "`--append-system-prompt`",
+          "`--append-system-prompt <text|path>`",
+          "向系统提示追加文本或文件内容；可重复",
+          "cli.md:231"
+        ],
+        [
+          "`--tui-mode`",
+          "`--tui-mode <fullscreen|regular>`",
+          "终端模式；文档标注 fullscreen 为默认",
+          "cli.md:233"
+        ],
+        [
+          "`--verbose`",
+          "无值",
+          "显示详细启动信息，覆盖 `quietStartup`",
+          "cli.md:235"
+        ],
+        [
+          "`-a`, `--approve`",
+          "无值",
+          "本次进程信任项目本地配置与资源",
+          "cli.md:237"
+        ],
+        [
+          "`-na`, `--no-approve`",
+          "无值",
+          "本次进程忽略受信任门控的项目本地配置与资源",
+          "cli.md:239"
+        ],
+        [
+          "`--offline`",
+          "无值",
+          "关自动联网（含模型目录刷新）；等价 `PI_OFFLINE=1`",
+          "cli.md:241"
+        ],
+        [
+          "`-h`, `--help`",
+          "无值",
+          "显示帮助（含扩展注册的 flag）后退出",
+          "cli.md:243"
+        ],
+        [
+          "`-v`, `--version`",
+          "无值",
+          "显示 pi 版本后退出",
+          "cli.md:245"
+        ],
+        [
+          "`--local` / `-l`",
+          "无值",
+          "用于 `install`/`remove`/`uninstall`/`config`，改用项目 settings 而非全局",
+          "cli.md:267"
+        ],
+        [
+          "`pi update --extensions`",
+          "无值",
+          "更新所有已装包",
+          "cli.md:276"
+        ],
+        [
+          "`pi update <source>`",
+          "位置参数",
+          "更新单个已装包",
+          "cli.md:277"
+        ],
+        [
+          "`pi update --models`",
+          "无值",
+          "刷新模型目录",
+          "cli.md:278"
+        ],
+        [
+          "`pi update --all`",
+          "无值",
+          "同时更新 pi 与所有已装包",
+          "cli.md:279"
+        ],
+        [
+          "`--force`",
+          "无值",
+          "当选中更新包含 pi 时重装 pi",
+          "cli.md:281"
+        ],
+        [
+          "`pi update --self` / `self` / `pi`",
+          "位置参数/flag",
+          "`pi update` 的别名族",
+          "cli.md:288"
+        ],
+        [
+          "`pi update --extension <source>`",
+          "位置参数",
+          "`pi update <source>` 的别名",
+          "cli.md:289"
+        ],
+        [
+          "`--provider`（auth 子命令）",
+          "`--provider <provider>`",
+          "为某 provider 解析凭据（三子命令通用）",
+          "cli.md:309"
+        ],
+        [
+          "`--model`（auth 子命令）",
+          "`--model <model>`",
+          "从模型解析凭据；可与 `--provider` 组合",
+          "cli.md:310"
+        ],
+        [
+          "`--json`（auth check）",
+          "无值",
+          "以 JSON 输出结构化结果",
+          "cli.md:311"
+        ],
+        [
+          "`--credentials`（auth check）",
+          "无值",
+          "ready 时一并输出解析到的凭据",
+          "cli.md:312"
+        ],
+        [
+          "`--no-refresh`（auth check）",
+          "无值",
+          "不刷新过期 OAuth 凭据（默认会刷新）",
+          "cli.md:313"
+        ],
+        [
+          "`--min-expiry`（print-bearer-token）",
+          "`--min-expiry <ms|s|m|h>`",
+          "要求剩余有效期，如 `30m`",
+          "cli.md:314"
+        ],
+        [
+          "`pi mcp add`",
+          "`pi mcp add <server> [options] -- <command> [args...]`",
+          "新增/替换 stdio server 到 `mcp.json`",
+          "cli.md:324"
+        ],
+        [
+          "`--env`（mcp add）",
+          "`--env KEY=VALUE`",
+          "设置 stdio server 环境变量；可重复",
+          "cli.md:324"
+        ],
+        [
+          "`--cwd`（mcp add）",
+          "`--cwd <dir>`",
+          "设置 stdio server 工作目录",
+          "cli.md:324"
+        ],
+        [
+          "`--url`（mcp add）",
+          "`--url <url>`",
+          "新增/替换 streamable HTTP server",
+          "cli.md:325"
+        ],
+        [
+          "`--header`（mcp add）",
+          "`--header KEY=VALUE`",
+          "HTTP 请求头；可重复",
+          "cli.md:325"
+        ],
+        [
+          "`--bearer-token-env-var`",
+          "`--bearer-token-env-var <NAME>`",
+          "发送 `Authorization: Bearer ${NAME}`",
+          "cli.md:325"
+        ],
+        [
+          "`--oauth-client-id` / `--oauth-client-secret` / `--oauth-callback-port` / `--oauth-client-name`",
+          "各自带值",
+          "配置 HTTP server 的 OAuth 认证",
+          "cli.md:325"
+        ],
+        [
+          "`pi mcp remove`",
+          "`pi mcp remove <server>`",
+          "从 `mcp.json` 移除 server；已存 OAuth 凭据保留",
+          "cli.md:326"
+        ],
+        [
+          "`pi mcp list`",
+          "`pi mcp list [--json]`",
+          "连接所有启用 server 并打印状态/工具/错误；异常时退出码 1",
+          "cli.md:327"
+        ],
+        [
+          "`pi mcp login`",
+          "`pi mcp login <server> [--timeout <seconds>]`",
+          "OAuth 登录；`--timeout` 默认 300 秒",
+          "cli.md:328"
+        ],
+        [
+          "`pi mcp logout`",
+          "`pi mcp logout <server>`",
+          "删除该 server 已存 OAuth 凭据",
+          "cli.md:329"
+        ],
+        [
+          "`--local` / `-l`（mcp）",
+          "无值",
+          "`add`/`remove` 改写当前目录 `.pi/mcp.json` 而非 `~/.pi/agent/mcp.json`",
+          "cli.md:331"
+        ],
+        [
+          "`--exposure`（mcp add）",
+          "`--exposure <mode>`",
+          "设置 MCP 工具暴露模式",
+          "cli.md:331"
+        ],
+        [
+          "`--description`（mcp add）",
+          "`--description <text>`",
+          "设置 server 描述",
+          "cli.md:331"
+        ]
+      ],
+      "inDocTotal": 82,
+      "undocumented": []
+    },
+    {
+      "id": "pi-slash",
+      "kind": "core",
+      "name": "pi 斜杠命令",
+      "version": "1.4.0",
+      "provider": "pi 核心",
+      "summary": "会话里能敲的斜杠命令全表，收自 docs/slash-commands.md。",
+      "scenes": [],
+      "commands": [],
+      "config": [],
+      "env": [],
+      "files": [],
+      "tableHead": [
+        "命令",
+        "作用",
+        "出处"
+      ],
+      "rows": [
+        [
+          "`/settings`",
+          "打开设置",
+          "slash-commands.md:11"
+        ],
+        [
+          "`/model [provider/model]`",
+          "选择模型",
+          "slash-commands.md:12"
+        ],
+        [
+          "`/thinking [level]`",
+          "设置思考等级",
+          "slash-commands.md:13"
+        ],
+        [
+          "`/scoped-models`",
+          "配置交互循环使用的模型",
+          "slash-commands.md:14"
+        ],
+        [
+          "`/login [provider]`",
+          "添加 provider 认证",
+          "slash-commands.md:15"
+        ],
+        [
+          "`/logout`",
+          "移除 provider 认证",
+          "slash-commands.md:16"
+        ],
+        [
+          "`/llama`",
+          "管理已配置 llama.cpp router 上的模型",
+          "slash-commands.md:17"
+        ],
+        [
+          "`/new`",
+          "开新会话",
+          "slash-commands.md:23"
+        ],
+        [
+          "`/resume`",
+          "切换到另一个已存会话",
+          "slash-commands.md:24"
+        ],
+        [
+          "`/name [name]`",
+          "设置会话显示名；省略时显示当前名",
+          "slash-commands.md:25"
+        ],
+        [
+          "`/session`",
+          "显示当前会话信息与统计",
+          "slash-commands.md:26"
+        ],
+        [
+          "`/tree`",
+          "在会话树中导航",
+          "slash-commands.md:27"
+        ],
+        [
+          "`/fork`",
+          "从更早的用户消息创建新会话",
+          "slash-commands.md:28"
+        ],
+        [
+          "`/clone`",
+          "在当前位点复制当前会话",
+          "slash-commands.md:29"
+        ],
+        [
+          "`/compact [instructions]`",
+          "压缩当前上下文，可带自定义指令",
+          "slash-commands.md:30"
+        ],
+        [
+          "`/import <path>`",
+          "导入并恢复一个 JSONL 会话",
+          "slash-commands.md:31"
+        ],
+        [
+          "`/copy`",
+          "复制最后一条助手消息",
+          "slash-commands.md:37"
+        ],
+        [
+          "`/export [path]`",
+          "把会话导出为 HTML 或 JSONL",
+          "slash-commands.md:38"
+        ],
+        [
+          "`/share`",
+          "上传会话并返回查看链接",
+          "slash-commands.md:39"
+        ],
+        [
+          "`/bug [description]`",
+          "准备给 pi 开发者的私有缺陷报告",
+          "slash-commands.md:40"
+        ],
+        [
+          "`/trust`",
+          "保存项目信任决定供后续 pi 进程使用",
+          "slash-commands.md:48"
+        ],
+        [
+          "`/reload`",
+          "重载键位、扩展、skills、模板、主题、上下文文件",
+          "slash-commands.md:49"
+        ],
+        [
+          "`/hotkeys`",
+          "显示生效的键盘快捷键",
+          "slash-commands.md:50"
+        ],
+        [
+          "`/changelog`",
+          "显示 changelog 条目",
+          "slash-commands.md:51"
+        ],
+        [
+          "`/quit`",
+          "退出 pi",
+          "slash-commands.md:52"
+        ],
+        [
+          "扩展注册的命令",
+          "带各自参数与补全行为",
+          "slash-commands.md:56"
+        ],
+        [
+          "每个 prompt 模板",
+          "以模板名作为命令",
+          "slash-commands.md:57"
+        ],
+        [
+          "`/skill:name`",
+          "skill 命令（`enableSkillCommands` 开启时）",
+          "slash-commands.md:58"
+        ]
+      ],
+      "inDocTotal": 28,
+      "undocumented": []
+    },
+    {
+      "id": "pi-env",
+      "kind": "core",
+      "name": "pi 环境变量",
+      "version": "1.4.0",
+      "provider": "pi 核心",
+      "summary": "pi 认的环境变量与默认值，收自 docs/environment-variables.md。",
+      "scenes": [],
+      "commands": [],
+      "config": [],
+      "env": [],
+      "files": [],
+      "tableHead": [
+        "变量",
+        "含义",
+        "默认值",
+        "出处"
+      ],
+      "rows": [
+        [
+          "`AI_AGENT=pi`",
+          "通用进程标记，供工具识别启动者",
+          "由 CLI/RPC 入口自动设为 `pi`",
+          "environment-variables.md:15"
+        ],
+        [
+          "`PI_CODING_AGENT=true`",
+          "pi 专用标记，供子进程判断自己跑在 pi 内",
+          "由 CLI/RPC 入口自动设为 `true`",
+          "environment-variables.md:16"
+        ],
+        [
+          "`PI_SESSION_ID`",
+          "当前会话 ID",
+          "每个 shell 命令启动时注入",
+          "environment-variables.md:26"
+        ],
+        [
+          "`PI_SESSION_FILE`",
+          "当前会话 JSONL 的绝对路径",
+          "临时会话下不设",
+          "environment-variables.md:27"
+        ],
+        [
+          "`PI_PROVIDER`",
+          "当前选中的 model provider",
+          "随模型切换",
+          "environment-variables.md:28"
+        ],
+        [
+          "`PI_MODEL`",
+          "当前选中的 model ID",
+          "随模型切换",
+          "environment-variables.md:29"
+        ],
+        [
+          "`PI_REASONING_LEVEL`",
+          "当前生效推理等级：`off`..`max`",
+          "随思考等级变化",
+          "environment-variables.md:30"
+        ],
+        [
+          "`PI_CODING_AGENT_DIR`",
+          "覆盖配置目录",
+          "`~/.pi/agent`",
+          "environment-variables.md:81"
+        ],
+        [
+          "`PI_CODING_AGENT_SESSION_DIR`",
+          "覆盖会话存储目录",
+          "文档未载；被 `--session-dir` 覆盖",
+          "environment-variables.md:82"
+        ],
+        [
+          "`PI_PACKAGE_DIR`",
+          "覆盖包目录（Nix/Guix store 路径用）",
+          "文档未载",
+          "environment-variables.md:83"
+        ],
+        [
+          "`PI_OFFLINE`",
+          "关自动联网（含模型目录刷新）",
+          "文档未载（等价 CLI `--offline`）",
+          "environment-variables.md:84"
+        ],
+        [
+          "`PI_SKIP_VERSION_CHECK`",
+          "关闭对 `pi.dev` 的版本查询",
+          "文档未载",
+          "environment-variables.md:85"
+        ],
+        [
+          "`PI_TELEMETRY`",
+          "覆盖安装/更新遥测与 provider 归属头；接受 `1/true/yes` 或 `0/false/no`",
+          "文档未载",
+          "environment-variables.md:86"
+        ],
+        [
+          "`PI_CODEMODE_MAX_WORKERS`",
+          "进程内跨会话同时存活的 codemode worker 上限；每个脚本最多 256 MB",
+          "`2`",
+          "environment-variables.md:87"
+        ],
+        [
+          "`PI_CACHE_RETENTION`",
+          "设为 `long` 启用（受支持的）provider 长 prompt 缓存",
+          "文档未载",
+          "environment-variables.md:88"
+        ],
+        [
+          "`PI_SHARE_VIEWER_URL`",
+          "覆盖 `/share` 使用的 base URL",
+          "文档未载",
+          "environment-variables.md:89"
+        ],
+        [
+          "`PI_RADIUS_GATEWAY`",
+          "覆盖 `/bug` 上传用的 Radius gateway origin",
+          "文档未载",
+          "environment-variables.md:90"
+        ],
+        [
+          "`PI_HARDWARE_CURSOR`",
+          "设为 `1` 显示硬件光标",
+          "文档未载",
+          "environment-variables.md:91"
+        ],
+        [
+          "`PI_CLIPBOARD_OSC52`",
+          "设为 `1` 在本地剪贴板写入后同时用 OSC 52 发送到终端",
+          "文档未载",
+          "environment-variables.md:92"
+        ],
+        [
+          "`PI_HYPERLINKS`",
+          "覆盖 OSC 8 超链接探测，取值 `1`/`0`/`auto`",
+          "文档未载",
+          "environment-variables.md:93"
+        ],
+        [
+          "`PI_PROGRAM_STATUS`",
+          "覆盖 OSC 7501 program status 探测：`1` 总上报、`0` 从不上报，否则待终端确认",
+          "文档未载",
+          "environment-variables.md:94"
+        ],
+        [
+          "`PI_IMAGE_PROTOCOL`",
+          "覆盖内联图片探测：`kitty`/`iterm2`/`none`/`auto`",
+          "文档未载",
+          "environment-variables.md:95"
+        ],
+        [
+          "`PI_TRUE_COLOR`",
+          "覆盖 truecolor 探测：`1`/`0`/`auto`",
+          "文档未载",
+          "environment-variables.md:96"
+        ],
+        [
+          "`PI_TUI_ESC_TIMEOUT`",
+          "单个 ESC 之后等待多久才当作 Escape，单位毫秒",
+          "SSH 下 `100`，其他情况 `10`",
+          "environment-variables.md:97"
+        ],
+        [
+          "`VISUAL`, `EDITOR`",
+          "`externalEditor` 未设置时的外部编辑器回退",
+          "文档未载（按 shell 环境）",
+          "environment-variables.md:98"
+        ],
+        [
+          "`HTTP_PROXY`, `HTTPS_PROXY`",
+          "出站 HTTP 代理",
+          "文档未载",
+          "environment-variables.md:99"
+        ]
+      ],
+      "inDocTotal": 26,
+      "undocumented": []
+    },
+    {
+      "id": "pi-settings",
+      "kind": "core",
+      "name": "settings.json 配置键",
+      "version": "1.4.0",
+      "provider": "pi 核心",
+      "summary": "settings.json 里能写的键（含嵌套路径），收自 docs/settings.md。",
+      "scenes": [],
+      "commands": [],
+      "config": [],
+      "env": [],
+      "files": [],
+      "tableHead": [
+        "键（含嵌套路径）",
+        "含义",
+        "默认值",
+        "出处"
+      ],
+      "rows": [
+        [
+          "`defaultProvider`",
+          "启动时的 AI provider",
+          "自动（文档写 Automatic）",
+          "settings.md:13"
+        ],
+        [
+          "`defaultModel`",
+          "启动模型 ID",
+          "自动",
+          "settings.md:14"
+        ],
+        [
+          "`defaultThinkingLevel`",
+          "启动思考等级：`off`..`max`",
+          "`\"medium\"`",
+          "settings.md:15"
+        ],
+        [
+          "`modelThinkingLevels`",
+          "按精确 `provider/modelId` 指定各模型启动思考等级",
+          "无",
+          "settings.md:16"
+        ],
+        [
+          "`thinkingBudgets`",
+          "`minimal`/`low`/`medium`/`high` 四档的 token 预算",
+          "内置预算",
+          "settings.md:17"
+        ],
+        [
+          "`enabledModels`",
+          "启动选择与模型循环用的模型模式，格式同 `--models`",
+          "全部可用模型",
+          "settings.md:18"
+        ],
+        [
+          "`hideThinkingBlock`",
+          "在 transcript 中隐藏 thinking 块",
+          "`false`",
+          "settings.md:19"
+        ],
+        [
+          "`showCacheMissNotices`",
+          "提示显著缓存未命中、缓存预热成功、压缩用量、provider 恢复",
+          "`false`",
+          "settings.md:20"
+        ],
+        [
+          "`cacheWarming`",
+          "保活 provider prompt 缓存：`off`/`streaming`/`idle`；仅全局设置",
+          "`\"streaming\"`",
+          "settings.md:21"
+        ],
+        [
+          "`steeringMode`",
+          "排队 steering 消息的投递方式：`all`/`one-at-a-time`",
+          "`\"one-at-a-time\"`",
+          "settings.md:31"
+        ],
+        [
+          "`followUpMode`",
+          "排队 follow-up 消息的投递方式：`all`/`one-at-a-time`",
+          "`\"one-at-a-time\"`",
+          "settings.md:32"
+        ],
+        [
+          "`externalEditor`",
+          "外部编辑器键位打开的编辑器命令",
+          "`$VISUAL` → `$EDITOR` → 平台默认",
+          "settings.md:33"
+        ],
+        [
+          "`doubleEscapeAction`",
+          "空编辑器下双击 Escape 的动作：`tree`/`fork`/`none`",
+          "`\"tree\"`",
+          "settings.md:34"
+        ],
+        [
+          "`treeFilterMode`",
+          "`/tree` 初始过滤：`default`/`no-tools`/`user-only`/`labeled-only`/`all`",
+          "`\"default\"`",
+          "settings.md:35"
+        ],
+        [
+          "`defaultProjectTrust`",
+          "项目信任回退行为：`ask`/`always`/`never`；只能在 agent 目录设置里设",
+          "`\"ask\"`",
+          "settings.md:36"
+        ],
+        [
+          "`defaultTools`",
+          "启动启用的工具；纯名字替换默认，`+name`/`-name` 增删，空数组关全部内置（不含扩展/SDK 工具）",
+          "`read`、`bash`、`edit`、`write`",
+          "settings.md:42"
+        ],
+        [
+          "`codemode.mode`",
+          "`codemode` 激活时如何呈现工具：`on`/`only`",
+          "`\"on\"`",
+          "settings.md:43"
+        ],
+        [
+          "`codemode.inlineBudget`",
+          "`codemode` 工具描述可用于工具声明的估算 token 数（字符/4）；`0` 只列命名空间",
+          "`3000`",
+          "settings.md:44"
+        ],
+        [
+          "`sessionDir`",
+          "会话存储目录；相对路径按工作目录解析，被 `PI_CODING_AGENT_SESSION_DIR` 与 `--session-dir` 覆盖",
+          "agent 会话目录",
+          "settings.md:66"
+        ],
+        [
+          "`sessionShareDestination`",
+          "`/share` 目标：`auto`/`gist`/`radius`",
+          "`\"auto\"`",
+          "settings.md:67"
+        ],
+        [
+          "`compaction.enabled`",
+          "启用自动压缩",
+          "`true`",
+          "settings.md:73"
+        ],
+        [
+          "`compaction.reserveTokens`",
+          "低于该空闲上下文 token 数触发自动压缩",
+          "`16384`",
+          "settings.md:74"
+        ],
+        [
+          "`compaction.keepRecentTokens`",
+          "保留不摘要的最近 token 数",
+          "`20000`",
+          "settings.md:75"
+        ],
+        [
+          "`compaction.modelOverrides`",
+          "按精确 `provider/modelId` 的 token 设置",
+          "无",
+          "settings.md:76"
+        ],
+        [
+          "`branchSummary.reserveTokens`",
+          "摘要分支历史时预留的 token",
+          "`16384`",
+          "settings.md:88"
+        ],
+        [
+          "`branchSummary.skipPrompt`",
+          "跳过分支摘要提示，默认不做摘要",
+          "`false`",
+          "settings.md:89"
+        ],
+        [
+          "`theme`",
+          "内置或自定义主题名；`system` 从终端主题取色",
+          "`\"system\"`",
+          "settings.md:95"
+        ],
+        [
+          "`quietStartup`",
+          "`true` 隐藏启动头与已加载资源列表；`\"header\"` 保留头部但隐藏模型范围行与资源列表",
+          "`false`",
+          "settings.md:96"
+        ],
+        [
+          "`tuiMode`",
+          "交互终端模式：`regular`/`fullscreen`",
+          "`\"fullscreen\"`",
+          "settings.md:97"
+        ],
+        [
+          "`fullscreenExitOutput`",
+          "全屏退出时打印的内容：`transcript`/`resume-hint`",
+          "`\"transcript\"`",
+          "settings.md:98"
+        ],
+        [
+          "`fullscreenScrollbar`",
+          "全屏 transcript 滚动条：`auto`/`always`/`hidden`",
+          "`\"auto\"`",
+          "settings.md:99"
+        ],
+        [
+          "`fullscreenCopyOnSelect`",
+          "全屏模式下自动复制选中文本",
+          "`true`",
+          "settings.md:100"
+        ],
+        [
+          "`fullscreenWheelScrollLines`",
+          "全屏每格滚轮行数，1–100 或 `auto`",
+          "`\"auto\"`",
+          "settings.md:101"
+        ],
+        [
+          "`editorPaddingX`",
+          "编辑器水平内边距，0–3 格",
+          "`0`",
+          "settings.md:102"
+        ],
+        [
+          "`outputPad`",
+          "transcript 水平内边距",
+          "`1`",
+          "settings.md:103"
+        ],
+        [
+          "`autocompleteMaxVisible`",
+          "可见补全条目数，3–20",
+          "`5`",
+          "settings.md:104"
+        ],
+        [
+          "`showHardwareCursor`",
+          "用终端光标替代 pi 自绘光标",
+          "`false`",
+          "settings.md:105"
+        ],
+        [
+          "`terminal.showImages`",
+          "支持时显示内联图片",
+          "`true`",
+          "settings.md:106"
+        ],
+        [
+          "`terminal.imageWidthCells`",
+          "内联图片首选宽度（终端格）",
+          "`60`",
+          "settings.md:107"
+        ],
+        [
+          "`terminal.clearOnShrink`",
+          "渲染内容变短时清空空行",
+          "`false`",
+          "settings.md:108"
+        ],
+        [
+          "`terminal.showTerminalProgress`",
+          "在终端标签显示 OSC 9;4 进度",
+          "`false`",
+          "settings.md:109"
+        ],
+        [
+          "`terminal.hyperlinks`",
+          "覆盖 OSC 8 超链接探测",
+          "`\"auto\"`",
+          "settings.md:110"
+        ],
+        [
+          "`terminal.images`",
+          "覆盖内联图片协议探测：`kitty`/`iterm2`/`auto`/`false`",
+          "`\"auto\"`",
+          "settings.md:111"
+        ],
+        [
+          "`terminal.trueColor`",
+          "覆盖 true-color 探测",
+          "`\"auto\"`",
+          "settings.md:112"
+        ],
+        [
+          "`images.autoResize`",
+          "发给模型前把图片缩到最大 2000×2000",
+          "`true`",
+          "settings.md:113"
+        ],
+        [
+          "`images.blockImages`",
+          "阻止图片发给模型",
+          "`false`",
+          "settings.md:114"
+        ],
+        [
+          "`markdown.codeBlockIndent`",
+          "代码块渲染缩进前缀",
+          "`\"  \"`",
+          "settings.md:115"
+        ],
+        [
+          "`markdown.mermaid`",
+          "Mermaid 渲染模式：`off`/`final`/`streaming`",
+          "`\"streaming\"`",
+          "settings.md:116"
+        ],
+        [
+          "`transport`",
+          "provider 首选传输：`auto`/`sse`/`websocket`/`websocket-cached`",
+          "`\"auto\"`",
+          "settings.md:124"
+        ],
+        [
+          "`httpProxy`",
+          "由 pi 管理的 HTTP 客户端代理 URL，写入 `HTTP_PROXY`/`HTTPS_PROXY`；只能在 agent 目录设置里设",
+          "无",
+          "settings.md:125"
+        ],
+        [
+          "`httpIdleTimeoutMs`",
+          "HTTP 头与体空闲超时毫秒；`0` 关闭",
+          "`300000`",
+          "settings.md:126"
+        ],
+        [
+          "`websocketConnectTimeoutMs`",
+          "WebSocket 连接超时毫秒；`0` 关闭",
+          "`15000`",
+          "settings.md:127"
+        ],
+        [
+          "`retry.enabled`",
+          "启用 agent 级瞬时失败重试",
+          "`true`",
+          "settings.md:128"
+        ],
+        [
+          "`retry.maxRetries`",
+          "agent 级最大重试次数",
+          "`3`",
+          "settings.md:129"
+        ],
+        [
+          "`retry.baseDelayMs`",
+          "指数退避初始延迟毫秒",
+          "`2000`",
+          "settings.md:130"
+        ],
+        [
+          "`retry.maxAgentDelayMs`",
+          "agent 级最大重试延迟毫秒",
+          "`60000`",
+          "settings.md:131"
+        ],
+        [
+          "`retry.provider.timeoutMs`",
+          "provider 请求超时毫秒",
+          "同 `httpIdleTimeoutMs`",
+          "settings.md:132"
+        ],
+        [
+          "`retry.provider.maxRetries`",
+          "provider 级重试次数",
+          "`0`",
+          "settings.md:133"
+        ],
+        [
+          "`retry.provider.maxRetryDelayMs`",
+          "服务器要求延迟的上限毫秒；`0` 取消上限",
+          "`60000`",
+          "settings.md:134"
+        ],
+        [
+          "`shellPath`",
+          "自定义 shell 可执行路径，支持前导 `~`",
+          "平台默认",
+          "settings.md:142"
+        ],
+        [
+          "`shellCommandPrefix`",
+          "前置到每条 shell 命令的前缀",
+          "无",
+          "settings.md:143"
+        ],
+        [
+          "`npmCommand`",
+          "npm 包查找与安装用的命令与参数",
+          "`npm`",
+          "settings.md:144"
+        ],
+        [
+          "`packages`",
+          "npm/git/本地 pi 包来源",
+          "`[]`",
+          "settings.md:154"
+        ],
+        [
+          "`extensions`",
+          "扩展文件或目录",
+          "`[]`",
+          "settings.md:155"
+        ],
+        [
+          "`skills`",
+          "skill 文件或目录",
+          "`[]`",
+          "settings.md:156"
+        ],
+        [
+          "`prompts`",
+          "prompt 模板文件或目录",
+          "`[]`",
+          "settings.md:157"
+        ],
+        [
+          "`themes`",
+          "主题文件或目录",
+          "`[]`",
+          "settings.md:158"
+        ],
+        [
+          "`enableSkillCommands`",
+          "把 skills 注册为 `/skill:name` 命令",
+          "`true`",
+          "settings.md:159"
+        ],
+        [
+          "`collapseChangelog`",
+          "更新后显示精简 changelog",
+          "`false`",
+          "settings.md:169"
+        ],
+        [
+          "`enableInstallTelemetry`",
+          "匿名安装/更新上报与部分 provider 归属头；不控制更新检查",
+          "`true`",
+          "settings.md:170"
+        ],
+        [
+          "`enableAnalytics`",
+          "选择加入分析数据共享（当前仅实验性首次运行设置使用）",
+          "`false`",
+          "settings.md:171"
+        ],
+        [
+          "`warnings.anthropicExtraUsage`",
+          "Anthropic 订阅认证可能产生额外计费时告警",
+          "`true`",
+          "settings.md:172"
+        ]
+      ],
+      "inDocTotal": 72,
+      "undocumented": []
+    },
+    {
+      "id": "skills",
+      "kind": "skill",
+      "name": "技能清单（全量）",
+      "version": "",
+      "provider": "多个来源",
+      "summary": "这台机器上 pi 能加载的全部技能，按来源分组：用户级目录、pi 自带目录、各包内置。",
+      "scenes": [],
+      "commands": [],
+      "config": [],
+      "env": [],
+      "files": [],
+      "tableHead": [
+        "技能",
+        "一句话",
+        "触发方式",
+        "来源"
+      ],
+      "rows": [
+        [
+          "anatomy",
+          "画等轴测 SVG 技术图解，带交互动效，可出 A4 PDF",
+          "`/skill:anatomy`；描述含 isometric illustration / explainer 等",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "ask-matt",
+          "路由器：问该用哪个技能或哪套流程",
+          "仅 `/skill:ask-matt`（disable-model-invocation）",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "chief-of-staff",
+          "在单会话内协调子代理推进长期目标",
+          "仅 `/skill:chief-of-staff`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "claude-handoff",
+          "把当前对话交给新开的后台代理接手",
+          "仅 `/skill:claude-handoff`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "code-review",
+          "双轴评审改动：编码标准与规格，并行子代理",
+          "`/skill:code-review`；\"review a branch/PR\"、\"review since X\"",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "codebase-design",
+          "深模块设计的共享词汇",
+          "`/skill:codebase-design`；\"design/improve a module's interface\"",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "diagnosing-bugs",
+          "难 bug 与性能回归的诊断循环",
+          "`/skill:diagnosing-bugs`；\"diagnose\" / \"debug this\" / 报错变慢",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "doc-cleaner",
+          "PDF/DOCX/XLSX/文本转干净结构化 Markdown",
+          "`/skill:doc-cleaner`；触发词未载",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "domain-modeling",
+          "建立并打磨项目领域模型（词表与 ADR）",
+          "`/skill:domain-modeling`；讨论术语 / 写 GLOSSARY / 记 ADR",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "find-skills",
+          "发现并安装可用的 agent 技能",
+          "`/skill:find-skills`；\"find a skill for X\"、\"how do I do X\"",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "git-guardrails-claude-code",
+          "装 Claude Code hook 在执行前拦危险 git 命令",
+          "`/skill:git-guardrails-claude-code`；想禁 push/reset --hard 等",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "grill-me",
+          "拷问式访谈打磨方案（内部转 grilling）",
+          "仅 `/skill:grill-me`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "grill-with-docs",
+          "拷问式打磨方案，并顺带产出 ADR 与词表",
+          "仅 `/skill:grill-with-docs`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "grilling",
+          "逐轮拷问计划/决策直到达成共识",
+          "`/skill:grilling`；任何 'grill' 触发短语",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "handoff",
+          "把对话压成交接文档给下一个代理",
+          "仅 `/skill:handoff`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "hyperframes",
+          "视频/动效请求的强制入口：选并装工作流",
+          "`/skill:hyperframes`；描述自称 mandatory entry point",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "hyperframes-animation",
+          "HyperFrames 全部动效知识与七种运行时适配",
+          "`/skill:hyperframes-animation`；任何 motion / animation 任务",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "hyperframes-audio",
+          "已放置音频的混音：淡入淡出、闪避、效果链",
+          "`/skill:hyperframes-audio`；混音/音量/效果等需求",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "hyperframes-cli",
+          "HyperFrames CLI 开发循环与渲染排错",
+          "`/skill:hyperframes-cli`；构建或渲染失败诊断",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "hyperframes-core",
+          "合成契约：如何构建一个可渲染项目",
+          "`/skill:hyperframes-core`；写合成 HTML 之前",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "hyperframes-creative",
+          "非动效创意方向：调色、字体、旁白、beat",
+          "`/skill:hyperframes-creative`；设计规范/品牌风格决策",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "hyperframes-keyframes",
+          "推拉摇移、Ken Burns 等可寻址关键帧",
+          "`/skill:hyperframes-keyframes`；镜头移动/关键帧需求",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "hyperframes-registry",
+          "搜索并安装 registry 区块与组件",
+          "`/skill:hyperframes-registry`；brief 命名某个视觉/效果/转场时",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "hyperframes-studio",
+          "Studio 协作：要不要改、计划、时间线布局",
+          "`/skill:hyperframes-studio`；在 Studio 里做项目",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "implement",
+          "依据 spec 或工单实现一块工作",
+          "仅 `/skill:implement`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "implement-spec",
+          "落地 /to-spec 与 /to-tickets 的产物代码",
+          "仅 `/skill:implement-spec`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "improve-codebase-architecture",
+          "扫描深化机会、出 HTML 报告、逐个拷问",
+          "仅 `/skill:improve-codebase-architecture`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "ja-zh-translator",
+          "中日互译、日语释义读音、语法教学与查错",
+          "`/skill:ja-zh-translator`；日汉翻译/敬语/读音/校对",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "loop-me",
+          "就你想搭的工作流发问，只产出 workflow spec",
+          "仅 `/skill:loop-me`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "markitdown",
+          "用 markitdown CLI 把本地文档转 Markdown",
+          "`/skill:markitdown`；\"convert to markdown\"、\"read PDF\"、\"OCR image\" 等",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "media-use",
+          "素材解析/生成/操作/复用的媒体操作系统",
+          "`/skill:media-use`；BGM、配音、字幕、调色、去背等",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "migrate-to-shoehorn",
+          "把测试里的 `as` 断言迁到 shoehorn",
+          "`/skill:migrate-to-shoehorn`；提到 shoehorn 或替换测试 as",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "pr",
+          "撰写 PR 正文",
+          "`/skill:pr`；\"writing a PR body\"",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "prototype",
+          "造一次性原型回答设计问题",
+          "`/skill:prototype`；想验证状态模型或 UI 观感",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "qa-archive",
+          "把指定问答归档为离线可检索 HTML 知识库",
+          "`/skill:qa-archive`（描述明示：仅执行明确发出的归档命令）",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "research",
+          "查一手资料并把结论写成仓库内 Markdown",
+          "`/skill:research`；想研究主题/收文档事实",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "retro",
+          "对编码会话做复盘",
+          "仅 `/skill:retro`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "reverse-engineer-anything",
+          "用 REA 逆向原生/打包/固件/浏览器目标",
+          "`/skill:reverse-engineer-anything`；以成品或运行时证据解释功能",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "scaffold-exercises",
+          "生成带节/题/解/讲义的练习目录结构",
+          "`/skill:scaffold-exercises`；想搭练习或课程章节",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "setup-matt-pocock-skills",
+          "配置本仓 issue tracker、triage 词表、领域文档布局",
+          "仅 `/skill:setup-matt-pocock-skills`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "setup-pre-commit",
+          "装 Husky + lint-staged、类型检查、测试钩子",
+          "`/skill:setup-pre-commit`；想加 pre-commit 钩子",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "setup-ts-deep-modules",
+          "用 dependency-cruiser 把每个包变成深模块",
+          "仅 `/skill:setup-ts-deep-modules`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "tdd",
+          "测试先行开发（红绿重构）",
+          "`/skill:tdd`；\"red-green-refactor\"、想写集成测试",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "teach",
+          "在本工作区内教用户一项技能或概念",
+          "仅 `/skill:teach`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "to-questionnaire",
+          "把答不了的决策转成他人填的问卷",
+          "仅 `/skill:to-questionnaire`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "to-spec",
+          "把当前对话综合成 spec 并发到 issue tracker",
+          "仅 `/skill:to-spec`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "to-tickets",
+          "把计划/spec 拆成带阻塞边的 tracer-bullet 工单",
+          "仅 `/skill:to-tickets`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "triage",
+          "让 issue 与外部 PR 走 triage 状态机",
+          "仅 `/skill:triage`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "wait-what",
+          "让上一条没讲清的消息重新讲一遍",
+          "仅 `/skill:wait-what`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "wayfinder",
+          "把超大工作量规划成决策工单地图",
+          "仅 `/skill:wayfinder`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "wizard",
+          "生成交互式 bash 向导带人走只有人能做的步骤",
+          "`/skill:wizard`；开基础设施/配凭据/CI 密钥/一次性迁移",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "writing-beats",
+          "写作（开采）：把素材编成 beats 旅程",
+          "仅 `/skill:writing-beats`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "writing-for-agents",
+          "写给代理看的文档（技能、AGENTS.md、CLAUDE.md）",
+          "`/skill:writing-for-agents`；创建/编辑技能或 AGENTS.md",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "writing-fragments",
+          "写作（探索）：只挖碎片，先不给结构",
+          "仅 `/skill:writing-fragments`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "writing-shape",
+          "写作（成稿）：把素材逐段塑成文章",
+          "仅 `/skill:writing-shape`",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "xlsx",
+          "以表格文件为输入或交付物的任务",
+          "`/skill:xlsx`；按名/路径提到 xlsx/xlsm/csv/tsv 等",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "xlsx-to-markdown",
+          "把 Excel「表内文档」型设计书忠实转 Markdown",
+          "`/skill:xlsx-to-markdown`；「このxlsxをMarkdown化したい」等",
+          "用户级 · ~/.agents/skills/"
+        ],
+        [
+          "herdr",
+          "控制 Herdr 终端复用器：窗格/标签/工作区/命令/别的代理",
+          "`/skill:herdr`；仅当用户明确提到 Herdr 才用",
+          "pi 自带 · <PI_HOME>/skills/"
+        ],
+        [
+          "context-mode",
+          "用 ctx_execute 等工具处理大输出，不走 Bash/cat",
+          "`/skill:context-mode`；描述里列了大量触发词（analyze logs、summarize output、parse JSON、git log 等），并对超 20 行的 MCP 输出触发",
+          "包内置 · context-mode"
+        ],
+        [
+          "ctx-doctor",
+          "跑 context-mode 诊断：运行时、钩子、FTS5、插件注册",
+          "`/skill:ctx-doctor`（frontmatter `user-invocable: true`，description 写 Trigger: /context-mode:ctx-doctor）",
+          "包内置 · context-mode"
+        ],
+        [
+          "ctx-index",
+          "把本地文件或目录索引进 FTS5 知识库",
+          "`/skill:ctx-index`（Trigger: /context-mode:ctx-index）",
+          "包内置 · context-mode"
+        ],
+        [
+          "ctx-insight",
+          "打开 Insight 团队分析看板",
+          "`/skill:ctx-insight`（Trigger: /context-mode:ctx-insight）",
+          "包内置 · context-mode"
+        ],
+        [
+          "ctx-purge",
+          "清空知识库（破坏性，不可撤销）",
+          "`/skill:ctx-purge`（Trigger: /context-mode:ctx-purge）",
+          "包内置 · context-mode"
+        ],
+        [
+          "ctx-search",
+          "在 FTS5 知识库里检索已索引内容",
+          "`/skill:ctx-search`（Trigger: /context-mode:ctx-search）",
+          "包内置 · context-mode"
+        ],
+        [
+          "ctx-stats",
+          "看本会话省了多少上下文窗口",
+          "`/skill:ctx-stats`（Trigger: /context-mode:ctx-stats）",
+          "包内置 · context-mode"
+        ],
+        [
+          "ctx-upgrade",
+          "从 GitHub 更新 context-mode 并修钩子/设置",
+          "`/skill:ctx-upgrade`（Trigger: /context-mode:ctx-upgrade）",
+          "包内置 · context-mode"
+        ],
+        [
+          "council-mode",
+          "跑一轮有界的、由主管主持的顾问团评议",
+          "`/skill:council-mode`；\"council mode\"、\"convene advisors\"、\"debate a decision\"、\"/council\"",
+          "包内置 · pi-subagents"
+        ],
+        [
+          "pi-subagents",
+          "经操作者许可把工作委派给 pi 子代理",
+          "`/skill:pi-subagents`；\"operator asks for it\"（描述原文：after the operator asks for it）",
+          "包内置 · pi-subagents"
+        ],
+        [
+          "plannotator",
+          "Plannotator 使用参考：计划/代码评审、标注、导出、Inbox",
+          "仅 `/skill:plannotator`（`disable-model-invocation: true`）",
+          "包内置 · @plannotator/pi-extension"
+        ]
+      ],
+      "inDocTotal": 69,
+      "undocumented": []
+    },
+    {
+      "id": "tools-core",
+      "kind": "tool",
+      "name": "pi 核心提供的工具",
+      "version": "1.4.0",
+      "provider": "pi 核心",
+      "summary": "不装任何包也有的工具：文件读写、搜索、shell、以及随包附带的那几类。",
+      "scenes": [],
+      "commands": [],
+      "config": [],
+      "env": [],
+      "files": [],
+      "tableHead": [
+        "工具名",
+        "作用",
+        "出处"
+      ],
+      "rows": [
+        [
+          "`read`",
+          "读文本/图片文件，支持 offset/limit，图片以附件返回",
+          "`pi 核心包内/dist/core/tools/read.js:51`；导出 `index.js:8`"
+        ],
+        [
+          "`bash`",
+          "执行 shell 命令并回传 stdout/stderr",
+          "`pi 核心包内/dist/core/tools/bash.js:313`；导出 `index.js:1`"
+        ],
+        [
+          "`powershell`",
+          "执行 PowerShell 命令（Windows 方言）",
+          "`pi 核心包内/dist/core/tools/powershell.js:16`；导出 `index.js:7`"
+        ],
+        [
+          "`edit`",
+          "唯一精确文本替换（oldText→newText，可多段）",
+          "`pi 核心包内/dist/core/tools/edit.js:83`；导出 `index.js:2`"
+        ],
+        [
+          "`write`",
+          "写文件/整文件覆盖，自动建父目录",
+          "`pi 核心包内/dist/core/tools/write.js:23`；导出 `index.js:10`"
+        ],
+        [
+          "`grep`",
+          "按正则/字面量搜内容，返回文件和行号",
+          "`pi 核心包内/dist/core/tools/grep.js:32`；导出 `index.js:5`"
+        ],
+        [
+          "`find`",
+          "按 glob 找文件",
+          "`pi 核心包内/dist/core/tools/find.js:37`；导出 `index.js:4`"
+        ],
+        [
+          "`ls`",
+          "列目录（可设上限）",
+          "`pi 核心包内/dist/core/tools/ls.js:25`；导出 `index.js:6`"
+        ],
+        [
+          "`tool_search`",
+          "搜索尚未加载的工具并把命中的加载出来",
+          "名称定义 `pi 核心包内/dist/extensions/tool-search/tool.js:11`（`TOOL_SEARCH_TOOL_NAME`），定义体 `:160-168`；注册 `pi 核心包内/dist/extensions/tool-search/index.js:11`"
+        ],
+        [
+          "`codemode`",
+          "用脚本批量/编排调用工具，减少往返",
+          "名称定义 `pi 核心包内/dist/extensions/codemode/tool.js:32`（`CODEMODE_TOOL_NAME`），定义体 `:256`；注册 `pi 核心包内/dist/extensions/codemode/index.js:19`"
+        ],
+        [
+          "`mcp__<server>__<tool>`",
+          "静态 MCP 服务器的每个工具逐个代理成独立 pi 工具（名字由 server/tool 生成，冲突加哈希后缀）",
+          "注册逻辑 `pi 核心包内/dist/extensions/mcp/index.js:283`（`registerTools`）→ `:336`/`:377` 的 `pi.registerTool(definition)`；名字正则渲染器 `:279-282`；`registerCommand(\"mcp\")` 在 `:1121`"
+        ]
+      ],
+      "inDocTotal": 11,
+      "undocumented": []
+    },
+    {
+      "id": "tools-packages",
+      "kind": "tool",
+      "name": "包提供的工具",
+      "version": "",
+      "provider": "各包",
+      "summary": "装包之后多出来的工具，每行标提供者 —— 用来判断「不装这个包还剩下什么」。",
+      "scenes": [],
+      "commands": [],
+      "config": [],
+      "env": [],
+      "files": [],
+      "tableHead": [
+        "工具名",
+        "作用",
+        "提供者",
+        "出处"
+      ],
+      "rows": [
+        [
+          "`bg_run`",
+          "后台跑一条长命令，立即返回 task ID 与输出路径",
+          "pi-background-tasks",
+          "`包内src/extension.ts:958-959`"
+        ],
+        [
+          "`bg_run_pi_attested`",
+          "直接 spawn 一个 `pi --mode json` 子进程并产出严格取证 sidecar（`config.features.attested` 才注册）",
+          "pi-background-tasks",
+          "`包内src/extension.ts:1066-1068`"
+        ],
+        [
+          "`bg_status`",
+          "单次查看某个或全部后台任务状态（不是等待原语）",
+          "pi-background-tasks",
+          "`包内src/extension.ts:1136-1137`"
+        ],
+        [
+          "`bg_logs`",
+          "读后台任务的有界输出，截断时给完整文件路径",
+          "pi-background-tasks",
+          "`包内src/extension.ts:1167-1168`"
+        ],
+        [
+          "`bg_kill`",
+          "按 ID 停掉运行中的后台任务",
+          "pi-background-tasks",
+          "`包内src/extension.ts:1212-1213`"
+        ],
+        [
+          "`bg_delegate`",
+          "把一段工作委派出去（delegate 扩展）",
+          "pi-background-tasks",
+          "名字常量 `包内src/core/delegate/types.ts:32`；注册 `包内src/delegate-extension.ts:500-501`"
+        ],
+        [
+          "`bg_result`",
+          "取被委派工作的结果（delegate 扩展）",
+          "pi-background-tasks",
+          "名字常量 `包内src/core/delegate/types.ts:33`；注册 `包内src/delegate-extension.ts:757-758`"
+        ],
+        [
+          "`delegate_read_artifact`",
+          "子代理侧读取委派产物",
+          "pi-background-tasks",
+          "`包内src/delegate-child-extension.ts:600-601`"
+        ],
+        [
+          "`fusion_reason`",
+          "Fusion 推理工作流（起一个后台 Fusion 任务）",
+          "pi-background-tasks",
+          "名字常量 `包内src/core/fusion/workflows.ts:23`；注册 `包内src/fusion-extension.ts:1287`"
+        ],
+        [
+          "`fusion_investigate`",
+          "Fusion 调查工作流",
+          "pi-background-tasks",
+          "名字常量 `包内src/core/fusion/workflows.ts:24`；注册 `包内src/fusion-extension.ts:1305`"
+        ],
+        [
+          "`fusion_research`",
+          "Fusion 研究工作流",
+          "pi-background-tasks",
+          "名字常量 `包内src/core/fusion/workflows.ts:25`；注册 `包内src/fusion-extension.ts:1324`"
+        ],
+        [
+          "`fusion_validate`",
+          "Fusion 验证工作流",
+          "pi-background-tasks",
+          "名字常量 `包内src/core/fusion/workflows.ts:26`；注册 `包内src/fusion-extension.ts:1344`"
+        ],
+        [
+          "`fusion_web_fetch`",
+          "抓公开 http(s) URL，返回有界文本/Markdown 与来源（`researchEnabled === '1'` 才注册）",
+          "pi-background-tasks",
+          "名字常量 `包内src/core/fusion/types.ts:69`；注册 `包内src/fusion-child-extension.ts:864-865`"
+        ],
+        [
+          "`subagents_enable`",
+          "空参数加载器：打开委派与管理工具面，不启动任何工作",
+          "pi-subagents",
+          "名字常量 `包内src/extension/tool-activation.js:6`；注册 `包内src/extension/tool-activation.js:125`"
+        ],
+        [
+          "`subagent`",
+          "委派子代理：单/并行/脚本化流程、异步运行、恢复/引导/停止",
+          "pi-subagents",
+          "名字常量 `包内src/extension/tool-activation.js:7`；注册 `包内src/extension/index.js:689-690`"
+        ],
+        [
+          "`bg_wait`",
+          "等后台工作并返回结果（无原生完成通知时的阻塞收集）",
+          "pi-subagents",
+          "名字常量 `包内src/extension/tool-activation.js:9`；注册 `包内src/runs/background/wait-tool.js:41`"
+        ],
+        [
+          "`contact_supervisor`",
+          "子代理向父/主管会话求助：要决策、结构化访谈、进度通报",
+          "pi-subagents",
+          "名字常量 `包内src/intercom/native-supervisor-channel.js:198`，定义 `:199-203`；`herdr` 桥接侧同名注册 `包内src/extension/herdr-pi-bridge.js:96-97`"
+        ],
+        [
+          "`subagent_supervisor`",
+          "父侧通道：reply / pending / status 应答子代理请求",
+          "pi-subagents",
+          "名字常量 `包内src/intercom/native-supervisor-channel.js:16`；定义+注册 `:576-578`（另有 `:719` 条件注册）"
+        ],
+        [
+          "`watchdog_diff`",
+          "评审基线 diff（review fanout 的 watchdog）",
+          "pi-subagents",
+          "名字常量 `包内src/watchdog/diff-tool.js:4`；使用处 `包内src/runs/shared/subagent-prompt-runtime.js:18`（`bundle/chunk-3JCDWF4V.js:823` 里 `pi.registerTool(createWatchdogDiffTool(...))`）"
+        ],
+        [
+          "`mcp`",
+          "MCP 网关：按 URL 装服务器、看状态、搜索/描述、鉴权、调单个 MCP 工具（`mcp({ tool, args })`）",
+          "pi-mcp-adapter",
+          "`包内index.ts:2665-2667`（`registerProxyTool`，`name: \"mcp\"`）"
+        ],
+        [
+          "每服务器一个命名空间代理工具（工具名为每个 server 动态生成）",
+          "把某台 MCP 服务器的工具聚成一个命名空间代理入口",
+          "pi-mcp-adapter",
+          "`包内namespace-tools.ts:260-262`（`pi.registerTool({ name: spec.toolName, … })`）；另有 deferred/direct 工具面 `direct-tools.ts`、`deferred-tool-surface.ts`"
+        ],
+        [
+          "`agent_browser`",
+          "执行单条原生 agent-browser 命令；固定序列用 `batch --bail`",
+          "pi-agent-browser-native",
+          "`包内dist/extensions/agent-browser/index.js:35234-35235`"
+        ],
+        [
+          "`agent_browser_code`",
+          "对持久浏览器跑一段新 JS，用 emit/emitImage 选择输出",
+          "pi-agent-browser-native",
+          "`包内dist/extensions/agent-browser/index.js:35246-35247`"
+        ],
+        [
+          "`agent_browser_tools`",
+          "发现/启用高级能力（action、qa、electron、source、network）",
+          "pi-agent-browser-native",
+          "`包内dist/extensions/agent-browser/index.js:35338-35339`"
+        ],
+        [
+          "`agent_browser_action`",
+          "用稳定定位器或当前 ref 点击/勾选/填写/选择唯一可访问目标",
+          "pi-agent-browser-native",
+          "名字 `包内dist/extensions/agent-browser/index.js:35204`；注册 `:35264-35265`"
+        ],
+        [
+          "`agent_browser_qa`",
+          "对 URL 或已附着页面做可见断言与诊断式 PASS/FAIL",
+          "pi-agent-browser-native",
+          "名字 `:35208`；注册 `:35278-35279`"
+        ],
+        [
+          "`agent_browser_electron`",
+          "发现、隔离启动、探测、清理自有 Electron 桌面应用",
+          "pi-agent-browser-native",
+          "名字 `:35212`；注册 `:35292-35293`"
+        ],
+        [
+          "`agent_browser_source`",
+          "找 DOM/React/本地源码候选（实验性，有界扫描）",
+          "pi-agent-browser-native",
+          "名字 `:35216`；注册 `:35306-35307`"
+        ],
+        [
+          "`agent_browser_network_source`",
+          "把失败请求与发起方、本地源码候选关联（实验性）",
+          "pi-agent-browser-native",
+          "名字 `:35220`；注册 `:35318-35319`"
+        ],
+        [
+          "`ctx_execute`",
+          "在受控运行时里执行命令并只回传结论（大输出不进上下文）",
+          "context-mode",
+          "名字集合 `包内server.bundle.mjs`（`ctx_execute`）；`包内build/adapters/openclaw/mcp-tools.js:62`；注册 `包内build/adapters/pi/mcp-bridge.js:858`"
+        ],
+        [
+          "`ctx_execute_file`",
+          "对单个文件执行处理再回结论（读/改文件首选）",
+          "context-mode",
+          "`openclaw/mcp-tools.js:77`；层级说明 `包内build/adapters/pi/extension.js:579-581`"
+        ],
+        [
+          "`ctx_batch_execute`",
+          "一次跑多命令的研究批处理（层级最高）",
+          "context-mode",
+          "`openclaw/mcp-tools.js:134`；`extension.js:579-581`"
+        ],
+        [
+          "`ctx_index`",
+          "把文件/目录索引进 FTS5 知识库",
+          "context-mode",
+          "`openclaw/mcp-tools.js:92`"
+        ],
+        [
+          "`ctx_search`",
+          "在知识库中检索已索引片段",
+          "context-mode",
+          "`openclaw/mcp-tools.js:106`"
+        ],
+        [
+          "`ctx_fetch_and_index`",
+          "抓网页并索引，后续用 ctx_search 查",
+          "context-mode",
+          "`openclaw/mcp-tools.js:120`"
+        ],
+        [
+          "`ctx_stats`",
+          "本会话上下文节省统计",
+          "context-mode",
+          "`openclaw/mcp-tools.js:147`；`extension.js:172-176`"
+        ],
+        [
+          "`ctx_doctor`",
+          "诊断运行时/钩子/FTS5/注册",
+          "context-mode",
+          "`openclaw/mcp-tools.js:157`"
+        ],
+        [
+          "`ctx_upgrade`",
+          "更新并修钩子与设置",
+          "context-mode",
+          "`openclaw/mcp-tools.js:167`"
+        ],
+        [
+          "`ctx_purge`",
+          "清空知识库（破坏性）",
+          "context-mode",
+          "`openclaw/mcp-tools.js:177`"
+        ],
+        [
+          "`ctx_insight`",
+          "打开 Insight 看板",
+          "context-mode",
+          "`openclaw/mcp-tools.js:196`"
+        ],
+        [
+          "`web_search`",
+          "网络检索（可指定 provider/queries/domainFilter）",
+          "pi-web-access",
+          "注册 `包内index.ts:1422-1423`；默认名 `包内web-tool-core.ts:136-141`（`DEFAULT_TOOL_NAMES.webSearch`）"
+        ],
+        [
+          "`source_check`",
+          "为某个断言收集来源，产出带逐段引用的结构化研究产物",
+          "pi-web-access",
+          "注册 `包内index.ts:1972-1973`；默认名 `web-tool-core.ts:136-141`（`sourceCheck`）"
+        ],
+        [
+          "`fetch_content`",
+          "抓 URL（含图片、YouTube 转录、GitHub 仓库、PDF、本地视频）",
+          "pi-web-access",
+          "注册 `包内index.ts:1995-1996`；默认名 `web-tool-core.ts:136-141`（`fetchContent`）"
+        ],
+        [
+          "`get_search_content`",
+          "分页取回上次搜索/抓取存下的内容，或找匹配段落",
+          "pi-web-access",
+          "注册 `包内index.ts:2187-2188`；默认名 `web-tool-core.ts:136-141`（`getSearchContent`）"
+        ],
+        [
+          "`web_enable`",
+          "空参数加载器：打开已配置的 web 工具面，本身不搜不抓",
+          "pi-web-access",
+          "名字常量 `包内tool-activation.ts:11`（`LOADER_NAME`）；注册 `包内tool-activation.ts:73-74`"
+        ],
+        [
+          "`ask_user_question`",
+          "向用户提结构化选择题/多选/带预览的问题并取回答案（`exposure: \"model-only\"`）",
+          "@juicesharp/rpiv-ask-user-question",
+          "名字常量 `包内ask-user-question.ts:86`；注册 `包内ask-user-question.ts:476-477`（`registerAskUserQuestionTool`）"
+        ],
+        [
+          "`plannotator`",
+          "Plannotator 主入口：计划评审、代码评审、标注文件/URL/目录/本地应用",
+          "@plannotator/pi-extension",
+          "名字常量 `包内generated/plannotator-tool.ts:59`；注册 `包内index.ts:1624-1625`（`agentToolEnabled` 才注册）"
+        ],
+        [
+          "`plannotator_mark_done`",
+          "把已批准计划里的某一步标记为完成",
+          "@plannotator/pi-extension",
+          "名字常量 `包内tool-scope.ts:11`；注册 `包内index.ts:1731-1732`"
+        ],
+        [
+          "`plannotator_submit_plan`",
+          "提交计划文件给用户评审",
+          "@plannotator/pi-extension",
+          "名字常量 `包内tool-scope.ts:5`；注册 `包内index.ts:1772-1773`"
+        ],
+        [
+          "`plannotator_inbox`",
+          "读写 Plannotator Inbox：非阻塞地收人稍后回答的问题与消息",
+          "@plannotator/pi-extension",
+          "名字常量 `包内generated/inbox/connection.ts:36`（`INBOX_TOOL_NAME`）；注册 `包内inbox.ts:169-170`"
+        ]
+      ],
+      "inDocTotal": 50,
+      "undocumented": []
     }
   ]
 }

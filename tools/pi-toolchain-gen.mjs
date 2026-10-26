@@ -61,6 +61,7 @@ const esc = (s) =>
     .replace(/"/g, '&quot;');
 
 const KIND_OF = {
+  core: { label: 'pi 自身命令面', id: 'sec-core' },
   package: { label: '包与扩展', id: 'sec-packages' },
   mcp: { label: 'MCP server', id: 'sec-mcp' },
   skill: { label: '技能清单', id: 'sec-skills' },
@@ -90,12 +91,21 @@ function table(head, rows, cls = '') {
 
 const code = (s) => `<code>${esc(s)}</code>`;
 
+/* 表格单元格：先转义，再把反引号片段渲染成行内 code（真源里用 markdown 写法记命令） */
+const cell = (s) => esc(String(s)).replace(/`([^`]+)`/g, '<code>$1</code>');
+
 /* 折叠：单条目声明总量超过阀值时整块收起。
    注意 <details> 里的内容仍在 DOM 里：Ctrl+F 搜不到，但过滤框命中时由脚本展开，
    且条数守恒断言不因折叠而变松（A7）。 */
 const foldable = (item, kind, summary, body) =>
   item.inDocTotal > FOLD_OVER
     ? `<details class="fold" data-fold="${kind}"><summary>${esc(summary)}</summary>\n${body}\n</details>`
+    : body;
+
+/* 大表按行数判阀，不复用 inDocTotal（两者语义不同：一个数行，一个数命令） */
+const foldRows = (item, summary, body) =>
+  item.rows && item.rows.length > FOLD_OVER
+    ? `<details class="fold" data-fold="rows"><summary>${esc(summary)}</summary>\n${body}\n</details>`
     : body;
 
 /* 出处统一渲染成小字，且已经脱敏（真源里就是占位符） */
@@ -164,6 +174,18 @@ function renderItem(item) {
     );
   }
 
+  /* 大表：清单类条目（命令面 / 技能 / 工具）用 rows 而不是逐条卡片，
+     否则 69 个技能会变成 69 张卡，页面没法扫读。rows 里的单元格按原文渲染，
+     最后一列通常是出处或来源。 */
+  if (item.tableHead && item.rows && item.rows.length) {
+    const body = table(
+      item.tableHead,
+      item.rows.map((r) => r.map((c) => cell(c))),
+      'rows'
+    );
+    blocks.push(foldRows(item, `共 ${item.rows.length} 行，展开查看`, body));
+  }
+
   if (item.files && item.files.length) {
     blocks.push(
       '<h4>相关文件</h4>' +
@@ -194,7 +216,7 @@ function renderItem(item) {
 
 function renderSections(data) {
   const out = [];
-  for (const kind of ['package', 'mcp', 'skill', 'tool']) {
+  for (const kind of ['core', 'package', 'mcp', 'skill', 'tool']) {
     const items = data.items.filter((i) => i.kind === kind);
     if (!items.length) continue;
     const k = KIND_OF[kind];
@@ -225,7 +247,7 @@ function renderUndocumented(data) {
 
 function renderNav(data) {
   const links = [['sec-terms', '术语速查']];
-  for (const kind of ['package', 'mcp', 'skill', 'tool']) {
+  for (const kind of ['core', 'package', 'mcp', 'skill', 'tool']) {
     if (data.items.some((i) => i.kind === kind)) links.push([KIND_OF[kind].id, KIND_OF[kind].label]);
   }
   links.push(['sec-undoc', '文档未载'], ['sec-update', '这份页怎么更新']);
@@ -549,14 +571,16 @@ const ASSERTIONS = [
   },
   {
     id: 'A7',
-    label: '折叠守恒：页内实际命令行数 == 真源声明总数（折叠不算丢）',
+    label: '折叠守恒：页内实际行数 == 真源声明总数（折叠不算丢）',
     run(html, data) {
       const problems = [];
       for (const item of data.items) {
         const block = itemBlock(html, item.id);
-        const rows = countRows(block, 'cmd');
-        const want = item.inDocTotal || 0;
-        if (rows !== want) problems.push(`${item.name}：页内 ${rows} 条，真源声明 ${want} 条`);
+        const listed = (item.commands || []).length + (item.rows || []).length;
+        const rendered = countRows(block, 'cmd') + countRows(block, 'rows');
+        const want = item.inDocTotal == null ? listed : item.inDocTotal;
+        if (rendered !== listed) problems.push(`${item.name}：页内 ${rendered} 行，真源列了 ${listed} 行`);
+        else if (listed !== want) problems.push(`${item.name}：真源列了 ${listed} 行，声明 ${want} 行`);
       }
       return problems.length ? problems.join('；') : null;
     },

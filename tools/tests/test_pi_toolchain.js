@@ -160,13 +160,34 @@ if (hasPiHome) {
   pass++; /* 本机没有 pi：A6 自报跳过，这一段不适用 */
 }
 
-/* 折叠机制：本版没有真实超过阀值的条目，用沙箱证明「过阀才折、内容仍在」（A7 守恒） */
+/* 折叠阀值：过 30 才折，且折叠不算丢行（A7 守恒） */
 scaffold();
-ok(!/<details class="fold"/.test(readPage()), '未过阀值时不应出现折叠块');
-mutateData((d) => { d.items[0].inDocTotal = 31; });
+{
+  const d = JSON.parse(fs.readFileSync(dataIn(), 'utf8'));
+  const page = readPage();
+  const blockOf = (id) => {
+    const i = page.indexOf(`id="item-${id}"`);
+    return i < 0 ? '' : page.slice(i, page.indexOf('</article>', i));
+  };
+  const expectsFold = (it) =>
+    ((it.commands || []).length > 0 && (it.inDocTotal || 0) > 30) || (it.rows || []).length > 30;
+
+  const big = d.items.filter(expectsFold);
+  ok(big.length > 0, '真源里应有超过折叠阀值的条目（否则这条断言是空转）');
+  for (const it of big) {
+    ok(/<details class="fold"/.test(blockOf(it.id)), `${it.id} 行数过阀值应被折叠`);
+  }
+  for (const it of d.items.filter((i) => !expectsFold(i))) {
+    ok(!/<details class="fold"/.test(blockOf(it.id)), `${it.id} 未过阀值不应折叠`);
+  }
+}
+
+/* 真源自身不一致（声明数 ≠ 已列数）时，write 也必须报错退出 1 并点名 A7 */
+mutateData((d) => {
+  const item = d.items.find((i) => (i.commands || []).length > 0);
+  item.inDocTotal = item.commands.length + 1;
+});
 const grown = run([path.join(TMP, 'tools', 'pi-toolchain-gen.mjs')], TMP);
-const foldedHtml = fs.readFileSync(pageIn(), 'utf8');
-ok(/<details class="fold"/.test(foldedHtml), `inDocTotal 过阀值后应渲染折叠块（write 退出码 ${grown.status}）`);
 ok(grown.status === 1, `真源声明数与已列数不符时 write 也应报错退出 1（实际 ${grown.status}）`);
 ok(/A7/.test(grown.stdout || ''), `write 的报错应点名 A7（实际：${grown.stdout}）`);
 
