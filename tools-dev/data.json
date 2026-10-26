@@ -5,7 +5,8 @@
     "TUI",
     "网关",
     "离线脚本",
-    "CLI 指南"
+    "CLI 指南",
+    "插件手册"
   ],
   "tools": [
     {
@@ -53,6 +54,19 @@
       "page": "pi-tui.html",
       "dir": "../pi-tui",
       "download": "downloads/pi-tui-0.4.1.zip"
+    },
+    {
+      "id": "pi-toolchain",
+      "title": "Pi 工具链手册",
+      "tags": [
+        "插件手册",
+        "CLI 指南"
+      ],
+      "status": "可用",
+      "version": "1.0.0",
+      "updated": "2026-10-24",
+      "summary": "本机 pi 装了哪些包、每个包的命令与配置在哪、有哪些技能与内置工具、哪些地方文档根本没写；内容由 tools-dev/pi-toolchain.data.json 生成，可离线过滤检索。",
+      "page": "pi-toolchain.html"
     }
   ]
 }

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pi 工具链手册</title>
+<meta name="description" content="本机 pi 装了哪些包、每个包怎么用、命令与配置在哪、哪些文档根本没写。">
+<style>
+:root{
+  --bg:#0f1115; --panel:#161a21; --ink:#e7ecf3; --muted:#9aa6b6; --rule:#26303c;
+  --accent:#5ec8c8; --accent-ink:#04212a; --badge:#2a3644;
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --ink:#1b2129; --muted:#5b6673; --rule:#dfe4ea;
+    --accent:#0b7a86; --accent-ink:#ffffff; --badge:#eceff3;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:15px/1.65 "Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:"Cascadia Code",Consolas,ui-monospace,monospace;font-size:.9em;
+  background:var(--badge);padding:.05em .35em;border-radius:4px}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 20px 72px}
+header.top{border-bottom:1px solid var(--rule);padding-bottom:20px;margin-bottom:28px}
+h1{font-size:28px;margin:0 0 6px}
+.sub{color:var(--muted);margin:0 0 14px}
+.facts{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--muted);font-size:13px;margin:0 0 18px}
+.facts code{background:var(--badge)}
+h2{font-size:19px;margin:34px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--rule)}
+h3{font-size:16px;margin:22px 0 4px}
+h4{font-size:13px;margin:16px 0 6px;color:var(--muted);text-transform:none;letter-spacing:.02em}
+.layout{display:block}
+.toc{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;margin:0 0 26px}
+.toc h2{font-size:13px;margin:0 0 8px;border:0;padding:0;color:var(--muted);letter-spacing:.06em}
+.toc ul{margin:0;padding-left:18px}
+.toc li{margin:2px 0}
+table{width:100%;border-collapse:collapse;margin:6px 0 4px;font-size:13.5px}
+th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{color:var(--muted);font-weight:600;white-space:nowrap}
+td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
+.src{color:var(--muted);font-size:12px;word-break:break-all}
+.entry{background:var(--panel);border:1px solid var(--rule);border-radius:10px;
+  padding:14px 18px 18px;margin:14px 0}
+.entry-meta{color:var(--muted);font-size:12.5px;margin:0 0 6px;display:flex;flex-wrap:wrap;gap:6px 16px}
+.meta-k{color:var(--muted);opacity:.75;margin-right:2px}
+.entry-summary{margin:0 0 4px}
+.badge{background:var(--badge);color:var(--muted);font-size:11px;padding:.1em .45em;border-radius:999px}
+.scenes{margin:4px 0 8px;padding-left:20px}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 20px}
+#q{flex:1 1 240px;min-width:180px;padding:8px 12px;border-radius:8px;
+  border:1px solid var(--rule);background:var(--panel);color:var(--ink);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--rule);background:var(--panel);color:var(--ink);
+  padding:5px 11px;border-radius:999px;font-size:12.5px;cursor:pointer;font-family:inherit}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.filter-note{color:var(--muted);font-size:12.5px;margin:0 0 10px}
+.note{color:var(--muted);font-size:13px}
+footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:var(--muted);font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+<h1>Pi 工具链手册</h1>
+<p class="sub">本机 pi 装了哪些包、每个包怎么用、命令与配置在哪、哪些文档根本没写。</p>
+<p class="facts">
+<span>采集日期 <code>2026-10-24</code></span>
+<span>pi 核心 <code>@earendil-works/pi-coding-agent</code> <code>1.4.0</code></span>
+<span>已装包 <code>11</code> 个</span>
+</p>
+<h2 id="sec-versions">版本基线</h2>
+<p class="note">这张表是这一版内容的基线：下面的命令与配置都是对着这些版本抄的。</p>
+<table class="ver">
+<thead><tr><th>包</th><th>版本</th><th>来自</th></tr></thead>
+<tbody>
+<tr data-pkg="pi-mcp-adapter" data-ver="6.0.0"><td><code>pi-mcp-adapter</code></td><td class="num">6.0.0</td><td>npm:pi-mcp-adapter</td></tr>
+<tr data-pkg="pi-web-access" data-ver="0.44.0"><td><code>pi-web-access</code></td><td class="num">0.44.0</td><td>npm:pi-web-access</td></tr>
+<tr data-pkg="@juicesharp/rpiv-ask-user-question" data-ver="2.15.0"><td><code>@juicesharp/rpiv-ask-user-question</code></td><td class="num">2.15.0</td><td>npm:@juicesharp/rpiv-ask-user-question</td></tr>
+<tr data-pkg="pi-background-tasks" data-ver="2.6.10"><td><code>pi-background-tasks</code></td><td class="num">2.6.10</td><td>npm:pi-background-tasks</td></tr>
+<tr data-pkg="@plannotator/pi-extension" data-ver="0.28.30"><td><code>@plannotator/pi-extension</code></td><td class="num">0.28.30</td><td>npm:@plannotator/pi-extension</td></tr>
+<tr data-pkg="pi-agent-browser-native" data-ver="0.9.6"><td><code>pi-agent-browser-native</code></td><td class="num">0.9.6</td><td>npm:pi-agent-browser-native</td></tr>
+<tr data-pkg="context-mode" data-ver="1.0.169"><td><code>context-mode</code></td><td class="num">1.0.169</td><td>npm:context-mode</td></tr>
+<tr data-pkg="pi-subagents" data-ver="0.82.1"><td><code>pi-subagents</code></td><td class="num">0.82.1</td><td>npm:pi-subagents</td></tr>
+<tr data-pkg="pi-tui-plus" data-ver="0.4.1"><td><code>pi-tui-plus</code> <span class="badge">本地路径</span></td><td class="num">0.4.1</td><td>本地路径 ~/.pi/packages/pi-tui</td></tr>
+<tr data-pkg="pi-compact-transcript" data-ver="0.12.0"><td><code>pi-compact-transcript</code></td><td class="num">0.12.0</td><td>npm:pi-compact-transcript</td></tr>
+<tr data-pkg="@yusukeshib/pi-working-status" data-ver="0.1.1"><td><code>@yusukeshib/pi-working-status</code></td><td class="num">0.1.1</td><td>npm:@yusukeshib/pi-working-status</td></tr>
+</tbody>
+</table>
+</header>
+
+<nav class="toc" aria-label="目录"><h2>目录</h2><ul><li><a href="#sec-terms">术语速查</a></li><li><a href="#sec-packages">包与扩展</a></li><li><a href="#sec-undoc">文档未载</a></li><li><a href="#sec-update">这份页怎么更新</a></li></ul></nav>
+
+<main>
+<section id="sec-terms">
+<h2>术语速查</h2>
+<table>
+<thead><tr><th>词</th><th>本页的用法</th></tr></thead>
+<tbody>
+<tr><td>包（package）</td><td>pi 用 `pi install` 装进来的 npm 包或本地路径包，靠 package.json 的 `pi` 字段声明要加载什么。</td></tr>
+<tr><td>扩展（extension）</td><td>包（或 &lt;PI_HOME&gt;/extensions/）导出的代码，给 pi 加工具、改界面、拦事件。一个包可以带多个扩展。</td></tr>
+<tr><td>插件（plugin）</td><td>口语词，本页不用它做技术分类：一个包可能同时带扩展、技能和 prompt。</td></tr>
+<tr><td>MCP server</td><td>外部进程，按 Model Context Protocol 把工具暴露给 pi；本机由适配器包接管，不走 pi 内置实现。</td></tr>
+<tr><td>技能（skill）</td><td>一段带 frontmatter 的 SKILL.md，模型按需加载；来源可以是用户目录、pi 自带目录，或某个包。</td></tr>
+<tr><td>工具（tool）</td><td>模型在会话里能直接调用的函数。可能由 pi 核心提供，也可能由某个包注册。</td></tr>
+<tr><td>真源 / 生成物</td><td>真源是 data.json（手改这个）；生成物是这一页（重跑生成器才变）。</td></tr>
+</tbody>
+</table>
+</section>
+
+<div class="toolbar">
+<input id="q" type="search" placeholder="过滤：名称 / 描述 / 命令 / 配置（Esc 清空）" aria-label="过滤条目">
+<div class="chips" role="group" aria-label="按类型筛选"><button type="button" class="chip" data-chip="all" aria-pressed="true">全部</button><button type="button" class="chip" data-chip="package" aria-pressed="false">包与扩展</button><button type="button" class="chip" data-chip="mcp" aria-pressed="false">MCP</button><button type="button" class="chip" data-chip="skill" aria-pressed="false">技能</button><button type="button" class="chip" data-chip="tool" aria-pressed="false">内置工具</button></div>
+</div>
+<p class="filter-note">显示 <span id="count">1 / 1</span> 条</p>
+
+<section data-section="package" id="sec-packages">
+<h2>包与扩展</h2>
+<article class="entry" id="item-context-mode" data-kind="package"><h3><a href="#item-context-mode">context-mode</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:context-mode<span class="meta-k">版本</span> <code>1.0.169</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/package.json</span></p><p class="entry-summary">把代码执行搬进沙箱、只把结论倒回上下文的 MCP 插件，用来省上下文窗口。</p><h4>相关文件</h4><table>
+<thead><tr><th>路径</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td><code>&lt;PI_HOME&gt;/npm/node_modules/context-mode/</code></td><td>包目录：pi 侧扩展入口与内置技能都在这里</td></tr>
+</tbody>
+</table></article>
+</section>
+
+<section id="sec-undoc">
+<h2>文档未载 / 两处矛盾</h2>
+<p class="note">这一版没有登记到「文档未载 / 两处矛盾」的条目。</p>
+</section>
+
+<section id="sec-update">
+<h2>这份页怎么更新</h2>
+<p>这一页是生成物，不要直接改 <code>tools-dev/pi-toolchain.html</code>。真源只有一份：<code>tools-dev/pi-toolchain.data.json</code>。</p>
+<ol>
+<li>改真源：新增一个包就往 <code>items</code> 里加一条，<code>id</code> 必须唯一且与页内锚点同名；<code>src</code> 一律写成 <code>~/</code>、<code>&lt;PI_HOME&gt;</code>、<code>&lt;REPO&gt;</code>、<code>&lt;USER&gt;</code> 这类占位符，不许写真实路径。</li>
+<li>重生成：<code>node tools/pi-toolchain-gen.mjs</code>。</li>
+<li>校验：<code>node tools/pi-toolchain-gen.mjs check</code>，再跑 <code>node tools/test.mjs</code>。</li>
+<li>新增包要同时动三处：真源的 <code>items</code> 与 <code>packages</code>、<code>collectedAt</code> 日期、以及包版本变化时的 <code>version</code>/<code>versionFrom</code>。</li>
+</ol>
+</section>
+</main>
+
+<footer>
+<p>采集于 2026-10-24，对应 pi 核心 1.4.0。内容随版本变化：重跑生成器即刷新。</p>
+</footer>
+
+</div>
+<script>
+(function(){
+  var q=document.getElementById('q');
+  var count=document.getElementById('count');
+  var chips=[].slice.call(document.querySelectorAll('.chip'));
+  var entries=[].slice.call(document.querySelectorAll('[data-kind]'));
+  var sections=[].slice.call(document.querySelectorAll('section[data-section]'));
+  var active='all';
+  function apply(){
+    var needle=(q.value||'').trim().toLowerCase();
+    var shown=0;
+    entries.forEach(function(el){
+      var okKind=(active==='all')||(el.getAttribute('data-kind')===active);
+      var okText=!needle||el.textContent.toLowerCase().indexOf(needle)>=0;
+      var on=okKind&&okText;
+      if(on){el.removeAttribute('hidden');shown++;}else{el.setAttribute('hidden','');}
+    });
+    sections.forEach(function(sec){
+      var any=sec.querySelector('[data-kind]:not([hidden])');
+      if(any){sec.removeAttribute('hidden');}else{sec.setAttribute('hidden','');}
+    });
+    if(count){count.textContent=shown+' / '+entries.length;}
+  }
+  chips.forEach(function(chip){
+    chip.addEventListener('click',function(){
+      active=chip.getAttribute('data-chip');
+      chips.forEach(function(other){
+        other.setAttribute('aria-pressed',String(other===chip));
+      });
+      apply();
+    });
+  });
+  if(q){q.addEventListener('input',apply);}
+  apply();
+})();
+</script>
+</body>
+</html>
