@@ -530,6 +530,7 @@ ${renderUndocumented(data)}
 
 <footer>
 <p>采集于 ${esc(data.collectedAt)}，对应 pi 核心 ${esc(data.piCore.version)}。内容随版本变化：重跑生成器即刷新。</p>
+<p class="back"><span><a href="../index.html#tools">← 回到工具开发</a></span></p>
 </footer>
 
 </div>
@@ -763,6 +764,18 @@ const ASSERTIONS = [
       if (/<[a-z][^>]*\shidden[\s>=]/i.test(markup)) return '标记里有默认 hidden 的元素';
       if (/display\s*:\s*none/i.test(html)) return '样式里有 display:none';
       if (/class="[^"]*is-filtered/.test(markup)) return '标记里有默认 is-filtered';
+      return null;
+    },
+  },
+  {
+    id: 'A11',
+    label: '回得去：详情页必须链回门户工具区（tools-dev 下每页都这么干）',
+    run(html) {
+      /* 详情页是从门户清单点进来的，回不去就等于把读者困在子页。
+         另外三个详情页（pi-tui / wb2api / copilot-cli-guide）都有这一条。 */
+      if (!/<a href="\.\.\/index\.html#tools">/.test(html)) {
+        return '找不到返回门户的链接（应为 <a href="../index.html#tools">）';
+      }
       return null;
     },
   },

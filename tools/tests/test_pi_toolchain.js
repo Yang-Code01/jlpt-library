@@ -215,6 +215,13 @@ const hiddenBlock = check(TMP);
 ok(hiddenBlock.status === 1, `默认隐藏内容块时 check 必须 exit 1（实际 ${hiddenBlock.status}）`);
 ok(/A10/.test(hiddenBlock.stdout || ''), `失败信息应点名 A10（实际：${hiddenBlock.stdout}）`);
 
+/* 改坏 8：删掉回门户的链接（A11） */
+scaffold();
+writePage(readPage().replace('<a href="../index.html#tools">← 回到工具开发</a>', ''));
+const noBack = check(TMP);
+ok(noBack.status === 1, `删掉返回门户链接后 check 必须 exit 1（实际 ${noBack.status}）`);
+ok(/A11/.test(noBack.stdout || ''), `失败信息应点名 A11（实际：${noBack.stdout}）`);
+
 /* ---------------------------------------------------------------- 汇总 */
 if (fails.length) {
   console.error(`\n✗ ${fails.length} 项失败（通过 ${pass} 项）：`);
