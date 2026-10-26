@@ -14,8 +14,8 @@
  * 脱敏靠真源自带的可逆占位符（~/、<PI_HOME>、<REPO>、<USER>）——生成器不做替换；
  * 只有 probe / 出处可达性校验才把它们还原成真实路径。
  *
- * 十10 条断言的实现进度：本文件当前落地 A1/A2/A3/A4/A5/A9/A10（ticket 01），
- * A6「出处存在」/A7「折叠守恒」/A8「缺口不静默」在 ticket 02/03 的改动里补齐。
+ * 十10 条断言的落地进度：A1/A2/A3/A4/A5/A9/A10（ticket 01）+ A6/A7/A8（ticket 02）。
+ * 其中 A6 依赖本机安装：整台机器没有 <PI_HOME> 时它自报跳过，不伪造成通过。
  */
 import fs from 'node:fs';
 import os from 'node:os';
@@ -90,6 +90,14 @@ function table(head, rows, cls = '') {
 
 const code = (s) => `<code>${esc(s)}</code>`;
 
+/* 折叠：单条目声明总量超过阀值时整块收起。
+   注意 <details> 里的内容仍在 DOM 里：Ctrl+F 搜不到，但过滤框命中时由脚本展开，
+   且条数守恒断言不因折叠而变松（A7）。 */
+const foldable = (item, kind, summary, body) =>
+  item.inDocTotal > FOLD_OVER
+    ? `<details class="fold" data-fold="${kind}"><summary>${esc(summary)}</summary>\n${body}\n</details>`
+    : body;
+
 /* 出处统一渲染成小字，且已经脱敏（真源里就是占位符） */
 const src = (s) => (s ? `<span class="src">${esc(s)}</span>` : '');
 
@@ -113,6 +121,9 @@ function renderVersionTable(data) {
   );
 }
 
+/* 单条目命令/配置总量超过这个数就把整块折起来（阀值来自 spec 决策 18） */
+const FOLD_OVER = 30;
+
 function renderItem(item) {
   const blocks = [];
 
@@ -125,23 +136,21 @@ function renderItem(item) {
   }
 
   if (item.commands && item.commands.length) {
-    blocks.push(
-      '<h4>命令 / 工具</h4>' +
-        table(
-          ['名称', '参数', '作用', '出处'],
-          item.commands.map((c) => [code(c.name), code(c.args || ''), esc(c.purpose), src(c.src)])
-        )
+    const body = table(
+      ['名称', '参数', '作用', '出处'],
+      item.commands.map((c) => [code(c.name), code(c.args || ''), esc(c.purpose), src(c.src)]),
+      'cmd'
     );
+    blocks.push(foldable(item, 'commands', `共 ${item.commands.length} 条命令，展开查看`, body));
   }
 
   if (item.config && item.config.length) {
-    blocks.push(
-      '<h4>配置项</h4>' +
-        table(
-          ['键', '含义', '默认值', '出处'],
-          item.config.map((c) => [code(c.key), esc(c.meaning), c.default ? code(c.default) : '—', src(c.src)])
-        )
+    const body = table(
+      ['键', '含义', '默认值', '出处'],
+      item.config.map((c) => [code(c.key), esc(c.meaning), c.default ? code(c.default) : '—', src(c.src)]),
+      'cfg'
     );
+    blocks.push(foldable(item, 'config', `共 ${item.config.length} 条配置，展开查看`, body));
   }
 
   if (item.env && item.env.length) {
@@ -149,7 +158,8 @@ function renderItem(item) {
       '<h4>环境变量</h4>' +
         table(
           ['变量', '含义', '出处'],
-          item.env.map((e) => [code(e.name), esc(e.meaning), src(e.src)])
+          item.env.map((e) => [code(e.name), esc(e.meaning), src(e.src)]),
+          'env'
         )
     );
   }
@@ -413,6 +423,45 @@ ${renderUndocumented(data)}
 /* ---------------------------------------------------------------- 十条断言 */
 
 /* 只保留「页面自身就能判」的断言：check 不依赖本机是否装了 pi（缺源是 probe 的事）。 */
+
+/** 真源里所有出处字段：命令 / 配置 / 环境变量 / 场景 / 版本源 / 缺口的两侧出处 */
+function collectSrcs(data) {
+  const out = [];
+  for (const item of data.items) {
+    if (item.versionFrom) out.push(item.versionFrom);
+    for (const k of ['scenes', 'commands', 'config', 'env']) {
+      for (const row of item[k] || []) if (row.src) out.push(row.src);
+    }
+    for (const u of item.undocumented || []) {
+      if (u.srcA) out.push(u.srcA);
+      if (u.srcB) out.push(u.srcB);
+    }
+  }
+  for (const u of data.undocumented || []) {
+    if (u.srcA) out.push(u.srcA);
+    if (u.srcB) out.push(u.srcB);
+  }
+  return out;
+}
+
+/** 取出单个条目的 HTML 片段（从它的 article 到下一个 article/section 结束） */
+function itemBlock(html, id) {
+  const start = html.indexOf(`id="item-${id}"`);
+  if (start < 0) return '';
+  const end = html.indexOf('</article>', start);
+  return end < 0 ? html.slice(start) : html.slice(start, end);
+}
+
+/** 数一数某类表格里实际渲染的数据行（表头在 thead，不计） */
+function countRows(block, cls) {
+  let n = 0;
+  const re = new RegExp(`<table class="${cls}">([\\s\\S]*?)</table>`, 'g');
+  for (const m of block.matchAll(re)) {
+    const tbody = m[1].slice(m[1].indexOf('<tbody>'));
+    n += (tbody.match(/<tr>/g) || []).length;
+  }
+  return n;
+}
 const ASSERTIONS = [
   {
     id: 'A1',
@@ -479,6 +528,53 @@ const ASSERTIONS = [
     },
   },
   {
+    id: 'A6',
+    label: '出处存在：占位符还原后，被引的文件真的在',
+    run(html, data) {
+      /* 没有本机 pi 安装时，占位符指向的目录根本不存在 —— 这是跳过，不是失败 */
+      if (!fs.existsSync(PI_HOME)) return { skip: `本机没有 <PI_HOME>（${'~/.pi/agent'}），出处无法核对` };
+      const bad = [];
+      for (const s of collectSrcs(data)) {
+        if (!s) continue;
+        const bare = String(s).replace(/:\d+(-\d+)?$/, '');
+        const abs = realPath(bare);
+        if (!path.isAbsolute(abs) || abs.includes('<')) {
+          bad.push(`${s}（占位符没还原成绝对路径）`);
+          continue;
+        }
+        if (!fs.existsSync(abs)) bad.push(`${s}（还原为 ${abs.replace(HOMEDIR, '~')}，不存在）`);
+      }
+      return bad.length ? `出处不可达：${bad.join('；')}` : null;
+    },
+  },
+  {
+    id: 'A7',
+    label: '折叠守恒：页内实际命令行数 == 真源声明总数（折叠不算丢）',
+    run(html, data) {
+      const problems = [];
+      for (const item of data.items) {
+        const block = itemBlock(html, item.id);
+        const rows = countRows(block, 'cmd');
+        const want = item.inDocTotal || 0;
+        if (rows !== want) problems.push(`${item.name}：页内 ${rows} 条，真源声明 ${want} 条`);
+      }
+      return problems.length ? problems.join('；') : null;
+    },
+  },
+  {
+    id: 'A8',
+    label: '缺口不静默：真源里的「文档未载」必须在页尾汇总里出现',
+    run(html, data) {
+      const gaps = [];
+      for (const u of data.undocumented || []) gaps.push(u.topic);
+      for (const item of data.items) {
+        for (const u of item.undocumented || []) gaps.push(`${item.name}：${u.topic}`);
+      }
+      const missing = gaps.filter((t) => !html.includes(esc(t)));
+      return missing.length ? `页里找不到这些缺口条目：${missing.join('、')}` : null;
+    },
+  },
+  {
     id: 'A9',
     label: '版本表一致：页头表每行都能对上真源（无多无少）',
     run(html, data) {
@@ -514,16 +610,21 @@ const ASSERTIONS = [
 
 function runAssertions(html, data) {
   const fails = [];
+  const skips = [];
   for (const a of ASSERTIONS) {
-    let err = null;
+    let res = null;
     try {
-      err = a.run(html, data);
+      res = a.run(html, data);
     } catch (e) {
-      err = `断言抛错：${e.message}`;
+      res = `断言抛错：${e.message}`;
     }
-    if (err) fails.push(`${a.id} ${a.label} —— ${err}`);
+    if (res && typeof res === 'object' && res.skip) {
+      skips.push(`${a.id} ${res.skip}`);
+      continue;
+    }
+    if (res) fails.push(`${a.id} ${a.label} —— ${res}`);
   }
-  return { total: ASSERTIONS.length, fails };
+  return { total: ASSERTIONS.length, fails, skips };
 }
 
 /* ------------------------------------------------------------------ 探测 */
@@ -632,6 +733,7 @@ function main() {
       for (const f of asserts.fails) console.log(`  ✗ ${f}`);
       process.exit(1);
     }
+    for (const s of asserts.skips) console.log(`  – ${s}`);
     process.exit(0);
   }
 
@@ -654,7 +756,12 @@ function main() {
     for (const p of problems) console.log(`  ✗ ${p}`);
     process.exit(1);
   }
-  console.log(`共 ${onDisk.total} 项断言，全部通过（${REL_OUT}，${data.items.length} 个条目）`);
+  for (const s of onDisk.skips) console.log(`  – ${s}`);
+  console.log(
+    `共 ${onDisk.total} 项断言，全部通过` +
+      (onDisk.skips.length ? `（${onDisk.skips.length} 项跳过）` : '') +
+      `（${REL_OUT}，${data.items.length} 个条目）`
+  );
   process.exit(0);
 }
 
