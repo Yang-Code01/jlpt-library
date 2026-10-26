@@ -73,8 +73,17 @@ function scaffold() {
   fs.writeFileSync(path.join(TMP, 'tools-dev', 'pi-toolchain.html'), fs.readFileSync(PAGE));
 }
 const pageIn = () => path.join(TMP, 'tools-dev', 'pi-toolchain.html');
+const dataIn = () => path.join(TMP, 'tools-dev', 'pi-toolchain.data.json');
 const readPage = () => fs.readFileSync(pageIn(), 'utf8');
 const writePage = (s) => fs.writeFileSync(pageIn(), s);
+
+/** 重建沙箱后只改真源、不重生成成品：用来验证「真源自身不一致」也能被抓住 */
+function mutateData(fn) {
+  scaffold();
+  const d = JSON.parse(fs.readFileSync(dataIn(), 'utf8'));
+  fn(d);
+  fs.writeFileSync(dataIn(), JSON.stringify(d, null, 2) + '\n');
+}
 
 scaffold();
 const clean = check(TMP);
@@ -115,6 +124,33 @@ writePage(readPage().replace(/data-ver="6\.0\.0"/, 'data-ver="9.9.9"'));
 const drift = check(TMP);
 ok(drift.status === 1, `版本表被改后 check 必须 exit 1（实际 ${drift.status}）`);
 ok(/A9|不一致/.test(drift.stdout || ''), `失败信息应点名版本不一致（实际：${drift.stdout}）`);
+
+/* 改坛 6：真源里声明了更多命令却没列（折叠守恒 A7） */
+mutateData((d) => { d.items[0].inDocTotal = 5; });
+const short = check(TMP);
+ok(short.status === 1, `inDocTotal 与已列条数不符时 check 必须 exit 1（实际 ${short.status}）`);
+ok(/A7/.test(short.stdout || ''), `失败信息应点名 A7（实际：${short.stdout}）`);
+
+/* 改坛 7：真源登记了缺口但页里没有（缺口不静默 A8） */
+mutateData((d) => {
+  d.items[0].undocumented = [
+    { topic: '示例缺口甲', srcA: 'a.md:1', srcB: 'b.md:2', choice: '待定' },
+  ];
+});
+const silent = check(TMP);
+ok(silent.status === 1, `登记了缺口但页里找不到时 check 必须 exit 1（实际 ${silent.status}）`);
+ok(/A8/.test(silent.stdout || ''), `失败信息应点名 A8（实际：${silent.stdout}）`);
+
+/* 改坛 8：出处指向不存在的文件（出处存在 A6）。A6 需要本机有 pi 安装，没有就跳过这一段 */
+const hasPiHome = fs.existsSync(path.join(os.homedir(), '.pi', 'agent'));
+if (hasPiHome) {
+  mutateData((d) => { d.items[0].versionFrom = '<REPO>/definitely-missing.json'; });
+  const deadSrc = check(TMP);
+  ok(deadSrc.status === 1, `出处不可达时 check 必须 exit 1（实际 ${deadSrc.status}）`);
+  ok(/A6/.test(deadSrc.stdout || ''), `失败信息应点名 A6（实际：${deadSrc.stdout}）`);
+} else {
+  pass++; /* 本机没有 pi：A6 自报跳过，这一段不适用 */
+}
 
 /* ---------------------------------------------------------------- 汇总 */
 if (fails.length) {
