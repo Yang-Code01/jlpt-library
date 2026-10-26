@@ -6,24 +6,94 @@
     "version": "1.4.0"
   },
   "chips": [
-    { "id": "all", "label": "全部" },
-    { "id": "package", "label": "包与扩展" },
-    { "id": "mcp", "label": "MCP" },
-    { "id": "skill", "label": "技能" },
-    { "id": "tool", "label": "内置工具" }
+    {
+      "id": "all",
+      "label": "全部"
+    },
+    {
+      "id": "package",
+      "label": "包与扩展"
+    },
+    {
+      "id": "mcp",
+      "label": "MCP"
+    },
+    {
+      "id": "skill",
+      "label": "技能"
+    },
+    {
+      "id": "tool",
+      "label": "内置工具"
+    }
   ],
   "packages": [
-    { "name": "pi-mcp-adapter", "version": "6.0.0", "provider": "npm:pi-mcp-adapter", "local": false },
-    { "name": "pi-web-access", "version": "0.44.0", "provider": "npm:pi-web-access", "local": false },
-    { "name": "@juicesharp/rpiv-ask-user-question", "version": "2.15.0", "provider": "npm:@juicesharp/rpiv-ask-user-question", "local": false },
-    { "name": "pi-background-tasks", "version": "2.6.10", "provider": "npm:pi-background-tasks", "local": false },
-    { "name": "@plannotator/pi-extension", "version": "0.28.30", "provider": "npm:@plannotator/pi-extension", "local": false },
-    { "name": "pi-agent-browser-native", "version": "0.9.6", "provider": "npm:pi-agent-browser-native", "local": false },
-    { "name": "context-mode", "version": "1.0.169", "provider": "npm:context-mode", "local": false },
-    { "name": "pi-subagents", "version": "0.82.1", "provider": "npm:pi-subagents", "local": false },
-    { "name": "pi-tui-plus", "version": "0.4.1", "provider": "本地路径 ~/.pi/packages/pi-tui", "local": true },
-    { "name": "pi-compact-transcript", "version": "0.12.0", "provider": "npm:pi-compact-transcript", "local": false },
-    { "name": "@yusukeshib/pi-working-status", "version": "0.1.1", "provider": "npm:@yusukeshib/pi-working-status", "local": false }
+    {
+      "name": "pi-mcp-adapter",
+      "version": "6.0.0",
+      "provider": "npm:pi-mcp-adapter",
+      "local": false
+    },
+    {
+      "name": "pi-web-access",
+      "version": "0.44.0",
+      "provider": "npm:pi-web-access",
+      "local": false
+    },
+    {
+      "name": "@juicesharp/rpiv-ask-user-question",
+      "version": "2.15.0",
+      "provider": "npm:@juicesharp/rpiv-ask-user-question",
+      "local": false
+    },
+    {
+      "name": "pi-background-tasks",
+      "version": "2.6.10",
+      "provider": "npm:pi-background-tasks",
+      "local": false
+    },
+    {
+      "name": "@plannotator/pi-extension",
+      "version": "0.28.30",
+      "provider": "npm:@plannotator/pi-extension",
+      "local": false
+    },
+    {
+      "name": "pi-agent-browser-native",
+      "version": "0.9.6",
+      "provider": "npm:pi-agent-browser-native",
+      "local": false
+    },
+    {
+      "name": "context-mode",
+      "version": "1.0.169",
+      "provider": "npm:context-mode",
+      "local": false
+    },
+    {
+      "name": "pi-subagents",
+      "version": "0.82.1",
+      "provider": "npm:pi-subagents",
+      "local": false
+    },
+    {
+      "name": "pi-tui-plus",
+      "version": "0.4.1",
+      "provider": "本地路径 ~/.pi/packages/pi-tui",
+      "local": true
+    },
+    {
+      "name": "pi-compact-transcript",
+      "version": "0.12.0",
+      "provider": "npm:pi-compact-transcript",
+      "local": false
+    },
+    {
+      "name": "@yusukeshib/pi-working-status",
+      "version": "0.1.1",
+      "provider": "npm:@yusukeshib/pi-working-status",
+      "local": false
+    }
   ],
   "undocumented": [],
   "items": [
@@ -34,19 +104,446 @@
       "version": "1.0.169",
       "versionFrom": "<PI_HOME>/npm/node_modules/context-mode/package.json",
       "provider": "npm:context-mode",
-      "summary": "把代码执行搬进沙箱、只把结论倒回上下文的 MCP 插件，用来省上下文窗口。",
-      "scenes": [],
-      "commands": [],
+      "summary": "把代码执行搬进隔离沙箱、只把 stdout 倒回上下文的 MCP 插件，用来省上下文窗口。",
+      "scenes": [
+        {
+          "text": "日志、接口响应、快照这类大输出：在沙箱里跑代码分析，只把结论写回上下文",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1178"
+        },
+        {
+          "text": "大段 markdown 切块进 SQLite FTS5，按需检索而不是整篇读进上下文",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1188"
+        },
+        {
+          "text": "超出 5KB 且给了 intent 时自动转成「索引全文 + 按意图取相关片段」",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1184"
+        }
+      ],
+      "commands": [
+        {
+          "name": "ctx_batch_execute",
+          "args": "",
+          "purpose": "一次调用跑多条命令 + 多个检索查询；I/O 型任务可开 concurrency 1-8",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1165"
+        },
+        {
+          "name": "ctx_execute",
+          "args": "",
+          "purpose": "在 12 种语言运行时里跑代码，只有 stdout 进入上下文",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1166"
+        },
+        {
+          "name": "ctx_execute_file",
+          "args": "",
+          "purpose": "在沙箱里处理文件，原文不出沙箱",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1167"
+        },
+        {
+          "name": "ctx_index",
+          "args": "",
+          "purpose": "按标题切块写进 FTS5 / BM25 索引",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1168"
+        },
+        {
+          "name": "ctx_search",
+          "args": "",
+          "purpose": "一次多查询检索已索引内容",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1169"
+        },
+        {
+          "name": "ctx_fetch_and_index",
+          "args": "",
+          "purpose": "取 URL → 转 markdown → 切块 → 索引；缓存 TTL 默认 24h",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1170"
+        },
+        {
+          "name": "ctx_stats",
+          "args": "",
+          "purpose": "看省了多少上下文、调用次数与会话统计",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1171"
+        },
+        {
+          "name": "ctx_doctor",
+          "args": "",
+          "purpose": "诊断运行时、hook、FTS5、版本",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1172"
+        },
+        {
+          "name": "ctx_upgrade",
+          "args": "",
+          "purpose": "从 GitHub 升到最新、重建、重配 hook",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1173"
+        },
+        {
+          "name": "ctx_purge",
+          "args": "",
+          "purpose": "永久删除知识库全部内容（不可恢复）",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1174"
+        },
+        {
+          "name": "context-mode doctor",
+          "args": "",
+          "purpose": "不开 AI 会话，直接在终端诊断",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1447"
+        },
+        {
+          "name": "context-mode index",
+          "args": "<path> --source <标签>",
+          "purpose": "终端里索引本地文件或目录",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1448"
+        },
+        {
+          "name": "context-mode search",
+          "args": "<query> --source <标签>",
+          "purpose": "终端里检索已索引内容",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1449"
+        },
+        {
+          "name": "context-mode upgrade",
+          "args": "",
+          "purpose": "终端里升级",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1450"
+        },
+        {
+          "name": "context-mode insight",
+          "args": "",
+          "purpose": "打开托管的 Insight 面板",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1451"
+        }
+      ],
       "config": [],
-      "env": [],
+      "env": [
+        {
+          "name": "CONTEXT_MODE_DIR",
+          "meaning": "存储根目录；sessions 与 content 都在它下面。空值视为未设置，非空必须是绝对路径（~ 不展开）",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1600"
+        },
+        {
+          "name": "CONTEXT_MODE_EXTERNAL_MCP_NUDGE_EVERY",
+          "meaning": "每隔多少次工具调用重注入「把大 payload 包进 ctx_execute」的提示；范围 1-100，非法值回落 10",
+          "src": "<PI_HOME>/npm/node_modules/context-mode/README.md:1606"
+        }
+      ],
       "files": [
         {
           "path": "<PI_HOME>/npm/node_modules/context-mode/",
-          "meaning": "包目录：pi 侧扩展入口与内置技能都在这里"
+          "meaning": "包目录：pi 侧扩展入口与 8 个内置技能都在这里"
         }
       ],
-      "inDocTotal": 0,
+      "inDocTotal": 15,
       "undocumented": []
+    },
+    {
+      "id": "pi-subagents",
+      "kind": "package",
+      "name": "pi-subagents",
+      "version": "0.82.1",
+      "versionFrom": "<PI_HOME>/npm/node_modules/pi-subagents/package.json",
+      "provider": "npm:pi-subagents",
+      "summary": "把活派给子 Pi 会话：单个委派，或脚本化的多代理工作流。",
+      "scenes": [
+        {
+          "text": "实现完先让 reviewer 子代理过一遍再总结",
+          "src": "<PI_HOME>/npm/node_modules/pi-subagents/README.md:52"
+        },
+        {
+          "text": "同一改动并行跑多个 reviewer（正确性 / 测试 / 清理）",
+          "src": "<PI_HOME>/npm/node_modules/pi-subagents/README.md:81"
+        },
+        {
+          "text": "决策本身没底时让 oracle 挑刺，再决定要不要动手",
+          "src": "<PI_HOME>/npm/node_modules/pi-subagents/README.md:78"
+        },
+        {
+          "text": "要跑长活时丢到后台，主线继续",
+          "src": "<PI_HOME>/npm/node_modules/pi-subagents/README.md:87"
+        }
+      ],
+      "commands": [
+        {
+          "name": "subagents_enable",
+          "args": "",
+          "purpose": "载入器：授权委派后，下一次模型请求才拿到完整 subagent schema",
+          "src": "<PI_HOME>/npm/node_modules/pi-subagents/README.md:47"
+        },
+        {
+          "name": "subagent",
+          "args": "",
+          "purpose": "启动子会话；前台在对话里流式输出，后台在游离进程里继续跑",
+          "src": "<PI_HOME>/npm/node_modules/pi-subagents/README.md:45"
+        },
+        {
+          "name": "bg_wait",
+          "args": "",
+          "purpose": "等后台工作结束（不激活也一直可用）",
+          "src": "<PI_HOME>/npm/node_modules/pi-subagents/README.md:47"
+        },
+        {
+          "name": "/council",
+          "args": "<议题>",
+          "purpose": "多顾问辩论一个决策",
+          "src": "<PI_HOME>/npm/node_modules/pi-subagents/README.md:82"
+        },
+        {
+          "name": "/subagents-fleet",
+          "args": "",
+          "purpose": "打开实时探测器：浏览子代理、读转录、steer 或停掉",
+          "src": "<PI_HOME>/npm/node_modules/pi-subagents/README.md:99"
+        },
+        {
+          "name": "/parallel-review",
+          "args": "",
+          "purpose": "打包好的并行评审快捷方式",
+          "src": "<PI_HOME>/npm/node_modules/pi-subagents/README.md:93"
+        },
+        {
+          "name": "/review-loop",
+          "args": "",
+          "purpose": "打包好的评审循环快捷方式",
+          "src": "<PI_HOME>/npm/node_modules/pi-subagents/README.md:93"
+        }
+      ],
+      "config": [
+        {
+          "key": "toolActivation",
+          "meaning": "控制全新会话是直接拿到 subagent，还是先只给 subagents_enable 载入器",
+          "default": "文档未载",
+          "src": "<PI_HOME>/npm/node_modules/pi-subagents/README.md:47"
+        },
+        {
+          "key": "maxSubagentSpawnsPerRun",
+          "meaning": "一棵运行树里累计允许的逻辑子代理数，与并发数和会话级预算分开算",
+          "default": "64",
+          "src": "<PI_HOME>/npm/node_modules/pi-subagents/README.md:103"
+        }
+      ],
+      "env": [],
+      "files": [
+        {
+          "path": "<PI_HOME>/npm/node_modules/pi-subagents/",
+          "meaning": "包目录：bundle 入口、13 份 agent 定义、prompts 与 docs 都在这里"
+        }
+      ],
+      "inDocTotal": 7,
+      "undocumented": [
+        {
+          "topic": "7 个内置 agent（scout / researcher / evidence-auditor / worker / reviewer / oracle / delegate）只在 README 的表格里列出用途，本页未逐个展开",
+          "srcA": "<PI_HOME>/npm/node_modules/pi-subagents/README.md:61-67",
+          "srcB": "",
+          "choice": "留给「内置工具」一节按提供者归并"
+        }
+      ]
+    },
+    {
+      "id": "pi-background-tasks",
+      "kind": "package",
+      "name": "pi-background-tasks",
+      "version": "2.6.10",
+      "versionFrom": "<PI_HOME>/npm/node_modules/pi-background-tasks/package.json",
+      "provider": "npm:pi-background-tasks",
+      "summary": "后台跑长命令、派只读代理、跑本机取证的 Pi 子进程，以及固定用途的 Fusion 多模型流程。",
+      "scenes": [
+        {
+          "text": "起 dev server、watch、跑长测试这类不阻塞对话的活",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:186"
+        },
+        {
+          "text": "让只读代理带着当前会话的上下文去调研，主进程继续干别的",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:187"
+        },
+        {
+          "text": "同一决策要三份独立意见：Fusion 合成 / 调查 / 研究 / 评审",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:189-192"
+        }
+      ],
+      "commands": [
+        {
+          "name": "bg_delegate",
+          "args": "",
+          "purpose": "README 公共工具清单里登记的工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:48"
+        },
+        {
+          "name": "bg_kill",
+          "args": "",
+          "purpose": "README 公共工具清单里登记的工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:48"
+        },
+        {
+          "name": "bg_logs",
+          "args": "",
+          "purpose": "README 公共工具清单里登记的工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:48"
+        },
+        {
+          "name": "bg_result",
+          "args": "",
+          "purpose": "README 公共工具清单里登记的工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:48"
+        },
+        {
+          "name": "bg_run",
+          "args": "",
+          "purpose": "README 公共工具清单里登记的工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:48"
+        },
+        {
+          "name": "bg_run_pi_attested",
+          "args": "",
+          "purpose": "README 公共工具清单里登记的工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:48"
+        },
+        {
+          "name": "bg_status",
+          "args": "",
+          "purpose": "README 公共工具清单里登记的工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:48"
+        },
+        {
+          "name": "fusion_investigate",
+          "args": "",
+          "purpose": "README 公共工具清单里登记的工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:48"
+        },
+        {
+          "name": "fusion_reason",
+          "args": "",
+          "purpose": "README 公共工具清单里登记的工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:48"
+        },
+        {
+          "name": "fusion_research",
+          "args": "",
+          "purpose": "README 公共工具清单里登记的工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:48"
+        },
+        {
+          "name": "fusion_validate",
+          "args": "",
+          "purpose": "README 公共工具清单里登记的工具",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:48"
+        },
+        {
+          "name": "/bg",
+          "args": "",
+          "purpose": "README 公共命令清单里登记的斜杠命令",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:46"
+        },
+        {
+          "name": "/bg-clear",
+          "args": "",
+          "purpose": "README 公共命令清单里登记的斜杠命令",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:46"
+        },
+        {
+          "name": "/bg-tasks",
+          "args": "",
+          "purpose": "README 公共命令清单里登记的斜杠命令",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:46"
+        },
+        {
+          "name": "/bg-update",
+          "args": "",
+          "purpose": "README 公共命令清单里登记的斜杠命令",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:46"
+        },
+        {
+          "name": "/claude-cache",
+          "args": "",
+          "purpose": "README 公共命令清单里登记的斜杠命令",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:46"
+        },
+        {
+          "name": "/fusion",
+          "args": "",
+          "purpose": "README 公共命令清单里登记的斜杠命令",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:46"
+        },
+        {
+          "name": "/fusion-models",
+          "args": "",
+          "purpose": "README 公共命令清单里登记的斜杠命令",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:46"
+        },
+        {
+          "name": "/jobs",
+          "args": "",
+          "purpose": "README 公共命令清单里登记的斜杠命令",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:46"
+        },
+        {
+          "name": "/kill",
+          "args": "",
+          "purpose": "README 公共命令清单里登记的斜杠命令",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:46"
+        },
+        {
+          "name": "/logs",
+          "args": "",
+          "purpose": "README 公共命令清单里登记的斜杠命令",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:46"
+        },
+        {
+          "name": "/tasks",
+          "args": "",
+          "purpose": "README 公共命令清单里登记的斜杠命令",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:46"
+        }
+      ],
+      "config": [
+        {
+          "key": "tool:bg_delegate",
+          "meaning": "受 feature:delegate 控制",
+          "default": "yes",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:57"
+        },
+        {
+          "key": "tool:bg_result",
+          "meaning": "受 any(feature:delegate, feature:fusion) 控制",
+          "default": "yes",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:58"
+        },
+        {
+          "key": "tool:bg_run_pi_attested",
+          "meaning": "受 feature:attested 控制",
+          "default": "yes",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:59"
+        },
+        {
+          "key": "tool:fusion_reason",
+          "meaning": "受 feature:fusion 控制",
+          "default": "yes",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:61"
+        },
+        {
+          "key": "dock:ctrl+alt+b",
+          "meaning": "footer 任务的快捷键",
+          "default": "no",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:64"
+        }
+      ],
+      "env": [
+        {
+          "name": "PI_BG_FEATURES",
+          "meaning": "严格的白名单集合，从 process / delegate / fusion / attested 等里选，用来关掉不想要的能力面",
+          "src": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:167"
+        }
+      ],
+      "files": [
+        {
+          "path": "<PI_HOME>/npm/node_modules/pi-background-tasks/",
+          "meaning": "包目录：dist 扩展、docs、以及 BACKGROUND-TASKS-INSTRUCTIONS.md 都在这里"
+        }
+      ],
+      "inDocTotal": 22,
+      "undocumented": [
+        {
+          "topic": "bg_run / bg_delegate / bg_run_pi_attested 的参数签名散在示例代码里，README 没有一张参数表",
+          "srcA": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:196-253",
+          "srcB": "<PI_HOME>/npm/node_modules/pi-background-tasks/README.md:182-192",
+          "choice": "命令表只记「是什么」，参数按需回去看示例，不在这里猜"
+        }
+      ]
     }
   ]
 }

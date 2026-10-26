@@ -115,21 +115,131 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <input id="q" type="search" placeholder="过滤：名称 / 描述 / 命令 / 配置（Esc 清空）" aria-label="过滤条目">
 <div class="chips" role="group" aria-label="按类型筛选"><button type="button" class="chip" data-chip="all" aria-pressed="true">全部</button><button type="button" class="chip" data-chip="package" aria-pressed="false">包与扩展</button><button type="button" class="chip" data-chip="mcp" aria-pressed="false">MCP</button><button type="button" class="chip" data-chip="skill" aria-pressed="false">技能</button><button type="button" class="chip" data-chip="tool" aria-pressed="false">内置工具</button></div>
 </div>
-<p class="filter-note">显示 <span id="count">1 / 1</span> 条</p>
+<p class="filter-note">显示 <span id="count">3 / 3</span> 条</p>
 
 <section data-section="package" id="sec-packages">
 <h2>包与扩展</h2>
-<article class="entry" id="item-context-mode" data-kind="package"><h3><a href="#item-context-mode">context-mode</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:context-mode<span class="meta-k">版本</span> <code>1.0.169</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/package.json</span></p><p class="entry-summary">把代码执行搬进沙箱、只把结论倒回上下文的 MCP 插件，用来省上下文窗口。</p><h4>相关文件</h4><table>
+<article class="entry" id="item-context-mode" data-kind="package"><h3><a href="#item-context-mode">context-mode</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:context-mode<span class="meta-k">版本</span> <code>1.0.169</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/package.json</span></p><p class="entry-summary">把代码执行搬进隔离沙箱、只把 stdout 倒回上下文的 MCP 插件，用来省上下文窗口。</p><h4>使用场景</h4><ul class="scenes"><li>日志、接口响应、快照这类大输出：在沙箱里跑代码分析，只把结论写回上下文 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1178</span></li><li>大段 markdown 切块进 SQLite FTS5，按需检索而不是整篇读进上下文 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1188</span></li><li>超出 5KB 且给了 intent 时自动转成「索引全文 + 按意图取相关片段」 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1184</span></li></ul>
+<table class="cmd">
+<thead><tr><th>名称</th><th>参数</th><th>作用</th><th>出处</th></tr></thead>
+<tbody>
+<tr><td><code>ctx_batch_execute</code></td><td><code></code></td><td>一次调用跑多条命令 + 多个检索查询；I/O 型任务可开 concurrency 1-8</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1165</span></td></tr>
+<tr><td><code>ctx_execute</code></td><td><code></code></td><td>在 12 种语言运行时里跑代码，只有 stdout 进入上下文</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1166</span></td></tr>
+<tr><td><code>ctx_execute_file</code></td><td><code></code></td><td>在沙箱里处理文件，原文不出沙箱</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1167</span></td></tr>
+<tr><td><code>ctx_index</code></td><td><code></code></td><td>按标题切块写进 FTS5 / BM25 索引</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1168</span></td></tr>
+<tr><td><code>ctx_search</code></td><td><code></code></td><td>一次多查询检索已索引内容</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1169</span></td></tr>
+<tr><td><code>ctx_fetch_and_index</code></td><td><code></code></td><td>取 URL → 转 markdown → 切块 → 索引；缓存 TTL 默认 24h</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1170</span></td></tr>
+<tr><td><code>ctx_stats</code></td><td><code></code></td><td>看省了多少上下文、调用次数与会话统计</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1171</span></td></tr>
+<tr><td><code>ctx_doctor</code></td><td><code></code></td><td>诊断运行时、hook、FTS5、版本</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1172</span></td></tr>
+<tr><td><code>ctx_upgrade</code></td><td><code></code></td><td>从 GitHub 升到最新、重建、重配 hook</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1173</span></td></tr>
+<tr><td><code>ctx_purge</code></td><td><code></code></td><td>永久删除知识库全部内容（不可恢复）</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1174</span></td></tr>
+<tr><td><code>context-mode doctor</code></td><td><code></code></td><td>不开 AI 会话，直接在终端诊断</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1447</span></td></tr>
+<tr><td><code>context-mode index</code></td><td><code>&lt;path&gt; --source &lt;标签&gt;</code></td><td>终端里索引本地文件或目录</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1448</span></td></tr>
+<tr><td><code>context-mode search</code></td><td><code>&lt;query&gt; --source &lt;标签&gt;</code></td><td>终端里检索已索引内容</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1449</span></td></tr>
+<tr><td><code>context-mode upgrade</code></td><td><code></code></td><td>终端里升级</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1450</span></td></tr>
+<tr><td><code>context-mode insight</code></td><td><code></code></td><td>打开托管的 Insight 面板</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1451</span></td></tr>
+</tbody>
+</table>
+<h4>环境变量</h4><table class="env">
+<thead><tr><th>变量</th><th>含义</th><th>出处</th></tr></thead>
+<tbody>
+<tr><td><code>CONTEXT_MODE_DIR</code></td><td>存储根目录；sessions 与 content 都在它下面。空值视为未设置，非空必须是绝对路径（~ 不展开）</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1600</span></td></tr>
+<tr><td><code>CONTEXT_MODE_EXTERNAL_MCP_NUDGE_EVERY</code></td><td>每隔多少次工具调用重注入「把大 payload 包进 ctx_execute」的提示；范围 1-100，非法值回落 10</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/context-mode/README.md:1606</span></td></tr>
+</tbody>
+</table>
+<h4>相关文件</h4><table>
 <thead><tr><th>路径</th><th>含义</th></tr></thead>
 <tbody>
-<tr><td><code>&lt;PI_HOME&gt;/npm/node_modules/context-mode/</code></td><td>包目录：pi 侧扩展入口与内置技能都在这里</td></tr>
+<tr><td><code>&lt;PI_HOME&gt;/npm/node_modules/context-mode/</code></td><td>包目录：pi 侧扩展入口与 8 个内置技能都在这里</td></tr>
+</tbody>
+</table></article>
+<article class="entry" id="item-pi-subagents" data-kind="package"><h3><a href="#item-pi-subagents">pi-subagents</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:pi-subagents<span class="meta-k">版本</span> <code>0.82.1</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/package.json</span></p><p class="entry-summary">把活派给子 Pi 会话：单个委派，或脚本化的多代理工作流。</p><h4>使用场景</h4><ul class="scenes"><li>实现完先让 reviewer 子代理过一遍再总结 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:52</span></li><li>同一改动并行跑多个 reviewer（正确性 / 测试 / 清理） <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:81</span></li><li>决策本身没底时让 oracle 挑刺，再决定要不要动手 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:78</span></li><li>要跑长活时丢到后台，主线继续 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:87</span></li></ul>
+<table class="cmd">
+<thead><tr><th>名称</th><th>参数</th><th>作用</th><th>出处</th></tr></thead>
+<tbody>
+<tr><td><code>subagents_enable</code></td><td><code></code></td><td>载入器：授权委派后，下一次模型请求才拿到完整 subagent schema</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:47</span></td></tr>
+<tr><td><code>subagent</code></td><td><code></code></td><td>启动子会话；前台在对话里流式输出，后台在游离进程里继续跑</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:45</span></td></tr>
+<tr><td><code>bg_wait</code></td><td><code></code></td><td>等后台工作结束（不激活也一直可用）</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:47</span></td></tr>
+<tr><td><code>/council</code></td><td><code>&lt;议题&gt;</code></td><td>多顾问辩论一个决策</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:82</span></td></tr>
+<tr><td><code>/subagents-fleet</code></td><td><code></code></td><td>打开实时探测器：浏览子代理、读转录、steer 或停掉</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:99</span></td></tr>
+<tr><td><code>/parallel-review</code></td><td><code></code></td><td>打包好的并行评审快捷方式</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:93</span></td></tr>
+<tr><td><code>/review-loop</code></td><td><code></code></td><td>打包好的评审循环快捷方式</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:93</span></td></tr>
+</tbody>
+</table>
+<table class="cfg">
+<thead><tr><th>键</th><th>含义</th><th>默认值</th><th>出处</th></tr></thead>
+<tbody>
+<tr><td><code>toolActivation</code></td><td>控制全新会话是直接拿到 subagent，还是先只给 subagents_enable 载入器</td><td><code>文档未载</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:47</span></td></tr>
+<tr><td><code>maxSubagentSpawnsPerRun</code></td><td>一棵运行树里累计允许的逻辑子代理数，与并发数和会话级预算分开算</td><td><code>64</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:103</span></td></tr>
+</tbody>
+</table>
+<h4>相关文件</h4><table>
+<thead><tr><th>路径</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td><code>&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/</code></td><td>包目录：bundle 入口、13 份 agent 定义、prompts 与 docs 都在这里</td></tr>
+</tbody>
+</table></article>
+<article class="entry" id="item-pi-background-tasks" data-kind="package"><h3><a href="#item-pi-background-tasks">pi-background-tasks</a></h3><p class="entry-meta"><span class="meta-k">来自</span> npm:pi-background-tasks<span class="meta-k">版本</span> <code>2.6.10</code><span class="meta-k">版本源</span> <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/package.json</span></p><p class="entry-summary">后台跑长命令、派只读代理、跑本机取证的 Pi 子进程，以及固定用途的 Fusion 多模型流程。</p><h4>使用场景</h4><ul class="scenes"><li>起 dev server、watch、跑长测试这类不阻塞对话的活 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:186</span></li><li>让只读代理带着当前会话的上下文去调研，主进程继续干别的 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:187</span></li><li>同一决策要三份独立意见：Fusion 合成 / 调查 / 研究 / 评审 <span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:189-192</span></li></ul>
+<table class="cmd">
+<thead><tr><th>名称</th><th>参数</th><th>作用</th><th>出处</th></tr></thead>
+<tbody>
+<tr><td><code>bg_delegate</code></td><td><code></code></td><td>README 公共工具清单里登记的工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:48</span></td></tr>
+<tr><td><code>bg_kill</code></td><td><code></code></td><td>README 公共工具清单里登记的工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:48</span></td></tr>
+<tr><td><code>bg_logs</code></td><td><code></code></td><td>README 公共工具清单里登记的工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:48</span></td></tr>
+<tr><td><code>bg_result</code></td><td><code></code></td><td>README 公共工具清单里登记的工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:48</span></td></tr>
+<tr><td><code>bg_run</code></td><td><code></code></td><td>README 公共工具清单里登记的工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:48</span></td></tr>
+<tr><td><code>bg_run_pi_attested</code></td><td><code></code></td><td>README 公共工具清单里登记的工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:48</span></td></tr>
+<tr><td><code>bg_status</code></td><td><code></code></td><td>README 公共工具清单里登记的工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:48</span></td></tr>
+<tr><td><code>fusion_investigate</code></td><td><code></code></td><td>README 公共工具清单里登记的工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:48</span></td></tr>
+<tr><td><code>fusion_reason</code></td><td><code></code></td><td>README 公共工具清单里登记的工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:48</span></td></tr>
+<tr><td><code>fusion_research</code></td><td><code></code></td><td>README 公共工具清单里登记的工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:48</span></td></tr>
+<tr><td><code>fusion_validate</code></td><td><code></code></td><td>README 公共工具清单里登记的工具</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:48</span></td></tr>
+<tr><td><code>/bg</code></td><td><code></code></td><td>README 公共命令清单里登记的斜杠命令</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:46</span></td></tr>
+<tr><td><code>/bg-clear</code></td><td><code></code></td><td>README 公共命令清单里登记的斜杠命令</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:46</span></td></tr>
+<tr><td><code>/bg-tasks</code></td><td><code></code></td><td>README 公共命令清单里登记的斜杠命令</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:46</span></td></tr>
+<tr><td><code>/bg-update</code></td><td><code></code></td><td>README 公共命令清单里登记的斜杠命令</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:46</span></td></tr>
+<tr><td><code>/claude-cache</code></td><td><code></code></td><td>README 公共命令清单里登记的斜杠命令</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:46</span></td></tr>
+<tr><td><code>/fusion</code></td><td><code></code></td><td>README 公共命令清单里登记的斜杠命令</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:46</span></td></tr>
+<tr><td><code>/fusion-models</code></td><td><code></code></td><td>README 公共命令清单里登记的斜杠命令</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:46</span></td></tr>
+<tr><td><code>/jobs</code></td><td><code></code></td><td>README 公共命令清单里登记的斜杠命令</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:46</span></td></tr>
+<tr><td><code>/kill</code></td><td><code></code></td><td>README 公共命令清单里登记的斜杠命令</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:46</span></td></tr>
+<tr><td><code>/logs</code></td><td><code></code></td><td>README 公共命令清单里登记的斜杠命令</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:46</span></td></tr>
+<tr><td><code>/tasks</code></td><td><code></code></td><td>README 公共命令清单里登记的斜杠命令</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:46</span></td></tr>
+</tbody>
+</table>
+<table class="cfg">
+<thead><tr><th>键</th><th>含义</th><th>默认值</th><th>出处</th></tr></thead>
+<tbody>
+<tr><td><code>tool:bg_delegate</code></td><td>受 feature:delegate 控制</td><td><code>yes</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:57</span></td></tr>
+<tr><td><code>tool:bg_result</code></td><td>受 any(feature:delegate, feature:fusion) 控制</td><td><code>yes</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:58</span></td></tr>
+<tr><td><code>tool:bg_run_pi_attested</code></td><td>受 feature:attested 控制</td><td><code>yes</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:59</span></td></tr>
+<tr><td><code>tool:fusion_reason</code></td><td>受 feature:fusion 控制</td><td><code>yes</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:61</span></td></tr>
+<tr><td><code>dock:ctrl+alt+b</code></td><td>footer 任务的快捷键</td><td><code>no</code></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:64</span></td></tr>
+</tbody>
+</table>
+<h4>环境变量</h4><table class="env">
+<thead><tr><th>变量</th><th>含义</th><th>出处</th></tr></thead>
+<tbody>
+<tr><td><code>PI_BG_FEATURES</code></td><td>严格的白名单集合，从 process / delegate / fusion / attested 等里选，用来关掉不想要的能力面</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:167</span></td></tr>
+</tbody>
+</table>
+<h4>相关文件</h4><table>
+<thead><tr><th>路径</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td><code>&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/</code></td><td>包目录：dist 扩展、docs、以及 BACKGROUND-TASKS-INSTRUCTIONS.md 都在这里</td></tr>
 </tbody>
 </table></article>
 </section>
 
 <section id="sec-undoc">
 <h2>文档未载 / 两处矛盾</h2>
-<p class="note">这一版没有登记到「文档未载 / 两处矛盾」的条目。</p>
+<table>
+<thead><tr><th>主题</th><th>出处 A</th><th>出处 B</th><th>取舍</th></tr></thead>
+<tbody>
+<tr><td>pi-subagents：7 个内置 agent（scout / researcher / evidence-auditor / worker / reviewer / oracle / delegate）只在 README 的表格里列出用途，本页未逐个展开</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-subagents/README.md:61-67</span></td><td></td><td>留给「内置工具」一节按提供者归并</td></tr>
+<tr><td>pi-background-tasks：bg_run / bg_delegate / bg_run_pi_attested 的参数签名散在示例代码里，README 没有一张参数表</td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:196-253</span></td><td><span class="src">&lt;PI_HOME&gt;/npm/node_modules/pi-background-tasks/README.md:182-192</span></td><td>命令表只记「是什么」，参数按需回去看示例，不在这里猜</td></tr>
+</tbody>
+</table>
 </section>
 
 <section id="sec-update">

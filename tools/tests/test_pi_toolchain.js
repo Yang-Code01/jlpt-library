@@ -152,6 +152,16 @@ if (hasPiHome) {
   pass++; /* 本机没有 pi：A6 自报跳过，这一段不适用 */
 }
 
+/* 折叠机制：本版没有真实超过阀值的条目，用沙箱证明「过阀才折、内容仍在」（A7 守恒） */
+scaffold();
+ok(!/<details class="fold"/.test(readPage()), '未过阀值时不应出现折叠块');
+mutateData((d) => { d.items[0].inDocTotal = 31; });
+const grown = run([path.join(TMP, 'tools', 'pi-toolchain-gen.mjs')], TMP);
+const foldedHtml = fs.readFileSync(pageIn(), 'utf8');
+ok(/<details class="fold"/.test(foldedHtml), `inDocTotal 过阀值后应渲染折叠块（write 退出码 ${grown.status}）`);
+ok(grown.status === 1, `真源声明数与已列数不符时 write 也应报错退出 1（实际 ${grown.status}）`);
+ok(/A7/.test(grown.stdout || ''), `write 的报错应点名 A7（实际：${grown.stdout}）`);
+
 /* ---------------------------------------------------------------- 汇总 */
 if (fails.length) {
   console.error(`\n✗ ${fails.length} 项失败（通过 ${pass} 项）：`);
