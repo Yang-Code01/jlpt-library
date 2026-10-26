@@ -201,6 +201,20 @@ const grown = run([path.join(TMP, 'tools', 'pi-toolchain-gen.mjs')], TMP);
 ok(grown.status === 1, `真源声明数与已列数不符时 write 也应报错退出 1（实际 ${grown.status}）`);
 ok(/A7/.test(grown.stdout || ''), `write 的报错应点名 A7（实际：${grown.stdout}）`);
 
+/* 改坏 6：把目录里的一个锚点改成不存在的 id（A2） */
+scaffold();
+writePage(readPage().replace('href="#sec-terms"', 'href="#sec-no-such-section"'));
+const deadLink = check(TMP);
+ok(deadLink.status === 1, `锚点指向不存在的 id 时 check 必须 exit 1（实际 ${deadLink.status}）`);
+ok(/A2/.test(deadLink.stdout || ''), `失败信息应点名 A2（实际：${deadLink.stdout}）`);
+
+/* 改坏 7：给一个内容块默加 hidden（无 JS 不白屏 A10） */
+scaffold();
+writePage(readPage().replace('<section id="sec-terms">', '<section id="sec-terms" hidden>'));
+const hiddenBlock = check(TMP);
+ok(hiddenBlock.status === 1, `默认隐藏内容块时 check 必须 exit 1（实际 ${hiddenBlock.status}）`);
+ok(/A10/.test(hiddenBlock.stdout || ''), `失败信息应点名 A10（实际：${hiddenBlock.stdout}）`);
+
 /* ---------------------------------------------------------------- 汇总 */
 if (fails.length) {
   console.error(`\n✗ ${fails.length} 项失败（通过 ${pass} 项）：`);

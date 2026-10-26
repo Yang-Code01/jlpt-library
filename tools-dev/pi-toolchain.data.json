@@ -3114,62 +3114,74 @@
       "tableHead": [
         "工具名",
         "作用",
+        "提供者",
         "出处"
       ],
       "rows": [
         [
           "`read`",
           "读文本/图片文件，支持 offset/limit，图片以附件返回",
+          "pi 核心",
           "`pi 核心包内/dist/core/tools/read.js:51`；导出 `index.js:8`"
         ],
         [
           "`bash`",
           "执行 shell 命令并回传 stdout/stderr",
+          "pi 核心",
           "`pi 核心包内/dist/core/tools/bash.js:313`；导出 `index.js:1`"
         ],
         [
           "`powershell`",
           "执行 PowerShell 命令（Windows 方言）",
+          "pi 核心",
           "`pi 核心包内/dist/core/tools/powershell.js:16`；导出 `index.js:7`"
         ],
         [
           "`edit`",
           "唯一精确文本替换（oldText→newText，可多段）",
+          "pi 核心",
           "`pi 核心包内/dist/core/tools/edit.js:83`；导出 `index.js:2`"
         ],
         [
           "`write`",
           "写文件/整文件覆盖，自动建父目录",
+          "pi 核心",
           "`pi 核心包内/dist/core/tools/write.js:23`；导出 `index.js:10`"
         ],
         [
           "`grep`",
           "按正则/字面量搜内容，返回文件和行号",
+          "pi 核心",
           "`pi 核心包内/dist/core/tools/grep.js:32`；导出 `index.js:5`"
         ],
         [
           "`find`",
           "按 glob 找文件",
+          "pi 核心",
           "`pi 核心包内/dist/core/tools/find.js:37`；导出 `index.js:4`"
         ],
         [
           "`ls`",
           "列目录（可设上限）",
+          "pi 核心",
           "`pi 核心包内/dist/core/tools/ls.js:25`；导出 `index.js:6`"
         ],
         [
           "`tool_search`",
           "搜索尚未加载的工具并把命中的加载出来",
+          "pi 核心",
           "名称定义 `pi 核心包内/dist/extensions/tool-search/tool.js:11`（`TOOL_SEARCH_TOOL_NAME`），定义体 `:160-168`；注册 `pi 核心包内/dist/extensions/tool-search/index.js:11`"
         ],
         [
           "`codemode`",
           "用脚本批量/编排调用工具，减少往返",
+          "pi 核心",
           "名称定义 `pi 核心包内/dist/extensions/codemode/tool.js:32`（`CODEMODE_TOOL_NAME`），定义体 `:256`；注册 `pi 核心包内/dist/extensions/codemode/index.js:19`"
         ],
         [
           "`mcp__<server>__<tool>`",
           "静态 MCP 服务器的每个工具逐个代理成独立 pi 工具（名字由 server/tool 生成，冲突加哈希后缀）",
+          "pi 核心",
           "注册逻辑 `pi 核心包内/dist/extensions/mcp/index.js:283`（`registerTools`）→ `:336`/`:377` 的 `pi.registerTool(definition)`；名字正则渲染器 `:279-282`；`registerCommand(\"mcp\")` 在 `:1121`"
         ]
       ],

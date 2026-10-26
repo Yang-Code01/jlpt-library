@@ -252,16 +252,31 @@ function renderUndocumented(data) {
 }
 
 function renderNav(data) {
-  const links = [['sec-terms', '术语速查']];
+  const rows = [];
+  const addTop = (id, label, count) =>
+    rows.push(
+      `<li><a href="#${id}">${esc(label)}</a>${count != null ? ` <span class="n">${count}</span>` : ''}`
+    );
+  addTop('sec-overview', '速览');
+  addTop('sec-terms', '术语速查');
+  addTop('sec-versions', '版本基线', data.packages.length);
   for (const kind of ['core', 'package', 'mcp', 'skill', 'tool']) {
-    if (data.items.some((i) => i.kind === kind)) links.push([KIND_OF[kind].id, KIND_OF[kind].label]);
+    const items = data.items.filter((i) => i.kind === kind);
+    if (!items.length) continue;
+    const k = KIND_OF[kind];
+    const sub = items
+      .map(
+        (i) =>
+          `<li><a href="#item-${esc(i.id)}">${esc(i.name)}</a>${i.rows ? ` <span class="n">${i.rows.length}</span>` : ''}</li>`
+      )
+      .join('');
+    rows.push(
+      `<li><a href="#${k.id}">${esc(k.label)}</a> <span class="n">${items.length}</span><ol>${sub}</ol></li>`
+    );
   }
-  links.push(['sec-undoc', '文档未载'], ['sec-update', '这份页怎么更新']);
-  return (
-    '<nav class="toc" aria-label="目录"><h2>目录</h2><ul>' +
-    links.map(([id, label]) => `<li><a href="#${id}">${esc(label)}</a></li>`).join('') +
-    '</ul></nav>'
-  );
+  addTop('sec-undoc', '文档未载 / 两处矛盾', (data.undocumented || []).length || null);
+  addTop('sec-update', '这份页怎么更新');
+  return `<nav class="toc" aria-label="目录"><h2>目录</h2><ul>${rows.join('')}</ul></nav>`;
 }
 
 /* -------------------------------------------------------------------- 样式 */
@@ -294,10 +309,28 @@ h2{font-size:19px;margin:34px 0 12px;padding-bottom:6px;border-bottom:1px solid 
 h3{font-size:16px;margin:22px 0 4px}
 h4{font-size:13px;margin:16px 0 6px;color:var(--muted);text-transform:none;letter-spacing:.02em}
 .layout{display:block}
-.toc{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;margin:0 0 26px}
-.toc h2{font-size:13px;margin:0 0 8px;border:0;padding:0;color:var(--muted);letter-spacing:.06em}
-.toc ul{margin:0;padding-left:18px}
-.toc li{margin:2px 0}
+.shell{display:grid;grid-template-columns:236px minmax(0,1fr);gap:34px;align-items:start}
+@media (max-width:900px){.shell{grid-template-columns:1fr}}
+.toc{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;
+  position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;font-size:13px}
+.toc h2{font-size:12px;margin:0 0 8px;border:0;padding:0;color:var(--muted);letter-spacing:.06em}
+.toc ul{margin:0;padding-left:0;list-style:none}
+.toc>ul>li{margin:6px 0 0}
+.toc>ul>li>a{font-weight:600}
+.toc ol{margin:2px 0 0;padding-left:14px;list-style:none}
+.toc ol li{margin:1px 0}
+.toc li a{color:var(--ink)}
+.toc li a:hover{color:var(--accent)}
+.toc .n{color:var(--muted);font-size:11.5px}
+
+/* 速览：四类各一句 + 三条入口 */
+.overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:0 0 14px}
+.ov-card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:10px 12px}
+.ov-card b{display:block;font-size:13px}
+.ov-card .n{color:var(--accent);font-size:18px;font-variant-numeric:tabular-nums}
+.ov-card p{margin:4px 0 0;color:var(--muted);font-size:12.5px}
+.jump{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px}
+.jump a{border:1px solid var(--rule);border-radius:999px;padding:4px 11px;font-size:12.5px}
 table{width:100%;border-collapse:collapse;margin:6px 0 4px;font-size:13.5px}
 th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
 th{color:var(--muted);font-weight:600;white-space:nowrap}
@@ -329,32 +362,54 @@ const SCRIPT = `
   var chips=[].slice.call(document.querySelectorAll('.chip'));
   var entries=[].slice.call(document.querySelectorAll('[data-kind]'));
   var sections=[].slice.call(document.querySelectorAll('section[data-section]'));
+  var autoOpened=[];
   var active='all';
+
+  /* 命中在折叠块里就把它展开；过滤清空时只关掉我们自己开过的那几个。
+     注意折叠块在条目内部（article > details），所以是往下找，不是 closest()。 */
+  function revealFolds(needle){
+    autoOpened.forEach(function(d){ d.open=false; });
+    autoOpened=[];
+    if(!needle) return;
+    entries.forEach(function(el){
+      if(el.hasAttribute('hidden')) return;
+      [].forEach.call(el.querySelectorAll('details.fold'),function(d){
+        if(!d.open){ d.open=true; autoOpened.push(d); }
+      });
+    });
+  }
+
   function apply(){
     var needle=(q.value||'').trim().toLowerCase();
     var shown=0;
     entries.forEach(function(el){
       var okKind=(active==='all')||(el.getAttribute('data-kind')===active);
       var okText=!needle||el.textContent.toLowerCase().indexOf(needle)>=0;
-      var on=okKind&&okText;
-      if(on){el.removeAttribute('hidden');shown++;}else{el.setAttribute('hidden','');}
+      if(okKind&&okText){el.removeAttribute('hidden');shown++;}else{el.setAttribute('hidden','');}
     });
     sections.forEach(function(sec){
       var any=sec.querySelector('[data-kind]:not([hidden])');
       if(any){sec.removeAttribute('hidden');}else{sec.setAttribute('hidden','');}
     });
+    revealFolds(needle);
     if(count){count.textContent=shown+' / '+entries.length;}
   }
+
   chips.forEach(function(chip){
     chip.addEventListener('click',function(){
       active=chip.getAttribute('data-chip');
-      chips.forEach(function(other){
-        other.setAttribute('aria-pressed',String(other===chip));
-      });
+      chips.forEach(function(other){ other.setAttribute('aria-pressed',String(other===chip)); });
       apply();
     });
   });
-  if(q){q.addEventListener('input',apply);}
+  if(q){
+    q.addEventListener('input',apply);
+    q.addEventListener('keydown',function(e){
+      if(e.key==='Escape'){ q.value=''; active='all';
+        chips.forEach(function(c){ c.setAttribute('aria-pressed',String(c.getAttribute('data-chip')==='all')); });
+        apply(); q.blur(); }
+    });
+  }
   apply();
 })();
 `;
@@ -378,6 +433,33 @@ function renderPage(data) {
     ['词', '本页的用法'],
     TERMS.map(([w, d]) => [esc(w), esc(d)])
   );
+
+  /* 速览：四类各一句 + 条目数 + 三条入口（spec 页面结构第 2 条） */
+  const OVERVIEW_TEXT = {
+    core: 'pi 自己就有的命令与配置，装上就有。',
+    package: '用 pi install 装的包，每个包能改哪些行为。',
+    mcp: '外接的 MCP server，以及它是怎么被接进来的。',
+    skill: '模型按需加载的技能，含谁带来的。',
+    tool: '会话里能直接调用的工具，分核心与包提供。',
+  };
+  const ovCards = ['core', 'package', 'mcp', 'skill', 'tool']
+    .map((kind) => {
+      const items = data.items.filter((i) => i.kind === kind);
+      if (!items.length) return '';
+      const rows = items.reduce((n, i) => n + ((i.rows || []).length || (i.commands || []).length), 0);
+      return `<div class="ov-card"><span class="n">${rows}</span><b>${esc(KIND_OF[kind].label)}</b><p>${esc(
+        OVERVIEW_TEXT[kind]
+      )}</p></div>`;
+    })
+    .join('');
+  const jumpLinks = [
+    ['sec-packages', '我装了哪些包'],
+    ['sec-core', '命令与配置在哪'],
+    ['sec-skills', '有哪些技能'],
+  ]
+    .filter(([id]) => `id="${id}"` && true)
+    .map(([id, label]) => `<a href="#${id}">${esc(label)}</a>`)
+    .join('');
 
   return `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -404,9 +486,17 @@ function renderPage(data) {
 ${renderVersionTable(data)}
 </header>
 
+<div class="shell">
 ${renderNav(data)}
 
 <main>
+<section id="sec-overview">
+<h2>速览</h2>
+<div class="overview">${ovCards}</div>
+<div class="jump">${jumpLinks}</div>
+<p class="note">数字是条目或表格行数，不是字数；每一项都能在左侧目录点进去，或在下面的过滤框里搜。</p>
+</section>
+
 <section id="sec-terms">
 <h2>术语速查</h2>
 ${terms}
@@ -429,13 +519,14 @@ ${renderUndocumented(data)}
 <h2>这份页怎么更新</h2>
 <p>这一页是生成物，不要直接改 <code>${REL_OUT}</code>。真源只有一份：<code>tools-dev/pi-toolchain.data.json</code>。</p>
 <ol>
-<li>改真源：新增一个包就往 <code>items</code> 里加一条，<code>id</code> 必须唯一且与页内锚点同名；<code>src</code> 一律写成 <code>~/</code>、<code>&lt;PI_HOME&gt;</code>、<code>&lt;REPO&gt;</code>、<code>&lt;USER&gt;</code> 这类占位符，不许写真实路径。</li>
+<li>改真源：新增一个包就往 <code>items</code> 里加一条，<code>id</code> 必须唯一且与页内锚点同名；<code>src</code> 一律写成 <code>~/</code>、<code>&lt;PI_HOME&gt;</code>、<code>&lt;PI_CORE&gt;</code>、<code>&lt;REPO&gt;</code>、<code>&lt;USER&gt;</code> 这类占位符，不许写真实路径。</li>
 <li>重生成：<code>node tools/pi-toolchain-gen.mjs</code>。</li>
 <li>校验：<code>node tools/pi-toolchain-gen.mjs check</code>，再跑 <code>node tools/test.mjs</code>。</li>
 <li>新增包要同时动三处：真源的 <code>items</code> 与 <code>packages</code>、<code>collectedAt</code> 日期、以及包版本变化时的 <code>version</code>/<code>versionFrom</code>。</li>
 </ol>
 </section>
 </main>
+</div>
 
 <footer>
 <p>采集于 ${esc(data.collectedAt)}，对应 pi 核心 ${esc(data.piCore.version)}。内容随版本变化：重跑生成器即刷新。</p>
@@ -457,6 +548,8 @@ function collectSrcs(data) {
   const out = [];
   for (const item of data.items) {
     if (item.versionFrom) out.push(item.versionFrom);
+    /* 注意：不把 files[].path 纳入 A6。那里存的是「文档说的文件位置」，很多是
+       按需才创建的项目级配置（~/ .pi/mcp-adapter.json 之类），本机不存在不代表错。 */
     for (const k of ['scenes', 'commands', 'config', 'env']) {
       for (const row of item[k] || []) if (row.src) out.push(row.src);
     }
@@ -563,7 +656,7 @@ const ASSERTIONS = [
   },
   {
     id: 'A6',
-    label: '出处存在：占位符还原后，被引的文件真的在',
+    label: '出处可达：条目级出处（含 files.path）还原后文件真存在',
     run(html, data) {
       /* 没有本机安装时，占位符指向的目录根本不存在 —— 这是跳过，不是失败 */
       if (!fs.existsSync(PI_HOME)) return { skip: '本机没有 <PI_HOME>（~/.pi/agent），出处无法核对' };
@@ -582,6 +675,16 @@ const ASSERTIONS = [
         }
       }
       A6_NON_PATH = nonPath;
+      /* 清单表格里的出处是搬过来的文本（「包内dist/...:123」），没有可还原的占位符，
+         这部分无法做存在性校验 —— 把行数报出来，不假装验过了。 */
+      let rowSrc = 0;
+      for (const item of data.items) {
+        for (const r of item.rows || []) {
+          const last = String(r[r.length - 1] || '');
+          if (/\.(md|json|jsonc|ts|js|mjs):\d+/.test(last)) rowSrc++;
+        }
+      }
+      A6_ROW_TEXT = rowSrc;
       if (!tokens.length) return null;
       const needsCore = tokens.some((t) => t.includes('<PI_CORE>'));
       if (needsCore && !coreDir()) return { skip: '本机找不到 pi 核心包（<PI_CORE> 无法还原）' };
@@ -629,18 +732,22 @@ const ASSERTIONS = [
   },
   {
     id: 'A9',
-    label: '版本表一致：页头表每行都能对上真源（无多无少）',
+    label: '版本表一致：页头表里看得见的版本格都对得上真源（无多无少）',
     run(html, data) {
-      const rows = [...html.matchAll(/<tr data-pkg="([^"]+)" data-ver="([^"]+)">/g)].map((m) => ({
+      /* 不看 data-ver 属性（那是生成器自己写的，自证），而看渲染出来的版本单元格文字 */
+      const rows = [...html.matchAll(/<tr data-pkg="([^"]+)" data-ver="[^"]*">([\s\S]*?)<\/tr>/g)].map((m) => ({
         name: m[1],
-        version: m[2],
+        cells: [...m[2].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map((c) =>
+          c[1].replace(/<[^>]+>/g, '').trim()
+        ),
       }));
       const want = data.packages.map((p) => ({ name: p.name, version: p.version }));
       if (rows.length !== want.length) return `表格行数 ${rows.length} ≠ 真源 ${want.length}`;
       for (const w of want) {
         const got = rows.find((r) => r.name === w.name);
         if (!got) return `表格缺 ${w.name}`;
-        if (got.version !== w.version) return `${w.name} 版本不一致（表 ${got.version}，真源 ${w.version}）`;
+        const shown = got.cells[1] || '';
+        if (shown !== w.version) return `${w.name} 版本格写的是 ${shown}，真源是 ${w.version}`;
       }
       const core = html.includes(`<code>${esc(data.piCore.version)}</code>`);
       if (!core) return `页头找不到 pi 核心版本 ${data.piCore.version}`;
@@ -661,8 +768,9 @@ const ASSERTIONS = [
   },
 ];
 
-/* A6 每次跑完填一次：有多少处出处是散文而不是文件引用（没法用存在性验） */
+/* A6 每次跑完填一次：散文/无占位符的出处有多少，无法用存在性验 */
 let A6_NON_PATH = 0;
+let A6_ROW_TEXT = 0;
 
 function runAssertions(html, data) {
   const fails = [];
@@ -808,7 +916,11 @@ function main() {
 
   const onDisk = runAssertions(disk, data);
   problems.push(...onDisk.fails);
-  if (A6_NON_PATH) console.log(`  · A6 跳过 ${A6_NON_PATH} 处非路径文本出处（散文无法验存在性）`);
+  if (A6_NON_PATH || A6_ROW_TEXT) {
+    console.log(
+      `  · A6 已验条目级出处；另有 ${A6_NON_PATH} 处散文、${A6_ROW_TEXT} 行清单出处是纯文本（无占位符可还原，未做存在性校验）`
+    );
+  }
 
   if (problems.length) {
     console.log(`✗ 共 ${onDisk.total} 项断言，${problems.length} 处问题：`);

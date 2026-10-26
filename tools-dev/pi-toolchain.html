@@ -33,10 +33,28 @@ h2{font-size:19px;margin:34px 0 12px;padding-bottom:6px;border-bottom:1px solid 
 h3{font-size:16px;margin:22px 0 4px}
 h4{font-size:13px;margin:16px 0 6px;color:var(--muted);text-transform:none;letter-spacing:.02em}
 .layout{display:block}
-.toc{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;margin:0 0 26px}
-.toc h2{font-size:13px;margin:0 0 8px;border:0;padding:0;color:var(--muted);letter-spacing:.06em}
-.toc ul{margin:0;padding-left:18px}
-.toc li{margin:2px 0}
+.shell{display:grid;grid-template-columns:236px minmax(0,1fr);gap:34px;align-items:start}
+@media (max-width:900px){.shell{grid-template-columns:1fr}}
+.toc{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;
+  position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto;font-size:13px}
+.toc h2{font-size:12px;margin:0 0 8px;border:0;padding:0;color:var(--muted);letter-spacing:.06em}
+.toc ul{margin:0;padding-left:0;list-style:none}
+.toc>ul>li{margin:6px 0 0}
+.toc>ul>li>a{font-weight:600}
+.toc ol{margin:2px 0 0;padding-left:14px;list-style:none}
+.toc ol li{margin:1px 0}
+.toc li a{color:var(--ink)}
+.toc li a:hover{color:var(--accent)}
+.toc .n{color:var(--muted);font-size:11.5px}
+
+/* 速览：四类各一句 + 三条入口 */
+.overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:0 0 14px}
+.ov-card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:10px 12px}
+.ov-card b{display:block;font-size:13px}
+.ov-card .n{color:var(--accent);font-size:18px;font-variant-numeric:tabular-nums}
+.ov-card p{margin:4px 0 0;color:var(--muted);font-size:12.5px}
+.jump{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px}
+.jump a{border:1px solid var(--rule);border-radius:999px;padding:4px 11px;font-size:12.5px}
 table{width:100%;border-collapse:collapse;margin:6px 0 4px;font-size:13.5px}
 th,td{text-align:left;padding:6px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
 th{color:var(--muted);font-weight:600;white-space:nowrap}
@@ -92,9 +110,17 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 </table>
 </header>
 
-<nav class="toc" aria-label="目录"><h2>目录</h2><ul><li><a href="#sec-terms">术语速查</a></li><li><a href="#sec-core">pi 自身命令面</a></li><li><a href="#sec-packages">包与扩展</a></li><li><a href="#sec-mcp">MCP server</a></li><li><a href="#sec-skills">技能清单</a></li><li><a href="#sec-tools">内置工具</a></li><li><a href="#sec-undoc">文档未载</a></li><li><a href="#sec-update">这份页怎么更新</a></li></ul></nav>
+<div class="shell">
+<nav class="toc" aria-label="目录"><h2>目录</h2><ul><li><a href="#sec-overview">速览</a><li><a href="#sec-terms">术语速查</a><li><a href="#sec-versions">版本基线</a> <span class="n">11</span><li><a href="#sec-core">pi 自身命令面</a> <span class="n">4</span><ol><li><a href="#item-pi-cli">pi 命令行：子命令与 flag</a> <span class="n">82</span></li><li><a href="#item-pi-slash">pi 斜杠命令</a> <span class="n">28</span></li><li><a href="#item-pi-env">pi 环境变量</a> <span class="n">26</span></li><li><a href="#item-pi-settings">settings.json 配置键</a> <span class="n">72</span></li></ol></li><li><a href="#sec-packages">包与扩展</a> <span class="n">11</span><ol><li><a href="#item-context-mode">context-mode</a></li><li><a href="#item-pi-subagents">pi-subagents</a></li><li><a href="#item-pi-background-tasks">pi-background-tasks</a></li><li><a href="#item-pi-mcp-adapter">pi-mcp-adapter</a></li><li><a href="#item-pi-web-access">pi-web-access</a></li><li><a href="#item-rpiv-ask-user-question">@juicesharp/rpiv-ask-user-question</a></li><li><a href="#item-plannotator">@plannotator/pi-extension</a></li><li><a href="#item-pi-agent-browser-native">pi-agent-browser-native</a></li><li><a href="#item-pi-compact-transcript">pi-compact-transcript</a></li><li><a href="#item-pi-working-status">@yusukeshib/pi-working-status</a></li><li><a href="#item-pi-tui-plus">pi-tui-plus</a></li></ol></li><li><a href="#sec-mcp">MCP server</a> <span class="n">1</span><ol><li><a href="#item-mcp-rea">rea</a></li></ol></li><li><a href="#sec-skills">技能清单</a> <span class="n">1</span><ol><li><a href="#item-skills">技能清单（全量）</a> <span class="n">69</span></li></ol></li><li><a href="#sec-tools">内置工具</a> <span class="n">2</span><ol><li><a href="#item-tools-core">pi 核心提供的工具</a> <span class="n">11</span></li><li><a href="#item-tools-packages">包提供的工具</a> <span class="n">50</span></li></ol></li><li><a href="#sec-undoc">文档未载 / 两处矛盾</a> <span class="n">18</span><li><a href="#sec-update">这份页怎么更新</a></ul></nav>
 
 <main>
+<section id="sec-overview">
+<h2>速览</h2>
+<div class="overview"><div class="ov-card"><span class="n">208</span><b>pi 自身命令面</b><p>pi 自己就有的命令与配置，装上就有。</p></div><div class="ov-card"><span class="n">85</span><b>包与扩展</b><p>用 pi install 装的包，每个包能改哪些行为。</p></div><div class="ov-card"><span class="n">3</span><b>MCP server</b><p>外接的 MCP server，以及它是怎么被接进来的。</p></div><div class="ov-card"><span class="n">69</span><b>技能清单</b><p>模型按需加载的技能，含谁带来的。</p></div><div class="ov-card"><span class="n">61</span><b>内置工具</b><p>会话里能直接调用的工具，分核心与包提供。</p></div></div>
+<div class="jump"><a href="#sec-packages">我装了哪些包</a><a href="#sec-core">命令与配置在哪</a><a href="#sec-skills">有哪些技能</a></div>
+<p class="note">数字是条目或表格行数，不是字数；每一项都能在左侧目录点进去，或在下面的过滤框里搜。</p>
+</section>
+
 <section id="sec-terms">
 <h2>术语速查</h2>
 <table>
@@ -769,19 +795,19 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <section data-section="tool" id="sec-tools">
 <h2>内置工具</h2>
 <article class="entry" id="item-tools-core" data-kind="tool"><h3><a href="#item-tools-core">pi 核心提供的工具</a></h3><p class="entry-meta"><span class="meta-k">来自</span> pi 核心<span class="meta-k">版本</span> <code>1.4.0</code></p><p class="entry-summary">不装任何包也有的工具：文件读写、搜索、shell、以及随包附带的那几类。</p><table class="rows">
-<thead><tr><th>工具名</th><th>作用</th><th>出处</th></tr></thead>
+<thead><tr><th>工具名</th><th>作用</th><th>提供者</th><th>出处</th></tr></thead>
 <tbody>
-<tr><td><code>read</code></td><td>读文本/图片文件，支持 offset/limit，图片以附件返回</td><td><code>pi 核心包内/dist/core/tools/read.js:51</code>；导出 <code>index.js:8</code></td></tr>
-<tr><td><code>bash</code></td><td>执行 shell 命令并回传 stdout/stderr</td><td><code>pi 核心包内/dist/core/tools/bash.js:313</code>；导出 <code>index.js:1</code></td></tr>
-<tr><td><code>powershell</code></td><td>执行 PowerShell 命令（Windows 方言）</td><td><code>pi 核心包内/dist/core/tools/powershell.js:16</code>；导出 <code>index.js:7</code></td></tr>
-<tr><td><code>edit</code></td><td>唯一精确文本替换（oldText→newText，可多段）</td><td><code>pi 核心包内/dist/core/tools/edit.js:83</code>；导出 <code>index.js:2</code></td></tr>
-<tr><td><code>write</code></td><td>写文件/整文件覆盖，自动建父目录</td><td><code>pi 核心包内/dist/core/tools/write.js:23</code>；导出 <code>index.js:10</code></td></tr>
-<tr><td><code>grep</code></td><td>按正则/字面量搜内容，返回文件和行号</td><td><code>pi 核心包内/dist/core/tools/grep.js:32</code>；导出 <code>index.js:5</code></td></tr>
-<tr><td><code>find</code></td><td>按 glob 找文件</td><td><code>pi 核心包内/dist/core/tools/find.js:37</code>；导出 <code>index.js:4</code></td></tr>
-<tr><td><code>ls</code></td><td>列目录（可设上限）</td><td><code>pi 核心包内/dist/core/tools/ls.js:25</code>；导出 <code>index.js:6</code></td></tr>
-<tr><td><code>tool_search</code></td><td>搜索尚未加载的工具并把命中的加载出来</td><td>名称定义 <code>pi 核心包内/dist/extensions/tool-search/tool.js:11</code>（<code>TOOL_SEARCH_TOOL_NAME</code>），定义体 <code>:160-168</code>；注册 <code>pi 核心包内/dist/extensions/tool-search/index.js:11</code></td></tr>
-<tr><td><code>codemode</code></td><td>用脚本批量/编排调用工具，减少往返</td><td>名称定义 <code>pi 核心包内/dist/extensions/codemode/tool.js:32</code>（<code>CODEMODE_TOOL_NAME</code>），定义体 <code>:256</code>；注册 <code>pi 核心包内/dist/extensions/codemode/index.js:19</code></td></tr>
-<tr><td><code>mcp__&lt;server&gt;__&lt;tool&gt;</code></td><td>静态 MCP 服务器的每个工具逐个代理成独立 pi 工具（名字由 server/tool 生成，冲突加哈希后缀）</td><td>注册逻辑 <code>pi 核心包内/dist/extensions/mcp/index.js:283</code>（<code>registerTools</code>）→ <code>:336</code>/<code>:377</code> 的 <code>pi.registerTool(definition)</code>；名字正则渲染器 <code>:279-282</code>；<code>registerCommand(&quot;mcp&quot;)</code> 在 <code>:1121</code></td></tr>
+<tr><td><code>read</code></td><td>读文本/图片文件，支持 offset/limit，图片以附件返回</td><td>pi 核心</td><td><code>pi 核心包内/dist/core/tools/read.js:51</code>；导出 <code>index.js:8</code></td></tr>
+<tr><td><code>bash</code></td><td>执行 shell 命令并回传 stdout/stderr</td><td>pi 核心</td><td><code>pi 核心包内/dist/core/tools/bash.js:313</code>；导出 <code>index.js:1</code></td></tr>
+<tr><td><code>powershell</code></td><td>执行 PowerShell 命令（Windows 方言）</td><td>pi 核心</td><td><code>pi 核心包内/dist/core/tools/powershell.js:16</code>；导出 <code>index.js:7</code></td></tr>
+<tr><td><code>edit</code></td><td>唯一精确文本替换（oldText→newText，可多段）</td><td>pi 核心</td><td><code>pi 核心包内/dist/core/tools/edit.js:83</code>；导出 <code>index.js:2</code></td></tr>
+<tr><td><code>write</code></td><td>写文件/整文件覆盖，自动建父目录</td><td>pi 核心</td><td><code>pi 核心包内/dist/core/tools/write.js:23</code>；导出 <code>index.js:10</code></td></tr>
+<tr><td><code>grep</code></td><td>按正则/字面量搜内容，返回文件和行号</td><td>pi 核心</td><td><code>pi 核心包内/dist/core/tools/grep.js:32</code>；导出 <code>index.js:5</code></td></tr>
+<tr><td><code>find</code></td><td>按 glob 找文件</td><td>pi 核心</td><td><code>pi 核心包内/dist/core/tools/find.js:37</code>；导出 <code>index.js:4</code></td></tr>
+<tr><td><code>ls</code></td><td>列目录（可设上限）</td><td>pi 核心</td><td><code>pi 核心包内/dist/core/tools/ls.js:25</code>；导出 <code>index.js:6</code></td></tr>
+<tr><td><code>tool_search</code></td><td>搜索尚未加载的工具并把命中的加载出来</td><td>pi 核心</td><td>名称定义 <code>pi 核心包内/dist/extensions/tool-search/tool.js:11</code>（<code>TOOL_SEARCH_TOOL_NAME</code>），定义体 <code>:160-168</code>；注册 <code>pi 核心包内/dist/extensions/tool-search/index.js:11</code></td></tr>
+<tr><td><code>codemode</code></td><td>用脚本批量/编排调用工具，减少往返</td><td>pi 核心</td><td>名称定义 <code>pi 核心包内/dist/extensions/codemode/tool.js:32</code>（<code>CODEMODE_TOOL_NAME</code>），定义体 <code>:256</code>；注册 <code>pi 核心包内/dist/extensions/codemode/index.js:19</code></td></tr>
+<tr><td><code>mcp__&lt;server&gt;__&lt;tool&gt;</code></td><td>静态 MCP 服务器的每个工具逐个代理成独立 pi 工具（名字由 server/tool 生成，冲突加哈希后缀）</td><td>pi 核心</td><td>注册逻辑 <code>pi 核心包内/dist/extensions/mcp/index.js:283</code>（<code>registerTools</code>）→ <code>:336</code>/<code>:377</code> 的 <code>pi.registerTool(definition)</code>；名字正则渲染器 <code>:279-282</code>；<code>registerCommand(&quot;mcp&quot;)</code> 在 <code>:1121</code></td></tr>
 </tbody>
 </table></article>
 <article class="entry" id="item-tools-packages" data-kind="tool"><h3><a href="#item-tools-packages">包提供的工具</a></h3><p class="entry-meta"><span class="meta-k">来自</span> 各包</p><p class="entry-summary">装包之后多出来的工具，每行标提供者 —— 用来判断「不装这个包还剩下什么」。</p><details class="fold" data-fold="rows"><summary>共 50 行，展开查看</summary>
@@ -881,13 +907,14 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
 <h2>这份页怎么更新</h2>
 <p>这一页是生成物，不要直接改 <code>tools-dev/pi-toolchain.html</code>。真源只有一份：<code>tools-dev/pi-toolchain.data.json</code>。</p>
 <ol>
-<li>改真源：新增一个包就往 <code>items</code> 里加一条，<code>id</code> 必须唯一且与页内锚点同名；<code>src</code> 一律写成 <code>~/</code>、<code>&lt;PI_HOME&gt;</code>、<code>&lt;REPO&gt;</code>、<code>&lt;USER&gt;</code> 这类占位符，不许写真实路径。</li>
+<li>改真源：新增一个包就往 <code>items</code> 里加一条，<code>id</code> 必须唯一且与页内锚点同名；<code>src</code> 一律写成 <code>~/</code>、<code>&lt;PI_HOME&gt;</code>、<code>&lt;PI_CORE&gt;</code>、<code>&lt;REPO&gt;</code>、<code>&lt;USER&gt;</code> 这类占位符，不许写真实路径。</li>
 <li>重生成：<code>node tools/pi-toolchain-gen.mjs</code>。</li>
 <li>校验：<code>node tools/pi-toolchain-gen.mjs check</code>，再跑 <code>node tools/test.mjs</code>。</li>
 <li>新增包要同时动三处：真源的 <code>items</code> 与 <code>packages</code>、<code>collectedAt</code> 日期、以及包版本变化时的 <code>version</code>/<code>versionFrom</code>。</li>
 </ol>
 </section>
 </main>
+</div>
 
 <footer>
 <p>采集于 2026-10-24，对应 pi 核心 1.4.0。内容随版本变化：重跑生成器即刷新。</p>
@@ -901,32 +928,54 @@ footer{border-top:1px solid var(--rule);margin-top:44px;padding-top:16px;color:v
   var chips=[].slice.call(document.querySelectorAll('.chip'));
   var entries=[].slice.call(document.querySelectorAll('[data-kind]'));
   var sections=[].slice.call(document.querySelectorAll('section[data-section]'));
+  var autoOpened=[];
   var active='all';
+
+  /* 命中在折叠块里就把它展开；过滤清空时只关掉我们自己开过的那几个。
+     注意折叠块在条目内部（article > details），所以是往下找，不是 closest()。 */
+  function revealFolds(needle){
+    autoOpened.forEach(function(d){ d.open=false; });
+    autoOpened=[];
+    if(!needle) return;
+    entries.forEach(function(el){
+      if(el.hasAttribute('hidden')) return;
+      [].forEach.call(el.querySelectorAll('details.fold'),function(d){
+        if(!d.open){ d.open=true; autoOpened.push(d); }
+      });
+    });
+  }
+
   function apply(){
     var needle=(q.value||'').trim().toLowerCase();
     var shown=0;
     entries.forEach(function(el){
       var okKind=(active==='all')||(el.getAttribute('data-kind')===active);
       var okText=!needle||el.textContent.toLowerCase().indexOf(needle)>=0;
-      var on=okKind&&okText;
-      if(on){el.removeAttribute('hidden');shown++;}else{el.setAttribute('hidden','');}
+      if(okKind&&okText){el.removeAttribute('hidden');shown++;}else{el.setAttribute('hidden','');}
     });
     sections.forEach(function(sec){
       var any=sec.querySelector('[data-kind]:not([hidden])');
       if(any){sec.removeAttribute('hidden');}else{sec.setAttribute('hidden','');}
     });
+    revealFolds(needle);
     if(count){count.textContent=shown+' / '+entries.length;}
   }
+
   chips.forEach(function(chip){
     chip.addEventListener('click',function(){
       active=chip.getAttribute('data-chip');
-      chips.forEach(function(other){
-        other.setAttribute('aria-pressed',String(other===chip));
-      });
+      chips.forEach(function(other){ other.setAttribute('aria-pressed',String(other===chip)); });
       apply();
     });
   });
-  if(q){q.addEventListener('input',apply);}
+  if(q){
+    q.addEventListener('input',apply);
+    q.addEventListener('keydown',function(e){
+      if(e.key==='Escape'){ q.value=''; active='all';
+        chips.forEach(function(c){ c.setAttribute('aria-pressed',String(c.getAttribute('data-chip')==='all')); });
+        apply(); q.blur(); }
+    });
+  }
   apply();
 })();
 </script>
