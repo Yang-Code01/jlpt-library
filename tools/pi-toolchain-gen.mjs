@@ -38,6 +38,12 @@ const PI_HOME = path.join(HOMEDIR, '.pi', 'agent');
 
 /* ------------------------------------------------------------------ 真源 */
 
+/* pi 核心包的安装目录（<PI_CORE> 用）；找不到就是没装，交给 probe / A6 处理 */
+function coreDir() {
+  const found = findCore();
+  return found ? path.dirname(found.file) : null;
+}
+
 function loadData() {
   return JSON.parse(fs.readFileSync(DATA, 'utf8'));
 }
@@ -47,6 +53,7 @@ function realPath(p) {
   return String(p)
     .replace(/^~\//, HOMEDIR + '/')
     .replace(/<PI_HOME>/g, PI_HOME)
+    .replace(/<PI_CORE>/g, coreDir() || "<PI_CORE>")
     .replace(/<REPO>/g, REPO)
     .replace(/<USER>/g, os.userInfo().username);
 }
@@ -232,11 +239,11 @@ function renderSections(data) {
 function renderUndocumented(data) {
   const rows = [];
   for (const u of data.undocumented || []) {
-    rows.push([esc(u.topic), src(u.srcA), src(u.srcB), esc(u.choice)]);
+    rows.push([cell(u.topic), src(u.srcA), src(u.srcB), cell(u.choice)]);
   }
   for (const item of data.items) {
     for (const u of item.undocumented || []) {
-      rows.push([`${esc(item.name)}：${esc(u.topic)}`, src(u.srcA), src(u.srcB), esc(u.choice)]);
+      rows.push([`${esc(item.name)}：${cell(u.topic)}`, src(u.srcA), src(u.srcB), cell(u.choice)]);
     }
   }
   if (!rows.length) {
@@ -466,6 +473,15 @@ function collectSrcs(data) {
   return out;
 }
 
+/* 一个出处单元格可能是「a.md:1、b.md:2」或「四份文档均未给默认值」这类散文：
+   按分隔符拆开，只挑出形如 文件.扩展:行号 的片段去验存在性。 */
+function srcTokens(value) {
+  return String(value)
+    .split(/[、，,;；]/)
+    .map((t) => t.trim())
+    .filter((t) => /\.(md|json|jsonc|ts|js|mjs)(:\d+(-\d+)?)?$/.test(t));
+}
+
 /** 取出单个条目的 HTML 片段（从它的 article 到下一个 article/section 结束） */
 function itemBlock(html, id) {
   const start = html.indexOf(`id="item-${id}"`);
@@ -553,18 +569,22 @@ const ASSERTIONS = [
     id: 'A6',
     label: '出处存在：占位符还原后，被引的文件真的在',
     run(html, data) {
-      /* 没有本机 pi 安装时，占位符指向的目录根本不存在 —— 这是跳过，不是失败 */
-      if (!fs.existsSync(PI_HOME)) return { skip: `本机没有 <PI_HOME>（${'~/.pi/agent'}），出处无法核对` };
+      /* 没有本机安装时，占位符指向的目录根本不存在 —— 这是跳过，不是失败 */
+      if (!fs.existsSync(PI_HOME)) return { skip: '本机没有 <PI_HOME>（~/.pi/agent），出处无法核对' };
+      const tokens = [];
+      for (const value of collectSrcs(data)) for (const t of srcTokens(value)) tokens.push(t);
+      if (!tokens.length) return null;
+      const needsCore = tokens.some((t) => t.includes('<PI_CORE>'));
+      if (needsCore && !coreDir()) return { skip: '本机找不到 pi 核心包（<PI_CORE> 无法还原）' };
       const bad = [];
-      for (const s of collectSrcs(data)) {
-        if (!s) continue;
-        const bare = String(s).replace(/:\d+(-\d+)?$/, '');
+      for (const t of tokens) {
+        const bare = t.replace(/:\d+(-\d+)?$/, '');
         const abs = realPath(bare);
         if (!path.isAbsolute(abs) || abs.includes('<')) {
-          bad.push(`${s}（占位符没还原成绝对路径）`);
+          bad.push(`${t}（占位符没还原成绝对路径）`);
           continue;
         }
-        if (!fs.existsSync(abs)) bad.push(`${s}（还原为 ${abs.replace(HOMEDIR, '~')}，不存在）`);
+        if (!fs.existsSync(abs)) bad.push(`${t}（还原为 ${abs.replace(HOMEDIR, '~')}，不存在）`);
       }
       return bad.length ? `出处不可达：${bad.join('；')}` : null;
     },
@@ -594,7 +614,7 @@ const ASSERTIONS = [
       for (const item of data.items) {
         for (const u of item.undocumented || []) gaps.push(`${item.name}：${u.topic}`);
       }
-      const missing = gaps.filter((t) => !html.includes(esc(t)));
+      const missing = gaps.filter((t) => !html.includes(cell(t)));
       return missing.length ? `页里找不到这些缺口条目：${missing.join('、')}` : null;
     },
   },
