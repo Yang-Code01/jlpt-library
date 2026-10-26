@@ -52,9 +52,53 @@ mark.hl{background:var(--hl);color:#000;border-radius:2px}
 .hide{display:none!important}
 body.beginner .card[data-level=adv]{display:none}
 pre{background:var(--code);padding:8px 10px;border-radius:6px;overflow-x:auto;font:12.5px Consolas,monospace}
+
+/* 右上角返回按钮（与 pi-toolchain.html 同款；改样式请四处一起改） */
+.back-btn{
+  position:fixed;top:14px;right:16px;z-index:60;
+  display:inline-flex;align-items:center;gap:9px;
+  padding:8px 13px 8px 10px;
+  color:var(--fg);text-decoration:none;
+  background-color:var(--card);
+  background-image:repeating-linear-gradient(0deg,rgba(127,127,127,.06) 0 1px,transparent 1px 3px);
+  border:1px solid var(--acc);border-radius:2px;
+  font-family:"Cascadia Code",Consolas,ui-monospace,monospace;
+  font-size:12.5px;font-weight:600;letter-spacing:.1em;
+  clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,9px 100%,0 calc(100% - 9px));
+  box-shadow:0 0 0 1px rgba(127,127,127,.22),0 8px 26px rgba(0,0,0,.22);
+  transition:color .16s,box-shadow .16s,transform .16s
+}
+.back-btn::before,.back-btn::after{content:"";position:absolute;width:8px;height:8px;
+  border:1px solid var(--acc);opacity:.85}
+.back-btn::before{left:3px;top:3px;border-right:0;border-bottom:0}
+.back-btn::after{right:3px;bottom:3px;border-left:0;border-top:0}
+.back-btn:hover{color:var(--acc);text-decoration:none;transform:translateX(-2px);
+  box-shadow:0 0 0 1px rgba(127,127,127,.35),0 0 18px rgba(127,127,127,.28),0 8px 26px rgba(0,0,0,.22)}
+.back-btn:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.back-btn .bk-ico{color:var(--acc);flex:0 0 auto}
+.back-btn .bk-txt{line-height:1.1}
+.back-btn .bk-en{font-size:9.5px;letter-spacing:.22em;color:var(--mut);opacity:.9;
+  border-left:1px solid var(--bd);padding-left:9px;margin-left:1px}
+.back-btn .bk-dot{width:5px;height:5px;background:var(--acc);border-radius:50%;
+  box-shadow:0 0 7px var(--acc);animation:bkpulse 2.4s ease-in-out infinite}
+@keyframes bkpulse{0%,100%{opacity:.4;transform:scale(.9)}50%{opacity:1;transform:scale(1.1)}}
+@media (prefers-reduced-motion:reduce){.back-btn .bk-dot{animation:none;opacity:1;transform:none}.back-btn{transition:none}}
+@media (max-width:640px){
+  .back-btn{top:10px;right:10px;gap:7px;padding:7px 10px 7px 8px;font-size:11.5px}
+  .back-btn .bk-en{padding-left:7px;letter-spacing:.16em}
+}
 </style>
 </head>
 <body>
+<a class="back-btn" href="../index.html#tools" data-back="top" aria-label="回到工具开发清单" title="回到工具开发清单">
+<svg class="bk-ico" viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" focusable="false">
+<path d="M20 12H7.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="square"/>
+<path d="M11.6 6.4 6 12l5.6 5.6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="miter"/>
+</svg>
+<span class="bk-dot" aria-hidden="true"></span>
+<span class="bk-txt">返回工具区</span>
+<span class="bk-en">TOOLS</span>
+</a>
 <header>
 <h1>GitHub Copilot CLI 场景化使用指南</h1>
 <ul class="meta">

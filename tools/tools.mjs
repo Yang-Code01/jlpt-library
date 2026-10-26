@@ -299,6 +299,12 @@ function validate(data, disk) {
         const abs = join(TOOLS_DIR, normalize(join(dirname(t.page), m[1])));
         if (!existsSync(abs)) bad(`${at}：详情页 tools-dev/${t.page} 的下载链接 ${m[1]} 指向不存在的文件（升版后忘了改？）`);
       }
+      /* 详情页是从门户清单点进来的，必须能回去：右上角固定按钮 + 页脚链接。
+         之前只有部分页有，读者会困在子页里。 */
+      if (!/<a[^>]+class="back-btn"[^>]+href="\.\.\/index\.html#tools"/.test(html)) {
+        bad(`${at}：详情页 tools-dev/${t.page} 缺右上角返回按钮（<a class="back-btn" href="../index.html#tools">）`);
+      }
+      if (!/data-back="top"/.test(html)) bad(`${at}：详情页 tools-dev/${t.page} 的返回按钮缺 data-back="top" 标记`);
     }
 
     if (t.dir) {
