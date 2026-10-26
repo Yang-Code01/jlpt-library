@@ -1,0 +1,52 @@
+{
+  "_note": "《Pi 工具链手册》的唯一真源。改这里 → node tools/pi-toolchain-gen.mjs → node tools/test.mjs。页面 tools-dev/pi-toolchain.html 是生成物，不许手改。字段：collectedAt 采集日（YYYY-MM-DD）· piCore 核心包名与版本 · packages 已装包清单（name/version/provider，用于页头版本表）· chips 类型切片（id 要与 item.kind 对得上）· items 条目数组（id 唯一且等于页内锚点；kind=package|mcp|skill|tool；src 一律用可逆占位符 ~/ <PI_HOME> <REPO> <USER>）· undocumented 跨条目的「文档未载」汇总。",
+  "collectedAt": "2026-10-24",
+  "piCore": {
+    "name": "@earendil-works/pi-coding-agent",
+    "version": "1.4.0"
+  },
+  "chips": [
+    { "id": "all", "label": "全部" },
+    { "id": "package", "label": "包与扩展" },
+    { "id": "mcp", "label": "MCP" },
+    { "id": "skill", "label": "技能" },
+    { "id": "tool", "label": "内置工具" }
+  ],
+  "packages": [
+    { "name": "pi-mcp-adapter", "version": "6.0.0", "provider": "npm:pi-mcp-adapter", "local": false },
+    { "name": "pi-web-access", "version": "0.44.0", "provider": "npm:pi-web-access", "local": false },
+    { "name": "@juicesharp/rpiv-ask-user-question", "version": "2.15.0", "provider": "npm:@juicesharp/rpiv-ask-user-question", "local": false },
+    { "name": "pi-background-tasks", "version": "2.6.10", "provider": "npm:pi-background-tasks", "local": false },
+    { "name": "@plannotator/pi-extension", "version": "0.28.30", "provider": "npm:@plannotator/pi-extension", "local": false },
+    { "name": "pi-agent-browser-native", "version": "0.9.6", "provider": "npm:pi-agent-browser-native", "local": false },
+    { "name": "context-mode", "version": "1.0.169", "provider": "npm:context-mode", "local": false },
+    { "name": "pi-subagents", "version": "0.82.1", "provider": "npm:pi-subagents", "local": false },
+    { "name": "pi-tui-plus", "version": "0.4.1", "provider": "本地路径 ~/.pi/packages/pi-tui", "local": true },
+    { "name": "pi-compact-transcript", "version": "0.12.0", "provider": "npm:pi-compact-transcript", "local": false },
+    { "name": "@yusukeshib/pi-working-status", "version": "0.1.1", "provider": "npm:@yusukeshib/pi-working-status", "local": false }
+  ],
+  "undocumented": [],
+  "items": [
+    {
+      "id": "context-mode",
+      "kind": "package",
+      "name": "context-mode",
+      "version": "1.0.169",
+      "versionFrom": "<PI_HOME>/npm/node_modules/context-mode/package.json",
+      "provider": "npm:context-mode",
+      "summary": "把代码执行搬进沙箱、只把结论倒回上下文的 MCP 插件，用来省上下文窗口。",
+      "scenes": [],
+      "commands": [],
+      "config": [],
+      "env": [],
+      "files": [
+        {
+          "path": "<PI_HOME>/npm/node_modules/context-mode/",
+          "meaning": "包目录：pi 侧扩展入口与内置技能都在这里"
+        }
+      ],
+      "inDocTotal": 0,
+      "undocumented": []
+    }
+  ]
+}
