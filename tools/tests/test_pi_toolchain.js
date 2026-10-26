@@ -126,9 +126,11 @@ const external = check(TMP);
 ok(external.status === 1, `外链脚本后 check 必须 exit 1（实际 ${external.status}）`);
 ok(/A5/.test(external.stdout || ''), `失败信息应点名 A5（实际：${external.stdout}）`);
 
-/* 改坏 5：改掉版本表里的一行（版本表一致 A9） */
+/* 改坏 5：改掉版本表里的一行（版本表一致 A9）。版本值从真源现取，不写死 ——
+   写死 6.0.0 的话升级当天这断言就会失真。 */
 scaffold();
-writePage(readPage().replace(/data-ver="6\.0\.0"/, 'data-ver="9.9.9"'));
+const firstVer = JSON.parse(fs.readFileSync(DATA, 'utf8')).packages[0].version;
+writePage(readPage().replace(`data-ver="${firstVer}"`, 'data-ver="0.0.0-drift"'));
 const drift = check(TMP);
 ok(drift.status === 1, `版本表被改后 check 必须 exit 1（实际 ${drift.status}）`);
 ok(/A9|不一致/.test(drift.stdout || ''), `失败信息应点名版本不一致（实际：${drift.stdout}）`);
@@ -157,7 +159,14 @@ if (hasPiHome) {
   ok(deadSrc.status === 1, `出处不可达时 check 必须 exit 1（实际 ${deadSrc.status}）`);
   ok(/A6/.test(deadSrc.stdout || ''), `失败信息应点名 A6（实际：${deadSrc.stdout}）`);
 } else {
-  pass++; /* 本机没有 pi：A6 自报跳过，这一段不适用 */
+  /* 本机没有 pi：这时候要验的是「A6 走跳过而不是假装通过」 */
+  const r2 = spawnSync(process.execPath, [path.join(TMP, 'tools', 'pi-toolchain-gen.mjs'), 'check'], {
+    cwd: TMP,
+    encoding: 'utf8',
+    env: { ...process.env, USERPROFILE: path.join(TMP, 'no-such-home') },
+  });
+  ok(r2.status === 0, `无 pi 安装时 check 应通过而不是失败（退出码 ${r2.status}）：${r2.stdout}${r2.stderr}`);
+  ok(/–\s*A6/.test(r2.stdout || ''), `无 pi 安装时应明说 A6 跳过（实际：${r2.stdout}）`);
 }
 
 /* 折叠阀值：过 30 才折，且折叠不算丢行（A7 守恒） */
@@ -170,7 +179,8 @@ scaffold();
     return i < 0 ? '' : page.slice(i, page.indexOf('</article>', i));
   };
   const expectsFold = (it) =>
-    ((it.commands || []).length > 0 && (it.inDocTotal || 0) > 30) || (it.rows || []).length > 30;
+    (((it.commands || []).length || (it.config || []).length) && (it.inDocTotal || 0) > 30) ||
+    (it.rows || []).length > 30;
 
   const big = d.items.filter(expectsFold);
   ok(big.length > 0, '真源里应有超过折叠阀值的条目（否则这条断言是空转）');

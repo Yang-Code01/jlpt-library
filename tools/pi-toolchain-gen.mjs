@@ -20,7 +20,6 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { norm, writePreservingEol } from './lib/eol.mjs';
 
@@ -473,15 +472,6 @@ function collectSrcs(data) {
   return out;
 }
 
-/* 一个出处单元格可能是「a.md:1、b.md:2」或「四份文档均未给默认值」这类散文：
-   按分隔符拆开，只挑出形如 文件.扩展:行号 的片段去验存在性。 */
-function srcTokens(value) {
-  return String(value)
-    .split(/[、，,;；]/)
-    .map((t) => t.trim())
-    .filter((t) => /\.(md|json|jsonc|ts|js|mjs)(:\d+(-\d+)?)?$/.test(t));
-}
-
 /** 取出单个条目的 HTML 片段（从它的 article 到下一个 article/section 结束） */
 function itemBlock(html, id) {
   const start = html.indexOf(`id="item-${id}"`);
@@ -536,8 +526,14 @@ const ASSERTIONS = [
     label: '无泄漏：全页无真实用户名 / 盘符 / 本机 home',
     run(html) {
       const hits = [];
+      /* 只认「路径段」形式的用户名：短用户名（pi、agent、runner）直接子串匹配会把
+         满页英文抳红，而且抳出来的也不是泄漏。 */
       const user = os.userInfo().username;
-      if (user && html.toLowerCase().includes(user.toLowerCase())) hits.push(`用户名 ${user}`);
+      if (user && user.length >= 4) {
+        const esc2 = user.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const asSegment = new RegExp(`[\\\\/]${esc2}[\\\\/]`, 'i');
+        if (asSegment.test(html)) hits.push(`用户名路径段 ${user}`);
+      }
       if (/[A-Za-z]:[\\/]/.test(html)) hits.push('盘符路径');
       if (HOMEDIR && html.includes(HOMEDIR)) hits.push('本机 home');
       if (/AppData/i.test(html)) hits.push('AppData');
@@ -572,7 +568,20 @@ const ASSERTIONS = [
       /* 没有本机安装时，占位符指向的目录根本不存在 —— 这是跳过，不是失败 */
       if (!fs.existsSync(PI_HOME)) return { skip: '本机没有 <PI_HOME>（~/.pi/agent），出处无法核对' };
       const tokens = [];
-      for (const value of collectSrcs(data)) for (const t of srcTokens(value)) tokens.push(t);
+      let nonPath = 0;
+      for (const value of collectSrcs(data)) {
+        for (const raw of String(value).split(/[、，,;；]/)) {
+          const t = raw.trim();
+          if (!t) continue;
+          if (!/\.(md|json|jsonc|ts|js|mjs)(:\d+(-\d+)?)?$/.test(t)) {
+            /* 散文型出处（「四份文档均未给默认值」）没法验，但也不能默默略过 */
+            nonPath++;
+            continue;
+          }
+          tokens.push(t);
+        }
+      }
+      A6_NON_PATH = nonPath;
       if (!tokens.length) return null;
       const needsCore = tokens.some((t) => t.includes('<PI_CORE>'));
       if (needsCore && !coreDir()) return { skip: '本机找不到 pi 核心包（<PI_CORE> 无法还原）' };
@@ -651,6 +660,9 @@ const ASSERTIONS = [
     },
   },
 ];
+
+/* A6 每次跑完填一次：有多少处出处是散文而不是文件引用（没法用存在性验） */
+let A6_NON_PATH = 0;
 
 function runAssertions(html, data) {
   const fails = [];
@@ -781,7 +793,9 @@ function main() {
     process.exit(0);
   }
 
-  /* check：成品必须与真源重渲染的结果逐字节一致，然后对成品跑断言 */
+  /* check：成品必须与真源重渲染的结果逐字节一致，然后对成品跑断言。
+     注意断言跑在**未归一化**的磁盘内容上：A4 要能真的看见 CR，
+     所以行尾敏感的比较放在下面的 norm() 里，而不是先把文件洗干净再断言。 */
   if (!fs.existsSync(OUT)) {
     console.log(`✗ ${REL_OUT} 不存在，先跑 node tools/pi-toolchain-gen.mjs`);
     process.exit(1);
@@ -792,8 +806,9 @@ function main() {
   if (norm(disk) !== norm(html)) problems.push('成品与真源重渲染的结果不一致（有人手改了生成物，或改真源后忘了重跑）');
   if ((disk.match(/\r/g) || []).length) problems.push('成品含 CR（行尾必须 LF）');
 
-  const onDisk = runAssertions(norm(disk), data);
+  const onDisk = runAssertions(disk, data);
   problems.push(...onDisk.fails);
+  if (A6_NON_PATH) console.log(`  · A6 跳过 ${A6_NON_PATH} 处非路径文本出处（散文无法验存在性）`);
 
   if (problems.length) {
     console.log(`✗ 共 ${onDisk.total} 项断言，${problems.length} 处问题：`);

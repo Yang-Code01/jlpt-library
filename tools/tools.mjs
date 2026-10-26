@@ -7,7 +7,9 @@
  *   node tools/tools.mjs pack <id>  # 把工具目录打成 tools-dev/downloads/<id>-<version>.zip 并写 manifest.json
  *   node tools/tools.mjs pack --all
  *
- * 真源是 tools-dev/data.json；每个工具的详情页是 tools-dev/<page>（手写自包含 HTML），
+ * 真源是 tools-dev/data.json；每个工具的详情页是 tools-dev/<page>（自包含 HTML，
+ * 有的是手写稿，有的是生成物 —— 例如 pi-toolchain.html 由 tools/pi-toolchain-gen.mjs
+ * 从 tools-dev/pi-toolchain.data.json 生成，见 ADR-0012），
  * 工具本体在 data.json 的 dir 指向的目录里。index.html 的标记区由 gen 写，勿手改。
  *
  * 「下载」不依赖任何服务：pack 把目录打成 store-only（不压缩）zip 随仓库发布，

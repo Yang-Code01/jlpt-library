@@ -99,7 +99,116 @@
       "local": false
     }
   ],
-  "undocumented": [],
+  "undocumented": [
+    {
+      "topic": "`pi mcp` 子命令集合：synopsis 只写 `list|login|logout`，正文另有 `add`/`remove`",
+      "srcA": "<PI_CORE>/docs/cli.md:16",
+      "srcB": "<PI_CORE>/docs/cli.md:324、<PI_CORE>/docs/cli.md:326",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "`pi --export` 目标格式：CLI 只说导出为 HTML",
+      "srcA": "<PI_CORE>/docs/cli.md:49",
+      "srcB": "<PI_CORE>/docs/slash-commands.md:38 说「导出为 HTML 或 JSONL」",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "`/mcp` 斜杠命令存在性：cli.md 明说不连 MCP 时「无 `/mcp`」，暗示存在该命令",
+      "srcA": "<PI_CORE>/docs/cli.md:199",
+      "srcB": "<PI_CORE>/docs/slash-commands.md:9-52 全表未收录 `/mcp`",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "`--use-theme`（一次性选主题）与 `theme`/`themes` 设置的优先级未说明",
+      "srcA": "<PI_CORE>/docs/cli.md:210",
+      "srcB": "<PI_CORE>/docs/settings.md:95、<PI_CORE>/docs/settings.md:158",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "代理来源优先级：`httpProxy`（仅 agent 目录）与 `HTTP_PROXY`/`HTTPS_PROXY` 谁生效未说明",
+      "srcA": "<PI_CORE>/docs/settings.md:125",
+      "srcB": "<PI_CORE>/docs/environment-variables.md:99",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "遥测开关关系：`PI_TELEMETRY` 与 `enableInstallTelemetry` 的覆盖顺序未说明",
+      "srcA": "<PI_CORE>/docs/environment-variables.md:86",
+      "srcB": "<PI_CORE>/docs/settings.md:170",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "会话目录优先级：settings 侧只说两者「覆盖」本设置，未排出二者之间顺序；CLI 侧明确 `--session-dir` > 环境变量 > 设置",
+      "srcA": "<PI_CORE>/docs/settings.md:66",
+      "srcB": "<PI_CORE>/docs/cli.md:96",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "`defaultProjectTrust` 与 `--approve`/`--no-approve` 的交互与谁优先未说明",
+      "srcA": "<PI_CORE>/docs/settings.md:36",
+      "srcB": "<PI_CORE>/docs/cli.md:237、<PI_CORE>/docs/cli.md:239",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "`defaultTools` 空数组语义只在 settings 侧写明（关全部内置，不含扩展/SDK 工具）",
+      "srcA": "<PI_CORE>/docs/settings.md:42",
+      "srcB": "<PI_CORE>/docs/cli.md:128 未提空数组",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "短选项前缀冲突风险：`-n`(name) 与 `-nbt`/`-ne`/`-ns`/`-np`/`-nc`/`-na` 同以 `-n` 开头，文档未说明解析规则",
+      "srcA": "<PI_CORE>/docs/cli.md:100",
+      "srcB": "<PI_CORE>/docs/cli.md:123、<PI_CORE>/docs/cli.md:196、<PI_CORE>/docs/cli.md:202、<PI_CORE>/docs/cli.md:206、<PI_CORE>/docs/cli.md:214、<PI_CORE>/docs/cli.md:239",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "`--tui-mode` 的默认值只在正文括注里出现（fullscreen），未进参数表",
+      "srcA": "<PI_CORE>/docs/cli.md:233",
+      "srcB": "<PI_CORE>/docs/settings.md:97 的 `tuiMode` 默认 `\"fullscreen\"`",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "`PI_CODING_AGENT_SESSION_DIR` 无默认值；settings 侧默认只写「Agent session directory」",
+      "srcA": "<PI_CORE>/docs/environment-variables.md:82",
+      "srcB": "<PI_CORE>/docs/settings.md:66",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "`PI_OFFLINE`、`PI_SKIP_VERSION_CHECK`、`PI_TELEMETRY`、`PI_PACKAGE_DIR`、`PI_CACHE_RETENTION` 默认值",
+      "srcA": "<PI_CORE>/docs/environment-variables.md:83-86、<PI_CORE>/docs/environment-variables.md:88",
+      "srcB": "四份文档均未给默认值",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "`retry.provider.timeoutMs` 默认值指向另一键而非字面值",
+      "srcA": "<PI_CORE>/docs/settings.md:132",
+      "srcB": "<PI_CORE>/docs/settings.md:126",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "`--offline` 与 `PI_OFFLINE` 的等价关系有载，但两者同时存在时的优先级未载",
+      "srcA": "<PI_CORE>/docs/cli.md:241",
+      "srcB": "<PI_CORE>/docs/environment-variables.md:84",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "`externalEditor` 默认链（`$VISUAL`→`$EDITOR`→平台默认）与环境变量节只列 `VISUAL`、`EDITOR` 一致，但「平台默认」具体值未载",
+      "srcA": "<PI_CORE>/docs/settings.md:33",
+      "srcB": "<PI_CORE>/docs/environment-variables.md:98",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "shell 工具会话变量的注入开关（`exposeSessionEnvironment`）是 API 选项，CLI/settings 无对应开关",
+      "srcA": "<PI_CORE>/docs/environment-variables.md:68",
+      "srcB": "<PI_CORE>/docs/cli.md 全篇、<PI_CORE>/docs/settings.md 全篇",
+      "choice": "两处并列保留，未替读者取舍"
+    },
+    {
+      "topic": "`PI_CODEMODE_MAX_WORKERS` 的每 worker 256 MB 上限无对应 settings 键",
+      "srcA": "<PI_CORE>/docs/environment-variables.md:87",
+      "srcB": "<PI_CORE>/docs/settings.md:43、<PI_CORE>/docs/settings.md:44 仅有 `codemode.mode` 与 `codemode.inlineBudget`",
+      "choice": "两处并列保留，未替读者取舍"
+    }
+  ],
   "items": [
     {
       "id": "context-mode",
