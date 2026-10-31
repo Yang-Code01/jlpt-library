@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{BOOK_TITLE}} · vibecoding 术语图解 · {{N}} 条</title>
+<style>
+:root{
+  --bg:#f6f4ee; --paper:#fffdf8; --ink:#1e2a30; --ink-soft:#3d4c52; --muted:#6b7a72;
+  --rule:#e2ddd0; --accent:#176b75; --accent-soft:#e3efee; --seal:#b3402a;
+  --fig:#f2efe6; --fig-line:#c9d3ca; --fig-arrow:#a6b3a9; --fig-fill:#fbf9f3; --fig-accent:#dceceb; --fig-accent-line:#7fb0ae;
+  --shadow:0 1px 2px rgba(30,42,48,.04), 0 8px 24px -18px rgba(30,42,48,.5);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#12171a; --paper:#171d20; --ink:#e8eae4; --ink-soft:#c3cbc4; --muted:#8b9a90;
+    --rule:#282f33; --accent:#5fb0b2; --accent-soft:#16302f; --seal:#e0715a;
+    --fig:#0e1316; --fig-line:#3a4a4a; --fig-arrow:#5d6f64; --fig-fill:#182024; --fig-accent:#173634; --fig-accent-line:#4b8f8e;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -20px rgba(0,0,0,.9);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Noto Sans JP","Source Han Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased;
+}
+.serif{font-family:"Noto Serif JP","Source Han Serif SC",Songti SC,SimSun,Georgia,serif}
+
+/* 册切换 */
+.books{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 18px}
+.books a{
+  padding:5px 11px; font-size:12px; line-height:1.4; text-decoration:none;
+  color:var(--muted); border:1px solid transparent; border-radius:999px; transition:color .18s, border-color .18s;
+}
+.books a:hover{color:var(--accent); border-color:var(--rule)}
+.books a[aria-current="page"]{color:var(--accent); border-color:var(--accent); background:var(--accent-soft)}
+
+/* 右上角返回（tools-dev 硬性要求） */
+.back-btn{
+  position:fixed; top:16px; right:20px; z-index:50;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 13px; border:1px solid var(--rule); border-radius:999px;
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  color:var(--ink-soft); font-size:12.5px; text-decoration:none;
+  backdrop-filter:blur(6px); transition:color .2s, border-color .2s;
+}
+.back-btn:hover{color:var(--accent); border-color:var(--accent)}
+
+/* 头部 */
+.hd{border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--bg))}
+.hd-in{max-width:1200px; margin:0 auto; padding:56px 40px 26px}
+.eyebrow{margin:0 0 14px; font-size:11.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted)}
+h1{margin:0; font-size:clamp(26px,3.1vw,38px); font-weight:600; letter-spacing:-.01em; line-height:1.25;
+   font-family:"Noto Serif JP","Source Han Serif SC",Songti SC,Georgia,serif}
+.lede{margin:14px 0 0; max-width:62ch; color:var(--ink-soft); font-size:14.5px; text-wrap:pretty}
+.lede em{font-style:normal; color:var(--seal); border-bottom:1px solid currentColor}
+.tools{display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-top:26px}
+.search{position:relative; flex:1 1 320px; max-width:420px}
+.search input{
+  width:100%; padding:10px 40px 10px 14px; font:inherit; font-size:14px;
+  color:var(--ink); background:var(--paper); border:1px solid var(--rule); border-radius:9px; outline:none;
+  transition:border-color .2s, box-shadow .2s;
+}
+.search input:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.search .kbd{position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  font-size:11px; color:var(--muted); border:1px solid var(--rule); border-radius:5px; padding:1px 6px; pointer-events:none}
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{
+  padding:6px 12px; font-size:12.5px; line-height:1.4; cursor:pointer;
+  color:var(--ink-soft); background:transparent; border:1px solid var(--rule); border-radius:999px;
+  transition:color .18s, border-color .18s, background .18s;
+}
+.chip:hover{border-color:var(--accent); color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:#f7fbfa}
+.count{font-size:12.5px; color:var(--muted); margin-left:auto; font-variant-numeric:tabular-nums}
+
+/* 主体 */
+.wrap{max-width:1200px; margin:0 auto; padding:0 40px 120px; display:grid; grid-template-columns:212px minmax(0,1fr); gap:48px}
+.toc{position:sticky; top:0; align-self:start; max-height:100vh; overflow-y:auto; padding:34px 0 40px; scrollbar-width:thin}
+.toc-g{margin:18px 0 6px; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted)}
+.toc-g:first-child{margin-top:0}
+.toc a{
+  display:block; padding:3px 0 3px 10px; margin-left:-10px; font-size:12.5px; line-height:1.5;
+  color:var(--muted); text-decoration:none; border-left:1px solid transparent;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .16s, border-color .16s;
+}
+.toc a:hover{color:var(--ink)}
+.toc a.on{color:var(--accent); border-left-color:var(--accent); font-weight:500}
+.doc{padding-bottom:60px}
+.grp{display:flex; align-items:baseline; gap:12px; padding:64px 0 4px; scroll-margin-top:0}
+.grp-k{font-family:"Noto Serif JP",Georgia,serif; font-size:13px; letter-spacing:.1em; color:var(--accent)}
+.grp-n{margin:0; font-size:19px; font-weight:600; font-family:"Noto Serif JP","Source Han Serif SC",Songti SC,serif}
+.grp-c{font-size:12px; color:var(--muted)}
+.grp-line{flex:1; height:1px; background:var(--rule)}
+
+.t{display:grid; grid-template-columns:minmax(0,1fr) 408px; gap:0 44px; padding:26px 0 24px; border-top:1px solid var(--rule); scroll-margin-top:12px}
+.t:first-of-type{border-top:0}
+.t-meta{grid-column:1; grid-row:1; min-width:0}
+.t-no{font-size:11px; letter-spacing:.12em; color:var(--muted); font-variant-numeric:tabular-nums}
+.t-h{margin:4px 0 0; display:flex; flex-wrap:wrap; align-items:baseline; gap:10px}
+.t-en{font-size:19px; font-weight:600; letter-spacing:-.005em}
+.t-cn{font-size:12.5px; color:var(--muted)}
+.t-p{margin:10px 0 0; color:var(--ink-soft); font-size:15px; line-height:1.85; text-wrap:pretty; text-wrap:balance}
+.t-fig{grid-column:2; grid-row:1; min-width:0}
+.fwrap{background:var(--fig); border:1px solid var(--rule); border-radius:10px; padding:8px 10px}
+.fig{display:block; width:100%; height:auto}
+.t-q{grid-column:1 / -1; grid-row:2; display:flex; gap:12px; align-items:baseline;
+  margin:16px 0 0; padding:11px 0 0; border-top:1px dashed var(--rule);
+  font-size:12.8px; line-height:1.8; color:var(--muted)}
+.t-q b{flex:0 0 auto; font-size:10.5px; letter-spacing:.1em; color:var(--seal); font-weight:600; white-space:nowrap}
+.t[hidden]{display:none}
+.grp[hidden]{display:none}
+.empty{display:none; padding:60px 0; color:var(--muted); font-size:14px}
+.empty.on{display:block}
+
+/* 图的元件语法 */
+.fig text{font-family:"Noto Sans JP","PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+.f-lab{fill:var(--ink); font-size:9.6px}
+.f-sub{fill:var(--muted); font-size:8.2px; letter-spacing:.02em}
+.f-thlab{fill:var(--ink-soft); font-size:8.6px}
+.f-badge{fill:var(--seal); font-size:8.4px; letter-spacing:.04em}
+.f-vs{fill:var(--muted); font-size:8.6px; letter-spacing:.14em}
+.f-box{fill:var(--fig-fill); stroke:var(--fig-line); stroke-width:1.3}
+.f-box-accent{fill:var(--fig-accent); stroke:var(--fig-accent-line); stroke-width:1.3}
+.f-box-muted{fill:none; stroke:var(--fig-line); stroke-width:1.3; stroke-dasharray:5 4}
+.f-pill{fill:var(--fig-fill); stroke:var(--fig-line); stroke-width:1.3}
+.f-panel{fill:none; stroke:var(--fig-line); stroke-width:1.2}
+.f-panel-hot{fill:var(--fig-accent); fill-opacity:.34; stroke:var(--fig-accent-line); stroke-width:1.4}
+.f-th{fill:var(--fig-accent); stroke:var(--fig-accent-line); stroke-width:1.1}
+.f-seg1{fill:var(--fig-fill); stroke:var(--fig-line)}
+.f-seg2{fill:var(--fig-accent); stroke:var(--fig-accent-line)}
+.f-seg3{fill:none; stroke:var(--fig-line)}
+.f-ar{fill:none; stroke:var(--fig-arrow); stroke-width:1.5; stroke-linejoin:round}
+.f-dash{stroke-dasharray:5 4}
+.f-head{fill:var(--fig-arrow)}
+.f-gate{stroke:var(--seal); stroke-width:1.3; stroke-dasharray:5 4; opacity:.75}
+.f-axis{stroke:var(--fig-line); stroke-width:1.2}
+.f-line{fill:none; stroke:var(--fig-line); stroke-width:1.1; stroke-dasharray:4 4}
+.f-dot{fill:var(--fig-fill); stroke:var(--fig-line); stroke-width:1.4}
+.f-dot-hot{fill:var(--seal); stroke:var(--seal); stroke-width:1.4}
+.f-rule{stroke:var(--fig-line); stroke-width:1; opacity:.85}
+.f-queue line{stroke:var(--fig-line); stroke-width:1; opacity:.8}
+.f-store .f-rule{stroke-dasharray:3 3}
+
+footer{border-top:1px solid var(--rule); padding:26px 40px 60px}
+.foot-in{max-width:1200px; margin:0 auto; display:flex; flex-wrap:wrap; gap:8px 20px; font-size:12.5px; color:var(--muted)}
+footer a{color:var(--muted)}
+footer a:hover{color:var(--accent)}
+
+@media (max-width:1080px){
+  .wrap{grid-template-columns:1fr; gap:0; padding:0 28px 80px}
+  .toc{display:none}
+  .t{grid-template-columns:1fr; row-gap:18px}
+  .t-meta,.t-fig,.t-q{grid-column:1; grid-row:auto}
+  .t-q{margin-top:4px}
+  .t-fig{max-width:520px}
+  .hd-in{padding:66px 28px 22px}
+}
+@media (max-width:560px){
+  .wrap{padding:0 18px 60px}
+  .hd-in{padding:62px 18px 18px}
+  .t-en{font-size:17px}
+  .count{margin-left:0; flex-basis:100%}
+}
+</style>
+</head>
+<body>
+<a class="back-btn" href="../index.html#tools" data-back="top" title="回到工具开发区列表">← 工具开发区</a>
+
+<header class="hd">
+  <div class="hd-in">
+    <nav class="books" id="books" aria-label="分册"></nav>
+    <p class="eyebrow">{{BOOK_K}} · {{BOOK_SUB}} · {{N}} 条</p>
+    <h1>{{BOOK_TITLE}}</h1>
+    <p class="lede">{{BOOK_LEDE}}</p>
+    <div class="tools">
+      <label class="search">
+        <input id="q" type="search" placeholder="搜术语 / 中文 / 正文…" autocomplete="off" spellcheck="false" aria-label="搜索术语">
+        <span class="kbd">/</span>
+      </label>
+      <div class="chips" id="chips"></div>
+      <span class="count" id="count"></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="toc" id="toc" aria-label="术语目录"></nav>
+  <div class="doc" id="doc"></div>
+</main>
+
+<footer>
+  <div class="foot-in">
+    <span>{{BOOK_NAME}} · {{N}} 条 · {{G}} 组 · 图共用一套语法</span>
+    <a href="dev-terms.html">目录页</a>
+    <a href="../index.html#tools">← 回工具开发区</a>
+    <a href="../index.html">回工作台首页</a>
+  </div>
+</footer>
+
+<script>/*__FIGS__*/</script>
+<script>/*__TERMS__*/</script>
+<script>
+(function () {
+  var terms = window.TERMS, groups = window.GROUPS;
+  var doc = document.querySelector('#doc');
+  var toc = document.querySelector('#toc');
+  var count = document.querySelector('#count');
+  var input = document.querySelector('#q');
+  var chips = document.querySelector('#chips');
+
+  function frag(html) { return document.createRange().createContextualFragment(html); }
+  function h(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  var state = { g: 'all', q: '' };
+  var html = '', tocHtml = '', no = 0, lastG = null, refs = [];
+
+  groups.forEach(function (grp) {
+    var items = terms.filter(function (t) { return t.g === grp.k; });
+    tocHtml += '<p class="toc-g">' + grp.k + ' · ' + grp.name + '</p>';
+    items.forEach(function (t) {
+      no += 1;
+      t._no = no;
+      t._id = 't-' + t.en.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + no;
+      tocHtml += '<a href="#' + t._id + '" data-id="' + t._id + '">' + h(t.en) + ' <span style="opacity:.6">' + h(t.cn) + '</span></a>';
+    });
+    html += '<section class="grp" data-g="' + grp.k + '" id="g-' + grp.k + '">' +
+      '<span class="grp-k">' + grp.k + '</span><h2 class="grp-n serif">' + h(grp.name) + '</h2>' +
+      '<span class="grp-c">' + items.length + ' 条 · ' + grp.tag + '</span><span class="grp-line"></span></section>';
+    items.forEach(function (t) {
+      var pad = t._no < 10 ? '0' + t._no : '' + t._no;
+      html += '<article class="t" id="' + t._id + '" data-g="' + t.g + '">' +
+        '<div class="t-meta">' +
+          '<div class="t-no">' + pad + '</div>' +
+          '<h3 class="t-h"><span class="t-en">' + h(t.en) + '</span><span class="t-cn">' + h(t.cn) + '</span></h3>' +
+          '<p class="t-p">' + h(t.p) + '</p>' +
+        '</div>' +
+        '<div class="t-fig"><div class="fwrap">' + window.FIGS.render(t.f) + '</div></div>' +
+        '<p class="t-q"><b>AI 常怎么糊弄你</b><span>' + h(t.q) + '</span></p>' +
+      '</article>';
+    });
+  });
+  html += '<p class="empty" id="empty">没有匹配的条目。换个词，或者按 Esc 清空。</p>';
+  doc.replaceChildren(frag(html));
+  toc.replaceChildren(frag(tocHtml));
+
+  var rows = Array.prototype.slice.call(doc.querySelectorAll('.t'));
+  var heads = Array.prototype.slice.call(doc.querySelectorAll('.grp'));
+  var links = Array.prototype.slice.call(toc.querySelectorAll('a'));
+  var empty = document.querySelector('#empty');
+  var linkMap = {};
+  links.forEach(function (a) { linkMap[a.dataset.id] = a; });
+
+  function apply() {
+    var q = state.q.trim().toLowerCase();
+    var shown = 0, gcount = {};
+    rows.forEach(function (r) {
+      var okG = state.g === 'all' || r.dataset.g === state.g;
+      var okQ = !q || r.textContent.toLowerCase().includes(q);
+      var ok = okG && okQ;
+      r.hidden = !ok;
+      if (ok) { shown += 1; gcount[r.dataset.g] = (gcount[r.dataset.g] || 0) + 1; }
+    });
+    heads.forEach(function (h) { h.hidden = !gcount[h.dataset.g]; });
+    empty.classList.toggle('on', shown === 0);
+    count.textContent = shown === rows.length ? rows.length + ' 条' : shown + ' / ' + rows.length + ' 条';
+    links.forEach(function (a) {
+      var id = a.dataset.id, el = doc.querySelector('#' + id);
+      a.style.display = el && el.hidden ? 'none' : '';
+    });
+  }
+
+  chips.addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    state.g = b.dataset.g;
+    Array.prototype.forEach.call(chips.children, function (c) {
+      c.setAttribute('aria-pressed', String(c === b));
+    });
+    apply();
+  });
+
+  input.addEventListener('input', function () { state.q = input.value; apply(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === '/' && document.activeElement !== input) { e.preventDefault(); input.focus(); input.select(); }
+    if (e.key === 'Escape') { input.value = ''; state.q = ''; apply(); input.blur(); }
+  });
+
+  /* 册切换 */
+  var booksEl = document.querySelector('#books');
+  var bookHtml = '<a href="dev-terms.html">目录</a>';
+  (window.BOOKS || []).forEach(function (b) {
+    var cur = b.k === window.CUR_BOOK;
+    bookHtml += '<a href="' + b.file + '"' + (cur ? ' aria-current="page"' : '') + '>' + b.name + '</a>';
+  });
+  booksEl.replaceChildren(frag(bookHtml));
+
+  /* 分组 chips */
+  var chipHtml = '<button class="chip" data-g="all" aria-pressed="true">全部</button>';
+  groups.forEach(function (g) {
+    chipHtml += '<button class="chip" data-g="' + g.k + '" aria-pressed="false">' + g.name + '</button>';
+  });
+  chips.replaceChildren(frag(chipHtml));
+
+  /* 目录高亮 */
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        var a = linkMap[en.target.id];
+        if (!a) return;
+        if (en.isIntersecting) {
+          links.forEach(function (l) { l.classList.remove('on'); });
+          a.classList.add('on');
+          var box = toc.getBoundingClientRect(), ab = a.getBoundingClientRect();
+          if (ab.top < box.top + 40 || ab.bottom > box.bottom - 40) a.scrollIntoView({ block: 'center' });
+        }
+      });
+    }, { rootMargin: '-8% 0px -82% 0px' });
+    rows.forEach(function (r) { io.observe(r); });
+  }
+
+  apply();
+})();
+</script>
+</body>
+</html>

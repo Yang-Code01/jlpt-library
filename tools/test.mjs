@@ -146,6 +146,7 @@ const CHECKS = [
   { cmd: ['node', 'tools/tools.mjs', 'check'], name: '工具开发清单自洽',   needs: [] },
   { cmd: ['node', 'tools/pi-changelog-gen.mjs', 'check'], name: 'pi 更新履历报告', needs: ['pi'] },
   { cmd: ['node', 'tools/pi-toolchain-gen.mjs', 'check'], name: 'pi 工具链手册', needs: ['plugins'] },
+  { cmd: ['node', 'tools/dev-terms-gen.mjs', 'check'], name: 'vibecoding 术语图解', needs: [] },
   { cmd: ['node', 'tools/check-exam-data.js'],    name: '真题全库审计',       needs: ['plain'] },
   { cmd: ['node', 'jp-vocab/gen.js', 'check'], name: '课堂单词数据',         needs: [] },
   { cmd: ['node', 'tools/en-accept.mjs'],         name: '英语侧整合验收',     needs: ['ecdict'] },

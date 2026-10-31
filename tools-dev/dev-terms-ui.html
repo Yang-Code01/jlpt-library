@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>界面与图形 · vibecoding 术语图解 · 70 条</title>
+<style>
+:root{
+  --bg:#f6f4ee; --paper:#fffdf8; --ink:#1e2a30; --ink-soft:#3d4c52; --muted:#6b7a72;
+  --rule:#e2ddd0; --accent:#176b75; --accent-soft:#e3efee; --seal:#b3402a;
+  --fig:#f2efe6; --fig-line:#c9d3ca; --fig-arrow:#a6b3a9; --fig-fill:#fbf9f3; --fig-accent:#dceceb; --fig-accent-line:#7fb0ae;
+  --shadow:0 1px 2px rgba(30,42,48,.04), 0 8px 24px -18px rgba(30,42,48,.5);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#12171a; --paper:#171d20; --ink:#e8eae4; --ink-soft:#c3cbc4; --muted:#8b9a90;
+    --rule:#282f33; --accent:#5fb0b2; --accent-soft:#16302f; --seal:#e0715a;
+    --fig:#0e1316; --fig-line:#3a4a4a; --fig-arrow:#5d6f64; --fig-fill:#182024; --fig-accent:#173634; --fig-accent-line:#4b8f8e;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -20px rgba(0,0,0,.9);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Noto Sans JP","Source Han Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased;
+}
+.serif{font-family:"Noto Serif JP","Source Han Serif SC",Songti SC,SimSun,Georgia,serif}
+
+/* 册切换 */
+.books{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 18px}
+.books a{
+  padding:5px 11px; font-size:12px; line-height:1.4; text-decoration:none;
+  color:var(--muted); border:1px solid transparent; border-radius:999px; transition:color .18s, border-color .18s;
+}
+.books a:hover{color:var(--accent); border-color:var(--rule)}
+.books a[aria-current="page"]{color:var(--accent); border-color:var(--accent); background:var(--accent-soft)}
+
+/* 右上角返回（tools-dev 硬性要求） */
+.back-btn{
+  position:fixed; top:16px; right:20px; z-index:50;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 13px; border:1px solid var(--rule); border-radius:999px;
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  color:var(--ink-soft); font-size:12.5px; text-decoration:none;
+  backdrop-filter:blur(6px); transition:color .2s, border-color .2s;
+}
+.back-btn:hover{color:var(--accent); border-color:var(--accent)}
+
+/* 头部 */
+.hd{border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--bg))}
+.hd-in{max-width:1200px; margin:0 auto; padding:56px 40px 26px}
+.eyebrow{margin:0 0 14px; font-size:11.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted)}
+h1{margin:0; font-size:clamp(26px,3.1vw,38px); font-weight:600; letter-spacing:-.01em; line-height:1.25;
+   font-family:"Noto Serif JP","Source Han Serif SC",Songti SC,Georgia,serif}
+.lede{margin:14px 0 0; max-width:62ch; color:var(--ink-soft); font-size:14.5px; text-wrap:pretty}
+.lede em{font-style:normal; color:var(--seal); border-bottom:1px solid currentColor}
+.tools{display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-top:26px}
+.search{position:relative; flex:1 1 320px; max-width:420px}
+.search input{
+  width:100%; padding:10px 40px 10px 14px; font:inherit; font-size:14px;
+  color:var(--ink); background:var(--paper); border:1px solid var(--rule); border-radius:9px; outline:none;
+  transition:border-color .2s, box-shadow .2s;
+}
+.search input:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.search .kbd{position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  font-size:11px; color:var(--muted); border:1px solid var(--rule); border-radius:5px; padding:1px 6px; pointer-events:none}
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{
+  padding:6px 12px; font-size:12.5px; line-height:1.4; cursor:pointer;
+  color:var(--ink-soft); background:transparent; border:1px solid var(--rule); border-radius:999px;
+  transition:color .18s, border-color .18s, background .18s;
+}
+.chip:hover{border-color:var(--accent); color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:#f7fbfa}
+.count{font-size:12.5px; color:var(--muted); margin-left:auto; font-variant-numeric:tabular-nums}
+
+/* 主体 */
+.wrap{max-width:1200px; margin:0 auto; padding:0 40px 120px; display:grid; grid-template-columns:212px minmax(0,1fr); gap:48px}
+.toc{position:sticky; top:0; align-self:start; max-height:100vh; overflow-y:auto; padding:34px 0 40px; scrollbar-width:thin}
+.toc-g{margin:18px 0 6px; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted)}
+.toc-g:first-child{margin-top:0}
+.toc a{
+  display:block; padding:3px 0 3px 10px; margin-left:-10px; font-size:12.5px; line-height:1.5;
+  color:var(--muted); text-decoration:none; border-left:1px solid transparent;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .16s, border-color .16s;
+}
+.toc a:hover{color:var(--ink)}
+.toc a.on{color:var(--accent); border-left-color:var(--accent); font-weight:500}
+.doc{padding-bottom:60px}
+.grp{display:flex; align-items:baseline; gap:12px; padding:64px 0 4px; scroll-margin-top:0}
+.grp-k{font-family:"Noto Serif JP",Georgia,serif; font-size:13px; letter-spacing:.1em; color:var(--accent)}
+.grp-n{margin:0; font-size:19px; font-weight:600; font-family:"Noto Serif JP","Source Han Serif SC",Songti SC,serif}
+.grp-c{font-size:12px; color:var(--muted)}
+.grp-line{flex:1; height:1px; background:var(--rule)}
+
+.t{display:grid; grid-template-columns:minmax(0,1fr) 408px; gap:0 44px; padding:26px 0 24px; border-top:1px solid var(--rule); scroll-margin-top:12px}
+.t:first-of-type{border-top:0}
+.t-meta{grid-column:1; grid-row:1; min-width:0}
+.t-no{font-size:11px; letter-spacing:.12em; color:var(--muted); font-variant-numeric:tabular-nums}
+.t-h{margin:4px 0 0; display:flex; flex-wrap:wrap; align-items:baseline; gap:10px}
+.t-en{font-size:19px; font-weight:600; letter-spacing:-.005em}
+.t-cn{font-size:12.5px; color:var(--muted)}
+.t-p{margin:10px 0 0; color:var(--ink-soft); font-size:15px; line-height:1.85; text-wrap:pretty; text-wrap:balance}
+.t-fig{grid-column:2; grid-row:1; min-width:0}
+.fwrap{background:var(--fig); border:1px solid var(--rule); border-radius:10px; padding:8px 10px}
+.fig{display:block; width:100%; height:auto}
+.t-q{grid-column:1 / -1; grid-row:2; display:flex; gap:12px; align-items:baseline;
+  margin:16px 0 0; padding:11px 0 0; border-top:1px dashed var(--rule);
+  font-size:12.8px; line-height:1.8; color:var(--muted)}
+.t-q b{flex:0 0 auto; font-size:10.5px; letter-spacing:.1em; color:var(--seal); font-weight:600; white-space:nowrap}
+.t[hidden]{display:none}
+.grp[hidden]{display:none}
+.empty{display:none; padding:60px 0; color:var(--muted); font-size:14px}
+.empty.on{display:block}
+
+/* 图的元件语法 */
+.fig text{font-family:"Noto Sans JP","PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+.f-lab{fill:var(--ink); font-size:9.6px}
+.f-sub{fill:var(--muted); font-size:8.2px; letter-spacing:.02em}
+.f-thlab{fill:var(--ink-soft); font-size:8.6px}
+.f-badge{fill:var(--seal); font-size:8.4px; letter-spacing:.04em}
+.f-vs{fill:var(--muted); font-size:8.6px; letter-spacing:.14em}
+.f-box{fill:var(--fig-fill); stroke:var(--fig-line); stroke-width:1.3}
+.f-box-accent{fill:var(--fig-accent); stroke:var(--fig-accent-line); stroke-width:1.3}
+.f-box-muted{fill:none; stroke:var(--fig-line); stroke-width:1.3; stroke-dasharray:5 4}
+.f-pill{fill:var(--fig-fill); stroke:var(--fig-line); stroke-width:1.3}
+.f-panel{fill:none; stroke:var(--fig-line); stroke-width:1.2}
+.f-panel-hot{fill:var(--fig-accent); fill-opacity:.34; stroke:var(--fig-accent-line); stroke-width:1.4}
+.f-th{fill:var(--fig-accent); stroke:var(--fig-accent-line); stroke-width:1.1}
+.f-seg1{fill:var(--fig-fill); stroke:var(--fig-line)}
+.f-seg2{fill:var(--fig-accent); stroke:var(--fig-accent-line)}
+.f-seg3{fill:none; stroke:var(--fig-line)}
+.f-ar{fill:none; stroke:var(--fig-arrow); stroke-width:1.5; stroke-linejoin:round}
+.f-dash{stroke-dasharray:5 4}
+.f-head{fill:var(--fig-arrow)}
+.f-gate{stroke:var(--seal); stroke-width:1.3; stroke-dasharray:5 4; opacity:.75}
+.f-axis{stroke:var(--fig-line); stroke-width:1.2}
+.f-line{fill:none; stroke:var(--fig-line); stroke-width:1.1; stroke-dasharray:4 4}
+.f-dot{fill:var(--fig-fill); stroke:var(--fig-line); stroke-width:1.4}
+.f-dot-hot{fill:var(--seal); stroke:var(--seal); stroke-width:1.4}
+.f-rule{stroke:var(--fig-line); stroke-width:1; opacity:.85}
+.f-queue line{stroke:var(--fig-line); stroke-width:1; opacity:.8}
+.f-store .f-rule{stroke-dasharray:3 3}
+
+footer{border-top:1px solid var(--rule); padding:26px 40px 60px}
+.foot-in{max-width:1200px; margin:0 auto; display:flex; flex-wrap:wrap; gap:8px 20px; font-size:12.5px; color:var(--muted)}
+footer a{color:var(--muted)}
+footer a:hover{color:var(--accent)}
+
+@media (max-width:1080px){
+  .wrap{grid-template-columns:1fr; gap:0; padding:0 28px 80px}
+  .toc{display:none}
+  .t{grid-template-columns:1fr; row-gap:18px}
+  .t-meta,.t-fig,.t-q{grid-column:1; grid-row:auto}
+  .t-q{margin-top:4px}
+  .t-fig{max-width:520px}
+  .hd-in{padding:66px 28px 22px}
+}
+@media (max-width:560px){
+  .wrap{padding:0 18px 60px}
+  .hd-in{padding:62px 18px 18px}
+  .t-en{font-size:17px}
+  .count{margin-left:0; flex-basis:100%}
+}
+</style>
+</head>
+<body>
+<a class="back-btn" href="../index.html#tools" data-back="top" title="回到工具开发区列表">← 工具开发区</a>
+
+<header class="hd">
+  <div class="hd-in">
+    <nav class="books" id="books" aria-label="分册"></nav>
+    <p class="eyebrow">ui · 渲染 · 样式 · 控件 · 交互 · 图形 · 70 条</p>
+    <h1>界面与图形</h1>
+    <p class="lede">浏览器怎么画页面，样式怎么写不打架，控件该选哪个，交互状态怎么补，图形与媒体怎么做。</p>
+    <div class="tools">
+      <label class="search">
+        <input id="q" type="search" placeholder="搜术语 / 中文 / 正文…" autocomplete="off" spellcheck="false" aria-label="搜索术语">
+        <span class="kbd">/</span>
+      </label>
+      <div class="chips" id="chips"></div>
+      <span class="count" id="count"></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="toc" id="toc" aria-label="术语目录"></nav>
+  <div class="doc" id="doc"></div>
+</main>
+
+<footer>
+  <div class="foot-in">
+    <span>界面与图形 · 70 条 · 5 组 · 图共用一套语法</span>
+    <a href="dev-terms.html">目录页</a>
+    <a href="../index.html#tools">← 回工具开发区</a>
+    <a href="../index.html">回工作台首页</a>
+  </div>
+</footer>
+
+<script>/* 图形语法：16 个模板，全部 340×150 画布，靠 CSS class 上色。
+   每个术语只给一句 spec：{ t:'flow', a:['页面','接口'] } —— a 是该模板的入参。 */
+(function () {
+  var UID = 0;
+  var AR = function () { return ''; };
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function T(x, y, s, cls, anchor) {
+    return '<text x="' + x + '" y="' + y + '" class="' + (cls || 'f-lab') +
+      '" text-anchor="' + (anchor || 'middle') + '">' + esc(s) + '</text>';
+  }
+  function R(x, y, w, h, cls, rx) {
+    return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h +
+      '" rx="' + (rx == null ? 6 : rx) + '" class="' + (cls || 'f-box') + '"/>';
+  }
+  function box(x, y, w, h, label, cls, sub) {
+    var cy = y + h / 2 + (sub ? -1.5 : 3.5);
+    return R(x, y, w, h, cls) + T(x + w / 2, cy, label, 'f-lab') +
+      (sub ? T(x + w / 2, y + h - 6, sub, 'f-sub') : '');
+  }
+  function pill(x, y, w, h, label, cls) {
+    return R(x, y, w, h, cls || 'f-pill', h / 2) + T(x + w / 2, y + h / 2 + 3.4, label, 'f-lab');
+  }
+
+  function svg(label, build) {
+    UID += 1;
+    var id = 'ah' + UID;
+    AR = function (d, cls) {
+      return '<path d="' + d + '" class="f-ar ' + (cls || '') + '" marker-end="url(#' + id + ')"/>';
+    };
+    return '<svg class="fig" viewBox="0 0 340 150" role="img" aria-label="' + esc(label) +
+      '" preserveAspectRatio="xMidYMid meet">' +
+      '<defs><marker id="' + id + '" viewBox="0 0 8 8" refX="6.4" refY="3" markerWidth="5" markerHeight="5" orient="auto">' +
+      '<path d="M0,0 L6.4,3 L0,6 z" class="f-head"/></marker></defs>' +
+      build() + '</svg>';
+  }
+
+  /* ---------- 模板 ---------- */
+
+  function flow(items) {
+    var n = items.length, gap = 20;
+    var w = Math.min(104, (340 - 16 - gap * (n - 1)) / n);
+    if (n > 1) gap = (340 - 16 - n * w) / (n - 1);
+    var out = '';
+    for (var i = 0; i < n; i++) {
+      var x = 8 + i * (w + gap);
+      out += box(x, 57, w, 36, items[i], i === n - 1 ? 'f-box-accent' : 'f-box');
+      if (i < n - 1) out += AR('M' + (x + w + 3) + ',75 L' + (x + w + gap - 3) + ',75');
+    }
+    return out;
+  }
+
+  function fanout(o) {
+    var tos = o.a, n = tos.length, out = '';
+    out += box(8, 57, 88, 36, o.from, 'f-box');
+    var h = n > 2 ? 26 : 32;
+    for (var i = 0; i < n; i++) {
+      var y = n === 1 ? 57 : 12 + i * ((150 - 24 - h) / (n - 1));
+      out += box(226, y, 106, h, tos[i], 'f-box-muted');
+      out += AR('M96,75 C 158,75 164,' + (y + h / 2) + ' 224,' + (y + h / 2));
+    }
+    if (o.n) out += T(n === 1 ? 170 : 150, n === 1 ? 112 : 132, o.n, 'f-badge');
+    return out;
+  }
+
+  function merge(o) {
+    var sources = o.a, n = sources.length, out = '', h = n > 2 ? 26 : 32;
+    for (var i = 0; i < n; i++) {
+      var y = n === 1 ? 57 : 12 + i * ((150 - 24 - h) / (n - 1));
+      out += box(8, y, 106, h, sources[i], 'f-box-muted');
+      out += AR('M114,' + (y + h / 2) + ' C 172,' + (y + h / 2) + ' 178,75 224,75');
+    }
+    out += box(226, 57, 106, 36, o.to, 'f-box-accent');
+    if (o.n) out += T(170, 100, o.n, 'f-badge');
+    return out;
+  }
+
+  function layers(items) {
+    var n = items.length, out = '';
+    var gap = n > 3 ? 8 : 18;
+    var h = Math.min(36, (150 - 20 - gap * (n - 1)) / n);
+    var total = n * h + (n - 1) * gap;
+    var top = (150 - total) / 2;
+    for (var i = 0; i < n; i++) {
+      var y = top + i * (h + gap);
+      out += box(20, y, 300, h, items[i], i === n - 1 ? 'f-box-accent' : 'f-box');
+      if (i < n - 1) out += AR('M170,' + (y + h + 1) + ' L170,' + (y + h + gap - 1));
+    }
+    return out;
+  }
+
+  function nest(o) {
+    var out = R(24, 12, 292, 126, 'f-box', 10);
+    out += T(170, 31, o.title, 'f-lab');
+    var kids = o.a;
+    if (kids.length === 1) {
+      out += box(70, 54, 200, 50, kids[0], 'f-box-accent');
+    } else {
+      var w = (248 - 12 * (kids.length - 1)) / kids.length;
+      for (var i = 0; i < kids.length; i++) out += box(46 + i * (w + 12), 54, w, 50, kids[i], 'f-box-accent');
+    }
+    if (o.sub) out += T(170, 127, o.sub, 'f-sub');
+    return out;
+  }
+
+  function gate(o) {
+    var out = box(4, 57, 86, 36, o.left, 'f-box') +
+      '<line x1="170" y1="16" x2="170" y2="134" class="f-gate"/>' +
+      T(170, 10, o.gate, 'f-sub') +
+      box(250, 57, 86, 36, o.right, 'f-box-accent');
+    if (o.dash) {
+      out += AR('M90,66 L250,66', 'f-dash') + T(170, 58, o.dash, 'f-sub');
+      out += AR('M90,86 L250,86') + T(170, 108, o.ok || '放行', 'f-sub');
+    } else {
+      out += AR('M90,75 L250,75') + T(170, 102, o.ok || '放行', 'f-sub');
+    }
+    return out;
+  }
+
+  function store(o) {
+    var cols = o.a, cw = 188 / cols.length, x = 76, y = 24, hh = 22, rh = 24, out = '';
+    out += R(x, y, 188, hh, 'f-th', 4);
+    for (var i = 0; i < cols.length; i++) {
+      out += T(x + cw * i + cw / 2, y + 15, cols[i], 'f-thlab');
+      out += '<line x1="' + (x + cw * i) + '" y1="' + y + '" x2="' + (x + cw * i) + '" y2="' + (y + hh) + '" class="f-rule"/>';
+    }
+    out += '<line x1="' + x + '" y1="' + (y + hh) + '" x2="' + (x + 188) + '" y2="' + (y + hh) + '" class="f-rule"/>';
+    for (var r = 0; r < 2; r++) {
+      var ry = y + hh + r * rh;
+      out += '<line x1="' + x + '" y1="' + (ry + rh) + '" x2="' + (x + 188) + '" y2="' + (ry + rh) + '" class="f-rule"/>';
+      for (var c = 0; c < cols.length; c++) {
+        out += '<line x1="' + (x + cw * c) + '" y1="' + ry + '" x2="' + (x + cw * c) + '" y2="' + (ry + rh) + '" class="f-rule"/>';
+      }
+    }
+    if (o.sub) out += T(x + 94, y + hh + 2 * rh + 20, o.sub, 'f-sub');
+    return out;
+  }
+
+  function cacheflow(o) {
+    var out = box(4, 57, 62, 36, o.l);
+    out += AR('M68,66 L96,66');
+    out += '<g class="f-store">' + R(96, 24, 76, 102, 'f-box') +
+      '<line x1="104" y1="44" x2="164" y2="44" class="f-rule"/>' +
+      '<line x1="134" y1="44" x2="134" y2="118" class="f-rule"/></g>';
+    out += T(134, 38, o.m, 'f-lab');
+    out += T(115, 64, o.k1 || 'key', 'f-sub') + T(149, 64, o.k2 || 'val', 'f-sub');
+    out += AR('M172,76 L256,76', 'f-dash') + T(214, 92, o.back || '回源', 'f-sub');
+    out += AR('M256,96 L172,96', 'f-dash') + T(214, 114, o.fill || '回填', 'f-sub');
+    out += box(256, 57, 80, 36, o.r);
+    return out;
+  }
+
+  function queue(o) {
+    var out = box(4, 57, 66, 36, o.l);
+    out += AR('M70,68 L90,68') + T(80, 60, o.tag || '202', 'f-badge');
+    out += '<g class="f-queue">' + R(90, 32, 88, 76, 'f-box') +
+      '<line x1="119" y1="32" x2="119" y2="108"/><line x1="148" y1="32" x2="148" y2="108"/></g>';
+    out += T(134, 24, o.m, 'f-sub');
+    out += AR('M178,88 L214,88', 'f-dash') + T(196, 106, o.later || '稍后处理', 'f-sub');
+    out += box(214, 57, 122, 36, o.r);
+    return out;
+  }
+
+  function segments(segs) {
+    var total = 0, i, x = 18, w = 304, y = 42, hh = 44, out = '';
+    for (i = 0; i < segs.length; i++) total += segs[i].w || 1;
+    for (i = 0; i < segs.length; i++) {
+      var sw = w * (segs[i].w || 1) / total;
+      out += '<rect x="' + x + '" y="' + y + '" width="' + sw + '" height="' + hh +
+        '" class="f-seg' + ((i % 3) + 1) + '" rx="' + (i === 0 || i === segs.length - 1 ? 5 : 0) + '"/>';
+      out += T(x + sw / 2, y + hh / 2 + 4, segs[i].t, 'f-lab');
+      if (segs[i].s) out += T(x + sw / 2, y + hh + 20, segs[i].s, 'f-sub');
+      x += sw;
+    }
+    return out;
+  }
+
+  function compare(o) {
+    var out = '';
+    [[8, o.l], [176, o.r]].forEach(function (p) {
+      var n = p[1].a.length, top = 56 - (n - 1) * 10.5;
+      out += R(p[0], 16, 156, 118, 'f-panel', 8);
+      out += T(p[0] + 78, 38, p[1].t, 'f-lab');
+      p[1].a.forEach(function (line, i) { out += T(p[0] + 78, top + 26 + i * 21, line, 'f-sub'); });
+    });
+    return out;
+  }
+
+  function compare3(o) {
+    var out = '';
+    [6, 118, 230].forEach(function (x, k) {
+      var p = o.a[k];
+      out += R(x, 16, 104, 118, k === o.hot ? 'f-panel-hot' : 'f-panel', 8);
+      out += T(x + 52, 38, p.t, 'f-lab');
+      p.a.forEach(function (line, i) { out += T(x + 52, 62 + i * 20, line, 'f-sub'); });
+    });
+    return out;
+  }
+
+  function timeline(o) {
+    var pts = o.a, n = pts.length, out = '', x0 = 28, x1 = 312, y = 82;
+    out += '<line x1="' + x0 + '" y1="' + y + '" x2="' + x1 + '" y2="' + y + '" class="f-axis"/>';
+    for (var i = 0; i < n; i++) {
+      var x = n === 1 ? 170 : x0 + i * (x1 - x0) / (n - 1);
+      out += '<circle cx="' + x + '" cy="' + y + '" r="4.5" class="' + (i === o.hot ? 'f-dot-hot' : 'f-dot') + '"/>';
+      var anc = i === 0 ? 'start' : (i === n - 1 ? 'end' : '');
+      var ax = i === 0 ? x - 6 : (i === n - 1 ? x + 6 : x);
+      out += T(ax, y - 16, pts[i].t, 'f-lab', anc);
+      if (pts[i].s) out += T(ax, y + 24, pts[i].s, 'f-sub', anc);
+    }
+    return out;
+  }
+
+  function cycle(o) {
+    var pts = o.a, out = '';
+    var pos = [[170, 18, 120], [78, 110, 104], [262, 110, 104]];
+    for (var i = 0; i < 3; i++) {
+      var p = pos[i], w = p[2], h = 32;
+      out += box(p[0] - w / 2, p[1], w, h, pts[i], i === o.hot ? 'f-box-accent' : 'f-box');
+    }
+    out += AR('M232,44 C 292,56 300,88 272,104');
+    out += AR('M208,126 C 186,144 152,144 132,126');
+    out += AR('M80,110 C 28,96 34,46 108,52');
+    return out;
+  }
+
+  function tree(o) {
+    var out = box(120, 12, 100, 30, o.root, 'f-box');
+    var kids = o.a, n = kids.length;
+    for (var i = 0; i < n; i++) {
+      var w = (340 - 16 - 12 * (n - 1)) / n, x = 8 + i * (w + 12);
+      out += '<path d="M170,44 L' + (x + w / 2) + ',98" class="f-line"/>';
+      out += box(x, 98, w, 30, kids[i], 'f-box-muted');
+    }
+    return out;
+  }
+
+  function rings(o) {
+    var l = o;
+    return R(10, 8, 320, 134, 'f-box', 12) + T(28, 28, l[0], 'f-lab', 'start') +
+      R(48, 40, 244, 86, 'f-box', 10) + T(66, 60, l[1] || '', 'f-lab', 'start') +
+      R(90, 68, 160, 44, 'f-box-accent', 8) + (l[2] ? T(170, 95, l[2], 'f-lab') : '');
+  }
+
+  /* 变体并列：n 个做法竖排，左边名字右边一句「什么时候用」。 */
+  function variants(o) {
+    var items = (o && o.items) || [], n = items.length || 1;
+    var top = 12;
+    if (o.title) top = n >= 5 ? 26 : 30;
+    var gap = n >= 5 ? 4 : 7;
+    var h = Math.min(30, Math.floor((150 - top - 8 - gap * (n - 1)) / n));
+    var out = o.title ? T(14, 18, o.title, 'f-sub', 'start') : '';
+    for (var i = 0; i < n; i++) {
+      var y = top + i * (h + gap), it = items[i];
+      out += R(12, y, 316, h, i === o.hot ? 'f-box-accent' : 'f-box', 6);
+      out += T(26, y + h / 2 + 3.5, it[0], 'f-lab', 'start');
+      if (it[1]) out += T(316, y + h / 2 + 3.5, it[1], 'f-sub', 'end');
+    }
+    return out;
+  }
+
+  function twice(o) {
+    return pill(70, 8, 160, 24, o.req) +
+      AR('M108,34 L108,54') + AR('M192,34 L192,54') + T(244, 32, '×2', 'f-badge') +
+      box(70, 56, 160, 34, o.mid, 'f-box') +
+      AR('M150,92 L150,106') +
+      R(70, 108, 160, 30, 'f-box-accent') + T(150, 127, o.res, 'f-lab');
+  }
+
+  var MAP = {
+    flow: flow, fanout: fanout, merge: merge, layers: layers, nest: nest, gate: gate,
+    store: store, cacheflow: cacheflow, queue: queue, segments: segments,
+    compare: compare, compare3: compare3, timeline: timeline, cycle: cycle,
+    tree: tree, rings: rings, twice: twice, variants: variants
+  };
+
+  window.FIGS = {
+    render: function (spec) {
+      var fn = MAP[spec.t];
+      if (!fn) throw new Error('未知图型 ' + spec.t);
+      // timeline / compare3 / cycle 的 spec 是「数组 + hot」，其余模板的入参都在 spec.a 里
+      var arg = ['timeline', 'compare3', 'cycle'].includes(spec.t) ? { a: spec.a, hot: spec.hot } : spec.a;
+      return svg(spec.alt || spec.t, function () { return fn(arg); });
+    }
+  };
+})();</script>
+<script>window.GROUPS = [{"k":"A","name":"浏览器与渲染","tag":"前端"},{"k":"M","name":"样式与布局","tag":"前端"},{"k":"G","name":"UI 控件与选型","tag":"前端"},{"k":"H","name":"交互与状态","tag":"前端"},{"k":"S","name":"图形与媒体","tag":"前端"}];
+window.TERMS = [{"g":"A","en":"DOM","cn":"文档对象模型","p":"浏览器把 HTML 变成一棵可以点的节点树，脚本改的就是这棵树。","q":"AI 说「拿到元素改一下就行」——它改的是内存里那棵树，刷新就没了，树不是数据。","f":{"t":"tree","a":{"root":"HTML 文档","a":["head","body","script"]}},"_no":1,"_id":"t-dom-1"},{"g":"A","en":"Specificity","cn":"CSS 优先级","p":"同一个元素被多条规则选中时，浏览器按权重挑一条，其余全丢。","q":"AI 加一句 !important 让你以为修好了——下次别处的样式就被它压死了。","f":{"t":"compare","a":{"l":{"t":"同权重","a":["后写的赢","行内样式更硬","!important 最高"]},"r":{"t":"被覆盖","a":["选择器越具体越硬","类 > 标签","少用 !important"]}}},"_no":2,"_id":"t-specificity-2"},{"g":"A","en":"Box Model","cn":"盒模型","p":"元素实际占多大 = 宽度 + 内边距 + 边框，算错就溢出。","q":"AI 问「设了 100% 为什么还溢出」——它没算 padding，也没改 box-sizing。","f":{"t":"compare","a":{"l":{"t":"content-box","a":["宽度只算内容","padding 往上加","实际更宽"]},"r":{"t":"border-box","a":["宽度含 padding","含边框","改尺寸不炸"]}}},"_no":3,"_id":"t-box-model-3"},{"g":"A","en":"Responsive","cn":"响应式","p":"同一份 HTML，按屏幕宽度切换布局（断点）。","q":"AI 只改一个 max-width 就交差——中间那段宽度它从没看过。","f":{"t":"compare","a":{"l":{"t":"宽屏","a":["三列并排","侧栏常驻"]},"r":{"t":"窄屏","a":["一列堆叠","侧栏收进抽屉"]}}},"_no":4,"_id":"t-responsive-4"},{"g":"A","en":"Component","cn":"组件","p":"把界面拆成能单独命名、单独复用的小块。","q":"AI 复制三份一样的卡片再分别改——改一处漏两处。","f":{"t":"nest","a":{"title":"页面","a":["卡片组件"],"sub":"组件 = 能单独改名、单独复用的那一块"}},"_no":5,"_id":"t-component-5"},{"g":"A","en":"props / state","cn":"外部数据 / 自己记忆","p":"props 是别人给的，只能看不能改；state 是自己的记忆，能改。","q":"AI 把 props 复制进 state 当初始值——父组件后来变了，它还停在老值。","f":{"t":"nest","a":{"title":"父组件（传下来的数）","a":["子组件 · 自己的 state"],"sub":"props 只读，state 能改，改了就重画"}},"_no":6,"_id":"t-props-state-6"},{"g":"A","en":"One-way Flow","cn":"单向数据流","p":"数据只往一个方向走：事件改状态，状态重画界面。","q":"AI 直接手改 DOM 让它「看起来对」——下一次重画全被覆盖。","f":{"t":"flow","a":["事件","改状态","重画视图"]},"_no":7,"_id":"t-one-way-flow-7"},{"g":"A","en":"Virtual DOM","cn":"虚拟 DOM 与 diff","p":"先在内存里比对新旧两棵树，只把差异写进真页面。","q":"AI 说「虚拟 DOM 一定更快」——它只是替你算差异，慢的时候照样慢。","f":{"t":"compare","a":{"l":{"t":"改之前","a":["内存里一棵旧树","新旧对比","算出差异"]},"r":{"t":"改之后","a":["只动变的那块","你写状态就行"]}}},"_no":8,"_id":"t-virtual-dom-8"},{"g":"A","en":"Reflow / Repaint","cn":"重排与重绘","p":"改布局属性要重算几何，改颜色只重画，代价差一个量级。","q":"AI 在循环里读一次布局写一次样式——每次读都逼浏览器重算整页。","f":{"t":"timeline","a":[{"t":"改样式"},{"t":"重排","s":"算位置"},{"t":"重绘","s":"上色"},{"t":"合成","s":"拼屏"}],"hot":1},"_no":9,"_id":"t-reflow-repaint-9"},{"g":"A","en":"Hydration","cn":"水合","p":"服务端先给一张静态图，JS 跑完挂上事件，页面才真的能点。","q":"AI 说「渲染完就能交互」——水合前点了没反应，用户以为坏了。","f":{"t":"layers","a":["服务端吐出 HTML","浏览器画出来（死的）","下载 JS 挂上事件","这一块才算能点"]},"_no":10,"_id":"t-hydration-10"},{"g":"A","en":"SSR / CSR / SSG","cn":"三种渲染时机","p":"同一个页面，在请求时拼、在浏览器里画、还是在构建时生成。","q":"AI 说「加个 SSR 就好」——它没问你的数据是每次都变还是几乎不变。","f":{"t":"compare3","a":[{"t":"SSR","a":["每次请求现拼","首屏快","服务器忙"]},{"t":"CSR","a":["先给空壳","JS 再画","首屏慢"]},{"t":"SSG","a":["构建时生成","最快","内容易过期"]}],"hot":0},"_no":11,"_id":"t-ssr-csr-ssg-11"},{"g":"A","en":"Client Router","cn":"客户端路由","p":"点链接不整页刷新，只换中间内容并改地址栏。","q":"AI 用普通 href 写站内跳转——整页重载，状态全丢。","f":{"t":"flow","a":["点链接","改 URL","换那块内容"]},"_no":12,"_id":"t-client-router-12"},{"g":"A","en":"Event Bubbling","cn":"事件冒泡与捕获","p":"点子元素的事件会一路传给上级，除非中途拦下。","q":"AI 一点按钮父级的点击也触发了——它忘了 stopPropagation，也没算委托范围。","f":{"t":"rings","a":["document","父元素","按钮"]},"_no":13,"_id":"t-event-bubbling-13"},{"g":"A","en":"Core Web Vitals","cn":"首屏指标","p":"衡量「打开得快不快」的几个时间点：有字节、有画面、主体出来、别乱跳。","q":"AI 说「本地很快」——它没看首屏那张大图是 4MB 未压缩。","f":{"t":"timeline","a":[{"t":"TTFB","s":"首字节"},{"t":"FCP","s":"有画面"},{"t":"LCP","s":"主体出来"},{"t":"CLS","s":"别乱跳"}],"hot":2},"_no":14,"_id":"t-core-web-vitals-14"},{"g":"M","en":"Cascade","cn":"层叠","p":"同一条规则打架时按顺序判决，不是谁写得晚谁赢。","q":"AI 到处加 !important，最后谁生效自己也说不清。","f":{"t":"layers","a":["浏览器默认样式","你自己写的样式","更高优先级的选择器","!important（最后的王炸）"]},"_no":15,"_id":"t-cascade-15"},{"g":"M","en":"Aspect Ratio","cn":"宽高比","p":"定死一个盒子的宽高比，缩放时不至于把图拉扁。","q":"AI 给图片写死 height:200px，用户传竖图就压成扁片。","f":{"t":"compare","a":{"l":{"t":"padding 撑高","a":["老办法","要写伪元素","忘了就变形"]},"r":{"t":"aspect-ratio","a":["一行就定死","图片视频都适用","裁剪自己控"]}}},"_no":16,"_id":"t-aspect-ratio-16"},{"g":"M","en":"Flexbox vs Grid","cn":"一维与二维","p":"一个方向排队用 flex，两个方向铺格子用 grid。","q":"AI 用 flex 硬凑二维网格，最后套了四层 div。","f":{"t":"compare","a":{"l":{"t":"Flexbox","a":["排一行或一列","靠内容撑","对齐很方便"]},"r":{"t":"Grid","a":["行和列同时定","布局先行","整页骨架"]}}},"_no":17,"_id":"t-flexbox-vs-grid-17"},{"g":"M","en":"Position","cn":"定位方式","p":"元素是留在文档流里，还是浮在别人上面。","q":"AI 给弹窗用 absolute，滚动时跟着页面跑了。","f":{"t":"variants","a":{"items":[["static","默认，跟着文档流"],["relative","占着原位，自己挪"],["absolute","脱流，贴着最近定位祖先"],["fixed","脱流，贴着窗口"],["sticky","滚到临界就粘住"]],"title":"五种定位决定它跟谁对齐"}},"_no":18,"_id":"t-position-18"},{"g":"M","en":"z-index","cn":"层叠顺序","p":"决定谁盖住谁，但只在同一个层叠上下文里比。","q":"AI 把 z-index 加到 99999，还是被遮住——父元素就有上下文。","f":{"t":"compare","a":{"l":{"t":"没有层叠上下文","a":["数字大的在上","谁都能压谁"]},"r":{"t":"有层叠上下文","a":["整组一起排","父子绑在一起"]}}},"_no":19,"_id":"t-z-index-19"},{"g":"M","en":"Block / Inline","cn":"块与行内","p":"一个元素是占一整行，还是跟文字挤在一行里。","q":"AI 给 span 设了 width，没反应，又加了个 !important。","f":{"t":"compare","a":{"l":{"t":"块级","a":["独占一行","能设宽高","上下外边距有效"]},"r":{"t":"行内","a":["和文字排一行","宽高无效","靠 line-height"]}}},"_no":20,"_id":"t-block-inline-20"},{"g":"M","en":"Rem / Em","cn":"相对单位","p":"rem 只认根上那个字号，em 认最近一层字号。","q":"AI 用 em 写内边距，嵌套三层后间距翻了三倍。","f":{"t":"compare","a":{"l":{"t":"rem","a":["对着根字号","改一处全站变"]},"r":{"t":"em","a":["对着父字号","会层层放大"]}}},"_no":21,"_id":"t-rem-em-21"},{"g":"M","en":"Spacing Scale","cn":"间距尺度","p":"间距只用一套固定的几档，页面才看着像一个整体。","q":"AI 每处 margin 都随手写 13px、17px，越改越乱。","f":{"t":"variants","a":{"title":"一套刻度，别随手写 13px","items":[["4 / 8","最紧，标签间距"],["12 / 16","卡片内部"],["24 / 32","卡片之间"],["48 / 64","区块之间"],["96+","整页留白"]]}},"_no":22,"_id":"t-spacing-scale-22"},{"g":"M","en":"Container Query","cn":"容器查询","p":"按「我被放进多宽的盒子」变，而不是按窗口。","q":"AI 在窄侧栏里塞了宽卡片，只能溢出。","f":{"t":"compare","a":{"l":{"t":"媒体查询","a":["看整个窗口","同一组件各处一样"]},"r":{"t":"容器查询","a":["看父容器宽度","侧栏里自动变窄"]}}},"_no":23,"_id":"t-container-query-23"},{"g":"M","en":"Overflow","cn":"溢出处理","p":"内容比盒子大时，是切掉、显示滚动条、还是索性溢出去。","q":"AI 用 hidden 藏掉横向滚动条，用户看不到右边的内容。","f":{"t":"variants","a":{"items":[["visible","溢出去，看得见"],["hidden","切掉，也不许滚"],["scroll","总能滚"],["auto","需要才滚"]],"title":"内容装不下时的四种态度"}},"_no":24,"_id":"t-overflow-24"},{"g":"M","en":"Stacking Context","cn":"层叠上下文","p":"有些属性一加，父元素就自成一层，子元素再也压不过外面的。","q":"AI 给子元素狂加 z-index，就是压不过旁边的浮层。","f":{"t":"gate","a":{"left":"子元素","gate":"父元素开了新上下文","right":"跟外面的比","ok":"只在组内比较"}},"_no":25,"_id":"t-stacking-context-25"},{"g":"M","en":"CSS Variable","cn":"自定义属性","p":"样式里的变量，能被继承，也能在局部覆盖。","q":"AI 在组件里改根变量，结果全站主题都被它改了。","f":{"t":"nest","a":{"title":"根上定义 --brand","a":["某个子树里覆盖"],"sub":"只影响这一支，别处还是原值"}},"_no":26,"_id":"t-css-variable-26"},{"g":"M","en":"Dark Mode","cn":"暗色策略","p":"用媒体查询跟系统，还是让用户自己挑。","q":"AI 只写了 prefers-color-scheme，系统是暗色时没有手动开关能救。","f":{"t":"compare3","a":[{"t":"只做亮色","a":["最省事","夜里刺眼"]},{"t":"跟系统","a":["媒体查询","用户改不了"]},{"t":"手动切换","a":["要存偏好","最贴心"]}],"hot":2},"_no":27,"_id":"t-dark-mode-27"},{"g":"M","en":"Font Loading","cn":"字体加载","p":"字体会晚到，先给个后备字体顶一下，别让页面白着。","q":"AI 阻塞加载三个字重，首屏白屏两秒。","f":{"t":"timeline","a":[{"t":"页面先出"},{"t":"先显示后备字体","s":"别空白等"},{"t":"字体到位"},{"t":"换字会跳"}]},"_no":28,"_id":"t-font-loading-28"},{"g":"G","en":"Date / Time Picker","cn":"日期与时间控件","p":"让人挑一个时刻，做法从日历一路到下拉。","q":"AI 一律给一个原生 date 输入：Safari 和安卓上长得完全不同，还选不了「半小时后」。","f":{"t":"variants","a":{"items":[["日历面板","点一天，最常用"],["时/分下拉","两列滚轮或列表"],["日期区间","起止一次选完"],["相对时间","「30 分钟后」"],["原生输入","浏览器自带，样式随系统"]],"title":"要做个「选时间」，有这几种"}},"_no":29,"_id":"t-date-time-picker-29"},{"g":"G","en":"Timezone","cn":"时区","p":"同一刻在不同表上不一样，存和显示要分开说。","q":"AI 直接 new Date() 落库，换台机器看数据就差了 8 小时。","f":{"t":"compare3","hot":0,"a":[{"t":"存 UTC","a":["显示时按用户时区转","最稳，跨区不打架"]},{"t":"存本地时间","a":["简单","换个时区就错"]},{"t":"只存字符串","a":["连时区都丢了"]}]},"_no":30,"_id":"t-timezone-30"},{"g":"G","en":"Select","cn":"下拉选择","p":"从固定几项里挑一个或几个。","q":"AI 一律上自定义下拉，结果手机上键盘弹不出来、也没法打字搜。","f":{"t":"variants","a":{"items":[["原生 select","手机上体验最好"],["可搜下拉","选项超过 10 个才需要"],["多选 chips","选完变成标签"],["单选按钮组","2–4 项时最直观"]],"title":"从固定几项里挑，有这几种"}},"_no":31,"_id":"t-select-31"},{"g":"G","en":"Autocomplete","cn":"自动补全","p":"边打字边给建议，敲定才算真的选中。","q":"AI 把输入框当搜索框，选中之后还留着你打的那半截字。","f":{"t":"flow","a":["打字","防抖查询","建议列表","敲定选中"]},"_no":32,"_id":"t-autocomplete-32"},{"g":"G","en":"Modal","cn":"对话框家族","p":"打断流程的那层浮层，按「多重」挑样式。","q":"AI 一有事就弹模态框，连「删除成功」都要你点确定。","f":{"t":"variants","a":{"items":[["Modal 居中弹窗","必须处理完才能走"],["Drawer 侧滑","放长表单"],["Sheet 底部抽屉","移动端常用"],["Popover 气泡","轻量，点外面关"],["整页路由","内容多、要能分享"]],"title":"「弹个框」其实有五种"}},"_no":33,"_id":"t-modal-33"},{"g":"G","en":"Toast","cn":"轻提示","p":"不打断人的一句反馈，位置和消失时间都得定。","q":"AI 把报错塞进 toast，两秒就没了，用户根本来不及读。","f":{"t":"variants","a":{"items":[["Toast 自消失","2–3 秒，角落弹出"],["Banner 常驻","一直在，直到修好"],["Inline 字段错","贴着那个输入框"],["Confirm 确认","删东西前拦一下"]],"title":"反馈提示有这几种"}},"_no":34,"_id":"t-toast-34"},{"g":"G","en":"Tooltip","cn":"悬浮提示","p":"补一句话的气泡，和能点东西的气泡不是一回事。","q":"AI 把可点的菜单做成 tooltip，鼠标一移开就点不到了。","f":{"t":"compare","a":{"l":{"t":"Tooltip","a":["悬停出现","一句话","移开就消失"]},"r":{"t":"Popover","a":["点击出现","里面能点","点外面才关"]}}},"_no":35,"_id":"t-tooltip-35"},{"g":"G","en":"Table","cn":"表格","p":"一堆同构数据，行数决定要不要虚拟滚动。","q":"AI 把一万行全塞进 DOM，滚两下风扇就响了。","f":{"t":"variants","a":{"items":[["普通表格","几十行以内够用"],["排序 + 筛选","列头直接操作"],["虚拟滚动","上千行只渲染看得见的"],["卡片列表","窄屏自动换形态"]],"title":"表格按行数挑做法"}},"_no":36,"_id":"t-table-36"},{"g":"G","en":"Pagination","cn":"分页","p":"数据分几次给，页码和无限滚动各有代价。","q":"AI 用 offset 分页，翻页时新数据插进来，同一行被看了两遍。","f":{"t":"variants","a":{"items":[["页码","能直接跳回第 5 页"],["加载更多","点一下多一屏"],["无限滚动","刷不到底，也回不去"],["游标分页","数据一直在变时用"]],"title":"数据分几次给，有这几种"}},"_no":37,"_id":"t-pagination-37"},{"g":"G","en":"Upload","cn":"文件上传","p":"选完文件还得校验、分片、给进度。","q":"AI 只画了个虚线框，没做大小校验，用户传 200MB 直接卡死。","f":{"t":"flow","a":["选文件","校验类型大小","上传 + 进度","成功 / 失败"]},"_no":38,"_id":"t-upload-38"},{"g":"G","en":"Rich Text","cn":"富文本","p":"要「能加粗」和要「能写文章」是两件事。","q":"AI 直接塞个富文本库，粘进来的 Word 样式把整页布局搞崩。","f":{"t":"variants","a":{"items":[["Markdown + 预览","存原文，最省事"],["contenteditable","所见即所得，坑很多"],["分块编辑器","一段一块，像 Notion"],["纯文本","只要文字就别引编辑器"]],"title":"「能加粗」和「能写文章」"}},"_no":39,"_id":"t-rich-text-39"},{"g":"G","en":"Input","cn":"输入控件族","p":"同样要一个值，控件形态差很远。","q":"AI 什么数字都给一个文本框，用户能填「十二」进去。","f":{"t":"variants","a":{"items":[["单行文本","最基础"],["多行文本域","长文本"],["数字步进","加减按钮限范围"],["滑块","粗略给个区间"],["标签输入","回车变成一个 chip"]],"title":"同样是填个值"}},"_no":40,"_id":"t-input-40"},{"g":"G","en":"Tree / Cascader","cn":"树形与级联","p":"层级数据：省市、部门、分类目录。","q":"AI 把三级目录做成三个联动下拉，用户选到一半就迷路了。","f":{"t":"tree","a":{"root":"全部分类","a":["手机","电脑","配件"]}},"_no":41,"_id":"t-tree-cascader-41"},{"g":"G","en":"Tabs","cn":"分区切换","p":"同一页里的几块内容，二选一呈现。","q":"AI 把互斥的步骤做成 Tabs，用户以为能同时开两个。","f":{"t":"compare","a":{"l":{"t":"Tabs","a":["几块内容并列","随时切换","占横向空间"]},"r":{"t":"Accordion","a":["自上而下展开","省空间","一次只能看一块"]}}},"_no":42,"_id":"t-tabs-42"},{"g":"H","en":"Loading","cn":"加载态","p":"等数据时给个交代，别让页面空着。","q":"AI 只给一个转圈，慢网下用户以为页面卡死了。","f":{"t":"compare","a":{"l":{"t":"转圈 + 文字","a":["实现最简单","不知道还要多久"]},"r":{"t":"骨架屏","a":["先占位","内容到位不跳"]}}},"_no":43,"_id":"t-loading-43"},{"g":"H","en":"Empty State","cn":"空状态","p":"没内容时也得说话：为什么空、下一步做什么。","q":"AI 只写「暂无数据」，用户不知道是自己错了还是系统坏了。","f":{"t":"compare3","hot":0,"a":[{"t":"首次无数据","a":["引导去创建"]},{"t":"搜不到","a":["建议换关键词"]},{"t":"没权限","a":["说清找谁开"]}]},"_no":44,"_id":"t-empty-state-44"},{"g":"H","en":"Error State","cn":"错误态","p":"出错要说三件事：错了、谁的错、怎么办。","q":"AI 直接弹一个 500，用户除了刷新页面什么也做不了。","f":{"t":"flow","a":["失败","说清原因","给个重试","兜底文案"]},"_no":45,"_id":"t-error-state-45"},{"g":"H","en":"Validation","cn":"校验时机","p":"什么时候告诉用户填错了，比报什么错更重要。","q":"AI 一边打字一边报红，你还没输完它就说手机号不合法。","f":{"t":"timeline","hot":1,"a":[{"t":"边输边验","s":"太吵"},{"t":"失焦时","s":"最常用"},{"t":"提交时","s":"一次报全"},{"t":"服务端","s":"最后一道"}]},"_no":46,"_id":"t-validation-46"},{"g":"H","en":"Control States","cn":"控件五态","p":"正常、悬停、聚焦、禁用、只读，五个都得画。","q":"AI 只做了正常态，禁用的按钮看着还能点，点下去还报错。","f":{"t":"variants","a":{"items":[["正常","默认"],["悬停","鼠标压上去"],["聚焦","键盘能操作"],["禁用","点了没反应"],["只读","能看不能改"]],"title":"一个控件至少有五种样子"}},"_no":47,"_id":"t-control-states-47"},{"g":"H","en":"Keyboard","cn":"键盘与快捷键","p":"鼠标之外的那条路：Tab 顺序、快捷键、命令面板。","q":"AI 弹窗开了关不掉，按 Esc 没反应，只能刷新页面。","f":{"t":"variants","a":{"items":[["Tab 顺序","跟着视觉顺序走"],["快捷键","只做最常用的几个"],["命令面板","Cmd+K 搜一切"],["Esc 关闭","浮层必须能关"]],"title":"鼠标之外的那条路"}},"_no":48,"_id":"t-keyboard-48"},{"g":"H","en":"Accessibility","cn":"无障碍","p":"看不见屏幕、只用键盘的人也要能用。","q":"AI 用 div 加 onClick 做按钮，键盘永远 Tab 不上去。","f":{"t":"variants","a":{"items":[["语义标签","button 就用 button"],["可聚焦","Tab 能走到"],["aria 标注","图标按钮要有名字"],["对比度","浅灰字别太浅"]],"title":"让键盘和读屏也能用"}},"_no":49,"_id":"t-accessibility-49"},{"g":"H","en":"i18n","cn":"本地化","p":"文案、日期、数字、复数，一样都不能写死。","q":"AI 把「3 items」拼成字符串，换成中文语序全乱。","f":{"t":"compare","a":{"l":{"t":"硬编码中文","a":["写得快","只能一种语言"]},"r":{"t":"文案表 + 格式函数","a":["能切换","日期数字都本地化"]}}},"_no":50,"_id":"t-i18n-50"},{"g":"H","en":"Wizard","cn":"分步流程","p":"一次填不完的表，拆成几步让人有进展感。","q":"AI 把 20 个字段堆一屏，用户填到一半就跑了。","f":{"t":"timeline","hot":2,"a":[{"t":"填信息","s":"必填校验"},{"t":"核对","s":"确认一遍"},{"t":"提交","s":"等返回"},{"t":"完成","s":"给下一步"}]},"_no":51,"_id":"t-wizard-51"},{"g":"H","en":"Undo","cn":"撤销","p":"做错能回退，比提前拦一次更好用。","q":"AI 每次删除都弹确认框，用得多了人闭眼点确定。","f":{"t":"compare","a":{"l":{"t":"撤销 toast","a":["先做了","5 秒内可撤回"]},"r":{"t":"二次确认","a":["先拦住","确认了才做"]}}},"_no":52,"_id":"t-undo-52"},{"g":"H","en":"Deep Link","cn":"深链","p":"筛选、页码、标签都该写进 URL，发出去别人看到的一样。","q":"AI 把筛选状态只放内存，刷新一下就没了，也没法发给同事。","f":{"t":"flow","a":["URL","解析成状态","渲染页面","可分享 / 可回退"]},"_no":53,"_id":"t-deep-link-53"},{"g":"H","en":"Scroll Restore","cn":"滚动位置","p":"从详情返回列表，位置该还在原处。","q":"AI 没做位置恢复，你点进第 30 条再回来，又得从头刷。","f":{"t":"compare","a":{"l":{"t":"不处理","a":["返回就回顶部","前面白翻了"]},"r":{"t":"记住位置","a":["返回即恢复","从第 30 条继续看"]}}},"_no":54,"_id":"t-scroll-restore-54"},{"g":"H","en":"Permission","cn":"按权限显隐","p":"没权限的功能，是藏起来还是灰着。","q":"AI 只在前端把按钮藏起来，接口照样能调——那等于没权限。","f":{"t":"gate","a":{"left":"已登录用户","gate":"按角色判定","right":"能看的内容","ok":"命中角色才放行"}},"_no":55,"_id":"t-permission-55"},{"g":"H","en":"Sticky","cn":"吸顶与吸底","p":"滚远了还得够得着：导航吸顶、操作吸底。","q":"AI 把两个都做成 fixed，结果内容永远被压在下面看不全。","f":{"t":"layers","a":["页面内容","吸顶导航","吸底操作栏"]},"_no":56,"_id":"t-sticky-56"},{"g":"S","en":"SVG vs Canvas","cn":"矢量与位图绘制","p":"要能点、能改样式用 SVG；要画几千个点用 Canvas。","q":"AI 用 SVG 画一万个数据点，滚动直接掉到 5 帧。","f":{"t":"compare","a":{"l":{"t":"SVG","a":["每个元素都是节点","能选中改样式","多了会卡"]},"r":{"t":"Canvas","a":["一像素一像素画","量大也不卡","选中要自己算"]}}},"_no":57,"_id":"t-svg-vs-canvas-57"},{"g":"S","en":"Raster vs Vector","cn":"位图与矢量","p":"位图是一格格的像素，矢量是「怎么画」的指令。","q":"AI 把 logo 导出成 200px 的 PNG，换高清屏就糊了。","f":{"t":"compare","a":{"l":{"t":"位图","a":["放大会糊","照片就是它"]},"r":{"t":"矢量","a":["放大不糊","图标 logo 用它"]}}},"_no":58,"_id":"t-raster-vs-vector-58"},{"g":"S","en":"Canvas 重绘","cn":"画布重绘","p":"画布不会记上一帧，每一帧都得自己重画。","q":"AI 每帧都在原图上叠画，越跑越糊、越跑越慢。","f":{"t":"cycle","a":["清空整块","画这一帧","等下一帧","再清空"]},"_no":59,"_id":"t-canvas-59"},{"g":"S","en":"WebGL","cn":"GPU 绘图","p":"把画图这活交给显卡，几万个物体也能动。","q":"AI 用 DOM 做粒子效果，两百个就卡，还说要加动画。","f":{"t":"flow","a":["顶点数据","着色器程序","交给 GPU","输出像素"]},"_no":60,"_id":"t-webgl-60"},{"g":"S","en":"Image Format","cn":"图片格式","p":"照片用 JPEG/WebP，图标用 SVG，透明用 PNG。","q":"AI 把截图存成 PNG，一张 4MB，列表里放二十张。","f":{"t":"variants","a":{"title":"同一张图，四种装法","items":[["JPEG","照片首选，不支持透明"],["PNG","要透明、要无损"],["WebP","体积小，兼容已够"],["AVIF","最小，解码稍慢"]]}},"_no":61,"_id":"t-image-format-61"},{"g":"S","en":"Responsive Image","cn":"响应式图片","p":"给同一张图准备几档尺寸，让浏览器按屏幕挑。","q":"AI 只给 3000px 原图，手机上为 100px 的缩略图下了 4MB。","f":{"t":"flow","a":["一个 img","给几档尺寸","浏览器自己挑","只下最合适的那张"]},"_no":62,"_id":"t-responsive-image-62"},{"g":"S","en":"Image Compression","cn":"压缩","p":"压照片可以舍一点肉眼看不出的细节，压图标不行。","q":"AI 把图标也做了有损压缩，边缘出现一圈脏边。","f":{"t":"compare","a":{"l":{"t":"有损","a":["体积小很多","仔细看有噪点"]},"r":{"t":"无损","a":["像素不变","体积大"]}}},"_no":63,"_id":"t-image-compression-63"},{"g":"S","en":"Video Codec","cn":"视频编码","p":"同一段视频，用什么编码决定体积和兼容性。","q":"AI 导出 H.265 就说「体积小一半」，老设备上放不出来。","f":{"t":"variants","a":{"items":[["H.264","兼容最好，体积一般"],["H.265","更小，专利麻烦"],["VP9","网页友好，编码慢"],["AV1","最小，解码吃 CPU"]]}},"_no":64,"_id":"t-video-codec-64"},{"g":"S","en":"Audio Format","cn":"音频格式","p":"语音用 Opus/AAC，兼容最广还是 MP3。","q":"AI 把 10 分钟音频存成无损 WAV，一个文件 100MB。","f":{"t":"compare","a":{"l":{"t":"MP3","a":["哪都能放","体积偏大"]},"r":{"t":"AAC / Opus","a":["同体积音质更好","老环境要兜底"]}}},"_no":65,"_id":"t-audio-format-65"},{"g":"S","en":"Media 预加载","cn":"媒体预加载","p":"视频音频先只加载封面，真要点开才拉媒体流。","q":"AI 在列表里放了五个 video 标签，进页面就开始下五条视频。","f":{"t":"timeline","a":[{"t":"只给封面"},{"t":"点开才加载","s":"省流量"},{"t":"边下边播"},{"t":"播完释放"}]},"_no":66,"_id":"t-media-66"},{"g":"S","en":"Lottie","cn":"矢量动画","p":"把 AE 动画导成一段 JSON，用代码实时画出来。","q":"AI 把动画导成 30MB 的 GIF，加载时卡住整个页面。","f":{"t":"flow","a":["设计稿导出 JSON","运行时渲染","体积小","能改颜色速度"]},"_no":67,"_id":"t-lottie-67"},{"g":"S","en":"Sprite","cn":"雪碧图","p":"把一堆小图拼成一张，靠坐标切出来用。","q":"AI 给每个小图标各发一个请求，首屏多了四十次往返。","f":{"t":"store","a":{"a":["一张大图","每个图标一块","用坐标取"],"sub":"一次请求拿全部小图标"}},"_no":68,"_id":"t-sprite-68"},{"g":"S","en":"Alpha Channel","cn":"透明通道","p":"除了颜色，还存一格「有多不透明」。","q":"AI 存了 JPEG 却要求透明背景，存完变白底。","f":{"t":"nest","a":{"title":"一个像素","a":["红绿蓝三个分量","再加一个透明度"],"sub":"有的格式干脆不带透明"}},"_no":69,"_id":"t-alpha-channel-69"},{"g":"S","en":"Color Space","cn":"色彩空间","p":"同一串色值，在不同色彩空间里长得不一样。","q":"AI 按设计稿的 P3 色值取色，放到普通屏上全偏了。","f":{"t":"compare","a":{"l":{"t":"sRGB","a":["最通用","显示不准会偏灰"]},"r":{"t":"P3 / 广色域","a":["颜色更艳","老设备要转换"]}}},"_no":70,"_id":"t-color-space-70"}];
+window.BOOKS = [{"k":"ui","name":"界面与图形","sub":"渲染 · 样式 · 控件 · 交互 · 图形","file":"dev-terms-ui.html","desc":"浏览器怎么画页面，样式怎么写不打架，控件该选哪个，交互状态怎么补，图形与媒体怎么做。","count":70,"groups":[{"k":"A","name":"浏览器与渲染"},{"k":"M","name":"样式与布局"},{"k":"G","name":"UI 控件与选型"},{"k":"H","name":"交互与状态"},{"k":"S","name":"图形与媒体"}]},{"k":"code","name":"语言与工程","sub":"语言 · 工程化 · 测试 · 性能 · 移动端","file":"dev-terms-code.html","desc":"语言与类型、打包与本地开发、测试怎么写、性能怎么量、跨端怎么不翻车。","count":70,"groups":[{"k":"L","name":"语言与框架"},{"k":"B","name":"前端工程化与网络"},{"k":"I","name":"测试与质量"},{"k":"Q","name":"性能与调试"},{"k":"R","name":"移动端与跨端"}]},{"k":"backend","name":"后端与数据","sub":"协议 · 存储 · 建模 · 并发 · 安全","file":"dev-terms-backend.html","desc":"接口长什么样、数据怎么存怎么查、并发与一致性怎么权衡、身份与权限怎么不出事。","count":70,"groups":[{"k":"C","name":"接口与协议"},{"k":"D","name":"数据与存储"},{"k":"P","name":"数据建模"},{"k":"E","name":"并发与异步"},{"k":"J","name":"安全与身份"}]},{"k":"ai","name":"AI 与基础设施","sub":"LLM · 检索 · 部署 · 云 · 协作","file":"dev-terms-ai.html","desc":"大模型应用的基本零件、上线与回滚、云上的名词，以及团队协作与发布流程。","count":70,"groups":[{"k":"K","name":"LLM 基础"},{"k":"T","name":"RAG 与工具调用"},{"k":"F","name":"部署与可观测"},{"k":"O","name":"云与基础设施"},{"k":"N","name":"协作与发布"}]}];
+window.CUR_BOOK = "ui";</script>
+<script>
+(function () {
+  var terms = window.TERMS, groups = window.GROUPS;
+  var doc = document.querySelector('#doc');
+  var toc = document.querySelector('#toc');
+  var count = document.querySelector('#count');
+  var input = document.querySelector('#q');
+  var chips = document.querySelector('#chips');
+
+  function frag(html) { return document.createRange().createContextualFragment(html); }
+  function h(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  var state = { g: 'all', q: '' };
+  var html = '', tocHtml = '', no = 0, lastG = null, refs = [];
+
+  groups.forEach(function (grp) {
+    var items = terms.filter(function (t) { return t.g === grp.k; });
+    tocHtml += '<p class="toc-g">' + grp.k + ' · ' + grp.name + '</p>';
+    items.forEach(function (t) {
+      no += 1;
+      t._no = no;
+      t._id = 't-' + t.en.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + no;
+      tocHtml += '<a href="#' + t._id + '" data-id="' + t._id + '">' + h(t.en) + ' <span style="opacity:.6">' + h(t.cn) + '</span></a>';
+    });
+    html += '<section class="grp" data-g="' + grp.k + '" id="g-' + grp.k + '">' +
+      '<span class="grp-k">' + grp.k + '</span><h2 class="grp-n serif">' + h(grp.name) + '</h2>' +
+      '<span class="grp-c">' + items.length + ' 条 · ' + grp.tag + '</span><span class="grp-line"></span></section>';
+    items.forEach(function (t) {
+      var pad = t._no < 10 ? '0' + t._no : '' + t._no;
+      html += '<article class="t" id="' + t._id + '" data-g="' + t.g + '">' +
+        '<div class="t-meta">' +
+          '<div class="t-no">' + pad + '</div>' +
+          '<h3 class="t-h"><span class="t-en">' + h(t.en) + '</span><span class="t-cn">' + h(t.cn) + '</span></h3>' +
+          '<p class="t-p">' + h(t.p) + '</p>' +
+        '</div>' +
+        '<div class="t-fig"><div class="fwrap">' + window.FIGS.render(t.f) + '</div></div>' +
+        '<p class="t-q"><b>AI 常怎么糊弄你</b><span>' + h(t.q) + '</span></p>' +
+      '</article>';
+    });
+  });
+  html += '<p class="empty" id="empty">没有匹配的条目。换个词，或者按 Esc 清空。</p>';
+  doc.replaceChildren(frag(html));
+  toc.replaceChildren(frag(tocHtml));
+
+  var rows = Array.prototype.slice.call(doc.querySelectorAll('.t'));
+  var heads = Array.prototype.slice.call(doc.querySelectorAll('.grp'));
+  var links = Array.prototype.slice.call(toc.querySelectorAll('a'));
+  var empty = document.querySelector('#empty');
+  var linkMap = {};
+  links.forEach(function (a) { linkMap[a.dataset.id] = a; });
+
+  function apply() {
+    var q = state.q.trim().toLowerCase();
+    var shown = 0, gcount = {};
+    rows.forEach(function (r) {
+      var okG = state.g === 'all' || r.dataset.g === state.g;
+      var okQ = !q || r.textContent.toLowerCase().includes(q);
+      var ok = okG && okQ;
+      r.hidden = !ok;
+      if (ok) { shown += 1; gcount[r.dataset.g] = (gcount[r.dataset.g] || 0) + 1; }
+    });
+    heads.forEach(function (h) { h.hidden = !gcount[h.dataset.g]; });
+    empty.classList.toggle('on', shown === 0);
+    count.textContent = shown === rows.length ? rows.length + ' 条' : shown + ' / ' + rows.length + ' 条';
+    links.forEach(function (a) {
+      var id = a.dataset.id, el = doc.querySelector('#' + id);
+      a.style.display = el && el.hidden ? 'none' : '';
+    });
+  }
+
+  chips.addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    state.g = b.dataset.g;
+    Array.prototype.forEach.call(chips.children, function (c) {
+      c.setAttribute('aria-pressed', String(c === b));
+    });
+    apply();
+  });
+
+  input.addEventListener('input', function () { state.q = input.value; apply(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === '/' && document.activeElement !== input) { e.preventDefault(); input.focus(); input.select(); }
+    if (e.key === 'Escape') { input.value = ''; state.q = ''; apply(); input.blur(); }
+  });
+
+  /* 册切换 */
+  var booksEl = document.querySelector('#books');
+  var bookHtml = '<a href="dev-terms.html">目录</a>';
+  (window.BOOKS || []).forEach(function (b) {
+    var cur = b.k === window.CUR_BOOK;
+    bookHtml += '<a href="' + b.file + '"' + (cur ? ' aria-current="page"' : '') + '>' + b.name + '</a>';
+  });
+  booksEl.replaceChildren(frag(bookHtml));
+
+  /* 分组 chips */
+  var chipHtml = '<button class="chip" data-g="all" aria-pressed="true">全部</button>';
+  groups.forEach(function (g) {
+    chipHtml += '<button class="chip" data-g="' + g.k + '" aria-pressed="false">' + g.name + '</button>';
+  });
+  chips.replaceChildren(frag(chipHtml));
+
+  /* 目录高亮 */
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        var a = linkMap[en.target.id];
+        if (!a) return;
+        if (en.isIntersecting) {
+          links.forEach(function (l) { l.classList.remove('on'); });
+          a.classList.add('on');
+          var box = toc.getBoundingClientRect(), ab = a.getBoundingClientRect();
+          if (ab.top < box.top + 40 || ab.bottom > box.bottom - 40) a.scrollIntoView({ block: 'center' });
+        }
+      });
+    }, { rootMargin: '-8% 0px -82% 0px' });
+    rows.forEach(function (r) { io.observe(r); });
+  }
+
+  apply();
+})();
+</script>
+</body>
+</html>

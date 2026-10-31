@@ -6,9 +6,22 @@
     "网关",
     "离线脚本",
     "CLI 指南",
-    "插件手册"
+    "插件手册",
+    "术语速查"
   ],
   "tools": [
+    {
+      "id": "dev-terms",
+      "title": "vibecoding 术语图解：前后端 280 条 · 4 册",
+      "tags": [
+        "术语速查"
+      ],
+      "status": "可用",
+      "version": "1.2.0",
+      "updated": "2026-11-01",
+      "summary": "做 vibe coding 时真会撞上的前后端概念、控件选型与环境知识：280 条 20 组，拆成「界面与图形 / 语言与工程 / 后端与数据 / AI 与基础设施」四册。每条四样东西——英文术语、一句人话、一张同语法画的图、以及 AI 常怎么糊弄你。可按组筛选、可搜正文。",
+      "page": "dev-terms.html"
+    },
     {
       "id": "copilot-cli-guide",
       "title": "GitHub Copilot CLI 场景化使用指南",

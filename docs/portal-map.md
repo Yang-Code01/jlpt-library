@@ -44,6 +44,7 @@
 | `pi-tui/` | pi 的 TUI 增强包 `pi-tui-plus`（pi-open-tui 自有分支：footer + 模型选择器 + 网关状态） | 自身源码（15+3 个 ts，无依赖） | 无（pi 直接加载目录） | `node tools/tools.mjs check`（版本 / 包 / 清单一致） |
 | `wb2api/` | WorkBuddy2API 部署包（额度转 OpenAI / Anthropic 网关：源码 + 兼容层补丁，`compose up -d --build` 现场编译），详情页 `tools-dev/wb2api.html` | 上游 `linguo2625469/workbuddy2api-panel` rev `6b31db6` + 兼容层（`src/internal/server/{responses,messages}.go`） | 无生成器（`src/` 与 `patches/` 手工更新，步骤见包内 `UPSTREAM.md`） | `node tools/tools.mjs check`（版本从 `src/cmd/server/main.go` 的 `appVersion` 取，见 `versionFrom`） |
 | `tools-dev/` + `tools/tools.mjs` | 工具开发区的清单与下载 | `tools-dev/data.json` + `tools-dev/<page>.html` | `node tools/tools.mjs gen`、`pack <id>` | `node tools/tools.mjs check` |
+| `tools/lib/dev-terms/` + `tools/dev-terms-gen.mjs` | 《vibecoding 术语图解》4 册（280 条 / 20 组，每条一句人话 + 一张同语法小图 + 「AI 常怎么糊弄你」；目录页跨四册搜索） | `tools/lib/dev-terms/{terms.json,figs.js,page.html,landing.html}` | `node tools/dev-terms-gen.mjs gen`（写目录页 + 4 册共 5 个文件） | `node tools/dev-terms-gen.mjs check`（`tools/test.mjs` 已接线） |
 | `research/pi-changelog.html` | pi 更新履历报告（报告区里的一篇） | 本机已装 pi 的 `CHANGELOG.md`（**不在仓库里**） | `node tools/pi-changelog-gen.mjs` | `node tools/pi-changelog-gen.mjs check` |
 | `assets/snooker*.js` | 斯诺克信息区（赛季轨道 + 世界排名 / 本赛季排名 + 单站天梯图与赛程） | snooker.org 的 `template=31 / 33 / 2 / 7` 四张表（31 = 两年滚动排名，33 = 单赛季榜） + **逐站 `index.asp?event=<id>` 对阵页** | `node tools/snooker.mjs`（线上由 `.github/workflows/snooker.yml` 每 10 分钟跑） | `node tools/snooker.mjs --check`（需联网）、`tools/tests/test_snooker.js`（含已入库快照的契约校验，离线） |
 
