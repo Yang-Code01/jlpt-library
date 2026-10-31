@@ -152,7 +152,9 @@ const CORE_TOKENS = [
 const coreRe = new RegExp(
   '--(' + CORE_TOKENS.slice().sort((a, b) => b.length - a.length).map((t) => t.replace(/[-]/g, '\-')).join('|') + ')\s*:'
 );
-const INLINE_SKIP = /^(research\/|tools-dev\/|tools\/tests\/|wb2api\/|pi-tui\/)/;
+// tools/lib/dev-terms/ 是 tools-dev 那 5 个自包含页面的骨架（生成器把它们写进 tools-dev/），
+// 产物已在白名单里，源与产物同属一套命名空间，一起放行。
+const INLINE_SKIP = /^(research\/|tools-dev\/|tools\/lib\/dev-terms\/|tools\/tests\/|wb2api\/|pi-tui\/)/;
 
 let pagesScanned = 0;
 const tracked = execFileSync('git', ['ls-files', '*.html'], { cwd: ROOT, encoding: 'utf8' })
