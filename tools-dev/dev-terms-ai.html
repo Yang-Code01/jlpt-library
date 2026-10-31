@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 与基础设施 · vibecoding 术语图解 · 70 条</title>
+<style>
+:root{
+  --bg:#f6f4ee; --paper:#fffdf8; --ink:#1e2a30; --ink-soft:#3d4c52; --muted:#6b7a72;
+  --rule:#e2ddd0; --accent:#176b75; --accent-soft:#e3efee; --seal:#b3402a;
+  --fig:#f2efe6; --fig-line:#c9d3ca; --fig-arrow:#a6b3a9; --fig-fill:#fbf9f3; --fig-accent:#dceceb; --fig-accent-line:#7fb0ae;
+  --shadow:0 1px 2px rgba(30,42,48,.04), 0 8px 24px -18px rgba(30,42,48,.5);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#12171a; --paper:#171d20; --ink:#e8eae4; --ink-soft:#c3cbc4; --muted:#8b9a90;
+    --rule:#282f33; --accent:#5fb0b2; --accent-soft:#16302f; --seal:#e0715a;
+    --fig:#0e1316; --fig-line:#3a4a4a; --fig-arrow:#5d6f64; --fig-fill:#182024; --fig-accent:#173634; --fig-accent-line:#4b8f8e;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -20px rgba(0,0,0,.9);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Noto Sans JP","Source Han Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased;
+}
+.serif{font-family:"Noto Serif JP","Source Han Serif SC",Songti SC,SimSun,Georgia,serif}
+
+/* 册切换 */
+.books{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 18px}
+.books a{
+  padding:5px 11px; font-size:12px; line-height:1.4; text-decoration:none;
+  color:var(--muted); border:1px solid transparent; border-radius:999px; transition:color .18s, border-color .18s;
+}
+.books a:hover{color:var(--accent); border-color:var(--rule)}
+.books a[aria-current="page"]{color:var(--accent); border-color:var(--accent); background:var(--accent-soft)}
+
+/* 右上角返回（tools-dev 硬性要求） */
+.back-btn{
+  position:fixed; top:16px; right:20px; z-index:50;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 13px; border:1px solid var(--rule); border-radius:999px;
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  color:var(--ink-soft); font-size:12.5px; text-decoration:none;
+  backdrop-filter:blur(6px); transition:color .2s, border-color .2s;
+}
+.back-btn:hover{color:var(--accent); border-color:var(--accent)}
+
+/* 头部 */
+.hd{border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--bg))}
+.hd-in{max-width:1200px; margin:0 auto; padding:56px 40px 26px}
+.eyebrow{margin:0 0 14px; font-size:11.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted)}
+h1{margin:0; font-size:clamp(26px,3.1vw,38px); font-weight:600; letter-spacing:-.01em; line-height:1.25;
+   font-family:"Noto Serif JP","Source Han Serif SC",Songti SC,Georgia,serif}
+.lede{margin:14px 0 0; max-width:62ch; color:var(--ink-soft); font-size:14.5px; text-wrap:pretty}
+.lede em{font-style:normal; color:var(--seal); border-bottom:1px solid currentColor}
+.tools{display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-top:26px}
+.search{position:relative; flex:1 1 320px; max-width:420px}
+.search input{
+  width:100%; padding:10px 40px 10px 14px; font:inherit; font-size:14px;
+  color:var(--ink); background:var(--paper); border:1px solid var(--rule); border-radius:9px; outline:none;
+  transition:border-color .2s, box-shadow .2s;
+}
+.search input:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.search .kbd{position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  font-size:11px; color:var(--muted); border:1px solid var(--rule); border-radius:5px; padding:1px 6px; pointer-events:none}
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{
+  padding:6px 12px; font-size:12.5px; line-height:1.4; cursor:pointer;
+  color:var(--ink-soft); background:transparent; border:1px solid var(--rule); border-radius:999px;
+  transition:color .18s, border-color .18s, background .18s;
+}
+.chip:hover{border-color:var(--accent); color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:#f7fbfa}
+.count{font-size:12.5px; color:var(--muted); margin-left:auto; font-variant-numeric:tabular-nums}
+
+/* 主体 */
+.wrap{max-width:1200px; margin:0 auto; padding:0 40px 120px; display:grid; grid-template-columns:212px minmax(0,1fr); gap:48px}
+.toc{position:sticky; top:0; align-self:start; max-height:100vh; overflow-y:auto; padding:34px 0 40px; scrollbar-width:thin}
+.toc-g{margin:18px 0 6px; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted)}
+.toc-g:first-child{margin-top:0}
+.toc a{
+  display:block; padding:3px 0 3px 10px; margin-left:-10px; font-size:12.5px; line-height:1.5;
+  color:var(--muted); text-decoration:none; border-left:1px solid transparent;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .16s, border-color .16s;
+}
+.toc a:hover{color:var(--ink)}
+.toc a.on{color:var(--accent); border-left-color:var(--accent); font-weight:500}
+.doc{padding-bottom:60px}
+.grp{display:flex; align-items:baseline; gap:12px; padding:64px 0 4px; scroll-margin-top:0}
+.grp-k{font-family:"Noto Serif JP",Georgia,serif; font-size:13px; letter-spacing:.1em; color:var(--accent)}
+.grp-n{margin:0; font-size:19px; font-weight:600; font-family:"Noto Serif JP","Source Han Serif SC",Songti SC,serif}
+.grp-c{font-size:12px; color:var(--muted)}
+.grp-line{flex:1; height:1px; background:var(--rule)}
+
+.t{display:grid; grid-template-columns:minmax(0,1fr) 408px; gap:0 44px; padding:26px 0 24px; border-top:1px solid var(--rule); scroll-margin-top:12px}
+.t:first-of-type{border-top:0}
+.t-meta{grid-column:1; grid-row:1; min-width:0}
+.t-no{font-size:11px; letter-spacing:.12em; color:var(--muted); font-variant-numeric:tabular-nums}
+.t-h{margin:4px 0 0; display:flex; flex-wrap:wrap; align-items:baseline; gap:10px}
+.t-en{font-size:19px; font-weight:600; letter-spacing:-.005em}
+.t-cn{font-size:12.5px; color:var(--muted)}
+.t-p{margin:10px 0 0; color:var(--ink-soft); font-size:15px; line-height:1.85; text-wrap:pretty; text-wrap:balance}
+.t-fig{grid-column:2; grid-row:1; min-width:0}
+.fwrap{background:var(--fig); border:1px solid var(--rule); border-radius:10px; padding:8px 10px}
+.fig{display:block; width:100%; height:auto}
+.t-q{grid-column:1 / -1; grid-row:2; display:flex; gap:12px; align-items:baseline;
+  margin:16px 0 0; padding:11px 0 0; border-top:1px dashed var(--rule);
+  font-size:12.8px; line-height:1.8; color:var(--muted)}
+.t-q b{flex:0 0 auto; font-size:10.5px; letter-spacing:.1em; color:var(--seal); font-weight:600; white-space:nowrap}
+.t[hidden]{display:none}
+.grp[hidden]{display:none}
+.empty{display:none; padding:60px 0; color:var(--muted); font-size:14px}
+.empty.on{display:block}
+
+/* 图的元件语法 */
+.fig text{font-family:"Noto Sans JP","PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+.f-lab{fill:var(--ink); font-size:9.6px}
+.f-sub{fill:var(--muted); font-size:8.2px; letter-spacing:.02em}
+.f-thlab{fill:var(--ink-soft); font-size:8.6px}
+.f-badge{fill:var(--seal); font-size:8.4px; letter-spacing:.04em}
+.f-vs{fill:var(--muted); font-size:8.6px; letter-spacing:.14em}
+.f-box{fill:var(--fig-fill); stroke:var(--fig-line); stroke-width:1.3}
+.f-box-accent{fill:var(--fig-accent); stroke:var(--fig-accent-line); stroke-width:1.3}
+.f-box-muted{fill:none; stroke:var(--fig-line); stroke-width:1.3; stroke-dasharray:5 4}
+.f-pill{fill:var(--fig-fill); stroke:var(--fig-line); stroke-width:1.3}
+.f-panel{fill:none; stroke:var(--fig-line); stroke-width:1.2}
+.f-panel-hot{fill:var(--fig-accent); fill-opacity:.34; stroke:var(--fig-accent-line); stroke-width:1.4}
+.f-th{fill:var(--fig-accent); stroke:var(--fig-accent-line); stroke-width:1.1}
+.f-seg1{fill:var(--fig-fill); stroke:var(--fig-line)}
+.f-seg2{fill:var(--fig-accent); stroke:var(--fig-accent-line)}
+.f-seg3{fill:none; stroke:var(--fig-line)}
+.f-ar{fill:none; stroke:var(--fig-arrow); stroke-width:1.5; stroke-linejoin:round}
+.f-dash{stroke-dasharray:5 4}
+.f-head{fill:var(--fig-arrow)}
+.f-gate{stroke:var(--seal); stroke-width:1.3; stroke-dasharray:5 4; opacity:.75}
+.f-axis{stroke:var(--fig-line); stroke-width:1.2}
+.f-line{fill:none; stroke:var(--fig-line); stroke-width:1.1; stroke-dasharray:4 4}
+.f-dot{fill:var(--fig-fill); stroke:var(--fig-line); stroke-width:1.4}
+.f-dot-hot{fill:var(--seal); stroke:var(--seal); stroke-width:1.4}
+.f-rule{stroke:var(--fig-line); stroke-width:1; opacity:.85}
+.f-queue line{stroke:var(--fig-line); stroke-width:1; opacity:.8}
+.f-store .f-rule{stroke-dasharray:3 3}
+
+footer{border-top:1px solid var(--rule); padding:26px 40px 60px}
+.foot-in{max-width:1200px; margin:0 auto; display:flex; flex-wrap:wrap; gap:8px 20px; font-size:12.5px; color:var(--muted)}
+footer a{color:var(--muted)}
+footer a:hover{color:var(--accent)}
+
+@media (max-width:1080px){
+  .wrap{grid-template-columns:1fr; gap:0; padding:0 28px 80px}
+  .toc{display:none}
+  .t{grid-template-columns:1fr; row-gap:18px}
+  .t-meta,.t-fig,.t-q{grid-column:1; grid-row:auto}
+  .t-q{margin-top:4px}
+  .t-fig{max-width:520px}
+  .hd-in{padding:66px 28px 22px}
+}
+@media (max-width:560px){
+  .wrap{padding:0 18px 60px}
+  .hd-in{padding:62px 18px 18px}
+  .t-en{font-size:17px}
+  .count{margin-left:0; flex-basis:100%}
+}
+</style>
+</head>
+<body>
+<a class="back-btn" href="../index.html#tools" data-back="top" title="回到工具开发区列表">← 工具开发区</a>
+
+<header class="hd">
+  <div class="hd-in">
+    <nav class="books" id="books" aria-label="分册"></nav>
+    <p class="eyebrow">ai · LLM · 检索 · 部署 · 云 · 协作 · 70 条</p>
+    <h1>AI 与基础设施</h1>
+    <p class="lede">大模型应用的基本零件、上线与回滚、云上的名词，以及团队协作与发布流程。</p>
+    <div class="tools">
+      <label class="search">
+        <input id="q" type="search" placeholder="搜术语 / 中文 / 正文…" autocomplete="off" spellcheck="false" aria-label="搜索术语">
+        <span class="kbd">/</span>
+      </label>
+      <div class="chips" id="chips"></div>
+      <span class="count" id="count"></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="toc" id="toc" aria-label="术语目录"></nav>
+  <div class="doc" id="doc"></div>
+</main>
+
+<footer>
+  <div class="foot-in">
+    <span>AI 与基础设施 · 70 条 · 5 组 · 图共用一套语法</span>
+    <a href="dev-terms.html">目录页</a>
+    <a href="../index.html#tools">← 回工具开发区</a>
+    <a href="../index.html">回工作台首页</a>
+  </div>
+</footer>
+
+<script>/* 图形语法：16 个模板，全部 340×150 画布，靠 CSS class 上色。
+   每个术语只给一句 spec：{ t:'flow', a:['页面','接口'] } —— a 是该模板的入参。 */
+(function () {
+  var UID = 0;
+  var AR = function () { return ''; };
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function T(x, y, s, cls, anchor) {
+    return '<text x="' + x + '" y="' + y + '" class="' + (cls || 'f-lab') +
+      '" text-anchor="' + (anchor || 'middle') + '">' + esc(s) + '</text>';
+  }
+  function R(x, y, w, h, cls, rx) {
+    return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h +
+      '" rx="' + (rx == null ? 6 : rx) + '" class="' + (cls || 'f-box') + '"/>';
+  }
+  function box(x, y, w, h, label, cls, sub) {
+    var cy = y + h / 2 + (sub ? -1.5 : 3.5);
+    return R(x, y, w, h, cls) + T(x + w / 2, cy, label, 'f-lab') +
+      (sub ? T(x + w / 2, y + h - 6, sub, 'f-sub') : '');
+  }
+  function pill(x, y, w, h, label, cls) {
+    return R(x, y, w, h, cls || 'f-pill', h / 2) + T(x + w / 2, y + h / 2 + 3.4, label, 'f-lab');
+  }
+
+  function svg(label, build) {
+    UID += 1;
+    var id = 'ah' + UID;
+    AR = function (d, cls) {
+      return '<path d="' + d + '" class="f-ar ' + (cls || '') + '" marker-end="url(#' + id + ')"/>';
+    };
+    return '<svg class="fig" viewBox="0 0 340 150" role="img" aria-label="' + esc(label) +
+      '" preserveAspectRatio="xMidYMid meet">' +
+      '<defs><marker id="' + id + '" viewBox="0 0 8 8" refX="6.4" refY="3" markerWidth="5" markerHeight="5" orient="auto">' +
+      '<path d="M0,0 L6.4,3 L0,6 z" class="f-head"/></marker></defs>' +
+      build() + '</svg>';
+  }
+
+  /* ---------- 模板 ---------- */
+
+  function flow(items) {
+    var n = items.length, gap = 20;
+    var w = Math.min(104, (340 - 16 - gap * (n - 1)) / n);
+    if (n > 1) gap = (340 - 16 - n * w) / (n - 1);
+    var out = '';
+    for (var i = 0; i < n; i++) {
+      var x = 8 + i * (w + gap);
+      out += box(x, 57, w, 36, items[i], i === n - 1 ? 'f-box-accent' : 'f-box');
+      if (i < n - 1) out += AR('M' + (x + w + 3) + ',75 L' + (x + w + gap - 3) + ',75');
+    }
+    return out;
+  }
+
+  function fanout(o) {
+    var tos = o.a, n = tos.length, out = '';
+    out += box(8, 57, 88, 36, o.from, 'f-box');
+    var h = n > 2 ? 26 : 32;
+    for (var i = 0; i < n; i++) {
+      var y = n === 1 ? 57 : 12 + i * ((150 - 24 - h) / (n - 1));
+      out += box(226, y, 106, h, tos[i], 'f-box-muted');
+      out += AR('M96,75 C 158,75 164,' + (y + h / 2) + ' 224,' + (y + h / 2));
+    }
+    if (o.n) out += T(n === 1 ? 170 : 150, n === 1 ? 112 : 132, o.n, 'f-badge');
+    return out;
+  }
+
+  function merge(o) {
+    var sources = o.a, n = sources.length, out = '', h = n > 2 ? 26 : 32;
+    for (var i = 0; i < n; i++) {
+      var y = n === 1 ? 57 : 12 + i * ((150 - 24 - h) / (n - 1));
+      out += box(8, y, 106, h, sources[i], 'f-box-muted');
+      out += AR('M114,' + (y + h / 2) + ' C 172,' + (y + h / 2) + ' 178,75 224,75');
+    }
+    out += box(226, 57, 106, 36, o.to, 'f-box-accent');
+    if (o.n) out += T(170, 100, o.n, 'f-badge');
+    return out;
+  }
+
+  function layers(items) {
+    var n = items.length, out = '';
+    var gap = n > 3 ? 8 : 18;
+    var h = Math.min(36, (150 - 20 - gap * (n - 1)) / n);
+    var total = n * h + (n - 1) * gap;
+    var top = (150 - total) / 2;
+    for (var i = 0; i < n; i++) {
+      var y = top + i * (h + gap);
+      out += box(20, y, 300, h, items[i], i === n - 1 ? 'f-box-accent' : 'f-box');
+      if (i < n - 1) out += AR('M170,' + (y + h + 1) + ' L170,' + (y + h + gap - 1));
+    }
+    return out;
+  }
+
+  function nest(o) {
+    var out = R(24, 12, 292, 126, 'f-box', 10);
+    out += T(170, 31, o.title, 'f-lab');
+    var kids = o.a;
+    if (kids.length === 1) {
+      out += box(70, 54, 200, 50, kids[0], 'f-box-accent');
+    } else {
+      var w = (248 - 12 * (kids.length - 1)) / kids.length;
+      for (var i = 0; i < kids.length; i++) out += box(46 + i * (w + 12), 54, w, 50, kids[i], 'f-box-accent');
+    }
+    if (o.sub) out += T(170, 127, o.sub, 'f-sub');
+    return out;
+  }
+
+  function gate(o) {
+    var out = box(4, 57, 86, 36, o.left, 'f-box') +
+      '<line x1="170" y1="16" x2="170" y2="134" class="f-gate"/>' +
+      T(170, 10, o.gate, 'f-sub') +
+      box(250, 57, 86, 36, o.right, 'f-box-accent');
+    if (o.dash) {
+      out += AR('M90,66 L250,66', 'f-dash') + T(170, 58, o.dash, 'f-sub');
+      out += AR('M90,86 L250,86') + T(170, 108, o.ok || '放行', 'f-sub');
+    } else {
+      out += AR('M90,75 L250,75') + T(170, 102, o.ok || '放行', 'f-sub');
+    }
+    return out;
+  }
+
+  function store(o) {
+    var cols = o.a, cw = 188 / cols.length, x = 76, y = 24, hh = 22, rh = 24, out = '';
+    out += R(x, y, 188, hh, 'f-th', 4);
+    for (var i = 0; i < cols.length; i++) {
+      out += T(x + cw * i + cw / 2, y + 15, cols[i], 'f-thlab');
+      out += '<line x1="' + (x + cw * i) + '" y1="' + y + '" x2="' + (x + cw * i) + '" y2="' + (y + hh) + '" class="f-rule"/>';
+    }
+    out += '<line x1="' + x + '" y1="' + (y + hh) + '" x2="' + (x + 188) + '" y2="' + (y + hh) + '" class="f-rule"/>';
+    for (var r = 0; r < 2; r++) {
+      var ry = y + hh + r * rh;
+      out += '<line x1="' + x + '" y1="' + (ry + rh) + '" x2="' + (x + 188) + '" y2="' + (ry + rh) + '" class="f-rule"/>';
+      for (var c = 0; c < cols.length; c++) {
+        out += '<line x1="' + (x + cw * c) + '" y1="' + ry + '" x2="' + (x + cw * c) + '" y2="' + (ry + rh) + '" class="f-rule"/>';
+      }
+    }
+    if (o.sub) out += T(x + 94, y + hh + 2 * rh + 20, o.sub, 'f-sub');
+    return out;
+  }
+
+  function cacheflow(o) {
+    var out = box(4, 57, 62, 36, o.l);
+    out += AR('M68,66 L96,66');
+    out += '<g class="f-store">' + R(96, 24, 76, 102, 'f-box') +
+      '<line x1="104" y1="44" x2="164" y2="44" class="f-rule"/>' +
+      '<line x1="134" y1="44" x2="134" y2="118" class="f-rule"/></g>';
+    out += T(134, 38, o.m, 'f-lab');
+    out += T(115, 64, o.k1 || 'key', 'f-sub') + T(149, 64, o.k2 || 'val', 'f-sub');
+    out += AR('M172,76 L256,76', 'f-dash') + T(214, 92, o.back || '回源', 'f-sub');
+    out += AR('M256,96 L172,96', 'f-dash') + T(214, 114, o.fill || '回填', 'f-sub');
+    out += box(256, 57, 80, 36, o.r);
+    return out;
+  }
+
+  function queue(o) {
+    var out = box(4, 57, 66, 36, o.l);
+    out += AR('M70,68 L90,68') + T(80, 60, o.tag || '202', 'f-badge');
+    out += '<g class="f-queue">' + R(90, 32, 88, 76, 'f-box') +
+      '<line x1="119" y1="32" x2="119" y2="108"/><line x1="148" y1="32" x2="148" y2="108"/></g>';
+    out += T(134, 24, o.m, 'f-sub');
+    out += AR('M178,88 L214,88', 'f-dash') + T(196, 106, o.later || '稍后处理', 'f-sub');
+    out += box(214, 57, 122, 36, o.r);
+    return out;
+  }
+
+  function segments(segs) {
+    var total = 0, i, x = 18, w = 304, y = 42, hh = 44, out = '';
+    for (i = 0; i < segs.length; i++) total += segs[i].w || 1;
+    for (i = 0; i < segs.length; i++) {
+      var sw = w * (segs[i].w || 1) / total;
+      out += '<rect x="' + x + '" y="' + y + '" width="' + sw + '" height="' + hh +
+        '" class="f-seg' + ((i % 3) + 1) + '" rx="' + (i === 0 || i === segs.length - 1 ? 5 : 0) + '"/>';
+      out += T(x + sw / 2, y + hh / 2 + 4, segs[i].t, 'f-lab');
+      if (segs[i].s) out += T(x + sw / 2, y + hh + 20, segs[i].s, 'f-sub');
+      x += sw;
+    }
+    return out;
+  }
+
+  function compare(o) {
+    var out = '';
+    [[8, o.l], [176, o.r]].forEach(function (p) {
+      var n = p[1].a.length, top = 56 - (n - 1) * 10.5;
+      out += R(p[0], 16, 156, 118, 'f-panel', 8);
+      out += T(p[0] + 78, 38, p[1].t, 'f-lab');
+      p[1].a.forEach(function (line, i) { out += T(p[0] + 78, top + 26 + i * 21, line, 'f-sub'); });
+    });
+    return out;
+  }
+
+  function compare3(o) {
+    var out = '';
+    [6, 118, 230].forEach(function (x, k) {
+      var p = o.a[k];
+      out += R(x, 16, 104, 118, k === o.hot ? 'f-panel-hot' : 'f-panel', 8);
+      out += T(x + 52, 38, p.t, 'f-lab');
+      p.a.forEach(function (line, i) { out += T(x + 52, 62 + i * 20, line, 'f-sub'); });
+    });
+    return out;
+  }
+
+  function timeline(o) {
+    var pts = o.a, n = pts.length, out = '', x0 = 28, x1 = 312, y = 82;
+    out += '<line x1="' + x0 + '" y1="' + y + '" x2="' + x1 + '" y2="' + y + '" class="f-axis"/>';
+    for (var i = 0; i < n; i++) {
+      var x = n === 1 ? 170 : x0 + i * (x1 - x0) / (n - 1);
+      out += '<circle cx="' + x + '" cy="' + y + '" r="4.5" class="' + (i === o.hot ? 'f-dot-hot' : 'f-dot') + '"/>';
+      var anc = i === 0 ? 'start' : (i === n - 1 ? 'end' : '');
+      var ax = i === 0 ? x - 6 : (i === n - 1 ? x + 6 : x);
+      out += T(ax, y - 16, pts[i].t, 'f-lab', anc);
+      if (pts[i].s) out += T(ax, y + 24, pts[i].s, 'f-sub', anc);
+    }
+    return out;
+  }
+
+  function cycle(o) {
+    var pts = o.a, out = '';
+    var pos = [[170, 18, 120], [78, 110, 104], [262, 110, 104]];
+    for (var i = 0; i < 3; i++) {
+      var p = pos[i], w = p[2], h = 32;
+      out += box(p[0] - w / 2, p[1], w, h, pts[i], i === o.hot ? 'f-box-accent' : 'f-box');
+    }
+    out += AR('M232,44 C 292,56 300,88 272,104');
+    out += AR('M208,126 C 186,144 152,144 132,126');
+    out += AR('M80,110 C 28,96 34,46 108,52');
+    return out;
+  }
+
+  function tree(o) {
+    var out = box(120, 12, 100, 30, o.root, 'f-box');
+    var kids = o.a, n = kids.length;
+    for (var i = 0; i < n; i++) {
+      var w = (340 - 16 - 12 * (n - 1)) / n, x = 8 + i * (w + 12);
+      out += '<path d="M170,44 L' + (x + w / 2) + ',98" class="f-line"/>';
+      out += box(x, 98, w, 30, kids[i], 'f-box-muted');
+    }
+    return out;
+  }
+
+  function rings(o) {
+    var l = o;
+    return R(10, 8, 320, 134, 'f-box', 12) + T(28, 28, l[0], 'f-lab', 'start') +
+      R(48, 40, 244, 86, 'f-box', 10) + T(66, 60, l[1] || '', 'f-lab', 'start') +
+      R(90, 68, 160, 44, 'f-box-accent', 8) + (l[2] ? T(170, 95, l[2], 'f-lab') : '');
+  }
+
+  /* 变体并列：n 个做法竖排，左边名字右边一句「什么时候用」。 */
+  function variants(o) {
+    var items = (o && o.items) || [], n = items.length || 1;
+    var top = 12;
+    if (o.title) top = n >= 5 ? 26 : 30;
+    var gap = n >= 5 ? 4 : 7;
+    var h = Math.min(30, Math.floor((150 - top - 8 - gap * (n - 1)) / n));
+    var out = o.title ? T(14, 18, o.title, 'f-sub', 'start') : '';
+    for (var i = 0; i < n; i++) {
+      var y = top + i * (h + gap), it = items[i];
+      out += R(12, y, 316, h, i === o.hot ? 'f-box-accent' : 'f-box', 6);
+      out += T(26, y + h / 2 + 3.5, it[0], 'f-lab', 'start');
+      if (it[1]) out += T(316, y + h / 2 + 3.5, it[1], 'f-sub', 'end');
+    }
+    return out;
+  }
+
+  function twice(o) {
+    return pill(70, 8, 160, 24, o.req) +
+      AR('M108,34 L108,54') + AR('M192,34 L192,54') + T(244, 32, '×2', 'f-badge') +
+      box(70, 56, 160, 34, o.mid, 'f-box') +
+      AR('M150,92 L150,106') +
+      R(70, 108, 160, 30, 'f-box-accent') + T(150, 127, o.res, 'f-lab');
+  }
+
+  var MAP = {
+    flow: flow, fanout: fanout, merge: merge, layers: layers, nest: nest, gate: gate,
+    store: store, cacheflow: cacheflow, queue: queue, segments: segments,
+    compare: compare, compare3: compare3, timeline: timeline, cycle: cycle,
+    tree: tree, rings: rings, twice: twice, variants: variants
+  };
+
+  window.FIGS = {
+    render: function (spec) {
+      var fn = MAP[spec.t];
+      if (!fn) throw new Error('未知图型 ' + spec.t);
+      // timeline / compare3 / cycle 的 spec 是「数组 + hot」，其余模板的入参都在 spec.a 里
+      var arg = ['timeline', 'compare3', 'cycle'].includes(spec.t) ? { a: spec.a, hot: spec.hot } : spec.a;
+      return svg(spec.alt || spec.t, function () { return fn(arg); });
+    }
+  };
+})();</script>
+<script>window.GROUPS = [{"k":"K","name":"LLM 基础","tag":"两端"},{"k":"T","name":"RAG 与工具调用","tag":"两端"},{"k":"F","name":"部署与可观测","tag":"后端"},{"k":"O","name":"云与基础设施","tag":"后端"},{"k":"N","name":"协作与发布","tag":"两端"}];
+window.TERMS = [{"g":"K","en":"Token","cn":"词元","p":"模型不是按字算，是按 token 算——中英文切法还不一样。","q":"AI 说「上下文够大」，其实 8 千字中文就顶到上限了。","f":{"t":"flow","a":["一段文字","切成 token","按 token 计价","也是长度上限"]},"_no":1,"_id":"t-token-1"},{"g":"K","en":"Context Window","cn":"上下文窗口","p":"一次能塞多少内容进去，就这么多，多了塞不下。","q":"AI 把整个仓库贴进提示，账单翻十倍，答案还更差。","f":{"t":"compare","a":{"l":{"t":"整本塞进去","a":["模型看得全","又贵又慢","还容易忘中间"]},"r":{"t":"只给相关片段","a":["便宜快","靠检索质量"]}}},"_no":2,"_id":"t-context-window-2"},{"g":"K","en":"Prompt 结构","cn":"提示的结构","p":"提示分四段：身份、任务、材料、格式，混在一起就不可控。","q":"AI 把格式要求写在最前面，输出还是一坨自然语言。","f":{"t":"layers","a":["系统设定（你是谁、守什么）","任务与背景","参考资料","输出格式要求"]},"_no":3,"_id":"t-prompt-3"},{"g":"K","en":"Few-shot","cn":"给几个例子","p":"给两三个「输入 → 期望输出」的样本，比讲十句要求管用。","q":"AI 一个例子不给，却抱怨输出格式不对。","f":{"t":"compare","a":{"l":{"t":"零示例","a":["省 token","格式全靠猜"]},"r":{"t":"两三个例子","a":["格式稳","多花 token"]}}},"_no":4,"_id":"t-few-shot-4"},{"g":"K","en":"Temperature","cn":"采样温度","p":"温度低就照着最可能的走，高了就爱自由发挥。","q":"AI 把抽取字段的任务设成 1.2，每次结果都不一样。","f":{"t":"variants","a":{"items":[["0 – 0.3","要稳定、要照格式"],["0.7","日常对话"],["1.0+","要发散、要创意"],["top_p","另一种截断方式"]],"title":"温度决定它敢不敢跑偏"}},"_no":5,"_id":"t-temperature-5"},{"g":"K","en":"Hallucination","cn":"幻觉","p":"模型不知道时会编，而且编得比真话还自信。","q":"AI 编了个不存在的 API，还标注了「文档已确认」。","f":{"t":"compare","a":{"l":{"t":"自由作答","a":["流畅","编得像真的"]},"r":{"t":"要求带出处","a":["能核验","不会就闭嘴"]}}},"_no":6,"_id":"t-hallucination-6"},{"g":"K","en":"Embedding","cn":"向量化","p":"把一句话压成一串数字，意思近的数字也近。","q":"AI 用关键词匹配冒充语义检索，问「怎么退款」搜不到「如何退货」。","f":{"t":"store","a":{"a":["文本","0.12","-0.41","0.07"],"sub":"意思相近的句子，向量也相近"}},"_no":7,"_id":"t-embedding-7"},{"g":"K","en":"Vector Similarity","cn":"相似度","p":"比两个向量有多近，近的就当成相关。","q":"AI 只看相似度不看阈值，最不相关的三条也硬塞给模型。","f":{"t":"compare","a":{"l":{"t":"余弦相似度","a":["看方向不看长度","最常用"]},"r":{"t":"关键词匹配","a":["精确但死板","换个说法就搜不到"]}}},"_no":8,"_id":"t-vector-similarity-8"},{"g":"K","en":"Fine-tuning","cn":"微调","p":"拿自己的数据再训一遍，让它更懂你的活。","q":"AI 建议先微调，其实先把提示和检索做好就够了。","f":{"t":"timeline","a":[{"t":"准备样本"},{"t":"训练"},{"t":"评测"},{"t":"再上线"}]},"_no":9,"_id":"t-fine-tuning-9"},{"g":"K","en":"Guardrail","cn":"护栏","p":"在模型前后加检查，不许它说不能说的话。","q":"AI 只在提示里写「不要输出敏感信息」，用户换个问法就绕过去了。","f":{"t":"gate","a":{"left":"用户输入","gate":"规则 + 二次校验","right":"模型输出","ok":"越界就拦下"}},"_no":10,"_id":"t-guardrail-10"},{"g":"K","en":"Multimodal","cn":"多模态","p":"同一个模型能读文字、看图、听声音。","q":"AI 说「支持图片」，其实只是把图片文件名当文本传给模型。","f":{"t":"variants","a":{"title":"同一件事，几种输入","items":[["文本","最便宜，最可控"],["图片","截图、图表、界面"],["音频","转写后再处理"],["视频","要抽帧，最贵"]]}},"_no":11,"_id":"t-multimodal-11"},{"g":"K","en":"Eval","cn":"评测集","p":"固定的一批题目 + 判分标准，改了什么都能复测。","q":"AI 每次改完都挑几个顺手的例子跑一遍，说「效果明显提升」。","f":{"t":"store","a":{"a":["问题","期望答案","判定标准"],"sub":"改一次提示就跑一遍，才知道有没有更好"}},"_no":12,"_id":"t-eval-12"},{"g":"K","en":"Prompt Injection","cn":"提示注入","p":"别人在文档里写「忽略之前的指令」，模型可能真听。","q":"AI 直接把抓来的网页原文拼进系统提示，等于把方向盘递出去。","f":{"t":"gate","a":{"left":"网页/文档里的文字","gate":"与指令分开、只当数据","right":"模型","ok":"文档里的话不当命令"}},"_no":13,"_id":"t-prompt-injection-13"},{"g":"K","en":"Streaming","cn":"流式输出","p":"一个字一个字往外吐，用户不用干等整段生成完。","q":"AI 用了流式接口，前端却等全部收完再显示，等于白流。","f":{"t":"timeline","a":[{"t":"发起请求"},{"t":"首个 token","s":"等最久"},{"t":"逐字返回"},{"t":"结束"}]},"_no":14,"_id":"t-streaming-14"},{"g":"T","en":"RAG","cn":"检索增强","p":"先去你自己的资料里找几段，再让模型照着答。","q":"AI 说做了 RAG，其实把整篇文档塞进提示，检索那步根本没有。","f":{"t":"flow","a":["用户提问","先查资料库","拼进提示","再让模型答"]},"_no":15,"_id":"t-rag-15"},{"g":"T","en":"Chunking","cn":"切块","p":"把长文档切成小段再入库，切法直接决定能不能搜到。","q":"AI 按 500 字硬切，正好把答案切在两块之间。","f":{"t":"variants","a":{"items":[["按段落","结构清晰时最好"],["按长度","简单，容易切断句子"],["按语义","效果最好，最慢"],["带重叠","防止答案被切开"]],"title":"块切得好不好，决定检索准不准"}},"_no":16,"_id":"t-chunking-16"},{"g":"T","en":"Vector DB","cn":"向量库","p":"专门存向量、按相似度取回的数据库。","q":"AI 用普通数据库存向量，每次查询全表扫一遍。","f":{"t":"store","a":{"a":["id","向量","原文","元数据"],"sub":"按「像不像」取，不按精确匹配取"}},"_no":17,"_id":"t-vector-db-17"},{"g":"T","en":"Hybrid Search","cn":"混合检索","p":"向量懂意思，关键词懂专名，两个一起用才稳。","q":"AI 只用向量搜产品型号，搜「XR-200」结果全错。","f":{"t":"compare","a":{"l":{"t":"纯向量","a":["懂同义","专有名词会漏"]},"r":{"t":"关键词 + 向量","a":["两种都占","要合并排序"]}}},"_no":18,"_id":"t-hybrid-search-18"},{"g":"T","en":"Rerank","cn":"重排","p":"先粗召回一大批，再用更贵的模型精排前几名。","q":"AI 只做召回不做重排，把最相关的三条挤出了前五。","f":{"t":"timeline","a":[{"t":"召回 50 条"},{"t":"逐条打分重排","s":"慢但准"},{"t":"取前 5 条"},{"t":"喂给模型"}]},"_no":19,"_id":"t-rerank-19"},{"g":"T","en":"Function Calling","cn":"工具调用","p":"模型不直接干活，只负责说「调哪个、传什么」。","q":"AI 以为模型会自己查数据库，其实得你把结果喂回去。","f":{"t":"flow","a":["模型选工具","给出参数","你执行","结果回灌"]},"_no":20,"_id":"t-function-calling-20"},{"g":"T","en":"Tool Schema","cn":"工具描述","p":"每个工具的名字、用途、参数都要写清楚，模型才调得对。","q":"AI 把两个工具的说明写得几乎一样，模型天天调错。","f":{"t":"store","a":{"a":["名字","说明","参数","示例"],"sub":"写得含糊，模型就乱调"}},"_no":21,"_id":"t-tool-schema-21"},{"g":"T","en":"MCP","cn":"模型上下文协议","p":"把工具和数据源按统一协议接上，模型那边只认协议。","q":"AI 给每个模型各写一套工具封装，改一处要改五遍。","f":{"t":"nest","a":{"title":"一个客户端","a":["协议","服务器（工具 + 数据）"],"sub":"工具接一次，所有模型都能用"}},"_no":22,"_id":"t-mcp-22"},{"g":"T","en":"Agent Loop","cn":"智能体循环","p":"想一步、做一步、看结果、再决定下一步，直到收尾。","q":"AI 的 agent 没有停止条件，同一个工具调了四十次。","f":{"t":"cycle","a":["想一想","调工具","看结果","再想"]},"_no":23,"_id":"t-agent-loop-23"},{"g":"T","en":"Planning","cn":"任务规划","p":"先拆步骤再动手，比想到哪做到哪稳。","q":"AI 一上来就写代码，写到一半发现整体思路是错的。","f":{"t":"layers","a":["把目标拆成步骤","排好顺序与依赖","逐步执行","最后验收"]},"_no":24,"_id":"t-planning-24"},{"g":"T","en":"Memory","cn":"记忆","p":"聊得久了，是整段塞回去，还是存摘要再按需取。","q":"AI 把整段历史每轮都重发，第三十轮时账单吓人。","f":{"t":"compare","a":{"l":{"t":"全塞上下文","a":["简单","很快塞满","越久越贵"]},"r":{"t":"摘要 + 检索","a":["要额外存储","能长期用"]}}},"_no":25,"_id":"t-memory-25"},{"g":"T","en":"Citation","cn":"引用","p":"答案里标清是哪段资料说的，错了能查回去。","q":"AI 标了引用编号，点开发现那段资料里根本没这句话。","f":{"t":"flow","a":["生成答案","标出出处","可点开原文","错了能追溯"]},"_no":26,"_id":"t-citation-26"},{"g":"T","en":"Query Rewrite","cn":"查询改写","p":"用户问得含糊，先改写成几条更好搜的查询。","q":"AI 拿口语原句直接做向量检索，召回全是废话。","f":{"t":"flow","a":["用户原话","补全与改写","生成多个查询","一起检索"]},"_no":27,"_id":"t-query-rewrite-27"},{"g":"T","en":"Grounding","cn":"接地","p":"答案必须有检索到的内容兜着，不能凭印象说。","q":"AI 检索没命中，还是照着常识编了一段，不说没找到。","f":{"t":"gate","a":{"left":"检索到的片段","gate":"只能引用这些","right":"答案","ok":"没依据就不许说"}},"_no":28,"_id":"t-grounding-28"},{"g":"F","en":"Image / Container","cn":"镜像与容器","p":"镜像是打包好的运行环境，容器是把镜像跑起来的一个实例。","q":"AI 把密钥写进镜像——镜像推到仓库，全世界都能拉下来。","f":{"t":"layers","a":["镜像：打包好的快照","容器：跑起来的实例","同一镜像多份实例"]},"_no":29,"_id":"t-image-container-29"},{"g":"F","en":"Reverse Proxy","cn":"反向代理","p":"用户只认一个门，门里的人替他挑后端、加加密、改头。","q":"AI 说「代理会自动带 X-Forwarded-For」——不配就不带，日志里全是代理 IP。","f":{"t":"flow","a":["用户","反向代理","后端多实例"]},"_no":30,"_id":"t-reverse-proxy-30"},{"g":"F","en":"Load Balancer","cn":"负载均衡","p":"把进来的请求摊到几个实例上，谁空给谁。","q":"AI 没开粘性会话——用户每点一下就被换到另一个实例，登录状态来回丢。","f":{"t":"fanout","a":{"from":"入口","a":["实例 1","实例 2","实例 3"],"n":"轮询 / 最少连接"}},"_no":31,"_id":"t-load-balancer-31"},{"g":"F","en":"Canary / Blue-Green","cn":"灰度 / 蓝绿 / 金丝雀","p":"新版本先给一小部分人用，看指标再决定要不要全量。","q":"AI 一次全量发布——出事只能回滚，回滚又要十分钟。","f":{"t":"compare3","a":[{"t":"灰度","a":["按用户分组","逐步放量","可回退"]},{"t":"蓝绿","a":["两套环境","一键切流量","回切快"]},{"t":"金丝雀","a":["先给 1%","盯指标","再全量"]}],"hot":2},"_no":32,"_id":"t-canary-blue-green-32"},{"g":"F","en":"CI / CD","cn":"持续集成与交付","p":"每次提交自动跑检查、自动打包、自动发到环境里。","q":"AI 说「测试都过了」——CI 里其实一个测试都没跑，只是没报错。","f":{"t":"cycle","a":["提交","构建 + 测试","部署"]},"_no":33,"_id":"t-ci-cd-33"},{"g":"F","en":"Rollback","cn":"回滚","p":"线上变坏时把版本切回去，比当场修 bug 快得多。","q":"AI 改完没留可回滚的点——迁移只往前不往后，回滚脚本根本跑不起来。","f":{"t":"timeline","a":[{"t":"上新版"},{"t":"指标变差"},{"t":"切回旧版","s":"几分钟"}],"hot":2},"_no":34,"_id":"t-rollback-34"},{"g":"F","en":"Env Vars","cn":"环境变量与配置","p":"密钥、地址这类每台机器不同的东西放在运行环境里，不写进代码。","q":"AI 把数据库密码写死在代码里——推到仓库就等于公开。","f":{"t":"nest","a":{"title":"运行环境","a":["环境变量","同一份代码"],"sub":"同一份代码，每套环境给不同的值"}},"_no":35,"_id":"t-env-vars-35"},{"g":"F","en":"Observability","cn":"日志 / 指标 / 追踪","p":"三件套：日志说细节，指标看趋势，追踪看一次请求走了哪。","q":"AI 只在出错时打日志——正常路径没有那个 id，出问题时串不起来。","f":{"t":"compare3","a":[{"t":"日志","a":["发生了什么","带上下文","量很大"]},{"t":"指标","a":["数字随时间","好报警","便宜"]},{"t":"追踪","a":["一次请求的链路","查慢在哪"]}],"hot":1},"_no":36,"_id":"t-observability-36"},{"g":"F","en":"Error Tracking","cn":"错误上报","p":"线上报错自动收集起来，按次数和影响面排序。","q":"AI 一个 try/catch 吞掉所有异常——你永远不知道用户遇到了什么。","f":{"t":"flow","a":["前端报错","自动上报","聚合 + 告警"]},"_no":37,"_id":"t-error-tracking-37"},{"g":"F","en":"Deploy Order","cn":"上线顺序","p":"改表结构要能和新旧代码同时共存：先加、再双写、再切、最后删。","q":"AI 直接把列改名——新旧版本同时在跑，老实例立刻 500。","f":{"t":"timeline","a":[{"t":"先加列","s":"旧代码照跑"},{"t":"双写"},{"t":"切读"},{"t":"最后删列"}],"hot":0},"_no":38,"_id":"t-deploy-order-38"},{"g":"F","en":"Asset Hash","cn":"资源指纹","p":"文件名里带上内容哈希：内容变了名字才变，缓存就能一直用。","q":"AI 手工把 v2 加进文件名——忘了改的那次，用户拿到的还是旧文件。","f":{"t":"segments","a":[{"t":"app","s":"名字不变","w":2},{"t":".a1b2c3","s":"内容变名字才变","w":3},{"t":".js","s":"","w":1}]},"_no":39,"_id":"t-asset-hash-39"},{"g":"F","en":"DNS","cn":"域名解析","p":"把域名翻译成 IP 的那本分布式电话簿。","q":"AI 改完解析就以为生效了——TTL 还挂着 24 小时，一半用户还指着旧 IP。","f":{"t":"tree","a":{"root":"你的域名","a":["A → IP","CNAME → 域名","MX / TXT"]}},"_no":40,"_id":"t-dns-40"},{"g":"F","en":"TLS Handshake","cn":"HTTPS 建连","p":"先验对方身份、再商量一把临时钥匙，之后的数据才加密。","q":"AI 说「上了 HTTPS 就安全」——证书过期、自签它都没查，浏览器早就警告了。","f":{"t":"timeline","a":[{"t":"TCP","s":"连上"},{"t":"验证书"},{"t":"协商密钥"},{"t":"加密传输"}],"hot":1},"_no":41,"_id":"t-tls-handshake-41"},{"g":"F","en":"SPOF","cn":"单点故障","p":"全站只靠一个东西撑着，它一挂全站就挂。","q":"AI 说「服务很稳」——它只有一份，重启那 30 秒就是全站宕机。","f":{"t":"fanout","a":{"from":"全部流量","a":["唯一的那个实例"],"n":"它一挂就全挂"}},"_no":42,"_id":"t-spof-42"},{"g":"O","en":"Object Storage","cn":"对象存储","p":"存图片、附件、备份的大桶，按 key 取。","q":"AI 把上传的图片塞进数据库字段，几万张之后备份都跑不动。","f":{"t":"store","a":{"a":["key","body","meta"],"sub":"按 key 取整块，改中间几个字节要重写"}},"_no":43,"_id":"t-object-storage-43"},{"g":"O","en":"Serverless","cn":"无服务器","p":"只为调用付钱，机器由平台管；代价是冷启动。","q":"AI 选了 Serverless，第一个请求要等两秒，用户以为挂了。","f":{"t":"compare","a":{"l":{"t":"Serverless","a":["不用管机器","有冷启动","按调用计费"]},"r":{"t":"常驻服务","a":["一直占内存","没冷启动","按小时付费"]}}},"_no":44,"_id":"t-serverless-44"},{"g":"O","en":"Kubernetes 词汇","cn":"集群与 Pod","p":"集群、节点、Pod、容器——云上一层层套着的名字。","q":"AI 说「已经容器化了」，其实只写了 Dockerfile，没跑过。","f":{"t":"nest","a":{"title":"一个集群里装着","a":["节点","Pod","容器"]}},"_no":45,"_id":"t-kubernetes-45"},{"g":"O","en":"Managed Service","cn":"托管服务","p":"数据库、队列、缓存都能买托管版，省掉一堆运维。","q":"AI 在自己机器上起个数据库当生产库，机器重装数据就没了。","f":{"t":"compare","a":{"l":{"t":"托管（云上）","a":["装好就能用","备份升级它管","贵一点"]},"r":{"t":"自建","a":["便宜","什么都得自己维护"]}}},"_no":46,"_id":"t-managed-service-46"},{"g":"O","en":"Region / AZ","cn":"地域与可用区","p":"机房分地域和可用区，跨区放一份才不怕单点。","q":"AI 把所有服务放同一个可用区，那区一抖全站挂。","f":{"t":"tree","a":{"root":"一个地区","a":["可用区 A","可用区 B","可用区 C"]}},"_no":47,"_id":"t-region-az-47"},{"g":"O","en":"VPC","cn":"网络隔离","p":"数据库只在内网，公网连不进来。","q":"AI 给数据库开了公网地址，还说「方便调试」。","f":{"t":"layers","a":["公网","应用子网","数据库子网（只有应用能连）"]},"_no":48,"_id":"t-vpc-48"},{"g":"O","en":"TLS 续期","cn":"证书自动续期","p":"证书有寿命，续期要么自动要么定闹钟。","q":"AI 手动装了一张证书，三个月后全站打不开。","f":{"t":"timeline","a":[{"t":"签发证书"},{"t":"有效期 90 天"},{"t":"到期前自动续","s":"别手动"},{"t":"忘了续就红"}],"hot":3},"_no":49,"_id":"t-tls-49"},{"g":"O","en":"Bandwidth / Latency","cn":"带宽与延迟","p":"带宽决定传多快，延迟决定一次响应等多久。","q":"AI 说你带宽够，用户却点一下等 800ms——来回次数太多。","f":{"t":"compare","a":{"l":{"t":"带宽","a":["每秒能搬多少","大文件看它"]},"r":{"t":"延迟","a":["一个来回多久","接口多就看它"]}}},"_no":50,"_id":"t-bandwidth-latency-50"},{"g":"O","en":"Backup / Restore","cn":"备份与恢复","p":"备份的价值只在「真的恢复得出来」那一刻。","q":"AI 说「有自动备份」，真出事时发现备份在同一块盘上。","f":{"t":"flow","a":["每天快照","异地留一份","定期演练恢复","等于没备份"]},"_no":51,"_id":"t-backup-restore-51"},{"g":"O","en":"Billing","cn":"计费模型","p":"云上花钱的四条大头，跑起来才开始涨。","q":"AI 开了三台高配机器「先放着」，一个月账单四位数。","f":{"t":"fanout","a":{"from":"月底账单","a":["存储","流量","调用","闲置"]}},"_no":52,"_id":"t-billing-52"},{"g":"O","en":"IaC","cn":"基础设施即代码","p":"服务器、网络、数据库都用配置文件描述，可复现。","q":"AI 手动点了一堆设置，重建环境时漏两项，线上行为不一样。","f":{"t":"compare","a":{"l":{"t":"手点控制台","a":["快","记不住点了什么","重建靠回忆"]},"r":{"t":"配置文件","a":["可复现","能 review","改错好回滚"]}}},"_no":53,"_id":"t-iac-53"},{"g":"O","en":"Autoscaling","cn":"自动扩缩容","p":"按指标自动加减机器，省心也省钱。","q":"AI 只配了扩容没配缩容，凌晨也在开满机器烧钱。","f":{"t":"timeline","a":[{"t":"流量上涨"},{"t":"自动加机器","s":"照指标"},{"t":"流量回落"},{"t":"缩回去"}]},"_no":54,"_id":"t-autoscaling-54"},{"g":"O","en":"Log Shipping","cn":"日志采集","p":"日志要集中收，不然出事时得一台台登机器。","q":"AI 把日志写在容器里，容器一重启，现场全没了。","f":{"t":"flow","a":["应用写日志","采集器收集","集中存起来","按条件查"]},"_no":55,"_id":"t-log-shipping-55"},{"g":"O","en":"SLA","cn":"可用率承诺","p":"「几个九」就是允许多久不能用。","q":"AI 张口承诺 99.99%，实际连监控都没有。","f":{"t":"store","a":{"a":["99%","99.9%","99.99%"],"sub":"每月可停机：7 小时 / 43 分 / 4 分"}},"_no":56,"_id":"t-sla-56"},{"g":"N","en":"Feature Flag","cn":"功能开关","p":"代码上线了功能先关着，按人按比例放开。","q":"AI 用 if (Date.now() \u003c 某个时间) 当开关，改时间还得重新发版。","f":{"t":"gate","a":{"left":"新功能代码","gate":"开关放行","right":"线上用户","ok":"出问题先关开关"}},"_no":57,"_id":"t-feature-flag-57"},{"g":"N","en":"A/B Test","cn":"分组实验","p":"同一批用户分两组，看哪个版本真的更好。","q":"AI 说做了 A/B，其实只上线了 B，没有对照组。","f":{"t":"fanout","a":{"from":"同一个入口","a":["A 版本","B 版本"]}},"_no":58,"_id":"t-a-b-test-58"},{"g":"N","en":"Code Review","cn":"合并前评审","p":"合并前让别人看一眼，专抓作者想不到的问题。","q":"AI 一次提 2000 行改动，review 变成一路点同意。","f":{"t":"timeline","a":[{"t":"提 PR"},{"t":"看 diff","s":"只看改动"},{"t":"提意见"},{"t":"改完再合"}],"hot":1},"_no":59,"_id":"t-code-review-59"},{"g":"N","en":"Branch Strategy","cn":"分支策略","p":"多久合一次、能不能直接推主干，得先定死。","q":"AI 在 feature 分支上待了三周，合并时 47 个冲突。","f":{"t":"compare","a":{"l":{"t":"主干开发","a":["小步快提","冲突少"]},"r":{"t":"长期分支","a":["合并时一大坨","冲突成灾"]}}},"_no":60,"_id":"t-branch-strategy-60"},{"g":"N","en":"Commit 规范","cn":"提交信息","p":"一条提交说清「改了什么类型的东西」。","q":"AI 所有提交都叫 update，翻历史时找不到哪次改坏了。","f":{"t":"variants","a":{"items":[["feat:","新功能"],["fix:","修 bug"],["refactor:","行为不变的重写"],["docs:","只有文档"],["chore:","依赖 / 脚本 / 杂事"]],"title":"类型前缀让历史可读"}},"_no":61,"_id":"t-commit-61"},{"g":"N","en":"Acceptance Criteria","cn":"验收标准","p":"开工前写清「什么算做完」，省掉后面扯皮。","q":"AI 做完了，你问「这算完成吗」，它说「看你需求」。","f":{"t":"store","a":{"a":["做了什么","怎么算完成","什么不算"],"sub":"先写这三条，再动手"}},"_no":62,"_id":"t-acceptance-criteria-62"},{"g":"N","en":"Analytics Event","cn":"埋点","p":"把关键动作记成事件，之后才知道用户在哪走掉。","q":"AI 埋点只记「点击了按钮」，哪个按钮、在哪页都没有。","f":{"t":"fanout","a":{"from":"用户动作","a":["事件名","属性","时间"]}},"_no":63,"_id":"t-analytics-event-63"},{"g":"N","en":"Kanban","cn":"看板状态","p":"一件事现在卡在谁那里，一眼能看出。","q":"AI 把任务全标「已完成」，实际一半没法用。","f":{"t":"layers","a":["待做","在做","待验收","已完成"]},"_no":64,"_id":"t-kanban-64"},{"g":"N","en":"On-call","cn":"值班","p":"出事时谁先接、先做什么，都要提前定。","q":"AI 说「已加监控」，告警却发到一个没人看的群。","f":{"t":"flow","a":["告警响","谁在看","先止损","再写复盘"]},"_no":65,"_id":"t-on-call-65"},{"g":"N","en":"Scope Change","cn":"需求变更","p":"需求变不是问题，没人记账才是问题。","q":"AI 一边写一边加需求，最后交付的和最初不是一回事。","f":{"t":"compare","a":{"l":{"t":"变更走流程","a":["先说清代价","再决定做不做"]},"r":{"t":"想到就加","a":["范围一直涨","没人说得清做完没"]}}},"_no":66,"_id":"t-scope-change-66"},{"g":"N","en":"ADR","cn":"架构决策记录","p":"重要决定写一页纸：为什么这么做、代价是什么。","q":"AI 三个月后把当初的决定「优化」掉，因为没人记得为什么那样。","f":{"t":"store","a":{"a":["背景","决定了什么","为什么","代价"],"sub":"放在仓库里，跟代码一起走"}},"_no":67,"_id":"t-adr-67"},{"g":"N","en":"SemVer","cn":"语义化版本","p":"主版本破坏兼容、次版本加功能、补丁修 bug。","q":"AI 改了个破坏性接口，版本号只加了补丁位。","f":{"t":"variants","a":{"items":[["1.4.2 → 1.4.3","只改 bug，兼容"],["1.4.2 → 1.5.0","加了功能，兼容"],["1.4.2 → 2.0.0","破坏性变更"],["0.x.y","还没稳定，随时会破"]],"title":"三段数字各说一件事"}},"_no":68,"_id":"t-semver-68"},{"g":"N","en":"Tech Debt","cn":"技术债与升级","p":"欠下的将就，利息是以后每次改动都更慢。","q":"AI 锁死依赖版本，两年后一个安全补丁都合不进来。","f":{"t":"compare","a":{"l":{"t":"一直不升","a":["暂时省事","攒成一次大爆炸"]},"r":{"t":"定期小步升","a":["每次风险小","好回滚"]}}},"_no":69,"_id":"t-tech-debt-69"},{"g":"N","en":"Changelog","cn":"变更记录","p":"人话写的「这版变了什么、要不要跟着改」。","q":"AI 的 changelog 是直接粘贴的 commit 列表。","f":{"t":"store","a":{"a":["版本","日期","改了什么","怎么迁移"],"sub":"给用的人看，不是给 git 看"}},"_no":70,"_id":"t-changelog-70"}];
+window.BOOKS = [{"k":"ui","name":"界面与图形","sub":"渲染 · 样式 · 控件 · 交互 · 图形","file":"dev-terms-ui.html","desc":"浏览器怎么画页面，样式怎么写不打架，控件该选哪个，交互状态怎么补，图形与媒体怎么做。","count":70,"groups":[{"k":"A","name":"浏览器与渲染"},{"k":"M","name":"样式与布局"},{"k":"G","name":"UI 控件与选型"},{"k":"H","name":"交互与状态"},{"k":"S","name":"图形与媒体"}]},{"k":"code","name":"语言与工程","sub":"语言 · 工程化 · 测试 · 性能 · 移动端","file":"dev-terms-code.html","desc":"语言与类型、打包与本地开发、测试怎么写、性能怎么量、跨端怎么不翻车。","count":70,"groups":[{"k":"L","name":"语言与框架"},{"k":"B","name":"前端工程化与网络"},{"k":"I","name":"测试与质量"},{"k":"Q","name":"性能与调试"},{"k":"R","name":"移动端与跨端"}]},{"k":"backend","name":"后端与数据","sub":"协议 · 存储 · 建模 · 并发 · 安全","file":"dev-terms-backend.html","desc":"接口长什么样、数据怎么存怎么查、并发与一致性怎么权衡、身份与权限怎么不出事。","count":70,"groups":[{"k":"C","name":"接口与协议"},{"k":"D","name":"数据与存储"},{"k":"P","name":"数据建模"},{"k":"E","name":"并发与异步"},{"k":"J","name":"安全与身份"}]},{"k":"ai","name":"AI 与基础设施","sub":"LLM · 检索 · 部署 · 云 · 协作","file":"dev-terms-ai.html","desc":"大模型应用的基本零件、上线与回滚、云上的名词，以及团队协作与发布流程。","count":70,"groups":[{"k":"K","name":"LLM 基础"},{"k":"T","name":"RAG 与工具调用"},{"k":"F","name":"部署与可观测"},{"k":"O","name":"云与基础设施"},{"k":"N","name":"协作与发布"}]}];
+window.CUR_BOOK = "ai";</script>
+<script>
+(function () {
+  var terms = window.TERMS, groups = window.GROUPS;
+  var doc = document.querySelector('#doc');
+  var toc = document.querySelector('#toc');
+  var count = document.querySelector('#count');
+  var input = document.querySelector('#q');
+  var chips = document.querySelector('#chips');
+
+  function frag(html) { return document.createRange().createContextualFragment(html); }
+  function h(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  var state = { g: 'all', q: '' };
+  var html = '', tocHtml = '', no = 0, lastG = null, refs = [];
+
+  groups.forEach(function (grp) {
+    var items = terms.filter(function (t) { return t.g === grp.k; });
+    tocHtml += '<p class="toc-g">' + grp.k + ' · ' + grp.name + '</p>';
+    items.forEach(function (t) {
+      no += 1;
+      t._no = no;
+      t._id = 't-' + t.en.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + no;
+      tocHtml += '<a href="#' + t._id + '" data-id="' + t._id + '">' + h(t.en) + ' <span style="opacity:.6">' + h(t.cn) + '</span></a>';
+    });
+    html += '<section class="grp" data-g="' + grp.k + '" id="g-' + grp.k + '">' +
+      '<span class="grp-k">' + grp.k + '</span><h2 class="grp-n serif">' + h(grp.name) + '</h2>' +
+      '<span class="grp-c">' + items.length + ' 条 · ' + grp.tag + '</span><span class="grp-line"></span></section>';
+    items.forEach(function (t) {
+      var pad = t._no < 10 ? '0' + t._no : '' + t._no;
+      html += '<article class="t" id="' + t._id + '" data-g="' + t.g + '">' +
+        '<div class="t-meta">' +
+          '<div class="t-no">' + pad + '</div>' +
+          '<h3 class="t-h"><span class="t-en">' + h(t.en) + '</span><span class="t-cn">' + h(t.cn) + '</span></h3>' +
+          '<p class="t-p">' + h(t.p) + '</p>' +
+        '</div>' +
+        '<div class="t-fig"><div class="fwrap">' + window.FIGS.render(t.f) + '</div></div>' +
+        '<p class="t-q"><b>AI 常怎么糊弄你</b><span>' + h(t.q) + '</span></p>' +
+      '</article>';
+    });
+  });
+  html += '<p class="empty" id="empty">没有匹配的条目。换个词，或者按 Esc 清空。</p>';
+  doc.replaceChildren(frag(html));
+  toc.replaceChildren(frag(tocHtml));
+
+  var rows = Array.prototype.slice.call(doc.querySelectorAll('.t'));
+  var heads = Array.prototype.slice.call(doc.querySelectorAll('.grp'));
+  var links = Array.prototype.slice.call(toc.querySelectorAll('a'));
+  var empty = document.querySelector('#empty');
+  var linkMap = {};
+  links.forEach(function (a) { linkMap[a.dataset.id] = a; });
+
+  function apply() {
+    var q = state.q.trim().toLowerCase();
+    var shown = 0, gcount = {};
+    rows.forEach(function (r) {
+      var okG = state.g === 'all' || r.dataset.g === state.g;
+      var okQ = !q || r.textContent.toLowerCase().includes(q);
+      var ok = okG && okQ;
+      r.hidden = !ok;
+      if (ok) { shown += 1; gcount[r.dataset.g] = (gcount[r.dataset.g] || 0) + 1; }
+    });
+    heads.forEach(function (h) { h.hidden = !gcount[h.dataset.g]; });
+    empty.classList.toggle('on', shown === 0);
+    count.textContent = shown === rows.length ? rows.length + ' 条' : shown + ' / ' + rows.length + ' 条';
+    links.forEach(function (a) {
+      var id = a.dataset.id, el = doc.querySelector('#' + id);
+      a.style.display = el && el.hidden ? 'none' : '';
+    });
+  }
+
+  chips.addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    state.g = b.dataset.g;
+    Array.prototype.forEach.call(chips.children, function (c) {
+      c.setAttribute('aria-pressed', String(c === b));
+    });
+    apply();
+  });
+
+  input.addEventListener('input', function () { state.q = input.value; apply(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === '/' && document.activeElement !== input) { e.preventDefault(); input.focus(); input.select(); }
+    if (e.key === 'Escape') { input.value = ''; state.q = ''; apply(); input.blur(); }
+  });
+
+  /* 册切换 */
+  var booksEl = document.querySelector('#books');
+  var bookHtml = '<a href="dev-terms.html">目录</a>';
+  (window.BOOKS || []).forEach(function (b) {
+    var cur = b.k === window.CUR_BOOK;
+    bookHtml += '<a href="' + b.file + '"' + (cur ? ' aria-current="page"' : '') + '>' + b.name + '</a>';
+  });
+  booksEl.replaceChildren(frag(bookHtml));
+
+  /* 分组 chips */
+  var chipHtml = '<button class="chip" data-g="all" aria-pressed="true">全部</button>';
+  groups.forEach(function (g) {
+    chipHtml += '<button class="chip" data-g="' + g.k + '" aria-pressed="false">' + g.name + '</button>';
+  });
+  chips.replaceChildren(frag(chipHtml));
+
+  /* 目录高亮 */
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        var a = linkMap[en.target.id];
+        if (!a) return;
+        if (en.isIntersecting) {
+          links.forEach(function (l) { l.classList.remove('on'); });
+          a.classList.add('on');
+          var box = toc.getBoundingClientRect(), ab = a.getBoundingClientRect();
+          if (ab.top < box.top + 40 || ab.bottom > box.bottom - 40) a.scrollIntoView({ block: 'center' });
+        }
+      });
+    }, { rootMargin: '-8% 0px -82% 0px' });
+    rows.forEach(function (r) { io.observe(r); });
+  }
+
+  apply();
+})();
+</script>
+</body>
+</html>
