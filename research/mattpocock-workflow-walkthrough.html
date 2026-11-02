@@ -760,6 +760,22 @@ ok(!/&lt;script[^&gt;]*src="score\.js"/.test(html), 'score.js（票 03）还没�
       </div>
     </section>
 
+      <h3><span class="h3-n">5.6</span>最后一张票最轻，却最容易踩人</h3>
+
+      <p>05 的活儿看着最没技术含量：门户加一张卡、写一份 ADR、补两处文档。它踩到的全是<strong>别人早写死的数字</strong>——三处测试各写了一遍「语言学习区有 12 张卡」（<code>test_area.js:48</code>、<code>test_reading.js:283</code>、<code>test_typing_en.js:380</code>），加一张卡就得改三遍；谁忘了改，测试红在同一句看不懂的话上。</p>
+
+      <figure>
+        <img src="mattpocock-shots/portal-card.jpg" alt="门户里新加的假名翻牌卡片：kicker 日本語·练习、pill 音效、标题假名翻牌、chips 3 档难度与 10 对牌、badge 3 档、打开 →">
+        <figcaption><b>新卡落在「日本語」分组的最后一张。</b><code>data-tags="词汇 练习"</code> 决定它被哪些筛选项命中；<code>pill</code> 写「音效」是因为声音是这台设备上合成出来的，不需要耳机文件；卡片<strong>故意不带</strong> <code>data-en-key</code>——全页必须恰好 107 项那条门禁就靠这一点不被误伤。</figcaption>
+      </figure>
+
+      <p>它顺手处理了一个更麻烦的东西：<strong>ARCH 里写的「给新页加 rail」并不该做</strong>。这个页面为了自成一格，没有引 <code>assets/style.css</code>，而 <code>rail.mjs</code> 的规则是「引了共享样式才必须有 rail」——照着 ARCH 去加，反而会破另一条先例（<code>typing/</code> 就是这么自成一格的）。</p>
+
+      <div class="callout">
+        <span class="ct">规格与实现不一致时，改规格，别改实现</span>
+        <p>这类偏差最容易被当成「漏做」。判据是：<strong>哪一边的先例更硬</strong>。这里是先例更硬（同仓已有两个模块不引共享样式），所以正确动作是让 ADR 把「为什么不加 rail」写下来，而不是硬加一个 rail 让它跟 <code>typing/</code> 长得不一样。<code>docs/adr/0013-kana-memory-module.md</code> 就记了这一条，顺带解决了 ADR 编号被 0012 占掉的撞车。</p>
+      </div>
+
     <section class="stage" id="s6">
       <div class="stage-head"><span class="stage-n">阶段 06</span><h2>评审：两个轴，故意不合并</h2></div>
       <p class="stage-skill"><b>code-review</b> — 标准轴 · 规格轴 · 并行两个子代理</p>
