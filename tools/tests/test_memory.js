@@ -409,8 +409,9 @@ section('静态契约：5 列 × 4 行、独立样式、无取数、LF');
   const iGame = html.indexOf('src="game.js"');
   const iPage = html.indexOf('src="page.js"');
   ok(iRomaji >= 0 && iGame > iRomaji && iPage > iGame, '脚本顺序是 romaji.js → game.js → page.js');
-  /* 02/04 各自把自己那行 script 加进来时不必改这条：只禁还没实现的 score.js（票 03） */
-  ok(!/<script[^>]*src="score\.js"/.test(html), 'score.js（票 03）还没被提前引用');
+  /* 03 已落地：score.js 到期翻面，只要求排在 tiers.js 之后、page.js 之前 */
+  const iScore = html.indexOf('src="score.js"');
+  ok(iScore < 0 || (iScore > html.indexOf('src="tiers.js"') && iScore < iPage), '若引了 score.js，它排在 tiers.js 之后、page.js 之前');
   const iTiers = html.indexOf('src="tiers.js"');
   const iFeel = html.indexOf('src="feel.js"');
   ok(iTiers < 0 || iTiers < iPage, '若引了 tiers.js，它排在 page.js 之前');
