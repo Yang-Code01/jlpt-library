@@ -4,7 +4,8 @@
    渲染计数、到点回翻。规则本身全在 game.js（KanaCore）里，这里不做判定。
    对外：
      KanaApp.on(name, fn) / KanaApp.emit(name, payload)
-     KanaApp.registerTier({ id, label, hint, build(rng) -> pairs })
+     KanaApp.registerTier({ id, label, hint, labels?, build(rng) -> pairs })
+                             labels 是牌面副标签 { a, b }，缺省 { a:'KANA', b:'ROMAJI' }
      KanaApp.setTier(id)      重建一局，并把档位写进 localStorage
      KanaApp.getState()       -> { tier, moves, matched, total, ms, running, round }
    事件：round:start / tile:open / tile:match / tile:miss / round:end / tier:change
@@ -21,6 +22,8 @@ var document = root.document;
 var MISS_MS = 620;      // 配错停留：够看清两张的位置，又不至于打断节奏
 var CLOCK_MS = 250;     // 用时显示刷新间隔
 var TIER_KEY = 'jlpt-kana-tier';
+/* 牌面副标签（a 面 / b 面）；档位定义可用 labels 覆盖，入门档就用这个缺省 */
+var TAG_LABELS = { a: 'KANA', b: 'ROMAJI' };
 
 /* 入门档的假名池：单假名，罗马字一律由 Romaji.readings(kana)[0] 派生（全站唯一口径）。
    刻意不收「を」——readings('を') 按字母序返回 ['o','wo']，首个写法与「お」撞车，
@@ -117,6 +120,7 @@ function span(className, text) {
 function renderBoard() {
   el.board.textContent = '';
   tileEls = [];
+  var labels = (tiers[tier] && tiers[tier].labels) || TAG_LABELS;
   for (var i = 0; i < round.tiles.length; i++) {
     var tile = round.tiles[i];
     var btn = document.createElement('button');
@@ -129,7 +133,7 @@ function renderBoard() {
     btn.appendChild(span('k-face k-back', 'かな'));
     var front = span('k-face k-front' + (tile.side === 'b' ? ' k-romaji' : ''), '');
     front.appendChild(span('k-word', tile.face));
-    front.appendChild(span('k-tag', tile.side === 'b' ? 'ROMAJI' : 'KANA'));
+    front.appendChild(span('k-tag', labels[tile.side] || TAG_LABELS[tile.side]));
     btn.appendChild(front);
     bindTile(btn, i);
     el.board.appendChild(btn);
@@ -298,6 +302,12 @@ function boot() {
   el.live = document.getElementById('k-live');
 
   registerTier(beginnerTier());
+  /* 后续票的档位脚本（tiers.js）在 page.js 之前加载，那时 KanaApp 还不存在，
+     它们只能把定义压进 root.KanaTierDefs。必须在读记忆档位之前排空：否则
+     saved 的档位不在 tiers 里，setTier 会回落 beginner 并把记忆覆盖掉。 */
+  var pending = root.KanaTierDefs || [];
+  for (var t = 0; t < pending.length; t++) registerTier(pending[t]);
+  pending.length = 0;
 
   var saved = null;
   try { saved = root.localStorage.getItem(TIER_KEY); } catch { saved = null; }

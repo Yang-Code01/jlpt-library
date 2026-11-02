@@ -50,9 +50,13 @@
   <p class="k-live" id="k-live" role="status" aria-live="polite"></p>
 </div>
 
-<!-- 脚本顺序固定：romaji.js → game.js → tiers.js/score.js/feel.js（02/03/04 各自加自己那行）→ page.js -->
+<!-- 脚本顺序固定：romaji.js → game.js → 词表 data → tiers.js/score.js/feel.js（02/03/04 各自加自己那行）→ page.js -->
 <script src="../typing/romaji.js"></script>
 <script src="game.js"></script>
+<!-- 进阶 / 高手档的词对来自这两份词表（typing/gen-words.js 的产物，file:// 下可直接引） -->
+<script src="../typing/data/n5.js"></script>
+<script src="../typing/data/n4.js"></script>
+<script src="tiers.js"></script>
 <script src="page.js"></script>
 </body>
 </html>
