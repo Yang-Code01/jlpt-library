@@ -93,6 +93,7 @@ const SUITES = [
   { f: 'tools/tests/test_typing_smoke.js',   name: '打字练习冒烟',          needs: [] },
   { f: 'tools/tests/test_memory.js',         name: '假名翻牌（一局能玩）',  needs: [] },
   { f: 'tools/tests/test_memory_tiers.js',   name: '假名翻牌（进阶档 / 换档）', needs: [] },
+  { f: 'tools/tests/test_memory_feel.js',    name: '假名翻牌（手感与可达性）', needs: [] },
   { f: 'tools/tests/test_lazy.js',           name: '真题按需加载',          needs: ['dek'] },
   { f: 'tools/tests/test_back.js',           name: '真题返回路径',          needs: ['dek'] },
   { f: 'tools/tests/test_back2.js',          name: '题型专练返回路径',      needs: ['dek'] },
