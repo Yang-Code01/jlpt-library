@@ -223,7 +223,7 @@
 
   <aside class="rail">
     <a class="rail-brand" href="#top"><b>把这套 skill 走一遍</b><span>Matt Pocock · Workflow</span></a>
-    <p class="rail-lede">左栏是这十三个 skill 各自管什么、什么时候该叫它；右栏是同一条流水线上真跑出来的一局——做一个新练习模块，从拷问到复盘。</p>
+    <p class="rail-lede">左栏是这十四个 skill 各自管什么、什么时候该叫它；右栏是同一条流水线上真跑出来的一局——做一个新练习模块，从拷问到复盘。</p>
 
     <p class="rail-group">地图</p>
     <a class="rail-mod" href="#s0">
@@ -367,7 +367,7 @@
     <header class="hero">
       <p class="eyebrow">Workflow · 实况记录</p>
       <h1>把这套 skill 走一遍：<br>从拷问到复盘的一份实况</h1>
-      <p class="sub">Matt Pocock 的 skill 不是十三个独立工具，是一条有先后、有出口的流水线。这篇不解释名词，而是把整条线真跑一遍：在 JLPT 学习站里新开一个「假名翻牌」练习模块，每一步都留下可打开的东西——样张、规格、票、分支、PR、复盘。</p>
+      <p class="sub">Matt Pocock 的 skill 不是十几个独立工具，是一条有先后、有出口的流水线。这篇不解释名词，而是把整条线真跑一遍：在 JLPT 学习站里新开一个「假名翻牌」练习模块，每一步都留下可打开的东西——样张、规格、票、分支、PR、复盘。</p>
       <div class="meta">
         <span><b>案例</b> kana-memory · 假名翻牌</span>
         <span><b>仓库</b> Yang-Code01/jlpt-library</span>
@@ -438,7 +438,7 @@ typing/typing.js:48    独立 localStorage 键先例：jlpt-typing-best</pre>
           <tbody>
             <tr><td>不可逆</td><td>案例是真的跑一遍，还是编一个？</td><td>真跑：于是有了真实分支、真实提交、真实 PR，报告里的每个截图都能点开核对</td></tr>
             <tr><td>不可逆</td><td>新开一个模块，还是塞进现有模块？</td><td>新开：于是「新增顶级模块」这条最贵的路径被完整走了一遍，包括门户与文档的七处同步</td></tr>
-            <tr><td>便宜但影响全篇</td><td>左栏放几个 skill？</td><td>十三个模块 + 一张路由表：够覆盖主线，又不至于变成名词表</td></tr>
+            <tr><td>便宜但影响全篇</td><td>左栏放几个 skill？</td><td>十四个模块 + 一张路由表：够覆盖主线，又不至于变成名词表</td></tr>
             <tr><td>便宜但影响全篇</td><td>截图是真截，还是画示意图？</td><td>真截：界面用无头浏览器出图，会话过程用终端卡讲真实文本</td></tr>
             <tr><td>口味</td><td>案例做什么题材？</td><td>假名翻牌：练的是「配对回忆」，正好补上站里单向练习的空缺</td></tr>
           </tbody>
@@ -713,6 +713,46 @@ kana-memory/index.html 的脚本块：
 
       <p>这张图值得和票 01 那张并排看：同一条命令、同一个视口、同一个页面，中间只隔了一次「按截图改」——任务书里附的是那张截图，不是「请提高对比度」这样的形容词。子代理拿到的是可核对的差，改完也能自证改到了。</p>
 
+      <h3><span class="h3-n">5.5</span>守卫到期：子代理第二次停下来问</h3>
+
+      <p>票 03 干到最后卡在一行测试上。集成分支里有一条断言是票 01 写的：</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>tools/tests/test_memory.js:412-413</b></span><span>票 01 写的守卫</span></div>
+        <pre><span class="dim">/* 02/04 各自把自己那行 script 加进来时不必改这条：只禁还没实现的 score.js（票 03） */</span>
+ok(!/&lt;script[^&gt;]*src="score\.js"/.test(html), 'score.js（票 03）还没被提前引用');</pre>
+      </div>
+
+      <p>票 03 正是那个<strong>要让 <code>score.js</code> 存在</strong>的票。它一旦按 ARCH 加那行 <code>&lt;script src="score.js"&gt;</code>，这条断言必红；而任务书同时写着「不许改 <code>test_memory.js</code>」「<code>test_memory.js</code> 必须全绿」。三件事不可能同时成立。</p>
+
+      <p>它没有选最省事的那条路。它停下来，把冲突摆出来，给了三种解法，并附上建议的那一种——而且指出同一文件里紧邻的两行已经是<strong>同构的正向写法</strong>（「若引了 <code>tiers.js</code>，它要排在 <code>page.js</code> 之前」）。</p>
+
+      <div class="callout callout--warn">
+        <span class="ct">「测试变绿」和「守卫到期」不是一回事</span>
+        <p>这条断言的本意是「别提前引还没落地的东西」——它天生要<strong>被落地那一票翻面</strong>。所以批准不是「把测试改绿」，而是承认<strong>守卫到期了</strong>：判据写死成一句话——谁来落地这个文件，谁就负责把它从「还不存在」改成「若存在，必须在某两个脚本之间」。改动范围只有那两行，其余 117 项一个字不动。</p>
+      </div>
+
+      <p>这是同一个模式第二次出现（票 02 那次是「不许引 tiers/score/feel」的断言，同样由落地票翻面）。两次都不是流程出错，而是<strong>守卫的生命周期</strong>：写守卫的人知道它会在哪一票到期，就把到期条件写在注释里；到期那一票的负责人翻面，翻面要同构、要窄。子代理两次都停下来的行为，比它改对更难教——所以 ARCH 里现在有一句明文：<em>规矩互相矛盾时停下来问，不要自己扩范围</em>。</p>
+
+      <p>票 03 交上来的东西：<code>score.js</code> 234 行（高手档 + 每档最高分 + 结算条）、<code>test_memory_score.js</code> 551 行 / 139 项断言。两处自定的判断值得记：</p>
+
+      <ul>
+        <li>牌面小标签取 <code>{ a: 'ことば', b: '中文' }</code>。a 面是「读音（附汉字写法）」，叫「読み」盖不住括号里的汉字，叫「ことば」才覆盖整面；b 面是释义，对日语读者不是读法而是意思，就不复用进阶档的「読み」。</li>
+        <li>这一档的 <code>m</code> 有 11 个重复值、100 条 <code>m</code> 与某个 <code>w</code> 字面相同，所以占位集合必须同时记 a、b 两面——只记一边会发出一局**没有唯一解**的牌墙。</li>
+      </ul>
+
+      <figure>
+        <img src="mattpocock-shots/kana-expert.jpg" alt="高手档：一张翻开的牌显示 えいがかん（映画館），两行折好不溢出，右下角小标签 ことば">
+        <figcaption><b>高手档里最长的那类牌面。</b>实测 a 面最长 14 字（<code>せんもんがっこう（専門学校）</code>）、13 字以上共 43 条；牌面 <code>white-space:normal</code> 在字间折行，两行放下——这张是 10 字的 <code>えいがかん（映画館）</code>。</figcaption>
+      </figure>
+
+      <p>结算条是这一票的收尾：本局步数、用时、是否刷新该档纪录，加「再来一局」「换一档」两个出口，出现后牌面不可再翻。设计上最要紧的一条是<strong>纪录按档分开记</strong>——入门档 10 步满分和高手档 10 步不是一个东西，混在一个键里，进阶难度就没意义了。</p>
+
+      <figure>
+        <img src="mattpocock-shots/kana-result.jpg" alt="通关后的牌墙：20 张全部带勾与朱色边框，顶部 10/10、10 步、00:07、本档最佳 10 步·00:07，底部结算条含两个按钮">
+        <figcaption><b>一局打完。</b>四行牌全部配对、顶部「本档最佳」写入、底部结算条给出「本局 10 步 · 用时 00:07 / 新纪录」和两个出口。</figcaption>
+      </figure>
+
       <div class="callout callout--warn">
         <span class="ct">真实的一次升级：子代理不许自己改契约</span>
         <p>票 02 开工五分钟就停下来问了三个阻断点，其中一个很典型：施工约定要求它自己的脚本注册到「档位表」，但那个表要到 <code>page.js</code> 末尾才存在，而 <code>boot()</code> 就在后面一行——于是刷新页面时保存的「进阶档」会被回落成「入门档」。它给了三个方案（改两行 / 加一行守卫 / 一行不改但靠内部实现细节），并说明推荐哪个、为什么不推荐第三个。</p>
@@ -763,6 +803,65 @@ e245b58 feat(kana-memory): 合并票 04（手感与可达性）
         <p>基线里的每一条都只是<em>带标签的启发式</em>（「可能是 Feature Envy」），永远不是硬违规；而仓库文档里写明的规矩可以是硬的。skill 还给了两条铁律：<strong>仓库文档覆盖基线</strong>（文档承认的做法，基线就别再挑），<strong>工具已经管的事不要报</strong>（格式、行尾、Lint 能查出来的，别浪费评审的篇幅）。</p>
       </div>
 
+
+      <h3 id="s6-run">6.1 真跑一次：两个子代理，两份报告</h3>
+
+      <p>任务书里各塞三样东西：<strong>固定点</strong>（<code>git rev-parse main</code> 解出来的那个 sha）、<strong>要读的文件清单</strong>、<strong>输出路径</strong>（<code>.scratch/kana-memory/review/{standards,spec}.md</code>）。两个都跑完、都读完，再动手改任何一行。</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>两轴各看到什么</b></span><span>标准轴 1 硬 + 9 判断 · 规格轴 1 P1 + 3 P2</span></div>
+        <pre><span class="u">标准轴</span>  <span class="fail">硬违规 1</span>  CONTEXT.md「模块」词条还写「十一张入口卡 / 日语侧七张」，
+                  而同批 README.md 已经改成 13 张 —— 两份文档互相矛盾
+          <span class="dim">判断项 9</span>  四个测试里逐字重复的 fakeTimer / loadPage（该抽进 dom.js）
+                   wordPool、fmtMs、restart 三处重复
+                   tiers.js 有「KanaApp 已存在」分支 / score.js 无条件 push
+                   score.js 反查 DOM 只为取档位顺序（Feature Envy）
+                   emit 挂进公开 API 但无调用者（Speculative Generality）
+                   「一局 10 对」散在五处（Shotgun Surgery）
+                   票号注释失真 8 处
+                   反向断言：点 #k-sound 后仍断言 aria-pressed === 'true'
+                   门户徽章「3 种模式」与正文「三档」串味
+
+<span class="u">规格轴</span>  <span class="fail">P1</span>      ≤640px 仍是 5 列，375px 下每张牌约 63px 宽、
+                  正文区 49×60px，而字号是 21px —— 高手档 13 字的牌面
+                  要排 7 行（约 147px），牌与牌直接互压
+          <span class="dim">P2</span>      CONTEXT.md 缺「假名翻牌 / 档位 / 牌对 / 一局」
+                  翻牌时 #k-live 播的那句与这张牌的 aria-label 同文（读屏念两遍）
+                  结算条的 .k-btn / .k-result-* 造了但 kana.css 里没有规则</pre>
+      </div>
+
+      <p>注意两轴的<strong>口径差别</strong>：标准轴把 CONTEXT.md 判成「硬违规」，因为它违反 <code>AGENTS.md</code> 里「术语唯一真源」这条写明的规矩；规格轴把同一件事判成 P2，因为它的依据是 SPEC 里「需要增补词条」的建议性表述。同一处毛病、两个轴、两种严重度——这就是 skill 坚持不合并两份报告的理由：<em>并排放着，你来决定哪个标签算数</em>。</p>
+
+      <p>规格轴那条 P1 值得单独说：它做的是<strong>拿尺子量</strong>——375px 屏、5 列、每张 63px、正文 49×60px、字号 21px、最长牌面 13 字，算出来要 7 行。这种结论代码里看不出来，只能算。我复核时用 playwright 把页面压到 375px 一量，<code>scrollHeight - clientHeight</code> 是 18～28px，跟它算的方向一致。</p>
+
+      <h3 id="s6-fix">6.2 修补：一次提交，逐条对上</h3>
+
+      <p>评审本身不改代码。改代码的是「读完两份报告的<strong>人</strong>」——也就是我。我挑了自己认的（硬违规 + P1 + 三条便宜的 P2），聚成<strong>一个</strong>提交 <code>52bf5e4</code>，每条在提交说明里对上评审原文。</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>52bf5e4</b></span><span>fix(kana-memory): 评审后的修补</span></div>
+        <pre>kana.css      窄屏 5 列 → <span class="add">4 列</span> + .k-word{font-size:<span class="add">clamp(12px,3.1vw,19px)</span>}
+              .k-face{overflow:hidden} · .k-tile{aspect-ratio:1/1.12}
+              补 .k-result-record / .k-result-actions / .k-btn / .k-btn--primary
+page.js       删掉翻牌时那次 announce(tileLabel(...))     <span class="dim">aria-label 已经念过同一句</span>
+score.js      「再来一局」加 k-btn--primary
+test_memory.js  #k-sound 那条反向断言改成只验形状
+              <span class="dim">type=button + aria-pressed ∈ {true,false}，真值由 test_memory_feel.js 覆盖</span></pre>
+      </div>
+
+      <figure>
+        <img src="mattpocock-shots/kana-mobile.jpg" alt="375px 窄屏下的假名翻牌：四列牌墙，高手档长牌面换行不溢出" loading="lazy">
+        <figcaption>修完的 375px：<code>grid-template-columns</code> 算出 4 列、每张 81px、最长牌面 13 字<strong>不溢出</strong>（<code>scrollHeight - clientHeight = 0</code>）。修之前这一格是 18～28px 的溢出。</figcaption>
+      </figure>
+
+      <p>四条里有一条要承认是<strong>没修的</strong>：重复的 <code>fakeTimer</code> / <code>loadPage</code> / <code>wordPool</code> / <code>fmtMs</code>。抽出去要同时动四个套件和 <code>tools/tests/dom.js</code>，评审之后、PR 之前的窗口里，这属于「改动面积大于收益」。我把它记进 retro 的「欠账」，让下一轮开票时有据可查——评审报告的价值不在于每条都被修，而在于<strong>每条都被记录且被分过类</strong>。</p>
+
+      <div class="callout">
+        <span class="ct">评审读的是仓库，不只是 diff</span>
+        <p>那条硬违规的现场（<code>CONTEXT.md</code>）<strong>根本不在 diff 里</strong>——它被 <code>.gitignore</code> 排除，只在本机存在。搜索规格轴也一样，它翻的是「术语真源」这份文档本身。这条差点被我判成误报：我改完 <code>CONTEXT.md</code> 想提交，<code>git add</code> 直接回「该路径被忽略」。结论是<strong>改名与词条这类「本机真相」类文档，只能靠评审去对，机械校验永远看不见它</strong>。</p>
+      </div>
+
+    </section>
     <section class="stage" id="s7">
       <div class="stage-head"><span class="stage-n">阶段 07</span><h2>交付：PR 正文只回答三个问题</h2></div>
       <p class="stage-skill"><b>pr</b> — 图说改动 · 前后证据 · 合并风险</p>
@@ -807,6 +906,58 @@ https://github.com/Yang-Code01/jlpt-library/pull/40</pre>
         <img src="mattpocock-shots/pr-draft.jpg" alt="GitHub 上的 draft PR 页面：标题、五张票的勾选清单、Draft 标记">
         <figcaption><b>draft PR #40。</b>这是第一次合并之后立刻开的那一版：只回答三个问题——这是什么、票到哪、怎么验。模板里最难写的两段（前后证据、合并风险）故意留空，它们要等评审跑完才有内容。</figcaption>
       </figure>
+    </section>
+
+    <section class="stage" id="s8">
+      <div class="stage-head"><span class="stage-n">阶段 08</span><h2>复盘：复的不是代码，是环境</h2></div>
+      <p class="stage-skill"><b>retro</b> — 候选按严重度排 · 机械的做成检查 · 判断的写成规范</p>
+
+      <p class="lede">很多人以为 retro 是「这次哪里做得不好」，<code>retro</code> 的靶子根本不是代码，而是<strong>下一次同类任务的环境</strong>：导航、自动化检查、编码规范、AGENTS.md、工具经济、信息获取。产物不是感想，是<em>候选改进清单，按严重度排</em>。</p>
+
+      <p>它还给了一条判断谁该干什么的原则，用一句话就能说清为什么评审要比实施更严：<strong>实施代理的上下文压力最大</strong>（要探索、写码、调错），<strong>评审代理最小</strong>（拿到 diff，不用探索）。所以规范该压在评审这一侧，实施侧只配导航指针。</p>
+
+      <h3 id="s8-list">8.1 这次排出来的七条</h3>
+
+      <div class="art">
+        <div class="art-bar"><span><b>复盘候选</b></span><span>按严重度降序 · 前三类：信息获取 / 机械违规 / 工具经济</span></div>
+        <pre><span class="u">1 信息获取</span>    评审子代理读不到 git
+                两份报告开头都写着「无 git/shell 权限，main...HEAD 未亲核」
+                只能把「工作区 = 分支 HEAD」当 diff：未跟踪文件、被忽略的本机文档、
+                提交粒度全部看不见 <span class="dim">→ 主代理预先把三点 diff 落成快照塞进任务书</span>
+
+<span class="u">2 自动检查</span>    「12 张卡」写死在三处测试
+                test_area.js:48 · test_reading.js:283 · test_typing_en.js:380
+                每上一个模块改三遍 <span class="dim">→ 改成从 portal 的桶推导，张数不是不变量</span>
+
+<span class="u">3 工具经济</span>    为六张证据图写了八个 shot-*.mjs（同一件事的八个小变体）
+                <span class="dim">→ 入库一个 tools/shoot.mjs：文件 / 锚点 / 视口 / 动作脚本</span>
+
+<span class="u">4 自动检查</span>    guardNoFetch 误报第三方：一个未跟踪的 plugins/ 插件点亮了「禁 fetch」
+                <span class="dim">→ vendored 白名单，或只扫本站运行时可达的文件</span>
+
+<span class="u">5 steering</span>    AGENTS.md 太肥 · 6 票号注释过期 · 7 两处 append-only 区域注定冲突
+                <span class="dim">→ 指针化 / 机械的做成检查 / 冲突解法写成一行可执行的话</span></pre>
+      </div>
+
+      <p>这七条里没有一条是「下次写 CSS 要更小心」。这正是它跟「自我检讨」的区别：<strong>能自动化的就不要写进规范</strong>，规范只留给判断类（比如「源码注释只描述当前行为，票号只出现在提交说明里」）。</p>
+
+      <h3 id="s8-end">8.2 走到这里，这条流水线交出了什么</h3>
+
+      <table class="tbl">
+        <thead><tr><th>阶段</th><th>产物</th><th>规模</th></tr></thead>
+        <tbody>
+          <tr><td>01 拷问</td><td>决策表（题材 / 完成度 / 分支 / 截图形态）</td><td>4 轮问题</td></tr>
+          <tr><td>02 样张</td><td>三份能点开玩的 HTML + 目录页</td><td>3 份 · 选 1</td></tr>
+          <tr><td>03 规格</td><td><code>SPEC.md</code>（问题 / 方案 / 16 条故事 / 决策 / 测试 / 不做）</td><td>6 节</td></tr>
+          <tr><td>04 切票</td><td>5 张 tracer bullet 票 + 依赖图</td><td>5 张</td></tr>
+          <tr><td>05 实施</td><td>模块 7 个文件 + 4 个套件 + 门户接入 + ADR</td><td>1202 行 · 427 条断言</td></tr>
+          <tr><td>06 评审</td><td>两轴报告 + 一个修补提交</td><td>1 硬 + 12 判断 · 修 6 条</td></tr>
+          <tr><td>07 交付</td><td>PR #40 正文（Summary / Evidence / Merge Danger）</td><td>3 段</td></tr>
+          <tr><td>08 复盘</td><td>七条环境改进候选</td><td>7 条</td></tr>
+        </tbody>
+      </table>
+
+      <p>整条链子的摩擦只集中在三个地方：<strong>契约的边界</strong>（三个子代理各自撞上同一处守卫）、<strong>共享文件的追加区</strong>（每次合并都冲突）、<strong>评审看不见 git</strong>。剩下的事——切片、并行、测试、截图——都顺得像走过很多遍的路。这也算这个 flow 的实测结论：<em>它省下的是返工，不是思考；省不掉的地方全在接口上</em>。</p>
     </section>
 
     <section class="stage" id="skipped">
