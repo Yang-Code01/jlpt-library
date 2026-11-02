@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>把这套 skill 走一遍：从拷问到复盘的一份实况</title>
+<!-- 自包含：无外链 css/js/font；图片为同目录 research/mattpocock-shots/ 下的本地文件 -->
+<style>
+  :root{
+    --paper:#FBFAF8; --paper-2:#F5F2ED; --ink:#17161A; --ink-2:#454249;
+    --ink-3:#7C7783; --rule:#E4E1DB; --rule-2:#D3CEC6; --card:#fff;
+    --accent:#B4451F; --accent-2:#8E3417; --accent-soft:#F7EDE7;
+    --ok:#3F6B4F; --skip:#9A949C;
+    --serif:"Iowan Old Style","Source Han Serif SC","Noto Serif SC",Palatino,Georgia,"Songti SC","STSong","SimSun","宋体",serif;
+    --sans:ui-sans-serif,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"Cascadia Mono","JetBrains Mono",Consolas,monospace;
+    --rail:322px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);font-size:16.5px;line-height:1.86;
+    text-rendering:optimizeLegibility;
+  }
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(180,69,31,.32)}
+  a:hover{border-bottom-color:var(--accent)}
+  code,kbd{font-family:var(--mono);font-size:.86em}
+  code{background:var(--paper-2);border:1px solid var(--rule);border-radius:3px;padding:.06em .34em}
+  kbd{background:#fff;border:1px solid var(--rule-2);border-bottom-width:2px;border-radius:4px;padding:.06em .38em;font-size:.78em;color:var(--ink-2)}
+
+  /* ── 外壳 ───────────────────────────────────────────── */
+  .shell{display:grid;grid-template-columns:var(--rail) minmax(0,1fr);align-items:start}
+  .rail{
+    position:sticky;top:0;height:100vh;overflow-y:auto;overscroll-behavior:contain;
+    border-right:1px solid var(--rule);background:linear-gradient(180deg,var(--paper) 0%,var(--paper) 70%,var(--paper-2) 100%);
+    padding:30px 22px 60px 26px;
+  }
+  .rail-brand{display:block;border:0;margin:0 0 4px}
+  .rail-brand b{font-size:1.02rem;letter-spacing:.01em;font-weight:600;display:block;line-height:1.4}
+  .rail-brand span{display:block;font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);margin-top:6px}
+  .rail-lede{margin:14px 0 20px;font-size:.82rem;line-height:1.65;color:var(--ink-2);border-top:1px solid var(--rule);padding-top:14px}
+  .rail-group{font-family:var(--mono);font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);margin:22px 0 8px;padding-left:2px}
+  .rail-mod{
+    display:grid;grid-template-columns:26px minmax(0,1fr);gap:8px;border:0;border-radius:5px;
+    padding:9px 9px 9px 7px;margin:0 -9px;color:inherit;transition:background .18s ease;
+  }
+  .rail-mod:hover{background:#fff}
+  .rail-mod.is-on{background:#fff;box-shadow:inset 2px 0 0 var(--accent)}
+  .rail-num{font-family:var(--mono);font-size:.72rem;color:var(--ink-3);padding-top:2px}
+  .rail-mod.is-on .rail-num{color:var(--accent)}
+  .rail-name{display:block;font-family:var(--mono);font-size:.8rem;letter-spacing:-.01em;color:var(--ink);line-height:1.35}
+  .rail-name em{font-family:var(--serif);font-style:normal;font-size:.78rem;color:var(--ink-2);margin-left:6px}
+  .rail-desc{display:block;font-size:.76rem;line-height:1.55;color:var(--ink-2);margin-top:4px}
+  .rail-when{display:block;font-size:.7rem;line-height:1.5;color:var(--ink-3);margin-top:3px}
+  .flag{display:inline-block;font-family:var(--mono);font-size:.58rem;letter-spacing:.06em;padding:.1em .42em;border-radius:2px;margin-top:6px;border:1px solid transparent}
+  .flag--used{background:var(--accent-soft);color:var(--accent-2);border-color:#EAD9CF}
+  .flag--light{background:#F0EFEA;color:#5C5850;border-color:#DFDCD4}
+  .flag--skip{color:var(--skip);border-color:var(--rule);border-style:dashed}
+  .rail-note{margin-top:26px;padding-top:14px;border-top:1px solid var(--rule);font-size:.72rem;line-height:1.6;color:var(--ink-3)}
+  .rail-note b{color:var(--ink-2);font-weight:600}
+
+  /* ── 正文 ───────────────────────────────────────────── */
+  .doc{padding:0 clamp(26px,5vw,84px) 120px;max-width:1000px}
+  .hero{padding:56px 0 22px;border-bottom:2px solid var(--ink)}
+  .hero .eyebrow{font-family:var(--mono);font-size:.64rem;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+  .hero h1{font-size:clamp(2rem,3.6vw,2.9rem);line-height:1.24;letter-spacing:-.015em;margin:.34em 0 .5em;font-weight:600}
+  .hero .sub{font-size:1.06rem;line-height:1.75;color:var(--ink-2);max-width:38em;margin:0}
+  .hero .meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:22px;font-family:var(--mono);font-size:.68rem;color:var(--ink-3);letter-spacing:.04em}
+  .hero .meta b{color:var(--ink-2);font-weight:500}
+
+  section.stage{padding:44px 0 8px;border-bottom:1px solid var(--rule)}
+  section.stage:last-of-type{border-bottom:0}
+  .stage-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:baseline;margin-bottom:6px}
+  .stage-n{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;color:var(--accent);border:1px solid #EAD9CF;background:var(--accent-soft);border-radius:2px;padding:.16em .5em;white-space:nowrap}
+  h2{font-size:1.62rem;line-height:1.32;letter-spacing:-.01em;margin:0;font-weight:600}
+  .stage-skill{margin:10px 0 22px;font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;color:var(--ink-3)}
+  .stage-skill b{color:var(--ink-2);font-weight:500}
+  h3{font-size:1.06rem;margin:2em 0 .5em;font-weight:600;letter-spacing:.005em}
+  h3 .h3-n{font-family:var(--mono);font-size:.72rem;color:var(--accent);margin-right:.5em;letter-spacing:.08em}
+  p{margin:0 0 1.05em}
+  ul,ol{margin:0 0 1.1em;padding-left:1.35em}
+  li{margin:.3em 0}
+  li::marker{color:var(--ink-3)}
+  strong{font-weight:600}
+  .lede{font-size:1.02rem;color:var(--ink-2)}
+
+  /* 引文 / 结论 / 现场 */
+  blockquote{margin:1.5em 0;padding:2px 0 2px 18px;border-left:2px solid var(--rule-2);color:var(--ink-2);font-size:.98rem}
+  blockquote cite{display:block;font-style:normal;font-family:var(--mono);font-size:.66rem;color:var(--ink-3);margin-top:8px;letter-spacing:.04em}
+  .callout{margin:1.6em 0;padding:16px 18px;background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--accent);border-radius:4px;font-size:.95rem;line-height:1.72}
+  .callout .ct{font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:6px}
+  .callout p:last-child{margin-bottom:0}
+  .callout--warn{border-left-color:#8A6A1E;background:#FCF8ED}
+  .callout--warn .ct{color:#8A6A1E}
+
+  /* 终端卡（会话记录） */
+  .term{background:#1B1A1F;color:#E8E5DE;border-radius:5px;margin:1.5em 0;overflow:hidden;font-family:var(--mono);font-size:.79rem;line-height:1.72}
+  .term-bar{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;background:#26252B;color:#9C97A1;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase}
+  .term-bar em{font-style:normal;color:#6E6873}
+  .term pre{margin:0;padding:14px 16px 16px;white-space:pre-wrap;word-break:break-word}
+  .term .u{color:#F0EEE8}
+  .term .a{color:#A9D3B4}
+  .term .c{color:#7E7885}
+  .term .k{color:#E8B57A}
+  .term .d{color:#C9A0DC}
+
+  /* 产物块 */
+  .art{margin:1.5em 0;border:1px solid var(--rule);border-radius:4px;background:var(--card);overflow:hidden}
+  .art-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 12px;border-bottom:1px solid var(--rule);background:var(--paper-2);font-family:var(--mono);font-size:.64rem;color:var(--ink-3);letter-spacing:.03em}
+  .art-bar b{color:var(--ink-2);font-weight:500;letter-spacing:.06em}
+  .art pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--mono);font-size:.76rem;line-height:1.75;color:var(--ink-2)}
+  .art pre .del{color:#9B3B2A;background:#FBEDE9}
+  .art pre .add{color:#2F5E3F;background:#EDF5EF}
+  .art pre .dim{color:var(--ink-3)}
+
+  /* 图 */
+  figure{margin:1.7em 0}
+  figure img{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:4px;background:#fff}
+  figcaption{font-size:.78rem;line-height:1.6;color:var(--ink-3);margin-top:9px;font-family:var(--sans)}
+  figcaption b{color:var(--ink-2);font-weight:600}
+
+  /* 表格 */
+  .flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin:2.1em 0 1.2em}
+  .flow a{display:block;padding:11px 12px 12px;background:var(--card);text-decoration:none;color:inherit;transition:background .18s}
+  .flow a:hover{background:var(--accent-soft)}
+  .flow .fn{font-family:var(--mono);font-size:.62rem;letter-spacing:.16em;color:var(--accent);display:block}
+  .flow .fs{display:block;margin-top:5px;font-size:.79rem;font-weight:600;letter-spacing:.01em}
+  .flow .fw{display:block;margin-top:4px;font-size:.71rem;color:var(--soft);line-height:1.5}
+  @media(max-width:760px){.flow{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .note{font-size:.85rem;color:var(--ink-2);line-height:1.85;margin:.2em 0 2em;padding-left:14px;border-left:2px solid var(--accent-soft)}
+  .tbl{margin:1.5em 0;border:1px solid var(--rule);border-radius:4px;overflow:hidden;background:var(--card)}
+  table{width:100%;border-collapse:collapse;font-size:.86rem}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top;line-height:1.6}
+  th{background:var(--paper-2);font-family:var(--sans);font-size:.72rem;letter-spacing:.06em;color:var(--ink-2);font-weight:600}
+  tr:last-child td{border-bottom:0}
+  td code{font-size:.82em}
+  .tbl--tight td,.tbl--tight th{padding:7px 11px}
+
+  /* 状态 / 小件 */
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:1em 0 1.3em}
+  .chip{font-family:var(--mono);font-size:.66rem;letter-spacing:.03em;border:1px solid var(--rule-2);border-radius:99px;padding:.16em .6em;color:var(--ink-2);background:#fff}
+  .kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 16px;margin:1.2em 0;font-size:.9rem}
+  .kv dt{font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;color:var(--ink-3);padding-top:.28em}
+  .kv dd{margin:0;color:var(--ink)}
+  hr.soft{border:0;border-top:1px solid var(--rule);margin:2.4em 0}
+  .end{margin-top:40px;padding:24px 0 0;border-top:2px solid var(--ink);font-size:.9rem;color:var(--ink-2)}
+
+  @media (max-width:1080px){
+    :root{--rail:0px}
+    .shell{grid-template-columns:minmax(0,1fr)}
+    .rail{position:static;height:auto;border-right:0;border-bottom:1px solid var(--rule);padding:22px 20px 26px}
+    .rail-mod{grid-template-columns:24px minmax(0,1fr)}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  @media print{
+    .rail{display:none}.shell{display:block}.doc{max-width:none;padding:0}
+    section.stage{break-inside:avoid-page}
+  }
+</style>
+<style data-wb-shell="1">
+  /* ===== 个人工作站外壳（顶部细条 + 浮动胶囊 + 页脚返回）：由 tools/research.mjs add-shell 写入，勿手改 =====
+     颜色尽量套用报告自己的令牌，套不到就退到中性半透明灰：浅色报告与深色报告都不违和。 */
+  .wb-shell-bar{display:flex;align-items:center;gap:10px;padding:9px 20px;
+    border-bottom:1px solid var(--rule,var(--border,rgba(127,127,127,.28)));
+    background:var(--card,var(--panel,rgba(127,127,127,.08)));
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;font-size:.78rem;line-height:1.6}
+  .wb-shell-mark{display:grid;place-items:center;flex:none;width:20px;height:20px;border-radius:5px;
+    background:#176b75;color:#fff;font-size:.7rem;font-weight:700;letter-spacing:-.01em;
+    /* QY 是两枚拉丁大写 —— 字号按 20px 容器实测定（.scratch/icons/probe-mark.mjs）；
+       门户头部那枚 30px 的同形标记在 index.html 的 .portal-brand-mark 里，两处要一起改。 */
+    font-family:Georgia,"Times New Roman","Songti SC",serif}
+  .wb-shell-path{color:var(--muted,#6C6A73)}
+  .wb-shell-path b{color:var(--ink,var(--text,inherit));font-weight:600}
+  .wb-shell-back{margin-left:auto;flex:none;color:var(--accent,#176b75);font-weight:600;text-decoration:none}
+  .wb-shell-back:hover{text-decoration:underline}
+  .wb-shell-float{position:fixed;right:22px;bottom:22px;z-index:50;display:inline-flex;align-items:center;gap:9px;
+    padding:9px 15px;border:1px solid var(--rule-strong,var(--border,rgba(127,127,127,.4)));border-radius:999px;
+    background:var(--card,var(--panel,rgba(127,127,127,.14)));color:var(--ink,var(--text,inherit));
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;font-size:.8rem;font-weight:600;text-decoration:none;
+    box-shadow:0 2px 4px rgba(0,0,0,.06),0 12px 28px -14px rgba(0,0,0,.4)}
+  .wb-shell-float:hover{color:var(--accent,#176b75);border-color:var(--accent,#176b75)}
+  .wb-shell-foot{max-width:760px;margin:56px auto 0;padding:22px 24px 0;
+    border-top:2px solid var(--ink,var(--text,currentColor));
+    display:flex;flex-wrap:wrap;align-items:center;gap:14px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",system-ui,sans-serif;font-size:.8rem;color:var(--muted,#6C6A73)}
+  .wb-shell-foot b{color:var(--ink,var(--text,inherit))}
+  .wb-shell-foot a{margin-left:auto;color:var(--accent,#176b75);font-weight:600;text-decoration:none}
+  .wb-shell-foot a:hover{text-decoration:underline}
+  /* ---- 正文排版（opt-in）：给报告正文容器加 class="wb-prose" 即生效 ---- */
+  .wb-prose{max-width:74ch}
+  .wb-prose h2{font-size:1.32em;line-height:1.35;margin:2em 0 .55em;padding-bottom:.28em;
+    border-bottom:1px solid var(--rule,var(--border,rgba(127,127,127,.28)))}
+  .wb-prose h3{font-size:1.08em;margin:1.6em 0 .4em}
+  .wb-prose p,.wb-prose li{line-height:1.78}
+  .wb-prose ul,.wb-prose ol{padding-left:1.35em}
+  .wb-prose li{margin:.28em 0}
+  .wb-prose table{width:100%;border-collapse:collapse;font-size:.94em;margin:1em 0}
+  .wb-prose th,.wb-prose td{padding:.5em .7em;text-align:left;vertical-align:top;
+    border-bottom:1px solid var(--rule,var(--border,rgba(127,127,127,.22)))}
+  .wb-prose th{font-weight:600;color:var(--ink,var(--text,inherit))}
+  .wb-prose pre{overflow:auto;padding:12px 14px;margin:1em 0;border-radius:10px;
+    background:var(--card,var(--panel,rgba(127,127,127,.08)));font-size:.9em;line-height:1.6}
+  .wb-prose code{font-size:.94em}
+  .wb-prose blockquote{margin:1em 0;padding:.2em 0 .2em 1em;
+    border-left:3px solid var(--accent,#176b75);color:var(--muted,#6C6A73)}
+  .wb-prose a{color:var(--accent,#176b75)}
+  @media (max-width:560px){
+    .wb-shell-bar{gap:8px;padding:8px 14px}
+    .wb-shell-float{right:14px;bottom:14px}
+  }
+</style>
+</head>
+<body id="top">
+<!-- wb:shell:bar:start -->
+<div class="wb-shell-bar">
+  <span class="wb-shell-mark" aria-hidden="true">QY</span>
+  <span class="wb-shell-path">个人工作站 › <b>调查报告</b></span>
+  <a class="wb-shell-back" href="../index.html#survey">← 返回报告清单</a>
+</div>
+<!-- wb:shell:bar:end -->
+<div class="shell">
+
+  <aside class="rail">
+    <a class="rail-brand" href="#top"><b>把这套 skill 走一遍</b><span>Matt Pocock · Workflow</span></a>
+    <p class="rail-lede">左栏是这十三个 skill 各自管什么、什么时候该叫它；右栏是同一条流水线上真跑出来的一局——做一个新练习模块，从拷问到复盘。</p>
+
+    <p class="rail-group">地图</p>
+    <a class="rail-mod" href="#s0">
+      <span class="rail-num">00</span>
+      <span>
+        <span class="rail-name">ask-matt<em>路由</em></span>
+        <span class="rail-desc">先判断你在哪条道上，再决定叫谁。</span>
+        <span class="rail-when">用在：开工第一句不知道从哪问起。</span>
+        <span class="flag flag--used">用过</span>
+      </span>
+    </a>
+
+    <p class="rail-group">主线</p>
+    <a class="rail-mod" href="#s1">
+      <span class="rail-num">01</span>
+      <span>
+        <span class="rail-name">grill-with-docs<em>拷问＋落文档</em></span>
+        <span class="rail-desc">不留情面地问到你没法含糊，顺把 ADR 与术语表写出来。</span>
+        <span class="rail-when">用在：想法还糊、动手就返工的阶段。</span>
+        <span class="flag flag--used">用过</span>
+      </span>
+    </a>
+    <a class="rail-mod" href="#s2">
+      <span class="rail-num">02</span>
+      <span>
+        <span class="rail-name">prototype<em>一次性样张</em></span>
+        <span class="rail-desc">只为回答一个问题写代码，答案拿到就扔。</span>
+        <span class="rail-when">用在：说不清长什么样、或状态模型对不对。</span>
+        <span class="flag flag--used">用过</span>
+      </span>
+    </a>
+    <a class="rail-mod" href="#s3">
+      <span class="rail-num">03</span>
+      <span>
+        <span class="rail-name">to-spec<em>综合成规格</em></span>
+        <span class="rail-desc">不再提问，把谈妥的东西压成一份可执行的 SPEC。</span>
+        <span class="rail-when">用在：定稿那一步，准备写码之前。</span>
+        <span class="flag flag--used">用过</span>
+      </span>
+    </a>
+    <a class="rail-mod" href="#s4">
+      <span class="rail-num">04</span>
+      <span>
+        <span class="rail-name">to-tickets<em>切成票</em></span>
+        <span class="rail-desc">切成能独立合入的 tracer bullet，每张声明阻塞边。</span>
+        <span class="rail-when">用在：活大到一个会话写不完、要并行。</span>
+        <span class="flag flag--used">用过</span>
+      </span>
+    </a>
+    <a class="rail-mod" href="#s5">
+      <span class="rail-num">05</span>
+      <span>
+        <span class="rail-name">implement-spec<em>按图并行实施</em></span>
+        <span class="rail-desc">读任务图、开集成分支、按前沿派子代理、合并、收尾评审。</span>
+        <span class="rail-when">用在：有 SPEC、有票、要好几个子代理同时干。</span>
+        <span class="flag flag--used">用过</span>
+      </span>
+    </a>
+    <a class="rail-mod" href="#s5b">
+      <span class="rail-num">06</span>
+      <span>
+        <span class="rail-name">tdd<em>红绿循环</em></span>
+        <span class="rail-desc">先写会红的测试再写实现，并且规定什么才算好测试。</span>
+        <span class="rail-when">用在：每个 implementer 开工的第一件事。</span>
+        <span class="flag flag--used">被调用</span>
+      </span>
+    </a>
+    <a class="rail-mod" href="#s6">
+      <span class="rail-num">07</span>
+      <span>
+        <span class="rail-name">code-review<em>双轴审查</em></span>
+        <span class="rail-desc">两路子代理并行：合规（Standards）与达标（Spec），并列给结论。</span>
+        <span class="rail-when">用在：全部票合完、开 PR 之前。</span>
+        <span class="flag flag--used">用过</span>
+      </span>
+    </a>
+    <a class="rail-mod" href="#s7">
+      <span class="rail-num">08</span>
+      <span>
+        <span class="rail-name">pr<em>写 PR 正文</em></span>
+        <span class="rail-desc">只写三段：图说改动、前后证据、合并风险（单向门？波及面？）。</span>
+        <span class="rail-when">用在：准备让人看这个分支的时候。</span>
+        <span class="flag flag--used">用过</span>
+      </span>
+    </a>
+    <a class="rail-mod" href="#s8">
+      <span class="rail-num">09</span>
+      <span>
+        <span class="rail-name">retro<em>复盘环境</em></span>
+        <span class="rail-desc">不评价代码，评价「这套环境下次能不能少踩一次」。</span>
+        <span class="rail-when">用在：活干完了，想让它下次更顺。</span>
+        <span class="flag flag--used">用过</span>
+      </span>
+    </a>
+
+    <p class="rail-group">插在主线上的</p>
+    <a class="rail-mod" href="#s0">
+      <span class="rail-num">10</span>
+      <span>
+        <span class="rail-name">research<em>后台调研</em></span>
+        <span class="rail-desc">派一个后台子代理去查证，结论落成 Markdown 留在仓里。</span>
+        <span class="rail-when">用在：开工前不知道会踩到哪些既有约束。</span>
+        <span class="flag flag--used">用过</span>
+      </span>
+    </a>
+    <a class="rail-mod" href="#s3">
+      <span class="rail-num">11</span>
+      <span>
+        <span class="rail-name">domain-modeling<em>术语与 ADR</em></span>
+        <span class="rail-desc">一边设计一边改词、写边界情景、把决定记成 ADR。</span>
+        <span class="rail-when">用在：词本身在打架，或要留下「为什么这样定」。</span>
+        <span class="flag flag--light">轻用</span>
+      </span>
+    </a>
+    <a class="rail-mod" href="#s5">
+      <span class="rail-num">12</span>
+      <span>
+        <span class="rail-name">codebase-design<em>深模块与接缝</em></span>
+        <span class="rail-desc">一整套说模块边界的话：小接口、大行为、缝在哪、怎么测。</span>
+        <span class="rail-when">用在：要决定往哪儿切一刀、测试从哪儿进。</span>
+        <span class="flag flag--light">轻用</span>
+      </span>
+    </a>
+    <a class="rail-mod" href="#skipped">
+      <span class="rail-num">13</span>
+      <span>
+        <span class="rail-name">handoff<em>交接文档</em></span>
+        <span class="rail-desc">把这一场对话压成一份能让别的会话接手的文件。</span>
+        <span class="rail-when">用在：一个会话干不完，要换人／换天接着干。</span>
+        <span class="flag flag--skip">没用到</span>
+      </span>
+    </a>
+
+    <p class="rail-note">
+      <b>没走到的支线：</b><code>triage</code>（把别人的 issue 推进状态机）、<code>diagnosing-bugs</code>（坏了才用）、<code>wayfinder</code>（不知道下一步往哪走）、<code>improve-codebase-architecture</code>（定期体检）、<code>wizard</code>（生成 bash 向导带你点网页）、<code>to-questionnaire</code>（把问题抛给真人填）。本案例都不缺，故不出现。
+    </p>
+  </aside>
+
+  <main class="doc">
+
+    <header class="hero">
+      <p class="eyebrow">Workflow · 实况记录</p>
+      <h1>把这套 skill 走一遍：<br>从拷问到复盘的一份实况</h1>
+      <p class="sub">Matt Pocock 的 skill 不是十三个独立工具，是一条有先后、有出口的流水线。这篇不解释名词，而是把整条线真跑一遍：在 JLPT 学习站里新开一个「假名翻牌」练习模块，每一步都留下可打开的东西——样张、规格、票、分支、PR、复盘。</p>
+      <div class="meta">
+        <span><b>案例</b> kana-memory · 假名翻牌</span>
+        <span><b>仓库</b> Yang-Code01/jlpt-library</span>
+        <span><b>分支</b> feat/kana-memory → main</span>
+        <span><b>PR</b> #40（draft）</span>
+      </div>
+    </header>
+
+      <nav class="flow" aria-label="流程总览">
+        <a href="#s1"><span class="fn">01</span><span class="fs">拷问</span><span class="fw">grill-with-docs</span></a>
+        <a href="#s2"><span class="fn">02</span><span class="fs">样张</span><span class="fw">prototype</span></a>
+        <a href="#s3"><span class="fn">03</span><span class="fs">规格</span><span class="fw">to-spec</span></a>
+        <a href="#s4"><span class="fn">04</span><span class="fs">切票</span><span class="fw">to-tickets</span></a>
+        <a href="#s5"><span class="fn">05</span><span class="fs">实施</span><span class="fw">implement-spec · tdd</span></a>
+        <a href="#s6"><span class="fn">06</span><span class="fs">评审</span><span class="fw">code-review</span></a>
+        <a href="#s7"><span class="fn">07</span><span class="fs">交付</span><span class="fw">pr</span></a>
+        <a href="#s8"><span class="fn">08</span><span class="fs">复盘</span><span class="fw">retro</span></a>
+      </nav>
+      <p class="note">八格是同一条线，不是八个工具：每一格的输入都是上一格的产物，除了第 06 格可以随时回去把第 03 格挖深一层。下面按这个顺序走，每格都带一个真产物。</p>
+
+    <section class="stage" id="s0">
+      <div class="stage-head"><span class="stage-n">阶段 00</span><h2>先别动手：问地图，再摸地</h2></div>
+      <p class="stage-skill"><b>ask-matt</b> 路由 · <b>research</b> 后台调研 · 前置 <b>setup-matt-pocock-skills</b> 只装一次</p>
+
+      <p class="lede">这套 skill 的入口不是「找一个技能」，而是「先认路」。<code>ask-matt</code> 里只有一张表：你现在处在哪一段，该叫谁。它把整条线分成三段——<strong>想清楚</strong>（grill-with-docs → handoff / prototype）、<strong>写成规格再切票</strong>（to-spec → to-tickets）、<strong>实施与收尾</strong>（implement | implement-spec → pr → retro），另有三条岔路（triage / diagnosing-bugs / wayfinder）和一套给「重构老代码」用的健康检查。</p>
+
+      <div class="term">
+        <div class="term-bar"><span>会话记录 · 起点</span><em>用户</em></div>
+        <pre><span class="u">做一个 mattpocock skill 的 workflow 的 html。页面分为两部分，左右，左小右大，
+左边竖列排列 skill 的介绍和使用场景。一个一个 skill 一个模块。右边是正文。
+从头到尾的先以流程为大体框架。主要内容是做一个案例。一步步介绍，
+案例里面要有每一步的截图。主要产物。等。</span></pre>
+      </div>
+
+      <p>按地图，这句话落在「想清楚」这一段——但有个陷阱：想清楚的前提是<strong>知道这块地上已经有什么</strong>。这个仓库是静态站，门户、测试、行尾、数据管线都有既成规矩，凭印象改必然踩。所以先派了一个只读的 <code>research</code> 子代理去把「新增一个顶级模块要动哪些地方」查清楚，主线程同时继续访谈。</p>
+
+      <div class="callout">
+        <span class="ct">research 的产出长这样</span>
+        <p>不是一篇散文，是一串带行号的坐标：门户卡片在哪一行、哪三处断言写死了卡片数、进度模块的白名单为什么不许扩、行尾规则钉在哪个文件。这些坐标后来直接变成了实施阶段的硬约束——子代理拿到的任务书里，每条约束都能追到行号。</p>
+      </div>
+
+      <div class="art">
+        <div class="art-bar"><span><b>research 结论 · 摘</b></span><span>门户改动面</span></div>
+        <pre>index.html:1610-1667   日语组 8 张卡，全部手写；data-tags 必须在词表内
+index.html:1593-1599   data-tags 受控词表（全部/资料/词汇/听力/真题/练习/工具）
+tools/tests/test_area.js:48        写死「12 张卡」
+tools/tests/test_reading.js:283    写死「12 张卡」
+tools/tests/test_typing_en.js:380  写死「12 张卡」
+index.html:1553-1586   左栏 11 个 .rail-item（与 shell.mjs 的 12 个 ITEMS 早已不同步）
+assets/progress.js:60  RE_UNIT 白名单不含新目录 → 新模块默认不计进度
+typing/typing.js:48    独立 localStorage 键先例：jlpt-typing-best</pre>
+      </div>
+
+      <p>这一步没有产物入库（调研笔记放在仓外的 <code>.scratch/</code>），但它改变了后面所有决定：模块不引共享样式、不接进度模块、不往左栏加条目、三处断言同批改。<strong>调研的价值不在结论正确，在于它把「猜」换成了「查过」。</strong></p>
+    </section>
+
+    <section class="stage" id="s1">
+      <div class="stage-head"><span class="stage-n">阶段 01</span><h2>拷问：把「做一个游戏」问成九条不能反悔的决定</h2></div>
+      <p class="stage-skill"><b>grill-with-docs</b> = <b>grilling</b>（拷问）＋ <b>domain-modeling</b>（顺手写 ADR 与术语）</p>
+
+      <p class="lede"><code>grilling</code> 的规矩很硬：一次只问一个问题，等你答完再问下一个；每问必带「推荐答案 + 理由」；不许把选项写成一大段让人自己挑。它的目标不是收集需求，是<strong>把含糊处逼到不能含糊</strong>——因为含糊的每一处，后面都会变成返工。</p>
+
+      <p>这一轮被问掉的东西，事后看分成三类：</p>
+
+      <div class="tbl">
+        <table>
+          <thead><tr><th style="width:15%">类别</th><th style="width:31%">被问的是什么</th><th>答完改变了什么</th></tr></thead>
+          <tbody>
+            <tr><td>不可逆</td><td>案例是真的跑一遍，还是编一个？</td><td>真跑：于是有了真实分支、真实提交、真实 PR，报告里的每个截图都能点开核对</td></tr>
+            <tr><td>不可逆</td><td>新开一个模块，还是塞进现有模块？</td><td>新开：于是「新增顶级模块」这条最贵的路径被完整走了一遍，包括门户与文档的七处同步</td></tr>
+            <tr><td>便宜但影响全篇</td><td>左栏放几个 skill？</td><td>十三个模块 + 一张路由表：够覆盖主线，又不至于变成名词表</td></tr>
+            <tr><td>便宜但影响全篇</td><td>截图是真截，还是画示意图？</td><td>真截：界面用无头浏览器出图，会话过程用终端卡讲真实文本</td></tr>
+            <tr><td>口味</td><td>案例做什么题材？</td><td>假名翻牌：练的是「配对回忆」，正好补上站里单向练习的空缺</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>九轮之后，谈定的话被写成一张表：<strong>每一个决定都带一句「为什么」</strong>。这是整条流水线里最便宜、也最省事的产物——后面每个子代理都拿它当输入，没有人再问「为什么不用另一种做法」。</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>.scratch/kana-memory/PLAN.md</b></span><span>决策表 · 摘</span></div>
+        <pre>| 决策       | 结论                                                    |
+| 案例真实性 | 真跑一遍流程，产物真落盘                                  |
+| 主构建技能 | implement-spec（implement 作补充说明）                    |
+| 牌面与档位 | 三档 = 三种配对：假名↔罗马音 / 汉字词↔读音 / 日语词↔释义  |
+| 分支与 PR  | 从 main 切 feat/kana-memory，draft PR base = main         |
+| 视觉方向   | B · 纸感卡片墙（三张样张对比后用户选定）                    |</pre>
+      </div>
+
+      <div class="callout callout--warn">
+        <span class="ct">这一阶段真实的一次越界</span>
+        <p>拷问的规矩是「只问决策，事实自己去查」。但第一轮我把「这个仓库的测试是怎么跑起来的」也列成了问题——那是事实，查一下就有，问用户等于把成本转嫁给他。用户当场纠正：<strong>事实性问题去查文件、查工具，只把决策留给人</strong>。这条纠正后来写进了本地约定，也直接决定了后面每一轮都先派调研再提问。</p>
+      </div>
+
+      <p><code>grill-with-docs</code> 比 <code>grilling</code> 多一件事：问的同时把文档写掉。本案例里落的是三条术语（牌墙 / 一局 / 配对）与一份 ADR——「为什么再开一个顶级模块，而不是塞进现有模块」。写文档不是为了留痕，是为了让下一个会话不必重新论证。</p>
+    </section>
+
+    <section class="stage" id="s2">
+      <div class="stage-head"><span class="stage-n">阶段 02</span><h2>样张：三个能打开的答案，比一段文字描述有用</h2></div>
+      <p class="stage-skill"><b>prototype</b> — 一次性代码，只为回答一个问题</p>
+
+      <p class="lede"><code>prototype</code> 的第一句话是：<strong>问题决定形状</strong>。要验数据模型，就写成几行脚本把状态打出来；要验界面，就写一个能点的页面。它的产物是「答案」，代码本身该扔——所以本案例的三个样张都放在仓外的 <code>.scratch/</code> 里，一个字节都不入库。</p>
+
+      <p>要问的问题是「这个游戏该长什么样」。这种问题用文字回答必然错位：说「纸感」三个人会想到三张纸。于是同一副牌、同一条洗牌种子、同一组预置状态（已配对一对、已翻开一张），写成三个方向完全不同的页面，再加一页目录说明各自在回答什么：</p>
+
+      <ul>
+        <li><strong>A · 绒布牌桌</strong>：深绿felt、奶油牌、金线，翻牌是三维翻转。押的是「像在桌边玩」的沉浸感。</li>
+        <li><strong>B · 纸感卡片墙</strong>：纸底、细线网格、墨色正文、朱色强调，配对成功给淡朱底＋勾。押的是「和这个站的气质是一家人」。</li>
+        <li><strong>C · 和纸双色</strong>：和纸底、藍与朱、明朝体、发丝线，配对后盖一枚朱色小印。押的是「日式印刷品」的调子。</li>
+      </ul>
+
+      <figure>
+        <img src="mattpocock-shots/proto-a.jpg" alt="样张 A：深绿绒布牌桌，卡片翻面三分之二，已配对的牌带金色圆环">
+        <figcaption><b>A · 绒布牌桌。</b>同一副牌，同一组预置状态：左上与中下两对已配对（金环＋右上勾），另有一张牌刚被翻开。</figcaption>
+      </figure>
+
+      <figure>
+        <img src="mattpocock-shots/proto-b.jpg" alt="样张 B：纸感卡片墙，五列四行，配对的牌淡朱底配勾，一张牌翻开">
+        <figcaption><b>B · 纸感卡片墙。</b>细线网格把 20 张牌排成一面墙；配对成功不是把牌调灰，而是给淡朱底和勾——「出局」比「变暗」更接近纸上的记号。</figcaption>
+      </figure>
+
+      <figure>
+        <img src="mattpocock-shots/proto-c.jpg" alt="样张 C：和纸底配藍与朱，明朝体，配对的牌右下盖朱色小印">
+        <figcaption><b>C · 和纸双色。</b>翻牌带一点下滑位移，配对后盖一枚朱色「済」小印——最像印刷物的一版，也最容易被当成「贴了张日式壁纸」。</figcaption>
+      </figure>
+
+      <p>用户看着三个能点的页面选了 <strong>B</strong>。这个选择不只定了配色，还定了一串下游决定：既然走纸感，就不该引站里那套无衬线设计令牌（那会把共享样式表拖成调色板），于是模块自带一份 CSS，走 <code>typing/</code> 那条「不引共享资源」的老路。一个视觉选择，最后变成了一条架构边界。</p>
+
+      <div class="callout callout--warn">
+        <span class="ct">样张里真踩到的两个坑</span>
+        <p><strong>一、洗牌写错看不出来。</strong>三张样张的洗牌数组只用了 0–9 的重复值去索引 20 张牌，牌墙上于是出现两张「き / ki」——看图时才发现的。修法不是删重复，而是换成带种子的 Fisher–Yates：样张要能复现，靠随机数就复现不了。</p>
+        <p><strong>二、居中会把证据裁掉。</strong>样张 A 用 flex 垂直居中，内容一旦高过视口，顶部那排计量（步数 / 用时 / 最佳）在整页截图里就整体消失。截图工具没错，是布局把信息推出去了——<strong>判断一个样张能不能用，先看它在截图里还剩下什么。</strong></p>
+      </div>
+    </section>
+
+    <section class="stage" id="s3">
+      <div class="stage-head"><span class="stage-n">阶段 03</span><h2>规格：把谈定的话压成一份能照着写的文件</h2></div>
+      <p class="stage-skill"><b>to-spec</b> — 不访谈，只综合</p>
+
+      <p class="lede"><code>to-spec</code> 的第一句就是禁令：<strong>不要再问用户，把你已经知道的写成规格</strong>。它要的产物不是会议纪要，而是这样一份文件：读完之后，一个没参加过对话的子代理能照着写代码，而且知道哪些事<em>不</em>该做。</p>
+
+      <p>写规格前还剩最后一个真决策没落：<strong>测试从哪儿进</strong>。这不是口味题，它决定了后面所有测试的形态，也决定了这个模块能不能被并行开发。问题是这么问的：</p>
+
+      <div class="term">
+        <div class="term-bar"><span>会话记录 · 接缝</span><em>提问</em></div>
+        <pre><span class="a">这个模块的算法只有十行（洗牌 + 比 key），风险全在接线：同 id 判定、翻开与配对的互斥、
+配错后的定时回翻、计步时机、换档重建牌墙。测试接缝放哪儿？</span>
+<span class="c">A. 只测纯逻辑层 —— 快，但上面那些风险一条都测不到
+B. DOM 桩驱动真页面脚本 —— 用仓库已有的 VM + 桩路线，慢一点，接线全在射程内
+C. 装 jsdom —— 最省事，但要引入外部依赖，破仓库「零依赖」硬约束</span></pre>
+      </div>
+
+      <p>选了 <strong>B</strong>。理由写在规格里，一句话就能服人：「只测纯函数会把五个真风险全漏掉」。这条决定还带出一个副产物：仓库原有的 DOM 桩 <code>classList</code> 是空实现，断不到「已配对」这种状态，于是新套件自带一个把 <code>classList</code> 做真的最小桩——不引依赖，只补缺的那一块。</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>.scratch/kana-memory/SPEC.md</b></span><span>118 行 · 结构</span></div>
+        <pre>## Problem Statement      练习都是单向的：敲字只练输出，翻转卡没有对局
+## Solution               10 对 / 20 张的牌墙；三档 = 三种配对关系
+## User Stories           16 条，逐条写「作为谁 / 我想要 / 以便」
+## Implementation Decisions
+   · 模块边界            新目录，走 typing/ 的「不引共享资源」路线
+   · 数据来源            复用 typing/romaji.js 与 typing/data/*.js，不复制表
+   · 一局的定义          10 对 20 张、5 列 4 行、步数 = 翻满两张算一步
+   · 持久化              只两个 localStorage 键；不动 progress.js 的白名单
+   · 交互与反馈          翻牌/配错/配对三态；结算条；键盘；aria-live
+   · 门户接入            加一张手写卡，不加 rail-item，三处断言 12 → 13
+   · 架构记录            要 ADR，要术语
+## Testing Decisions      接缝 = DOM 桩；什么算好测试；要测的九件事
+## Out of Scope           七条「不做」，其中两条是别人踩过的坑</pre>
+      </div>
+
+      <p>十六行 <code>Out of Scope</code> 是这份文件里最容易被跳过、也最值钱的一节。它把「不接进度模块」「不加左栏条目」「不做音频文件」「不改 <code>typing/</code>」逐条写成白纸黑字——后面三个子代理各自独立干活时，谁都可能顺手「改进」其中一条，而这一节给了它们说不的依据。事实上有一次差点破线：进阶档想给牌面小字换个更准的标签，方案里第一反应是「顺手把 CSS 也调一下」，被「票 04 独占 <code>kana.css</code>」和这条边界拦住了。</p>
+
+      <div class="callout callout--warn">
+        <span class="ct">命名漂移，一份规格才收得住</span>
+        <p>访谈阶段的施工单里，模块目录写的是 <code>memory/</code>；到规格阶段定稿成 <code>kana-memory/</code>。这种漂移在任何项目里都会发生，危险的是它悄悄分裂：票里写一个名字、测试断言另一个名字、文档再写第三个。定稿的规格把它锁成一个词，后面所有票、分支名、路径、文档行都从这一个词派生。</p>
+      </div>
+    </section>
+
+    <section class="stage" id="s4">
+      <div class="stage-head"><span class="stage-n">阶段 04</span><h2>切票：切成能单独合进去的小刀，而不是按层次切</h2></div>
+      <p class="stage-skill"><b>to-tickets</b> — tracer bullet ＋ 声明的阻塞边</p>
+
+      <p class="lede">切票最自然的错法是按代码分层切：先做数据层、再做状态层、最后做界面层。这样切的每一刀<strong>都看不见东西</strong>——数据层写完，页面上什么都没有，没法验证、没法截图、也没法给别人看。<code>to-tickets</code> 要的是另一种切法：每一张票都是一颗<strong>能打到目标的子弹</strong>，合进去之后立刻能在页面上看见一点新东西。</p>
+
+      <p>这个模块被切成五张：</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>任务图</b></span><span>5 张票 · 3 条阻塞边</span></div>
+        <pre>01 一局能玩（入门档）            ← 无阻塞，第一颗子弹
+ │
+ ├─→ 02 进阶档 + 档位切换
+ │      │
+ │      └─→ 03 高手档 + 每档最高分
+ │                │
+ │                └─→ 05 门户接入与文档
+ └─→ 04 手感与可达性（只依赖 01，故可与 02 并行）</pre>
+      </div>
+
+      <p>看这张图就能看出为什么它值钱：<strong>01 一落地，前沿就有两张票</strong>（02 和 04），可以同时派两个子代理；03 等 02、05 等 03，串行的那一段只剩两张。并行度不是靠人多，是靠依赖边画得准。</p>
+
+      <p>一张票长这样——短、硬、可判：</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>issues/02-mid-tier-and-switch.md</b></span><span>14 行 · 全文</span></div>
+        <pre># 02: 进阶档 汉字词 ↔ 假名读音 + 档位切换
+
+**What to build:** 页面顶部出现三个档位（入门 / 进阶 / 高手），点「进阶」重建牌墙：
+牌对改为从 typing/data/{n5,n4}.js 抽的汉字词与其假名读音（如 兄 ↔ あに），步数、用时、
+配对数全部归零并从这一刻重新计时。纯假名词（汉字写法与读音相同）不进牌池。
+
+**Blocked by:** 01
+
+**Status:** ready-for-agent
+
+- [ ] 三个档位可切换，当前档位有可见的选中态
+- [ ] 切到进阶档后牌池全部来自词表条目，且不含 w === k 的词
+- [ ] 换档会重建牌墙（牌数与行列不变）、步数 / 用时 / 配对数归零
+- [ ] 换档后计时不继续累加，直到下一次翻牌才重新起跑
+- [ ] 当前档位在刷新后仍然保留
+- [ ] node tools/tests/test_memory.js 增加换档断言并全绿</pre>
+      </div>
+
+      <p>四条格式很关键，缺一条子代理就会自己发明：<br>
+      <strong>What to build</strong> 写成「合进去之后用户能看见什么」，不写成「改哪些文件」（文件归属另有施工约定）；<br>
+      <strong>Blocked by</strong> 只写票号，机器和人都能读，整张图就是从这些行拼出来的；<br>
+      <strong>Status</strong> 让「谁能开工」变成查表而不是讨论；<br>
+      <strong>勾选项</strong> 全是可判定的行为，没有一条是「代码质量好」这种没法定案的话。</p>
+
+      <div class="callout">
+        <span class="ct">切票的判据</span>
+        <p>不是「代码分层」也不是「工作量平均」，而是两条：<strong>能单独合入</strong>，且合入后<strong>立刻可验证</strong>。按这个判据，01 必须包含「随机抽 10 对、能翻牌、能配对、计步计时」整条纵切——它一张票就穿过了数据、状态、界面三层，但它是唯一一张「能让用户玩起来」的票，所以它第一。</p>
+      </div>
+    </section>
+
+    <section class="stage" id="s5">
+      <div class="stage-head"><span class="stage-n">阶段 05</span><h2>实施：九个步骤把「任务图」变成一堆子代理</h2></div>
+      <p class="stage-skill"><b>implement-spec</b> — 集成分支 ＋ worktree ＋ 前沿并发（内部调 <b>tdd</b>）</p>
+
+      <p class="lede">到这一步，活儿其实已经不是「写代码」，而是「调度」。<code>implement-spec</code> 的九步里没有一步在讲怎么实现，全在讲怎么让好几个子代理互不碍事：开集成分支、把每张票丢进自己的 worktree、合完一张就重算前沿、全部合完才让评审进场。</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>implement-spec/SKILL.md</b></span><span>九步 · 摘</span></div>
+        <pre>3. 建集成分支。若追踪器以 PR 关闭工作，或用户要求，则在第 5 步首次合并后开 draft PR
+   （尚未领先 main 的分支开不了 PR），标记为关闭此规格与这些票。
+4. 用 implementer 子代理实现每张票，每票在自己的 worktree、自己的分支上。每个 implementer：
+   · 开工前确认自己的 worktree 基于集成分支，若不是就 reset 到它上面；
+   · 调 Skill 工具跑 tdd 把票建起来；
+   · 报完成之前先把集成分支的 tip 合进自己的分支。
+5. 每个 implementer 完成后，用 merger 子代理把它合进集成分支。
+6. 若前沿变了，就再派一批 implementer —— 这是并发度的来源。
+7. 全部完成后，在集成分支上跑 code-review，把问题交给一个 implementer 一次修完。
+8. 若有 draft PR，就把它标成 ready；否则按追踪器的规矩逐张关票。
+9. 清理所有 implementer 的 worktree。
+
+沟通要稀疏。主要靠上下文指针：指向规格、票、调研笔记、之前的提交。不要转述已经能查到的东西。</pre>
+      </div>
+
+      <p>最后那段话是整个流程能跑起来的真正原因。派出去的每个子代理<strong>看不到主线程的对话</strong>，所以任务书里不是「我们刚才讨论了…」，而是一串路径：读 <code>SPEC.md</code>、读 <code>issues/02-*.md</code>、读施工约定 <code>ARCH.md</code>。主线程花在转述上的 token 越少，能同时带多少个子代理就越多。</p>
+
+      <h3><span class="h3-n">5.1</span>第一颗子弹：一张票就让它能玩</h3>
+
+      <p>票 01 的目标不是「搭好架子」，而是「能玩」：随机抽十对、能翻、能配、计步计时。它在自己的一条分支上完成，提交时新增五个文件：</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>git show --stat 3823508</b></span><span>票 01</span></div>
+        <pre>kana-memory/game.js        110 行   纯逻辑：洗牌 / 开一局 / 翻一张 / 结算
+kana-memory/page.js        329 行   接线：建牌 / 绑事件 / 渲染计数 / 档位注册
+kana-memory/index.html      58 行   插槽 + 固定脚本顺序
+kana-memory/kana.css       131 行   纸感卡片墙（照样张 B）
+tools/tests/test_memory.js 430 行   116 项断言，DOM 桩驱动真页面
+ tools/test.mjs              1 行   登记进 SUITES</pre>
+      </div>
+
+      <figure>
+        <img src="mattpocock-shots/page-01.jpg" alt="票 01 完成后的页面：纸感底、五列四行的牌墙，全部牌背面朝上">
+        <figcaption><b>票 01 合进来之后的样子。</b>能玩了，但还没法看：牌背几乎与纸底同色，那一行「かな」淡得快消失，整面牌墙没有重量。这张图后来直接成为票 04 的输入——任务书里附的是这张截图，不是形容词。</figcaption>
+      </figure>
+
+      <p>注意这一版「不完整」得刚刚好：档位只有一个、最高分列显示破折号、结算条是空的、音效按钮点了没反应。但它已经能玩一局，所以<strong>它是可以被验证的</strong>——这也是为什么切票时要它先落地，而不是先把三个档位写完。</p>
+
+      <h3 id="s5b"><span class="h3-n">5.2</span>每个 implementer 开工的第一件事：先写会红的测试</h3>
+
+      <p><code>implement-spec</code> 让每个 implementer 「调 Skill 工具跑 <code>tdd</code>」，不是为了仪式感，而是为了不让子代理把测试写成「跑得通就行」。<code>tdd</code> 里真正有用的不是红绿循环本身，是它规定的<strong>什么算好测试</strong>：只断言外部可观察行为，不断言样式、不测动画时长、不测音频波形。</p>
+
+      <div class="tbl">
+        <table>
+          <thead><tr><th style="width:32%">风险（真实存在）</th><th>测试怎么捉它</th></tr></thead>
+          <tbody>
+            <tr><td>洗牌写错，牌墙出现两张一模一样的牌</td><td>断言「一局里每对恰好两张、无重复无遗漏」—— 这条是从样张阶段的真实事情留下的</td></tr>
+            <tr><td>配错后不翻回去</td><td>推进假定时器到 619ms 仍开着，到 620ms 回背面</td></tr>
+            <tr><td>同一张牌被点两次计入步数</td><td>点两次，断言步数不变、状态不变</td></tr>
+            <tr><td>换档后旧定时器把新牌局改乱</td><td>换档后推进旧定时器，断言新牌局不受影响（代际守卫）</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>票 01 交上来的时候测试数字是 <code>✓ 全部通过 (116)</code>，全仓 <code>node tools/test.mjs</code> 是 <code>26 通过 · 0 失败 · 9 跳过 · 2432 项断言</code>。那 9 个跳过不是失败——是需要本地源材料或密钥的套件，在别人克隆的仓库里本来就不该跑。</p>
+
+      <h3><span class="h3-n">5.3</span>开二条线：并行写入的边界在哪</h3>
+
+      <p>票 01 合进集成分支后，前沿变成两张票（02 和 04），于是同时派两个子代理，各自一个 worktree、自己的分支：</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>git worktree list</b></span><span>同一仓、同一条 main 的四个检出口</span></div>
+        <pre>library           0253041 [feat/kana-memory]   ← 集成分支，只有它往 main 上合
+library-wt/01     3823508 [feat/kana-01]       ← 已合并，留作对照
+library-wt/02     0253041 [feat/kana-02]       ← 进阶档 + 档位切换（进行中）
+library-wt/04     0253041 [feat/kana-04]       ← 手感与可达性（并行）</pre>
+      </div>
+
+      <p>并行的真正约束不是 CPU，是<strong>文件归属</strong>。两个子代理同时改一行，合并时就只能手工猜。所以派活时先写一张归属表：谁拥有 <code>kana.css</code>、谁拥有 <code>page.js</code>、谁的测试文件只归谁。这张表还提前把冲突点写成了规则——「02 只能往 <code>page.js</code> 加两处，上限 8 行」，而不是「你们小心点」。</p>
+
+      <h3><span class="h3-n">5.4</span>两条线撞在一起：冲突的解法不能靠「看哪边新」</h3>
+
+      <p>票 04 交上来合并时报了两处冲突，都是并行写入的必然产物，不是谁的错：</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>git merge feat/kana-04</b></span><span>CONFLICT ×2</span></div>
+        <pre><span class="del">CONFLICT (content): Merge conflict in kana-memory/index.html</span>
+<span class="del">CONFLICT (content): Merge conflict in tools/test.mjs</span>
+
+kana-memory/index.html 的脚本块：
+<span class="dim">&lt;&lt;&lt; 集成分支（票 02 刚加的）</span>
+  &lt;script src="../typing/data/n5.js"&gt;&lt;/script&gt;
+  &lt;script src="../typing/data/n4.js"&gt;&lt;/script&gt;
+  &lt;script src="tiers.js"&gt;&lt;/script&gt;
+<span class="dim">=== 票 04 的分支</span>
+  &lt;script src="feel.js"&gt;&lt;/script&gt;
+<span class="dim">&gt;&gt;&gt; feat/kana-04</span></pre>
+      </div>
+
+      <p>低级的解法是「两边都留」——那么 <code>feel.js</code> 会排到 <code>tiers.js</code> 前面还是后面，完全取决于编辑器把哪块放在上面。真正的解法在施工约定里：脚本顺序是**契约**，写死成 <code>romaji → game → n5 → n4 → tiers → score → feel → page</code>。合并时按契约重排，而不是按提交时间或代码块位置。</p>
+
+      <p><code>tools/test.mjs</code> 的冲突同理：两边各往 <code>SUITES</code> 里加了一行测试套件，两行都保留、按契约里的顺序排——一行是「进阶档 / 换档」，一行是「手感与可达性」。</p>
+
+      <p>这次合并完整跑了一遍三个套件（118 + 80 + 89 项断言）之后才提交。合并提交的职责不是「让 git 不报错」，是<strong>让两条线的语义都还在</strong>。</p>
+
+      <figure>
+        <img src="mattpocock-shots/page-04.jpg" alt="票 04 合并后的页面：牌背变成暖纸色带内衬细线，かな 加深，三档可切换">
+        <figcaption><b>票 04 合进来之后。</b>牌背从「和纸底一个色」变成暖一档的纸色加内衬细线，<code>かな</code> 从 1.9:1 拉到 7.3:1，牌墙终于像一面墙；同一屏里能看到三档 tab 都出来了。</figcaption>
+      </figure>
+
+      <p>这张图值得和票 01 那张并排看：同一条命令、同一个视口、同一个页面，中间只隔了一次「按截图改」——任务书里附的是那张截图，不是「请提高对比度」这样的形容词。子代理拿到的是可核对的差，改完也能自证改到了。</p>
+
+      <div class="callout callout--warn">
+        <span class="ct">真实的一次升级：子代理不许自己改契约</span>
+        <p>票 02 开工五分钟就停下来问了三个阻断点，其中一个很典型：施工约定要求它自己的脚本注册到「档位表」，但那个表要到 <code>page.js</code> 末尾才存在，而 <code>boot()</code> 就在后面一行——于是刷新页面时保存的「进阶档」会被回落成「入门档」。它给了三个方案（改两行 / 加一行守卫 / 一行不改但靠内部实现细节），并说明推荐哪个、为什么不推荐第三个。</p>
+        <p>这是并行开发里最值得期待的场景：<strong>子代理不能自己改契约，但必须把冲突升级上来，而且带着方案</strong>。最后选了第一个方案——允许它改 <code>page.js</code> 六行，同时由主线程把施工约定回写一份：契约改了，文档必须同批改，否则下一个子代理会拿着旧约定开干。</p>
+      </div>
+    </section>
+
+    <section class="stage" id="s6">
+      <div class="stage-head"><span class="stage-n">阶段 06</span><h2>评审：两个轴，故意不合并</h2></div>
+      <p class="stage-skill"><b>code-review</b> — 标准轴 · 规格轴 · 并行两个子代理</p>
+
+      <p class="lede"><code>code-review</code> 的全部主张就一句话：<strong>一次评审只能回答一个问题</strong>。所以它把评审劈成两个轴，各派一个子代理，拿回两份报告，<em>并排</em>放着——不合并、不重新排序、不选出「最重要的一条」。</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>两轴</b></span><span>以及它们分别会漏掉什么</span></div>
+        <pre><span class="u">标准轴</span>  git diff main...HEAD 里的每个 hunk，违反仓库写明的哪条规矩？
+        外加一份「坏味道基线」（Fowler 《重构》第 3 章），仓库有文档就以文档为准。
+
+<span class="u">规格轴</span>  同样一份 diff，对照 SPEC：哪些要求漏了 / 只做了一半？
+        哪些行为规格根本没要（scope creep）？哪些看着做了但做法是错的？
+
+<span class="dim">代码合乎所有规范，但做错了事 → 标准轴过，规格轴红。</span>
+<span class="dim">代码完全照规格做，但破坏了项目约定 → 规格轴过，标准轴红。</span></pre>
+      </div>
+
+      <p>这个设计要挡住的是**掩盖**：如果一份 diff 的格式问题很明显，一次「什么都看」的评审就会把整篇篇幅花在格式上，规格偏差藏在最后一行；反过来，一个人拿着 SPEC 逐条对账，就会对重复代码和神秘命名视而不见。分开跑，两种漏法都堵住了。</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>终端</b></span><span>钉住不动点</span></div>
+        <pre><span class="dim">$</span> git rev-parse main          <span class="dim"># 固定点必须先解得出</span>
+7ff91f6c3c0b2a8eccbf8a1c67a6d1a0b9f2a7d5
+
+<span class="dim">$</span> git log main..HEAD --oneline
+e245b58 feat(kana-memory): 合并票 04（手感与可达性）
+28268ac feat(kana-memory): 合并票 02（进阶档 + 档位切换）
+0253041 feat(kana-memory): 合并票 01（一局能玩）
+0c1dd7d test(kana-memory): 静态断言只禁 score.js…
+
+<span class="dim">$</span> git diff main...HEAD --stat</pre>
+      </div>
+
+      <p>固定点用**三点** diff（<code>main...HEAD</code>），比较的是 <code>main</code> 与分支的 merge-base，不是 <code>main</code> 的尖端——否则你评审的东西里会混进别人这期间合进 <code>main</code> 的提交。skill 里还有一条前置检查：固定点解不出来、或者 diff 是空的，<strong>在这一步就失败</strong>，别等到两个并行子代理里才炸。</p>
+
+      <p>标准轴要什么，skill 说得很具体：找到仓库里<strong>每一份</strong>写「代码该怎么写」的文件（<code>CODING_STANDARDS.md</code>、<code>CONTRIBUTING.md</code> 存在就必须在列），再把那份坏味道基线<strong>原样贴进子代理的任务书</strong>——子代理的上下文是干净的，它看不到你手里的基线。本仓库的清单是四份：<code>CODING_STANDARDS.md</code>、<code>AGENTS.md</code>（架构约束与不变量）、<code>docs/portal-map.md</code>（真源→生成器→校验）、<code>docs/adr/</code>（已决架构，如 ADR-0011 要求新模块同批改四处）。</p>
+
+      <div class="callout">
+        <span class="ct">「判断」和「违规」不是一回事</span>
+        <p>基线里的每一条都只是<em>带标签的启发式</em>（「可能是 Feature Envy」），永远不是硬违规；而仓库文档里写明的规矩可以是硬的。skill 还给了两条铁律：<strong>仓库文档覆盖基线</strong>（文档承认的做法，基线就别再挑），<strong>工具已经管的事不要报</strong>（格式、行尾、Lint 能查出来的，别浪费评审的篇幅）。</p>
+      </div>
+
+    <section class="stage" id="s7">
+      <div class="stage-head"><span class="stage-n">阶段 07</span><h2>交付：PR 正文只回答三个问题</h2></div>
+      <p class="stage-skill"><b>pr</b> — 图说改动 · 前后证据 · 合并风险</p>
+
+      <p class="lede"><code>pr</code> 这个 skill 只有一段模板和一句劝告：<strong>跳过一切前言，只留下能回答问题的部分</strong>。模板三段，各有各的读者：<code>Summary</code> 给想知道「改了什么形状」的人，<code>Evidence</code> 给不信「能跑」的人，<code>Merge Danger</code> 给要按合并键的人。</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>pr/SKILL.md</b></span><span>模板 · 全文</span></div>
+        <pre>## Summary
+&lt;diagram, diff-sketch, or tree&gt;
+
+## Evidence
+- **Before:** &lt;screenshot/output/failing test run&gt;
+  **After:** &lt;screenshot/output/passing test run&gt;
+
+## Merge Danger
+**Door:** &lt;one-way or two-way&gt;
+**Blast Radius:** &lt;one-word description&gt;</pre>
+      </div>
+
+      <p>三段里最容易被写坏的是第一段。<code>Summary</code> 不是「改了哪些文件」的清单，而是<strong>一张能让人一眼看懂形状的图</strong>：改逻辑就给伪代码，改控制流就给调用树，改文件归属就给浅树，改界面就给组件树或 diff。本案例的改动正好是「多了一整块目录 + 一行脚本顺序」，所以用树 + 一段状态机伪代码，比三段文字都清楚。</p>
+
+      <p>第三段是最少人写、最该写的一段。「单向门还是双向门」这个问题逼你想一件事：<strong>合下去之后好不好退</strong>。新目录 + 一张门户卡 + 四处断言数字，一个 revert 就回去了，是双向门；但「三处断言与新卡是同批改的」这条要写出来——只回退一半，门户测试会红。</p>
+
+      <div class="callout">
+        <span class="ct">draft PR 的时机是流程硬定的</span>
+        <p><code>implement-spec</code> 第 3 步说得很具体：<strong>首次合并之后</strong>再开 draft PR——因为一个还没领先 <code>main</code> 的分支连 PR 都开不出来。这条不是形式主义：有了 PR，后面每合一张票，评审者看到的是一个在长的东西，而不是最后一坨。</p>
+      </div>
+
+      <div class="art">
+        <div class="art-bar"><span><b>终端</b></span><span>首次合并之后</span></div>
+        <pre><span class="dim">$</span> git push -u origin feat/kana-memory
+ * [new branch]      feat/kana-memory -&gt; feat/kana-memory
+
+<span class="dim">$</span> HTTPS_PROXY=$PROXY gh pr create --draft --base main --head feat/kana-memory     --title "假名翻牌：一个新的顶级练习模块" --body-file .scratch/kana-memory/pr-draft.md
+https://github.com/Yang-Code01/jlpt-library/pull/40</pre>
+      </div>
+
+      <p>PR 正文的定稿不在这时候写。draft 阶段它只需要两件事：<strong>说清这是什么</strong>、<strong>勾出票的进度</strong>——让人知道现在看它有没有意义。真正的正文留到 code-review 之后，用 <code>pr</code> 的模板重写一遍，然后 <code>gh pr edit</code> 覆盖上去。</p>
+
+      <figure>
+        <img src="mattpocock-shots/pr-draft.jpg" alt="GitHub 上的 draft PR 页面：标题、五张票的勾选清单、Draft 标记">
+        <figcaption><b>draft PR #40。</b>这是第一次合并之后立刻开的那一版：只回答三个问题——这是什么、票到哪、怎么验。模板里最难写的两段（前后证据、合并风险）故意留空，它们要等评审跑完才有内容。</figcaption>
+      </figure>
+    </section>
+
+    <section class="stage" id="skipped">
+      <div class="stage-head"><span class="stage-n">支线</span><h2>这套流水线里，有三种活不该走主线</h2></div>
+      <p class="stage-skill"><b>triage</b> · <b>diagnosing-bugs</b> · <b>wayfinder</b> · <b>improve-codebase-architecture</b></p>
+
+      <p class="lede">主线的假设是「你知道要做什么，只是还没想清怎么做」。有三类活不满足这个假设，硬套主线会得到一份规格性很强的错误答案。</p>
+
+      <div class="tbl">
+        <table>
+          <thead><tr><th style="width:22%">什么时候叫它</th><th style="width:26%">skill</th><th>它做完之后你手上多出什么</th></tr></thead>
+          <tbody>
+            <tr><td>别人（或未来的自己）塞给你一堆 issue / 外部 PR，乱七八糟没分诊</td><td><code>triage</code></td><td>每一条都被分成「需补充 / 可交给 agent / 需人工 / 不做」，可交给 agent 的那些还附了一份能直接开工的简报</td></tr>
+            <tr><td>它不是「要加什么」，而是「坏了」——报错、慢、偶发</td><td><code>diagnosing-bugs</code></td><td>一条能复现的证据链和最小修法，而不是一圈猜测式改动</td></tr>
+            <tr><td>你连「下一步该往哪走」都不知道，方向比方案更缺</td><td><code>wayfinder</code></td><td>一张把可能性摊开的地图，以及一条便宜的验证路径</td></tr>
+            <tr><td>没有新需求，但你感觉这块代码越来越难改</td><td><code>improve-codebase-architecture</code></td><td>按「深模块」重新划一遍边界，给出一批可独立合入的加深手术</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>本案例一条都没走：需求是新的、没有故障、方向从一开始就明确（新开一个练习模块）、模块本身是新建的（没有历史包袱可体检）。<strong>不用某个 skill 不是缺失，是因为它解决的问题这次不存在。</strong>左栏把 <code>handoff</code> 也留在这里，理由相同——这一整轮从访谈做到复盘都在同一个会话里，没有需要交接给下一个会话的断层。</p>
+
+      <div class="callout">
+        <span class="ct">反过来看：什么时候必须要 handoff</span>
+        <p>如果一个会话做不完（上下文要满了），或者要换人接手，就必须把「已经谈定的决定 + 现在做到哪 + 下一步的入口」压成一份文件。它的写法与本篇的流水线一致：<strong>指针多于复述</strong>——写「规格在哪个文件、第几张票没做完、分支叫什么」，而不是把规格抄一遍。</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+<script>
+(function () {
+  var mods = [].slice.call(document.querySelectorAll('.rail-mod'));
+  if (!('IntersectionObserver' in window)) return;
+  var seen = {};
+  var targets = [];
+  mods.forEach(function (a) {
+    var id = (a.getAttribute('href') || '').slice(1);
+    var el = id && document.getElementById(id);
+    if (el && !seen[id]) { seen[id] = 1; targets.push(el); }
+  });
+  if (!targets.length) return;
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var here = '#' + e.target.id;
+      mods.forEach(function (m) {
+        m.classList.toggle('is-on', m.getAttribute('href') === here);
+      });
+    });
+  }, { rootMargin: '-12% 0px -72% 0px' });
+  targets.forEach(function (t) { io.observe(t); });
+})();
+</script>
+<!-- wb:shell:foot:start -->
+<div class="wb-shell-foot">
+  <span>这份报告属于 <b>个人工作站 › 调查报告</b></span>
+  <a href="../index.html#survey">← 返回报告清单</a>
+</div>
+<!-- wb:shell:foot:end -->
+<!-- wb:shell:float:start -->
+<a class="wb-shell-float" href="../index.html#survey">
+  <span class="wb-shell-mark" aria-hidden="true">QY</span>
+  <span>返回调查报告</span>
+</a>
+<!-- wb:shell:float:end -->
+</body>
+
+</html>
