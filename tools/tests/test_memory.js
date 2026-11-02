@@ -409,8 +409,12 @@ section('静态契约：5 列 × 4 行、独立样式、无取数、LF');
   const iGame = html.indexOf('src="game.js"');
   const iPage = html.indexOf('src="page.js"');
   ok(iRomaji >= 0 && iGame > iRomaji && iPage > iGame, '脚本顺序是 romaji.js → game.js → page.js');
-  ok(!/<script[^>]*src="(tiers|score|feel)\.js"/.test(html),
-    '本轮还不存在的 tiers.js / score.js / feel.js 没有被提前引用');
+  /* 02/04 各自把自己那行 script 加进来时不必改这条：只禁还没实现的 score.js（票 03） */
+  ok(!/<script[^>]*src="score\.js"/.test(html), 'score.js（票 03）还没被提前引用');
+  const iTiers = html.indexOf('src="tiers.js"');
+  const iFeel = html.indexOf('src="feel.js"');
+  ok(iTiers < 0 || iTiers < iPage, '若引了 tiers.js，它排在 page.js 之前');
+  ok(iFeel < 0 || iFeel < iPage, '若引了 feel.js，它排在 page.js 之前');
 
   /* 纯逻辑层不碰 DOM：game.js 里不许出现 document / localStorage */
   ok(!/\bdocument\b/.test(game), 'game.js 不碰 document');
