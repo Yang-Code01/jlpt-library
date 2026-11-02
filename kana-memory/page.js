@@ -173,7 +173,7 @@ function openTile(index) {
     startClock();
     paint(res.tiles);
     emit('tile:open', { index: index, tile: round.tiles[index] });
-    announce(tileLabel(index, round.tiles[index]));
+    /* 这里不再播报：这张牌的 aria-label 已经念过同一句（评审提出的重复朗读） */
     return;
   }
 

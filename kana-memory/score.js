@@ -150,7 +150,7 @@ function ensureResultParts() {
 
 function button(doc, id, label) {
   var btn = doc.createElement('button');
-  btn.className = 'k-btn';
+  btn.className = 'k-btn' + (id === 'k-again' ? ' k-btn--primary' : '');
   btn.id = id;
   btn.setAttribute('type', 'button');
   btn.textContent = label;

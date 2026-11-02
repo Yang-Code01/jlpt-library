@@ -163,11 +163,12 @@ section('开局：20 张全背面，计数归零');
     '每张牌都有 .k-face.k-back 与 .k-face.k-front');
   ok(list.every((t) => /\d/.test(t.getAttribute('aria-label'))), '每张牌都有含序号的 aria-label');
 
-  /* #k-sound 本票只渲染不接线 */
+  /* #k-sound 的接线在 feel.js（票 04）里，本套件不 fire DOMContentLoaded 所以只验形状；
+     真正的开合行为由 test_memory_feel.js 覆盖，这里不要再断言它的取值。 */
   const sound = doc.getElementById('k-sound');
   ok(!!sound, '#k-sound 插槽已渲染');
-  sound.click();
-  eq(sound.getAttribute('aria-pressed'), 'true', '#k-sound 本票是 inert（点了不改状态）');
+  ok(sound.getAttribute('type') === 'button', '#k-sound 是 <button type="button">');
+  ok(['true', 'false'].indexOf(sound.getAttribute('aria-pressed')) >= 0, '#k-sound 带 aria-pressed（真值由 feel.js 决定）');
 }
 
 /* ============================ 2. 配对成功 ============================ */
