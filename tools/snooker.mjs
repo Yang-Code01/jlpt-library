@@ -615,6 +615,29 @@ function healFinished(calendar) {
  *     抓到就冻结（frozen()），冻结后不再进来。
  *  ② 赛程还很远的站（>7 天）返回 Infinity，即「不抓」——开赛前一周才可能有签表。
  *  ③ Infinity 不能被 due() 当成「没抓过」而放行。 */
+/* 落盘前的最后一道归一化：场次的 r 必须是本站 rounds 里真实存在的轮次 id。
+   为什么要有这一步：attachEvents 是「先铺上次快照、抓到了再覆盖」，rounds 与 matches
+   分别铺 ⇒ 两半可以来自不同代次；上游把某几轮的标题单元格抹掉时，parseEvent 只认出
+   「Final」一轮却仍返回 r=13/14 的场次，于是快照里出现孤儿场次。
+   checkData() 抓得到它，但那是 check.yml 下游的事 —— 脏数据先一步被 snooker.yml 提交到
+   main 了（2026-11-03 的冠中冠就是这么坏的）。所以在写文件之前直接把孤儿场次丢掉：
+   这些行没有选手名、只剩开赛时刻，丢掉不损失可读信息，页面降级成「签表未出」。 */
+function pruneOrphanMatches(calendar) {
+  let dropped = 0;
+  for (const e of calendar || []) {
+    const ms = e.matches || [];
+    if (!ms.length) continue;
+    const ids = new Set((e.rounds || []).map((r) => r.id));
+    const kept = ms.filter((m) => ids.has(m.r));
+    if (kept.length !== ms.length) {
+      dropped += ms.length - kept.length;
+      warn(e.en + ' 有 ' + (ms.length - kept.length) + ' 场指向不存在的轮次，已丢弃');
+      e.matches = kept;
+    }
+  }
+  return dropped;
+}
+
 function dueAt(e) {
   const today = todayIso();
   if (e.s <= today && today <= e.e) return 10 * 60 * 1000;
@@ -701,6 +724,7 @@ function buildData(ranking, calendar, updated, prev, ranking1y, updated1y) {
     if (e.rounds === undefined) e.rounds = null;
     if (e.purse === undefined) e.purse = null;
   }
+  pruneOrphanMatches(calendar);
   return {
     updated,
     /* 单赛季榜单独记一次抓取时间：它可降级（沿用上次），所以榜的年龄可能比快照老 */
@@ -1026,7 +1050,7 @@ async function main() {
 }
 
 /* 供离线单测 import 用（直接 node 跑时照旧执行 main） */
-export { parseEvent, parseMatch, parseRank, parseRank1y, toJsFile, loadFund, parseCalendar, parseIcs, parseFinals, pickEvents, toEvents, buildData, frozen, dueAt, fetchBucket, last16Id, cutFrozenMatches, healFinished, sameData, checkData, CITY_CN, TZ };
+export { parseEvent, parseMatch, parseRank, parseRank1y, toJsFile, loadFund, parseCalendar, parseIcs, parseFinals, pickEvents, toEvents, buildData, frozen, dueAt, fetchBucket, last16Id, cutFrozenMatches, healFinished, pruneOrphanMatches, sameData, checkData, CITY_CN, TZ };
 
 const invokedDirectly = (() => {
   try { return process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]); }
