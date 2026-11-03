@@ -43,6 +43,9 @@ jobs:
       - name: 抓取并生成
         run: node tools/snooker.mjs
 
+      - name: 落盘契约（脏数据不许进 main）
+        run: node tools/tests/test_snooker.js
+
       - name: 有变化才提交
         run: |
           git add assets/snooker-data.js
