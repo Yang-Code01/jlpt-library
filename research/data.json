@@ -1,46 +1,95 @@
 {
   "_note": "调查报告真源：改这里 → node tools/research.mjs gen → node tools/research.mjs check。tags 是受控词表，要新增先在 tags 里登记，否则 check 会报未登记标签。reports 里每条的 file 是 research/ 下的自包含单文件报告，日期是定稿日期。",
-  "tags": ["技能生态", "工具横评", "工程实践", "模型", "环境配置", "学习资料", "版本履历"],
+  "tags": [
+    "技能生态",
+    "工具横评",
+    "工程实践",
+    "模型",
+    "环境配置",
+    "学习资料",
+    "版本履历"
+  ],
   "reports": [
-        {
+    {
+      "file": "n2-exam-frequency.html",
+      "title": "N2 真题高频词与高频语法：30 套卷量化分析",
+      "date": "2026-11-04",
+      "tags": [
+        "学习资料"
+      ],
+      "summary": "把 2010–2025 年 30 套 N2 真题（3,076 题）的正文、题干与听力原文切成词，去掉停用词后共 3.8 万词次、5,924 个词形；前 500 词覆盖 52.2% 的词次。语法侧以真题为准：被考过或当过选项的 111 个语法点（站内 N5–N1 库共 884 条，其余默认收起），每条带接续、讲解与真题原题解析。三张榜都可搜索、筛选、标记掌握。",
+      "source": {
+        "label": "JLPT 真题库（站内）",
+        "url": "https://github.com/Yang-Code01/jlpt-library"
+      }
+    },
+    {
       "file": "mattpocock-workflow-walkthrough.html",
       "title": "把这套 skill 走一遍：从拷问到复盘的一份实况",
       "date": "2026-11-02",
-      "tags": ["技能生态", "工程实践"],
+      "tags": [
+        "技能生态",
+        "工程实践"
+      ],
       "summary": "拿一个真案例把 mattpocock 的主线从头走到尾：拷问、样张、规格、切票、并行实施、评审、PR、复盘，每一步都留下可点开的产物——三张样张、规格文件、五张票、六次合并、一个 draft PR，和一张前后对比截图。",
-      "source": { "label": "GitHub", "url": "https://github.com/mattpocock/skills" }
+      "source": {
+        "label": "GitHub",
+        "url": "https://github.com/mattpocock/skills"
+      }
     },
     {
       "file": "pi-changelog.html",
       "title": "pi 更新履历：0.10.0 → 1.4.0",
       "date": "2026-10-21",
-      "tags": ["版本履历", "工具横评"],
+      "tags": [
+        "版本履历",
+        "工具横评"
+      ],
       "summary": "十一个月 290 个版本、3173 条变更的完整归档：六段分期讲主线，121 条破坏性变更单列成表，末尾是可全文检索的逐版本原档。",
-      "source": { "label": "GitHub", "url": "https://github.com/earendil-works/pi" }
+      "source": {
+        "label": "GitHub",
+        "url": "https://github.com/earendil-works/pi"
+      }
     },
     {
       "file": "git-worktree-research.html",
       "title": "git worktree 调查报告：AI 工具视角",
       "date": "2026-10-19",
-      "tags": ["工程实践", "工具横评"],
+      "tags": [
+        "工程实践",
+        "工具横评"
+      ],
       "summary": "从 AI 编码工具视角理解 git worktree：文件系统原理、四工具对比、命令速查、常见坑与排查决策树。",
-      "source": { "label": "Git", "url": "https://git-scm.com/docs/git-worktree" }
+      "source": {
+        "label": "Git",
+        "url": "https://git-scm.com/docs/git-worktree"
+      }
     },
     {
       "file": "mattpocock-skills-1.3.1.html",
       "title": "mattpocock/skills v1.3.1 更新说明",
       "date": "2026-10-15",
-      "tags": ["技能生态"],
+      "tags": [
+        "技能生态"
+      ],
       "summary": "三条收尾技能（pr / implement-spec / retro）加上一批破坏性改名，把技能集串成一条主线；附本机 38 个技能的行动清单。",
-      "source": { "label": "GitHub", "url": "https://github.com/mattpocock/skills" }
+      "source": {
+        "label": "GitHub",
+        "url": "https://github.com/mattpocock/skills"
+      }
     },
     {
       "file": "mattpocock-skills-changelog.html",
       "title": "mattpocock-skills 更新报告",
       "date": "2026-10-15",
-      "tags": ["技能生态"],
+      "tags": [
+        "技能生态"
+      ],
       "summary": "按时间线记录上游仓库每一次可见变化，以及其中有几条会影响本机已装的技能。",
-      "source": { "label": "GitHub", "url": "https://github.com/mattpocock/skills" }
+      "source": {
+        "label": "GitHub",
+        "url": "https://github.com/mattpocock/skills"
+      }
     }
   ]
 }
