@@ -44,8 +44,8 @@ eq(count(/class="tab[^"]*" data-tag="/g), 7, '类型筛选 7 个标签');
 ok(/class="tab is-on" data-tag="全部"/.test(html), '默认「全部」');
 ok(/data-rail-toggle/.test(html), '窄屏有抽屉开关');
 
-/* 4. 卡片：12 张，右栏有进度胶囊或规模徽章，进度分母由 data-units 指认 */
-eq(count(/<article class="card"/g), 12, '语言学习区 12 张卡');
+/* 4. 卡片：13 张，右栏有进度胶囊或规模徽章，进度分母由 data-units 指认 */
+eq(count(/<article class="card"/g), 13, '语言学习区 13 张卡');
 eq(count(/data-units="/g), 4, '4 张卡挂了 data-units（ja / jp-reading / en-vocab / en-reading）');
 ok(/data-units="ja"/.test(html) && /data-units="en-vocab"/.test(html) && /data-units="en-reading"/.test(html),
   'data-units 三个桶齐备');

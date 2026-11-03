@@ -1,0 +1,174 @@
+/* 假名翻牌 · 纸感卡片墙（样张 B）
+   独立样式表：不引 ../assets/style.css、不引 ../assets/theme.js、不接 progress.js。
+   与 typing/ 同款路线 —— 纸感与站点无衬线令牌是两套语言，硬套共享皮肤会把
+   assets/style.css 拖成调色板。色值只写在本文件的 :root 令牌块里。
+
+   一处刻意偏离样张 B：样张的牌背是 #FFFFFF 贴在 #FBFAF8 纸底上，两者亮度只差 2%，
+   整面牌墙糊成一片、牌背的「かな」又用 --faint(#9C9AA3)，远看像没印上的水印。
+   这里给牌背一档更暖更深的纸色 + 内衬细线 + 更实的墨色「かな」，卡面翻开的仍是纯白。 */
+
+:root{
+  --paper:#FBFAF8; --ink:#17161A; --muted:#6C6A73; --faint:#9C9AA3;
+  --rule:#E4E1DB; --rule-strong:#CFCBC3;
+  --accent:#B4451F; --accent-soft:#F6EDE7;
+  --card:#FFFFFF; --card-up:#FFFFFF;
+  --card-back:#F1EDE4; --card-back-line:#D8D2C6; --card-back-ink:#4A4741;
+  /* 动效：时长与位移全部走令牌，减少动效时只把这四个值归零（规则一条都不用重写） */
+  --dur:.18s; --dur-slow:.24s; --shake:.3s; --lift:-2px;
+  --serif:"Iowan Old Style",Palatino,Georgia,"Songti SC",SimSun,serif;
+  --sans:-apple-system,"Segoe UI","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"Cascadia Mono",Consolas,monospace;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--sans); padding:30px 24px 34px; min-height:100vh;
+}
+
+.k-sheet{max-width:940px; margin:0 auto}
+
+/* ---------- 返回门户（手写 crumb） ---------- */
+.k-crumb{font-family:var(--mono); font-size:11.5px; letter-spacing:.06em;
+  color:var(--faint); margin:0 0 18px}
+.k-crumb a{color:var(--muted); text-decoration:none}
+.k-crumb a:hover{color:var(--accent)}
+.k-crumb-sep{margin:0 6px}
+
+/* ---------- 报头 ---------- */
+.k-masthead{display:flex; align-items:flex-end; justify-content:space-between;
+  gap:20px; flex-wrap:wrap; border-bottom:2px solid var(--ink); padding-bottom:14px}
+.k-kicker{font-family:var(--mono); font-size:11px; letter-spacing:.18em;
+  text-transform:uppercase; color:var(--accent); margin:0 0 7px}
+h1{font-family:var(--serif); font-size:30px; font-weight:600; margin:0; letter-spacing:-.01em}
+
+.k-tierbar{display:flex; align-items:center; gap:16px}
+.k-tiers{display:flex; gap:16px; font-size:13px}
+.k-tier{font:inherit; display:inline-flex; align-items:baseline; gap:6px;
+  background:none; border:0; padding:0 0 3px; cursor:pointer;
+  color:var(--faint); border-bottom:2px solid transparent}
+.k-tier[aria-pressed="true"]{color:var(--ink); border-bottom-color:var(--accent); font-weight:600}
+.k-tier-hint{font-family:var(--mono); font-size:10px; letter-spacing:.06em; font-weight:400}
+.k-sound{font:inherit; font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+  background:none; color:var(--muted); border:1px solid var(--rule-strong);
+  border-radius:3px; padding:3px 8px; cursor:pointer}
+.k-sound[aria-pressed="true"]{color:var(--accent); border-color:var(--accent)}
+.k-sound[aria-pressed="false"]{color:var(--faint); border-style:dashed}
+
+/* 键盘焦点环：三种可点元素共用一套，任何背景上都看得见 */
+.k-tile:focus-visible,
+.k-tier:focus-visible,
+.k-sound:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* ---------- 计量条 ---------- */
+.k-meters{display:flex; margin:16px 0 22px; border-bottom:1px solid var(--rule)}
+.k-meter{flex:1; padding:0 0 12px; border-right:1px solid var(--rule)}
+.k-meter:last-child{border-right:0}
+.k-meter span{display:block; font-family:var(--mono); font-size:10.5px;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--faint)}
+.k-meter b{display:block; font-family:var(--serif); font-size:22px; font-weight:600;
+  margin-top:3px; font-variant-numeric:tabular-nums}
+
+/* ---------- 牌墙：5 列 × 4 行 ---------- */
+.k-board{display:grid; grid-template-columns:repeat(5,1fr); gap:12px}
+.k-tile{
+  position:relative; aspect-ratio:1/1.18; padding:0; font:inherit; color:inherit;
+  border:1px solid var(--rule-strong); border-radius:4px; background:var(--card-back);
+  cursor:pointer;
+  box-shadow:0 1px 0 rgba(23,22,26,.05), 0 8px 16px -14px rgba(23,22,26,.55);
+  transition:transform var(--dur) ease, box-shadow var(--dur) ease,
+    background-color var(--dur) ease, border-color var(--dur) ease;
+}
+.k-tile:hover{transform:translateY(var(--lift)); box-shadow:0 10px 20px -14px rgba(23,22,26,.6)}
+
+.k-face{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  padding:6px; transition:opacity var(--dur) ease}
+/* 牌背：一档更暖的纸色 + 内衬细线 + 实墨的「かな」，远看是一面牌墙 */
+.k-back{font-family:var(--serif); font-size:20px; font-weight:600; color:var(--card-back-ink);
+  letter-spacing:.1em}
+.k-back::after{content:""; position:absolute; inset:6px;
+  border:1px solid var(--card-back-line); border-radius:2px}
+.k-front{opacity:0; flex-direction:column; gap:3px}
+.k-word{font-family:var(--serif); font-size:29px; line-height:1}
+.k-front.k-romaji .k-word{font-family:var(--mono); font-size:16px; color:var(--muted); letter-spacing:.05em}
+.k-tag{position:absolute; bottom:5px; font-family:var(--mono); font-size:8.5px;
+  letter-spacing:.14em; color:var(--faint)}
+
+/* 翻开的唯一钩子：data-state；配错抖动用 .is-miss */
+.k-tile[data-state="open"],
+.k-tile[data-state="done"]{
+  background:var(--card-up); border-color:var(--ink);
+  box-shadow:0 1px 0 rgba(23,22,26,.06), 0 16px 26px -20px rgba(23,22,26,.85);
+}
+.k-tile[data-state="open"] .k-back,
+.k-tile[data-state="done"] .k-back{opacity:0}
+.k-tile[data-state="open"] .k-front,
+.k-tile[data-state="done"] .k-front{opacity:1; animation:k-card-in var(--dur-slow) ease both}
+/* 牌面从下方滑入：只动 transform，opacity 留给上面的静态规则管（配对的淡朱底要靠它） */
+@keyframes k-card-in{from{transform:translateY(7px) scale(.985)} to{transform:none}}
+
+/* 配对成功：淡朱底 + 右上勾（而不是把牌调灰）；牌面留六成半，看得清内容又不抢下一张 */
+.k-tile[data-state="done"]{border-color:var(--accent); background:var(--accent-soft)}
+.k-tile[data-state="done"] .k-front{opacity:.72}
+.k-tile[data-state="done"]::after{content:"✓"; position:absolute; top:3px; right:6px;
+  font-size:12px; line-height:1; color:var(--accent); font-weight:600}
+
+/* 配错：一声轻抖 + 朱色描边。抖动时长归零后（减少动效）描边仍在，
+   所以「配错」和「刚翻开」在无动效下也分得开 */
+.k-tile.is-miss{border-color:var(--accent); animation:k-swing var(--shake) ease 1}
+@keyframes k-swing{25%{transform:rotate(-1.4deg)} 75%{transform:rotate(1.4deg)}}
+
+/* ---------- 结算条 ---------- */
+.k-result{margin-top:20px; padding:14px 18px; border:1px solid var(--accent);
+  border-radius:4px; background:var(--accent-soft)}
+/* 显式写死：.k-result 自带 layout，别让 UA 的 [hidden] 被它盖掉 */
+.k-result[hidden]{display:none}
+.k-result-line{margin:0; font-family:var(--serif); font-size:18px}
+
+/* ---------- 页脚 ---------- */
+.k-foot{display:flex; align-items:center; justify-content:space-between; gap:16px;
+  margin-top:20px; padding-top:12px; border-top:1px solid var(--rule);
+  font-size:12.5px; color:var(--muted)}
+.k-foot kbd{font-family:var(--mono); font-size:11px; border:1px solid var(--rule-strong);
+  border-radius:3px; padding:1px 5px; color:var(--ink)}
+
+/* ---------- 状态播报（只给读屏） ---------- */
+.k-live{position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0}
+
+/* ---------- 减少动效：翻牌不再滑入、配错不再抖、悬停不再抬起 ----------
+   只改令牌，规则一条都不用重写；媒体查询给真实浏览器，
+   [data-motion="reduce"] 是 feel.js 镜像的同一个开关（系统设置被改动时也能跟上）。 */
+@media (prefers-reduced-motion: reduce){
+  :root{--dur:0s; --dur-slow:0s; --shake:0s; --lift:0px}
+}
+:root[data-motion="reduce"]{--dur:0s; --dur-slow:0s; --shake:0s; --lift:0px}
+
+/* ---------- 窄屏：4 列，字号折算到列宽，长牌面靠 clamp 兜住 ----------
+   5 列在 375px 下每张只有 63px，高手档 13 字的牌面会压到相邻牌上（评审 P1）。 */
+@media (max-width:640px){
+  body{padding:20px 14px 26px}
+  h1{font-size:24px}
+  .k-board{grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px}
+  .k-tile{aspect-ratio:1/1.12}
+  .k-face{padding:4px; overflow:hidden}
+  .k-word{font-size:clamp(12px,3.1vw,19px); line-height:1.12}
+  .k-front.k-romaji .k-word{font-size:clamp(9px,2.1vw,12px)}
+  .k-back{font-size:16px}
+  .k-meter b{font-size:17px}
+  .k-meter span{font-size:9.5px}
+  .k-tierbar{gap:10px}
+  .k-tiers{gap:10px}
+}
+
+/* ---------- 结算条的两个按钮（score.js 造出来，原先没有样式） ---------- */
+.k-result-record{font-family:var(--serif); font-size:15px; color:var(--ink-2); margin:4px 0 12px}
+.k-result-actions{display:flex; gap:10px}
+.k-btn{font:inherit; font-size:13.5px; padding:7px 16px; border-radius:3px; cursor:pointer;
+  border:1px solid var(--rule-strong); background:var(--card); color:var(--ink);
+  transition:background-color var(--dur) ease, border-color var(--dur) ease}
+.k-btn:hover{background:var(--accent-soft); border-color:var(--accent)}
+.k-btn--primary{background:var(--ink); border-color:var(--ink); color:var(--paper)}
+.k-btn--primary:hover{background:var(--accent); border-color:var(--accent); color:var(--paper)}
+.k-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}

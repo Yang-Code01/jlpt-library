@@ -38,6 +38,7 @@
 | `verb/` | 动词专练 | `verb/units/<unit>/data.json`、`verb/conjugation/data.json` | `verb/gen.js` | `node verb/gen.js check` |
 | `dictation/` | 听写练习 | `words-data.js` + 每单元 `*.js` | 无 | 无 |
 | `typing/` | 打字练习 | 取自 `n1/`–`n5/vocab/*.html` | `node typing/gen-words.js` → `typing/data/{n5..n1}.js` | 无 |
+| `kana-memory/` | 假名翻牌 | `typing/romaji.js`（假名 → 罗马字，唯一判定口径）+ `typing/data/n5.js`、`n4.js`（`typing/gen-words.js` 的产物，本模块只读） | 无（模块自身不含生成器，也不复制词表） | 无独立校验命令；`tools/tests/test_memory.js` / `test_memory_tiers.js` / `test_memory_score.js` / `test_memory_feel.js` 四个套件（已在 `tools/test.mjs` 登记） |
 | `listening/` | 听力专项 | `listening/data/<level>/<卷>.js` + `audio/` + `pdf/`（每题注音讲义） | 讲义：本地 `.scratch/listening-pdf/`（需 kuromoji，不入库，见 ADR-0009） | `node tools/listening-handout.mjs` |
 | `en/` | 英语侧（词表单元 / 阅读 / 搭配） | `.scratch` 里的 ECDICT / Gutenberg 缓存（**不入库**） | `tools/en-vocab.mjs`、`en-reading.mjs`、`en-typing.mjs` | `node tools/en-accept.mjs` |
 | `research/` | 调查报告 | `research/data.json` | `node tools/research.mjs gen` | `node tools/research.mjs check` |

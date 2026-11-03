@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>假名翻牌 · 个人工作站</title>
+<!-- 纸感卡片墙：独立样式，不引 ../assets/style.css、不引 ../assets/theme.js、不接 progress.js（同 typing/ 的路线） -->
+<link rel="stylesheet" href="kana.css">
+</head>
+<body>
+<div class="k-sheet">
+  <nav class="k-crumb">
+    <a href="../index.html">资料库首页</a>
+    <span class="k-crumb-sep">／</span>
+    <a href="#" id="k-crumb-here">假名翻牌</a>
+  </nav>
+
+  <header class="k-masthead">
+    <div>
+      <p class="k-kicker">假名翻牌 · Kana Memory</p>
+      <h1>翻开两张，配成一对</h1>
+    </div>
+    <div class="k-tierbar">
+      <!-- 档位按钮由 KanaApp.registerTier 自动渲染：button.k-tier[data-tier] -->
+      <div class="k-tiers" id="k-tiers" role="group" aria-label="难度"></div>
+      <!-- 音效开关：04 接上合成音与记忆（feel.js） -->
+      <button type="button" class="k-sound" id="k-sound" aria-pressed="true">音效 开</button>
+    </div>
+  </header>
+
+  <div class="k-meters">
+    <div class="k-meter"><span>已配对</span><b id="k-pairs">0 / 10</b></div>
+    <div class="k-meter"><span>步数</span><b id="k-moves">0</b></div>
+    <div class="k-meter"><span>用时</span><b id="k-time">00:00</b></div>
+    <!-- 本档最佳：03（score.js）填这个插槽，本票先留空 -->
+    <div class="k-meter"><span>本档最佳</span><b id="k-best">—</b></div>
+  </div>
+
+  <div class="k-board" id="k-board"></div>
+
+  <!-- 结算条：默认 hidden，本票只写「步数 / 用时」，按钮由 03 补 -->
+  <div class="k-result" id="k-result" hidden>
+    <p class="k-result-line" id="k-result-line"></p>
+  </div>
+
+  <div class="k-foot">
+    <span>点两张牌翻开配对 · <kbd>Tab</kbd> 移动焦点 · <kbd>Enter</kbd> 翻牌</span>
+  </div>
+
+  <p class="k-live" id="k-live" role="status" aria-live="polite"></p>
+</div>
+
+<!-- 脚本顺序固定：romaji.js → game.js → 词表 data → tiers.js/score.js/feel.js（02/03/04 各自加自己那行）→ page.js -->
+<script src="../typing/romaji.js"></script>
+<script src="game.js"></script>
+<!-- 进阶 / 高手档的词对来自这两份词表（typing/gen-words.js 的产物，file:// 下可直接引） -->
+<script src="../typing/data/n5.js"></script>
+<script src="../typing/data/n4.js"></script>
+<script src="tiers.js"></script>
+<script src="score.js"></script>
+<script src="feel.js"></script>
+<script src="page.js"></script>
+</body>
+</html>
