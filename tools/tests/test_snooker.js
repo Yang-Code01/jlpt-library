@@ -456,6 +456,43 @@ try { fs.unlinkSync(tmp); fs.unlinkSync(tiny); } catch {}
   }
 }
 
+/* ===================== F2. 孤儿场次必须在落盘前被丢掉 =====================
+ * 冠中冠 2026-11-03 那次快照：rounds 只剩 {id:15 Final}，matches 却有 r=15/14/13/7
+ * 共 15 场 —— 上游把那几轮的标题单元格抹掉，parseEvent 只认出一轮。
+ * checkData() 事后抓得到，但那时数据已经被 snooker.yml 提交到 main 了。
+ * 这里钉住 pruneOrphanMatches 的口径：r 不在 rounds.id 里的场次全丢、幂等、
+ * rounds 缺失时不留任何场次。 */
+{
+  const code = [
+    "import { pruneOrphanMatches } from " + JSON.stringify(new URL('file://' + TOOL).href) + ';',
+    'const cal = [',
+    "  { en: 'A', rounds: [{ id: 15 }], matches: [{ r: 15 }, { r: 14 }, { r: 13 }] },",
+    "  { en: 'B', rounds: null, matches: [{ r: 1 }] },",
+    "  { en: 'C', rounds: [{ id: 1 }], matches: [] },",
+    '];',
+    'const out = {};',
+    'out.first = pruneOrphanMatches(cal);',
+    'out.a = cal[0].matches.length;',
+    'out.b = cal[1].matches.length;',
+    'out.c = cal[2].matches.length;',
+    'out.again = pruneOrphanMatches(cal);',
+    'out.empty = pruneOrphanMatches(null);',
+    'process.stdout.write(JSON.stringify(out));',
+  ].join(String.fromCharCode(10));
+  const r = spawnSync(process.execPath, ['--input-type=module', '-e', code], { encoding: 'utf8' });
+  let o = null;
+  try { o = JSON.parse(r.stdout || 'null'); } catch {}
+  ok(r.status === 0 && !!o, 'pruneOrphanMatches 可运行', (r.stderr || '').slice(0, 300));
+  if (o) {
+    ok(o.first === 3, 'A 应丢 2 场 + B 应丢 1 场（实际 ' + o.first + '）');
+    ok(o.a === 1, 'A 只剩 id 存在的 1 场（实际 ' + o.a + '）');
+    ok(o.b === 0, 'rounds 缺失时不留任何场次（实际 ' + o.b + '）');
+    ok(o.c === 0, '本来就没有场次的站不受影响（实际 ' + o.c + '）');
+    ok(o.again === 0, '必须幂等：再跑一次不再丢（实际 ' + o.again + '）');
+    ok(o.empty === 0, '传 null 不应抛错（实际 ' + o.empty + '）');
+  }
+}
+
 /* ===================== 结论 ===================== */
 console.log('\n' + (fails.length ? '✗ ' + fails.length + ' 条失败 / ' + (pass + fails.length) : '✓ 全部通过 (' + pass + ')'));
 if (fails.length) {
