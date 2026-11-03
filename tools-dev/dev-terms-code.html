@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>语言与工程 · vibecoding 术语图解 · 70 条</title>
+<style>
+:root{
+  --bg:#f6f4ee; --paper:#fffdf8; --ink:#1e2a30; --ink-soft:#3d4c52; --muted:#6b7a72;
+  --rule:#e2ddd0; --accent:#176b75; --accent-soft:#e3efee; --seal:#b3402a;
+  --fig:#f2efe6; --fig-line:#c9d3ca; --fig-arrow:#a6b3a9; --fig-fill:#fbf9f3; --fig-accent:#dceceb; --fig-accent-line:#7fb0ae;
+  --shadow:0 1px 2px rgba(30,42,48,.04), 0 8px 24px -18px rgba(30,42,48,.5);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#12171a; --paper:#171d20; --ink:#e8eae4; --ink-soft:#c3cbc4; --muted:#8b9a90;
+    --rule:#282f33; --accent:#5fb0b2; --accent-soft:#16302f; --seal:#e0715a;
+    --fig:#0e1316; --fig-line:#3a4a4a; --fig-arrow:#5d6f64; --fig-fill:#182024; --fig-accent:#173634; --fig-accent-line:#4b8f8e;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px -20px rgba(0,0,0,.9);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Noto Sans JP","Source Han Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  font-size:15px; line-height:1.75; -webkit-font-smoothing:antialiased;
+}
+.serif{font-family:"Noto Serif JP","Source Han Serif SC",Songti SC,SimSun,Georgia,serif}
+
+/* 册切换 */
+.books{display:flex; flex-wrap:wrap; gap:6px; margin:0 0 18px}
+.books a{
+  padding:5px 11px; font-size:12px; line-height:1.4; text-decoration:none;
+  color:var(--muted); border:1px solid transparent; border-radius:999px; transition:color .18s, border-color .18s;
+}
+.books a:hover{color:var(--accent); border-color:var(--rule)}
+.books a[aria-current="page"]{color:var(--accent); border-color:var(--accent); background:var(--accent-soft)}
+
+/* 右上角返回（tools-dev 硬性要求） */
+.back-btn{
+  position:fixed; top:16px; right:20px; z-index:50;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 13px; border:1px solid var(--rule); border-radius:999px;
+  background:color-mix(in srgb, var(--paper) 88%, transparent);
+  color:var(--ink-soft); font-size:12.5px; text-decoration:none;
+  backdrop-filter:blur(6px); transition:color .2s, border-color .2s;
+}
+.back-btn:hover{color:var(--accent); border-color:var(--accent)}
+
+/* 头部 */
+.hd{border-bottom:1px solid var(--rule); background:linear-gradient(180deg,var(--paper),var(--bg))}
+.hd-in{max-width:1200px; margin:0 auto; padding:56px 40px 26px}
+.eyebrow{margin:0 0 14px; font-size:11.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--muted)}
+h1{margin:0; font-size:clamp(26px,3.1vw,38px); font-weight:600; letter-spacing:-.01em; line-height:1.25;
+   font-family:"Noto Serif JP","Source Han Serif SC",Songti SC,Georgia,serif}
+.lede{margin:14px 0 0; max-width:62ch; color:var(--ink-soft); font-size:14.5px; text-wrap:pretty}
+.lede em{font-style:normal; color:var(--seal); border-bottom:1px solid currentColor}
+.tools{display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-top:26px}
+.search{position:relative; flex:1 1 320px; max-width:420px}
+.search input{
+  width:100%; padding:10px 40px 10px 14px; font:inherit; font-size:14px;
+  color:var(--ink); background:var(--paper); border:1px solid var(--rule); border-radius:9px; outline:none;
+  transition:border-color .2s, box-shadow .2s;
+}
+.search input:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.search .kbd{position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  font-size:11px; color:var(--muted); border:1px solid var(--rule); border-radius:5px; padding:1px 6px; pointer-events:none}
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{
+  padding:6px 12px; font-size:12.5px; line-height:1.4; cursor:pointer;
+  color:var(--ink-soft); background:transparent; border:1px solid var(--rule); border-radius:999px;
+  transition:color .18s, border-color .18s, background .18s;
+}
+.chip:hover{border-color:var(--accent); color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:#f7fbfa}
+.count{font-size:12.5px; color:var(--muted); margin-left:auto; font-variant-numeric:tabular-nums}
+
+/* 主体 */
+.wrap{max-width:1200px; margin:0 auto; padding:0 40px 120px; display:grid; grid-template-columns:212px minmax(0,1fr); gap:48px}
+.toc{position:sticky; top:0; align-self:start; max-height:100vh; overflow-y:auto; padding:34px 0 40px; scrollbar-width:thin}
+.toc-g{margin:18px 0 6px; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted)}
+.toc-g:first-child{margin-top:0}
+.toc a{
+  display:block; padding:3px 0 3px 10px; margin-left:-10px; font-size:12.5px; line-height:1.5;
+  color:var(--muted); text-decoration:none; border-left:1px solid transparent;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:color .16s, border-color .16s;
+}
+.toc a:hover{color:var(--ink)}
+.toc a.on{color:var(--accent); border-left-color:var(--accent); font-weight:500}
+.doc{padding-bottom:60px}
+.grp{display:flex; align-items:baseline; gap:12px; padding:64px 0 4px; scroll-margin-top:0}
+.grp-k{font-family:"Noto Serif JP",Georgia,serif; font-size:13px; letter-spacing:.1em; color:var(--accent)}
+.grp-n{margin:0; font-size:19px; font-weight:600; font-family:"Noto Serif JP","Source Han Serif SC",Songti SC,serif}
+.grp-c{font-size:12px; color:var(--muted)}
+.grp-line{flex:1; height:1px; background:var(--rule)}
+
+.t{display:grid; grid-template-columns:minmax(0,1fr) 408px; gap:0 44px; padding:26px 0 24px; border-top:1px solid var(--rule); scroll-margin-top:12px}
+.t:first-of-type{border-top:0}
+.t-meta{grid-column:1; grid-row:1; min-width:0}
+.t-no{font-size:11px; letter-spacing:.12em; color:var(--muted); font-variant-numeric:tabular-nums}
+.t-h{margin:4px 0 0; display:flex; flex-wrap:wrap; align-items:baseline; gap:10px}
+.t-en{font-size:19px; font-weight:600; letter-spacing:-.005em}
+.t-cn{font-size:12.5px; color:var(--muted)}
+.t-p{margin:10px 0 0; color:var(--ink-soft); font-size:15px; line-height:1.85; text-wrap:pretty; text-wrap:balance}
+.t-fig{grid-column:2; grid-row:1; min-width:0}
+.fwrap{background:var(--fig); border:1px solid var(--rule); border-radius:10px; padding:8px 10px}
+.fig{display:block; width:100%; height:auto}
+.t-q{grid-column:1 / -1; grid-row:2; display:flex; gap:12px; align-items:baseline;
+  margin:16px 0 0; padding:11px 0 0; border-top:1px dashed var(--rule);
+  font-size:12.8px; line-height:1.8; color:var(--muted)}
+.t-q b{flex:0 0 auto; font-size:10.5px; letter-spacing:.1em; color:var(--seal); font-weight:600; white-space:nowrap}
+.t[hidden]{display:none}
+.grp[hidden]{display:none}
+.empty{display:none; padding:60px 0; color:var(--muted); font-size:14px}
+.empty.on{display:block}
+
+/* 图的元件语法 */
+.fig text{font-family:"Noto Sans JP","PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+.f-lab{fill:var(--ink); font-size:9.6px}
+.f-sub{fill:var(--muted); font-size:8.2px; letter-spacing:.02em}
+.f-thlab{fill:var(--ink-soft); font-size:8.6px}
+.f-badge{fill:var(--seal); font-size:8.4px; letter-spacing:.04em}
+.f-vs{fill:var(--muted); font-size:8.6px; letter-spacing:.14em}
+.f-box{fill:var(--fig-fill); stroke:var(--fig-line); stroke-width:1.3}
+.f-box-accent{fill:var(--fig-accent); stroke:var(--fig-accent-line); stroke-width:1.3}
+.f-box-muted{fill:none; stroke:var(--fig-line); stroke-width:1.3; stroke-dasharray:5 4}
+.f-pill{fill:var(--fig-fill); stroke:var(--fig-line); stroke-width:1.3}
+.f-panel{fill:none; stroke:var(--fig-line); stroke-width:1.2}
+.f-panel-hot{fill:var(--fig-accent); fill-opacity:.34; stroke:var(--fig-accent-line); stroke-width:1.4}
+.f-th{fill:var(--fig-accent); stroke:var(--fig-accent-line); stroke-width:1.1}
+.f-seg1{fill:var(--fig-fill); stroke:var(--fig-line)}
+.f-seg2{fill:var(--fig-accent); stroke:var(--fig-accent-line)}
+.f-seg3{fill:none; stroke:var(--fig-line)}
+.f-ar{fill:none; stroke:var(--fig-arrow); stroke-width:1.5; stroke-linejoin:round}
+.f-dash{stroke-dasharray:5 4}
+.f-head{fill:var(--fig-arrow)}
+.f-gate{stroke:var(--seal); stroke-width:1.3; stroke-dasharray:5 4; opacity:.75}
+.f-axis{stroke:var(--fig-line); stroke-width:1.2}
+.f-line{fill:none; stroke:var(--fig-line); stroke-width:1.1; stroke-dasharray:4 4}
+.f-dot{fill:var(--fig-fill); stroke:var(--fig-line); stroke-width:1.4}
+.f-dot-hot{fill:var(--seal); stroke:var(--seal); stroke-width:1.4}
+.f-rule{stroke:var(--fig-line); stroke-width:1; opacity:.85}
+.f-queue line{stroke:var(--fig-line); stroke-width:1; opacity:.8}
+.f-store .f-rule{stroke-dasharray:3 3}
+
+footer{border-top:1px solid var(--rule); padding:26px 40px 60px}
+.foot-in{max-width:1200px; margin:0 auto; display:flex; flex-wrap:wrap; gap:8px 20px; font-size:12.5px; color:var(--muted)}
+footer a{color:var(--muted)}
+footer a:hover{color:var(--accent)}
+
+@media (max-width:1080px){
+  .wrap{grid-template-columns:1fr; gap:0; padding:0 28px 80px}
+  .toc{display:none}
+  .t{grid-template-columns:1fr; row-gap:18px}
+  .t-meta,.t-fig,.t-q{grid-column:1; grid-row:auto}
+  .t-q{margin-top:4px}
+  .t-fig{max-width:520px}
+  .hd-in{padding:66px 28px 22px}
+}
+@media (max-width:560px){
+  .wrap{padding:0 18px 60px}
+  .hd-in{padding:62px 18px 18px}
+  .t-en{font-size:17px}
+  .count{margin-left:0; flex-basis:100%}
+}
+</style>
+</head>
+<body>
+<a class="back-btn" href="../index.html#tools" data-back="top" title="回到工具开发区列表">← 工具开发区</a>
+
+<header class="hd">
+  <div class="hd-in">
+    <nav class="books" id="books" aria-label="分册"></nav>
+    <p class="eyebrow">code · 语言 · 工程化 · 测试 · 性能 · 移动端 · 70 条</p>
+    <h1>语言与工程</h1>
+    <p class="lede">语言与类型、打包与本地开发、测试怎么写、性能怎么量、跨端怎么不翻车。</p>
+    <div class="tools">
+      <label class="search">
+        <input id="q" type="search" placeholder="搜术语 / 中文 / 正文…" autocomplete="off" spellcheck="false" aria-label="搜索术语">
+        <span class="kbd">/</span>
+      </label>
+      <div class="chips" id="chips"></div>
+      <span class="count" id="count"></span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <nav class="toc" id="toc" aria-label="术语目录"></nav>
+  <div class="doc" id="doc"></div>
+</main>
+
+<footer>
+  <div class="foot-in">
+    <span>语言与工程 · 70 条 · 5 组 · 图共用一套语法</span>
+    <a href="dev-terms.html">目录页</a>
+    <a href="../index.html#tools">← 回工具开发区</a>
+    <a href="../index.html">回工作台首页</a>
+  </div>
+</footer>
+
+<script>/* 图形语法：16 个模板，全部 340×150 画布，靠 CSS class 上色。
+   每个术语只给一句 spec：{ t:'flow', a:['页面','接口'] } —— a 是该模板的入参。 */
+(function () {
+  var UID = 0;
+  var AR = function () { return ''; };
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function T(x, y, s, cls, anchor) {
+    return '<text x="' + x + '" y="' + y + '" class="' + (cls || 'f-lab') +
+      '" text-anchor="' + (anchor || 'middle') + '">' + esc(s) + '</text>';
+  }
+  function R(x, y, w, h, cls, rx) {
+    return '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h +
+      '" rx="' + (rx == null ? 6 : rx) + '" class="' + (cls || 'f-box') + '"/>';
+  }
+  function box(x, y, w, h, label, cls, sub) {
+    var cy = y + h / 2 + (sub ? -1.5 : 3.5);
+    return R(x, y, w, h, cls) + T(x + w / 2, cy, label, 'f-lab') +
+      (sub ? T(x + w / 2, y + h - 6, sub, 'f-sub') : '');
+  }
+  function pill(x, y, w, h, label, cls) {
+    return R(x, y, w, h, cls || 'f-pill', h / 2) + T(x + w / 2, y + h / 2 + 3.4, label, 'f-lab');
+  }
+
+  function svg(label, build) {
+    UID += 1;
+    var id = 'ah' + UID;
+    AR = function (d, cls) {
+      return '<path d="' + d + '" class="f-ar ' + (cls || '') + '" marker-end="url(#' + id + ')"/>';
+    };
+    return '<svg class="fig" viewBox="0 0 340 150" role="img" aria-label="' + esc(label) +
+      '" preserveAspectRatio="xMidYMid meet">' +
+      '<defs><marker id="' + id + '" viewBox="0 0 8 8" refX="6.4" refY="3" markerWidth="5" markerHeight="5" orient="auto">' +
+      '<path d="M0,0 L6.4,3 L0,6 z" class="f-head"/></marker></defs>' +
+      build() + '</svg>';
+  }
+
+  /* ---------- 模板 ---------- */
+
+  function flow(items) {
+    var n = items.length, gap = 20;
+    var w = Math.min(104, (340 - 16 - gap * (n - 1)) / n);
+    if (n > 1) gap = (340 - 16 - n * w) / (n - 1);
+    var out = '';
+    for (var i = 0; i < n; i++) {
+      var x = 8 + i * (w + gap);
+      out += box(x, 57, w, 36, items[i], i === n - 1 ? 'f-box-accent' : 'f-box');
+      if (i < n - 1) out += AR('M' + (x + w + 3) + ',75 L' + (x + w + gap - 3) + ',75');
+    }
+    return out;
+  }
+
+  function fanout(o) {
+    var tos = o.a, n = tos.length, out = '';
+    out += box(8, 57, 88, 36, o.from, 'f-box');
+    var h = n > 2 ? 26 : 32;
+    for (var i = 0; i < n; i++) {
+      var y = n === 1 ? 57 : 12 + i * ((150 - 24 - h) / (n - 1));
+      out += box(226, y, 106, h, tos[i], 'f-box-muted');
+      out += AR('M96,75 C 158,75 164,' + (y + h / 2) + ' 224,' + (y + h / 2));
+    }
+    if (o.n) out += T(n === 1 ? 170 : 150, n === 1 ? 112 : 132, o.n, 'f-badge');
+    return out;
+  }
+
+  function merge(o) {
+    var sources = o.a, n = sources.length, out = '', h = n > 2 ? 26 : 32;
+    for (var i = 0; i < n; i++) {
+      var y = n === 1 ? 57 : 12 + i * ((150 - 24 - h) / (n - 1));
+      out += box(8, y, 106, h, sources[i], 'f-box-muted');
+      out += AR('M114,' + (y + h / 2) + ' C 172,' + (y + h / 2) + ' 178,75 224,75');
+    }
+    out += box(226, 57, 106, 36, o.to, 'f-box-accent');
+    if (o.n) out += T(170, 100, o.n, 'f-badge');
+    return out;
+  }
+
+  function layers(items) {
+    var n = items.length, out = '';
+    var gap = n > 3 ? 8 : 18;
+    var h = Math.min(36, (150 - 20 - gap * (n - 1)) / n);
+    var total = n * h + (n - 1) * gap;
+    var top = (150 - total) / 2;
+    for (var i = 0; i < n; i++) {
+      var y = top + i * (h + gap);
+      out += box(20, y, 300, h, items[i], i === n - 1 ? 'f-box-accent' : 'f-box');
+      if (i < n - 1) out += AR('M170,' + (y + h + 1) + ' L170,' + (y + h + gap - 1));
+    }
+    return out;
+  }
+
+  function nest(o) {
+    var out = R(24, 12, 292, 126, 'f-box', 10);
+    out += T(170, 31, o.title, 'f-lab');
+    var kids = o.a;
+    if (kids.length === 1) {
+      out += box(70, 54, 200, 50, kids[0], 'f-box-accent');
+    } else {
+      var w = (248 - 12 * (kids.length - 1)) / kids.length;
+      for (var i = 0; i < kids.length; i++) out += box(46 + i * (w + 12), 54, w, 50, kids[i], 'f-box-accent');
+    }
+    if (o.sub) out += T(170, 127, o.sub, 'f-sub');
+    return out;
+  }
+
+  function gate(o) {
+    var out = box(4, 57, 86, 36, o.left, 'f-box') +
+      '<line x1="170" y1="16" x2="170" y2="134" class="f-gate"/>' +
+      T(170, 10, o.gate, 'f-sub') +
+      box(250, 57, 86, 36, o.right, 'f-box-accent');
+    if (o.dash) {
+      out += AR('M90,66 L250,66', 'f-dash') + T(170, 58, o.dash, 'f-sub');
+      out += AR('M90,86 L250,86') + T(170, 108, o.ok || '放行', 'f-sub');
+    } else {
+      out += AR('M90,75 L250,75') + T(170, 102, o.ok || '放行', 'f-sub');
+    }
+    return out;
+  }
+
+  function store(o) {
+    var cols = o.a, cw = 188 / cols.length, x = 76, y = 24, hh = 22, rh = 24, out = '';
+    out += R(x, y, 188, hh, 'f-th', 4);
+    for (var i = 0; i < cols.length; i++) {
+      out += T(x + cw * i + cw / 2, y + 15, cols[i], 'f-thlab');
+      out += '<line x1="' + (x + cw * i) + '" y1="' + y + '" x2="' + (x + cw * i) + '" y2="' + (y + hh) + '" class="f-rule"/>';
+    }
+    out += '<line x1="' + x + '" y1="' + (y + hh) + '" x2="' + (x + 188) + '" y2="' + (y + hh) + '" class="f-rule"/>';
+    for (var r = 0; r < 2; r++) {
+      var ry = y + hh + r * rh;
+      out += '<line x1="' + x + '" y1="' + (ry + rh) + '" x2="' + (x + 188) + '" y2="' + (ry + rh) + '" class="f-rule"/>';
+      for (var c = 0; c < cols.length; c++) {
+        out += '<line x1="' + (x + cw * c) + '" y1="' + ry + '" x2="' + (x + cw * c) + '" y2="' + (ry + rh) + '" class="f-rule"/>';
+      }
+    }
+    if (o.sub) out += T(x + 94, y + hh + 2 * rh + 20, o.sub, 'f-sub');
+    return out;
+  }
+
+  function cacheflow(o) {
+    var out = box(4, 57, 62, 36, o.l);
+    out += AR('M68,66 L96,66');
+    out += '<g class="f-store">' + R(96, 24, 76, 102, 'f-box') +
+      '<line x1="104" y1="44" x2="164" y2="44" class="f-rule"/>' +
+      '<line x1="134" y1="44" x2="134" y2="118" class="f-rule"/></g>';
+    out += T(134, 38, o.m, 'f-lab');
+    out += T(115, 64, o.k1 || 'key', 'f-sub') + T(149, 64, o.k2 || 'val', 'f-sub');
+    out += AR('M172,76 L256,76', 'f-dash') + T(214, 92, o.back || '回源', 'f-sub');
+    out += AR('M256,96 L172,96', 'f-dash') + T(214, 114, o.fill || '回填', 'f-sub');
+    out += box(256, 57, 80, 36, o.r);
+    return out;
+  }
+
+  function queue(o) {
+    var out = box(4, 57, 66, 36, o.l);
+    out += AR('M70,68 L90,68') + T(80, 60, o.tag || '202', 'f-badge');
+    out += '<g class="f-queue">' + R(90, 32, 88, 76, 'f-box') +
+      '<line x1="119" y1="32" x2="119" y2="108"/><line x1="148" y1="32" x2="148" y2="108"/></g>';
+    out += T(134, 24, o.m, 'f-sub');
+    out += AR('M178,88 L214,88', 'f-dash') + T(196, 106, o.later || '稍后处理', 'f-sub');
+    out += box(214, 57, 122, 36, o.r);
+    return out;
+  }
+
+  function segments(segs) {
+    var total = 0, i, x = 18, w = 304, y = 42, hh = 44, out = '';
+    for (i = 0; i < segs.length; i++) total += segs[i].w || 1;
+    for (i = 0; i < segs.length; i++) {
+      var sw = w * (segs[i].w || 1) / total;
+      out += '<rect x="' + x + '" y="' + y + '" width="' + sw + '" height="' + hh +
+        '" class="f-seg' + ((i % 3) + 1) + '" rx="' + (i === 0 || i === segs.length - 1 ? 5 : 0) + '"/>';
+      out += T(x + sw / 2, y + hh / 2 + 4, segs[i].t, 'f-lab');
+      if (segs[i].s) out += T(x + sw / 2, y + hh + 20, segs[i].s, 'f-sub');
+      x += sw;
+    }
+    return out;
+  }
+
+  function compare(o) {
+    var out = '';
+    [[8, o.l], [176, o.r]].forEach(function (p) {
+      var n = p[1].a.length, top = 56 - (n - 1) * 10.5;
+      out += R(p[0], 16, 156, 118, 'f-panel', 8);
+      out += T(p[0] + 78, 38, p[1].t, 'f-lab');
+      p[1].a.forEach(function (line, i) { out += T(p[0] + 78, top + 26 + i * 21, line, 'f-sub'); });
+    });
+    return out;
+  }
+
+  function compare3(o) {
+    var out = '';
+    [6, 118, 230].forEach(function (x, k) {
+      var p = o.a[k];
+      out += R(x, 16, 104, 118, k === o.hot ? 'f-panel-hot' : 'f-panel', 8);
+      out += T(x + 52, 38, p.t, 'f-lab');
+      p.a.forEach(function (line, i) { out += T(x + 52, 62 + i * 20, line, 'f-sub'); });
+    });
+    return out;
+  }
+
+  function timeline(o) {
+    var pts = o.a, n = pts.length, out = '', x0 = 28, x1 = 312, y = 82;
+    out += '<line x1="' + x0 + '" y1="' + y + '" x2="' + x1 + '" y2="' + y + '" class="f-axis"/>';
+    for (var i = 0; i < n; i++) {
+      var x = n === 1 ? 170 : x0 + i * (x1 - x0) / (n - 1);
+      out += '<circle cx="' + x + '" cy="' + y + '" r="4.5" class="' + (i === o.hot ? 'f-dot-hot' : 'f-dot') + '"/>';
+      var anc = i === 0 ? 'start' : (i === n - 1 ? 'end' : '');
+      var ax = i === 0 ? x - 6 : (i === n - 1 ? x + 6 : x);
+      out += T(ax, y - 16, pts[i].t, 'f-lab', anc);
+      if (pts[i].s) out += T(ax, y + 24, pts[i].s, 'f-sub', anc);
+    }
+    return out;
+  }
+
+  function cycle(o) {
+    var pts = o.a, out = '';
+    var pos = [[170, 18, 120], [78, 110, 104], [262, 110, 104]];
+    for (var i = 0; i < 3; i++) {
+      var p = pos[i], w = p[2], h = 32;
+      out += box(p[0] - w / 2, p[1], w, h, pts[i], i === o.hot ? 'f-box-accent' : 'f-box');
+    }
+    out += AR('M232,44 C 292,56 300,88 272,104');
+    out += AR('M208,126 C 186,144 152,144 132,126');
+    out += AR('M80,110 C 28,96 34,46 108,52');
+    return out;
+  }
+
+  function tree(o) {
+    var out = box(120, 12, 100, 30, o.root, 'f-box');
+    var kids = o.a, n = kids.length;
+    for (var i = 0; i < n; i++) {
+      var w = (340 - 16 - 12 * (n - 1)) / n, x = 8 + i * (w + 12);
+      out += '<path d="M170,44 L' + (x + w / 2) + ',98" class="f-line"/>';
+      out += box(x, 98, w, 30, kids[i], 'f-box-muted');
+    }
+    return out;
+  }
+
+  function rings(o) {
+    var l = o;
+    return R(10, 8, 320, 134, 'f-box', 12) + T(28, 28, l[0], 'f-lab', 'start') +
+      R(48, 40, 244, 86, 'f-box', 10) + T(66, 60, l[1] || '', 'f-lab', 'start') +
+      R(90, 68, 160, 44, 'f-box-accent', 8) + (l[2] ? T(170, 95, l[2], 'f-lab') : '');
+  }
+
+  /* 变体并列：n 个做法竖排，左边名字右边一句「什么时候用」。 */
+  function variants(o) {
+    var items = (o && o.items) || [], n = items.length || 1;
+    var top = 12;
+    if (o.title) top = n >= 5 ? 26 : 30;
+    var gap = n >= 5 ? 4 : 7;
+    var h = Math.min(30, Math.floor((150 - top - 8 - gap * (n - 1)) / n));
+    var out = o.title ? T(14, 18, o.title, 'f-sub', 'start') : '';
+    for (var i = 0; i < n; i++) {
+      var y = top + i * (h + gap), it = items[i];
+      out += R(12, y, 316, h, i === o.hot ? 'f-box-accent' : 'f-box', 6);
+      out += T(26, y + h / 2 + 3.5, it[0], 'f-lab', 'start');
+      if (it[1]) out += T(316, y + h / 2 + 3.5, it[1], 'f-sub', 'end');
+    }
+    return out;
+  }
+
+  function twice(o) {
+    return pill(70, 8, 160, 24, o.req) +
+      AR('M108,34 L108,54') + AR('M192,34 L192,54') + T(244, 32, '×2', 'f-badge') +
+      box(70, 56, 160, 34, o.mid, 'f-box') +
+      AR('M150,92 L150,106') +
+      R(70, 108, 160, 30, 'f-box-accent') + T(150, 127, o.res, 'f-lab');
+  }
+
+  var MAP = {
+    flow: flow, fanout: fanout, merge: merge, layers: layers, nest: nest, gate: gate,
+    store: store, cacheflow: cacheflow, queue: queue, segments: segments,
+    compare: compare, compare3: compare3, timeline: timeline, cycle: cycle,
+    tree: tree, rings: rings, twice: twice, variants: variants
+  };
+
+  window.FIGS = {
+    render: function (spec) {
+      var fn = MAP[spec.t];
+      if (!fn) throw new Error('未知图型 ' + spec.t);
+      // timeline / compare3 / cycle 的 spec 是「数组 + hot」，其余模板的入参都在 spec.a 里
+      var arg = ['timeline', 'compare3', 'cycle'].includes(spec.t) ? { a: spec.a, hot: spec.hot } : spec.a;
+      return svg(spec.alt || spec.t, function () { return fn(arg); });
+    }
+  };
+})();</script>
+<script>window.GROUPS = [{"k":"L","name":"语言与框架","tag":"前端"},{"k":"B","name":"前端工程化与网络","tag":"前端"},{"k":"I","name":"测试与质量","tag":"两端"},{"k":"Q","name":"性能与调试","tag":"两端"},{"k":"R","name":"移动端与跨端","tag":"前端"}];
+window.TERMS = [{"g":"L","en":"Type System","cn":"类型系统","p":"类型是「这个变量里能放什么」的规矩，等于提前替你查错。","q":"AI 一句 `as any` 绕过去，等于把类型系统关掉了还说「已通过」。","f":{"t":"compare","a":{"l":{"t":"静态类型","a":["编译时就查","重构敢下手","要多写标注"]},"r":{"t":"动态类型","a":["运行才发现","写得快","重构靠测试"]}}},"_no":1,"_id":"t-type-system-1"},{"g":"L","en":"Null / Undefined","cn":"空值","p":"「没有值」也得有个明确的表示法，不然到处是惊喜。","q":"AI 到处写 `?? ''`，把「查不到」和「本来就是空」混成同一件事。","f":{"t":"variants","a":{"items":[["允认为空","最省事，到处判空"],["必须给值","编译期就逼你处理"],["空对象兜底","省判空，但会悄悄错"],["直接抛错","早失败早发现"]],"title":"空值怎么表示，决定 bug 长什么样"}},"_no":2,"_id":"t-null-undefined-2"},{"g":"L","en":"Scope","cn":"作用域","p":"一个变量在哪儿能被看见，由它被声明在哪一层决定。","q":"AI 说「这个变量外面能用」，其实它在大括号里就死了。","f":{"t":"compare","a":{"l":{"t":"块级作用域","a":["出了大括号就没了","let / const"]},"r":{"t":"函数作用域","a":["整个函数内都在","var 的老规矩"]}}},"_no":3,"_id":"t-scope-3"},{"g":"L","en":"Hoisting","cn":"提升","p":"变量声明会被悄悄挪到作用域顶部，赋值不会。","q":"AI 说「没赋值怎么会是 undefined」，其实声明早跑了。","f":{"t":"timeline","a":[{"t":"声明被提到顶部"},{"t":"赋值还留在原处"},{"t":"先用了，拿到空值","s":"不报错，最坑"},{"t":"再赋值才有值"}]},"_no":4,"_id":"t-hoisting-4"},{"g":"L","en":"Prototype","cn":"原型链","p":"找不到的属性，顺着原型一个个往上问，直到 null。","q":"AI 把方法塞到实例上，一万个对象存一万份函数。","f":{"t":"tree","a":{"root":"一个对象","a":["原型对象","原型的原型","null 到头"]}},"_no":5,"_id":"t-prototype-5"},{"g":"L","en":"Async / Await","cn":"异步语法","p":"把异步写成看着像同步的样子，本质没变。","q":"AI 在 map 里用 await，以为会等，其实拿到一堆 Promise。","f":{"t":"compare","a":{"l":{"t":"Promise 链","a":[".then 往下串","错误要 catch","容易漏 return"]},"r":{"t":"async / await","a":["像同步那样写","try/catch 接错","还是异步"]}}},"_no":6,"_id":"t-async-await-6"},{"g":"L","en":"Promise 状态","cn":"承诺的状态","p":"一个承诺只有这三种状态，定了就不能改。","q":"AI 想「再给它一次机会」，重新 resolve 一次，结果没生效。","f":{"t":"compare3","a":[{"t":"pending","a":["还没结果","只能等"]},{"t":"fulfilled","a":["成功","值定死"]},{"t":"rejected","a":["失败","错误定死"]}],"hot":0},"_no":7,"_id":"t-promise-7"},{"g":"L","en":"Callback","cn":"回调","p":"先给一个「做完了叫我」，回头再执行。","q":"AI 套了五层回调，错误全在最里层吞掉。","f":{"t":"flow","a":["发起一件事","把函数交给它","完成时回头调","一层套一层"]},"_no":8,"_id":"t-callback-8"},{"g":"L","en":"Immutability","cn":"不可变","p":"改数据时给对方一个新版本，而不是动原来那份。","q":"AI 说「不可变」，却对数组 push，外面那份跟着变了。","f":{"t":"compare","a":{"l":{"t":"就地改","a":["省内存","谁都能改到","排查像破案"]},"r":{"t":"返回新对象","a":["旧的不动","比较靠引用","好回滚"]}}},"_no":9,"_id":"t-immutability-9"},{"g":"L","en":"Type Inference","cn":"类型推断","p":"编译器能自己猜出类型，但边界上猜错就传下去了。","q":"AI 把返回类型写成 any，调用方全失去提示。","f":{"t":"variants","a":{"items":[["显式标注","接口边界最该写"],["让它推断","局部变量最省事"],["断言 as","你最清楚，风险自负"],["any 硬塞","等于关掉检查"]],"title":"越靠近边界越该写清楚"}},"_no":10,"_id":"t-type-inference-10"},{"g":"L","en":"Compiler vs Transpiler","cn":"编译与转译","p":"一个变成机器能跑的，一个只是把新写法翻译成旧写法。","q":"AI 说「编译过了」，其实只做了语法转译，类型错误一条没查。","f":{"t":"compare","a":{"l":{"t":"编译","a":["源码变机器码","类型检查在这一步"]},"r":{"t":"转译","a":["新语法变旧语法","类型通常被擦掉"]}}},"_no":11,"_id":"t-compiler-vs-transpiler-11"},{"g":"L","en":"Framework vs Library","cn":"框架与库","p":"谁掌握主流程：你，还是它。","q":"AI 按库的用法写框架代码，生命周期全乱套。","f":{"t":"compare","a":{"l":{"t":"库","a":["你调它","自己控流程"]},"r":{"t":"框架","a":["它调你","流程它定"]}}},"_no":12,"_id":"t-framework-vs-library-12"},{"g":"L","en":"Package / Module","cn":"包与模块","p":"包是发出去的那一坨，模块是里面能单独 import 的一块。","q":"AI 把整个包当一个文件引，打包体积翻三倍。","f":{"t":"nest","a":{"title":"一个包（有版本号）","a":["模块 A","模块 B"],"sub":"包能被安装，模块只能被引用"}},"_no":13,"_id":"t-package-module-13"},{"g":"L","en":"GC","cn":"垃圾回收","p":"没人用的内存自动收回，你不用手动 free。","q":"AI 往全局数组里一直 push，说「GC 会管的」——它不会，因为一直被引用。","f":{"t":"flow","a":["分配对象","没人再引用","标记成垃圾","回收再利用"]},"_no":14,"_id":"t-gc-14"},{"g":"B","en":"Bundler","cn":"打包器","p":"把源码和依赖树压成浏览器能加载的少数几个文件。","q":"AI 直接往 HTML 里塞 \u003cscript>——打包产物里缺那块，线上 404。","f":{"t":"flow","a":["几十个文件","打包","浏览器能吃的几份"]},"_no":15,"_id":"t-bundler-15"},{"g":"B","en":"Tree Shaking","cn":"摇掉没用的代码","p":"打包时把没被引用的代码摇掉，产物变小。","q":"AI 说「摇不掉」——多半是模块顶层就干活（副作用），摇器不敢删。","f":{"t":"tree","a":{"root":"依赖树","a":["用到的","没用到","有副作用的"]}},"_no":16,"_id":"t-tree-shaking-16"},{"g":"B","en":"Code Splitting","cn":"代码分割 / 懒加载","p":"不一次下全部，走到哪下到哪。","q":"AI 在首屏 import 了整张地图库——2MB 全在首屏包里。","f":{"t":"flow","a":["首屏只要这些","走到那页才下","不占首屏"]},"_no":17,"_id":"t-code-splitting-17"},{"g":"B","en":"HMR","cn":"热更新","p":"改一行代码，页面不刷新、状态不丢，只换掉变的那块。","q":"AI 说「热更新坏了就刷新一下」——那等于没 HMR，状态全丢。","f":{"t":"cycle","a":["改文件","只换那一块","状态还在"],"hot":1},"_no":18,"_id":"t-hmr-18"},{"g":"B","en":"CDN","cn":"内容分发网络","p":"把静态文件复制到离用户最近的机器，别让每个人绕地球一圈。","q":"AI 以为改了文件就生效——文件名和缓存头没变，用户十分钟后还拿旧 JS。","f":{"t":"flow","a":["用户","边缘节点","源站"]},"_no":19,"_id":"t-cdn-19"},{"g":"B","en":"Cookie vs Storage","cn":"浏览器存储三件套","p":"三个存在浏览器里的小抽屉，区别只在「会不会自动发给服务器」和「活多久」。","q":"AI 把 token 塞 localStorage 还说是「最安全」——XSS 一来全被读走。","f":{"t":"compare3","a":[{"t":"cookie","a":["随请求自动带","4KB","会过期"]},{"t":"localStorage","a":["不自动带","5MB+","手动清"]},{"t":"sessionStorage","a":["关页就没","同一标签页","不跨标签"]}],"hot":0},"_no":20,"_id":"t-cookie-vs-storage-20"},{"g":"B","en":"CORS","cn":"跨域资源共享","p":"浏览器发现请求发给了别家域名，先替你问一句「你允许吗」；对方不答，结果你就看不到。","q":"AI 说「后端加个 Access-Control-Allow-Origin: * 就行」——带 cookie 的请求不许用 *，预检还会因为你多了一个自定义头而失败。","f":{"t":"gate","a":{"left":"页面 JS","gate":"浏览器关卡","right":"接口","dash":"① 预检 OPTIONS","ok":"② 正式请求"}},"_no":21,"_id":"t-cors-21"},{"g":"B","en":"XSS","cn":"跨站脚本注入","p":"别人写的字被当代码执行：评论里塞一段脚本，看的人全中招。","q":"AI 用 innerHTML 拼用户内容——它没消毒，还觉得「反正是文本」。","f":{"t":"gate","a":{"left":"用户输入","gate":"没转义","right":"页面执行","ok":"转义 / 白名单"}},"_no":22,"_id":"t-xss-22"},{"g":"B","en":"CSRF","cn":"跨站请求伪造","p":"你在 A 站登录着，B 站偷偷替你向 A 站发请求，cookie 自动带上。","q":"AI 只加 CORS 当防护——CORS 挡的是读响应，不挡这个请求发出去。","f":{"t":"flow","a":["别家页面","带上你的 cookie","你的站干活"]},"_no":23,"_id":"t-csrf-23"},{"g":"B","en":"Realtime","cn":"实时通道三选一","p":"拿实时数据的三条路：定时问、服务器推、双向长连。","q":"AI 上 WebSocket 画进度条——单向 SSE 就够了，它多给你一套心跳重连。","f":{"t":"compare3","a":[{"t":"轮询","a":["定时问","最简单","费请求"]},{"t":"SSE","a":["服务器单推","自带重连","只下行"]},{"t":"WebSocket","a":["双向","一直开着","要管心跳"]}],"hot":1},"_no":24,"_id":"t-realtime-24"},{"g":"B","en":"Optimistic UI","cn":"乐观更新","p":"先当成功把界面改了，失败了再退回去——省掉等待感。","q":"AI 只写了成功路径——失败时界面永远停在「已完成」。","f":{"t":"timeline","a":[{"t":"点了","s":"界面先变"},{"t":"发请求"},{"t":"失败回滚","s":"弹提示"}],"hot":0},"_no":25,"_id":"t-optimistic-ui-25"},{"g":"B","en":"Controlled Input","cn":"受控 / 非受控","p":"输入框的值到底归框架管，还是归浏览器管。","q":"AI 混着用——一会儿读 state 一会儿读 ref，值永远差一步。","f":{"t":"compare","a":{"l":{"t":"受控","a":["值存在状态里","每次输入都更新","好校验"]},"r":{"t":"非受控","a":["值在 DOM 里","要时再读","省事"]}}},"_no":26,"_id":"t-controlled-input-26"},{"g":"B","en":"Closure","cn":"闭包","p":"函数返回了，它里面用到的变量还被记着——这就是闭包。","q":"AI 在循环里建闭包——所有回调都拿到最后一个值。","f":{"t":"nest","a":{"title":"函数作用域","a":["变量 被记住了"],"sub":"函数返回之后，变量还没死"}},"_no":27,"_id":"t-closure-27"},{"g":"B","en":"Event Loop","cn":"事件循环","p":"JS 一次只干一件事，干完从队列取下一件，中途插空重画界面。","q":"AI 说「setTimeout 0 就是立刻」——它得排队等当前这轮跑完。","f":{"t":"cycle","a":["取一个任务","一次跑到底","插空重画界面"],"hot":2},"_no":28,"_id":"t-event-loop-28"},{"g":"I","en":"Unit Test","cn":"单元测试","p":"最小的那颗钉子：给一个函数喂输入，看输出对不对。","q":"AI 说「已加测试」，打开一看是 assert(true === true)。","f":{"t":"compare","a":{"l":{"t":"单元测试","a":["测一个函数","毫秒级","改了就立刻知道"]},"r":{"t":"端到端测试","a":["开真实浏览器","分钟级","最接近用户"]}}},"_no":29,"_id":"t-unit-test-29"},{"g":"I","en":"Integration Test","cn":"集成测试","p":"几个部件接在一起跑，专抓「各自都对、合起来就错」。","q":"AI 只写单测，一上线才发现两个服务字段名对不上。","f":{"t":"flow","a":["真实数据库","真实接口","串起来跑一遍","慢，但信得过"]},"_no":30,"_id":"t-integration-test-30"},{"g":"I","en":"End-to-End","cn":"端到端测试","p":"从用户点进去到结果出来，整条路都跑一遍。","q":"AI 的 e2e 只断言「页面能打开」，按钮点了没反应也照样绿。","f":{"t":"timeline","a":[{"t":"打开页面"},{"t":"登录"},{"t":"点一遍主流程","s":"别跳步"},{"t":"看结果与报错"}],"hot":2},"_no":31,"_id":"t-end-to-end-31"},{"g":"I","en":"Test Pyramid","cn":"测试金字塔","p":"底层多、顶层少，否则测试比功能还难维护。","q":"AI 反着来：一堆 e2e，跑一次十分钟，最后全被跳过。","f":{"t":"compare3","a":[{"t":"单测（多）","a":["快","定位准","写起来便宜"]},{"t":"集成（中）","a":["验接口","验 SQL","比单测慢"]},{"t":"e2e（少）","a":["最慢","最容易抖","只跑主路径"]}],"hot":1},"_no":32,"_id":"t-test-pyramid-32"},{"g":"I","en":"Mock / Stub","cn":"桩与假实现","p":"把外部依赖换成假的，才测得稳自己这一块。","q":"AI mock 掉整个数据库，绿灯，真 SQL 一跑就报错。","f":{"t":"compare","a":{"l":{"t":"Mock","a":["假实现","能断言被调几次","验交互"]},"r":{"t":"Stub","a":["只返回固定值","不关心调用","验分支"]}}},"_no":33,"_id":"t-mock-stub-33"},{"g":"I","en":"Fixture","cn":"测试数据","p":"每次测试前固定准备好的那批数据。","q":"AI 让测试共用一份数据，第二遍失败、第三遍又好了。","f":{"t":"flow","a":["建一批数据","跑测试","删干净","下一轮再来"]},"_no":34,"_id":"t-fixture-34"},{"g":"I","en":"Flaky Test","cn":"抖动测试","p":"一时绿一时红的测试，比没有测试更费人。","q":"AI 遇到抖动就加 sleep(3)，慢三倍，偶尔还是挂。","f":{"t":"timeline","a":[{"t":"同样的代码"},{"t":"有时过有时挂","s":"随机会话·时钟"},{"t":"查网络与并行"},{"t":"加等待更慢"}],"hot":1},"_no":35,"_id":"t-flaky-test-35"},{"g":"I","en":"Coverage","cn":"覆盖率","p":"有多少代码被测试跑过——不是测得好不好。","q":"AI 冲 100% 覆盖率，到处写「能跑通」的断言，边界照样崩。","f":{"t":"store","a":{"a":["文件","行","分支","函数"],"sub":"行覆盖 100% 也能一个边界都没测"}},"_no":36,"_id":"t-coverage-36"},{"g":"I","en":"Regression","cn":"回归测试","p":"改完之后，确认原来好的地方还好的那批测试。","q":"AI 改完顺手删掉「跑不过的老测试」，说这样 CI 就绿了。","f":{"t":"compare","a":{"l":{"t":"回归测试","a":["改一处，跑全量","怕的是改坏别处"]},"r":{"t":"冒烟测试","a":["只跑几条主路径","便宜，覆盖粗"]}}},"_no":37,"_id":"t-regression-37"},{"g":"I","en":"Snapshot","cn":"快照测试","p":"把输出存一份，下次不一样就报——省断言，容易误报。","q":"AI 一报错就 -u 更新快照，把 bug 拍进基准里。","f":{"t":"compare","a":{"l":{"t":"快照对比","a":["结构变了就红","不用手写断言"]},"r":{"t":"手写断言","a":["只看关键字段","改样式不误报"]}}},"_no":38,"_id":"t-snapshot-38"},{"g":"I","en":"TDD","cn":"测试先行","p":"先写红的测试，再写代码让它变绿。","q":"AI 说「TDD 了」，其实先写完实现再补测试，只是顺序好看。","f":{"t":"cycle","a":["先写失败测试","写到变绿","重构","下一轮"]},"_no":39,"_id":"t-tdd-39"},{"g":"I","en":"Test Isolation","cn":"测试隔离","p":"测试之间互不影响，才能单独跑、并行跑。","q":"AI 让测试共用一个账号，并行跑时互相删了对方的数据。","f":{"t":"compare","a":{"l":{"t":"共享数据库","a":["快","互相污染","顺序一换就挂"]},"r":{"t":"每个测试独立","a":["慢一点","随便重跑","失败好定位"]}}},"_no":40,"_id":"t-test-isolation-40"},{"g":"I","en":"CI Gate","cn":"流水线门禁","p":"机器守门：测试不过，就不许合。","q":"AI 把门禁设成「允许失败」，从此再没人看红叉。","f":{"t":"flow","a":["推送","自动跑测试","红就拦住","绿才合并"]},"_no":41,"_id":"t-ci-gate-41"},{"g":"I","en":"Assertion","cn":"断言","p":"测试的落点：一句「必须是这样」，不满足就失败。","q":"AI 用 console.log 代替断言，日志写着错值，测试还是绿的。","f":{"t":"compare","a":{"l":{"t":"断言","a":["不满足就失败","会挡住合并"]},"r":{"t":"打日志","a":["只是记一笔","谁都可能不看"]}}},"_no":42,"_id":"t-assertion-42"},{"g":"Q","en":"Profiling","cn":"性能剖析","p":"先量再改，别凭感觉猜哪里慢。","q":"AI 说「我优化了性能」，其实只是把循环改成了 map。","f":{"t":"flow","a":["录一段真实操作","看火焰图","挑最热的那个","只改这一处"]},"_no":43,"_id":"t-profiling-43"},{"g":"Q","en":"Flame Graph","cn":"火焰图","p":"横条越宽越耗时，一层层看下去就知道时间花在哪。","q":"AI 盯着最深的那个函数改，其实它只占 3%。","f":{"t":"tree","a":{"root":"一次操作 800ms","a":["渲染 500ms","请求 200ms","脚本 100ms"]}},"_no":44,"_id":"t-flame-graph-44"},{"g":"Q","en":"Memory Leak","cn":"内存泄漏","p":"该释放的没释放，用得越久越卡。","q":"AI 在组件卸载时没清定时器，来回切十次页面就卡住。","f":{"t":"timeline","a":[{"t":"一直在分配"},{"t":"引用没放开","s":"定时器·监听"},{"t":"内存只涨不落"},{"t":"最后卡死"}]},"_no":45,"_id":"t-memory-leak-45"},{"g":"Q","en":"Layout Thrashing","cn":"强制重排","p":"读一次布局、改一次样式反复交替，浏览器被迫反复重算。","q":"AI 在 for 循环里读 offsetHeight 再改样式，一屏卡成幻灯片。","f":{"t":"compare","a":{"l":{"t":"读写交替","a":["每次读都逼它重算","几十次就掉帧"]},"r":{"t":"先读后写","a":["只重算一次","快一个数量级"]}}},"_no":46,"_id":"t-layout-thrashing-46"},{"g":"Q","en":"Long Task","cn":"长任务","p":"主线程一次干太久，页面就冻住，点什么都没反应。","q":"AI 一次性解析十万行数据，加载时整个界面死三秒。","f":{"t":"compare","a":{"l":{"t":"一口气 200ms","a":["页面卡住不动","点哪都没反应"]},"r":{"t":"拆成几个 16ms","a":["每帧都能响应","用户不觉得卡"]}}},"_no":47,"_id":"t-long-task-47"},{"g":"Q","en":"Debounce / Throttle","cn":"防抖与节流","p":"一个等「停下来再做」，一个「每隔一会儿做一次」。","q":"AI 给输入框加节流，用户打字时一直在发请求。","f":{"t":"compare","a":{"l":{"t":"防抖","a":["停了才执行","搜索框用"]},"r":{"t":"节流","a":["固定间隔执行","滚动监听用"]}}},"_no":48,"_id":"t-debounce-throttle-48"},{"g":"Q","en":"Lazy Load","cn":"懒加载","p":"不用的先不加载，滚到了再说。","q":"AI 把二十张图全塞首屏，手机上白屏五秒。","f":{"t":"flow","a":["先只加载首屏","滚到附近再要","加载时占好位","避免跳动"]},"_no":49,"_id":"t-lazy-load-49"},{"g":"Q","en":"Preload / Prefetch","cn":"预加载","p":"一个「现在就要」，一个「有空先备着」。","q":"AI 把所有资源都设 preload，真正关键的那个反而排到后面。","f":{"t":"compare","a":{"l":{"t":"preload","a":["这页马上就要用","优先级最高"]},"r":{"t":"prefetch","a":["下一页可能用","空闲时再拉"]}}},"_no":50,"_id":"t-preload-prefetch-50"},{"g":"Q","en":"Bundle Budget","cn":"体积预算","p":"给每类资源定个上限，超了就砍，别等用户抱怨慢。","q":"AI 装了个 UI 库只为用一个按钮，包体直接 +300KB。","f":{"t":"variants","a":{"title":"首屏这几样都得称重","items":[["首屏 JS","超过 200KB 就该砍"],["字体","只留要用的字重"],["首屏图片","压缩 + 定尺寸"],["第三方脚本","统计、客服最占"]]}},"_no":51,"_id":"t-bundle-budget-51"},{"g":"Q","en":"Web Worker","cn":"离屏线程","p":"把重计算挪到别的线程，主线程才能继续响应点击。","q":"AI 在主线程里解析十万行 CSV，滚动条卡住不动。","f":{"t":"fanout","a":{"from":"主线程","a":["纯计算","解析大文件","加密"]}},"_no":52,"_id":"t-web-worker-52"},{"g":"Q","en":"Source Map","cn":"源码映射","p":"线上报错指到压缩后的第 1 行，靠映射表找回真实位置。","q":"AI 线上排错时对着 bundle 里一行十万字符的代码看。","f":{"t":"flow","a":["压缩后的代码","映射表","报错定位回源码","看到真实行号"]},"_no":53,"_id":"t-source-map-53"},{"g":"Q","en":"Breakpoint","cn":"断点调试","p":"让程序停在那一行，看当时的变量到底是什么。","q":"AI 加了一堆 console.log，改八遍才找到原因。","f":{"t":"timeline","a":[{"t":"打开调试器"},{"t":"打上断点"},{"t":"单步走"},{"t":"看变量与栈"}]},"_no":54,"_id":"t-breakpoint-54"},{"g":"Q","en":"Stack Trace","cn":"调用栈","p":"报错时把「谁调谁」一层层列出来，顺着能找到源头。","q":"AI 只看第一行报错就下结论，真正的原因在第三层。","f":{"t":"nest","a":{"title":"报错那一行","a":["谁调用了它","又是谁调用了那个"],"sub":"从下往上看，最外层是入口"}},"_no":55,"_id":"t-stack-trace-55"},{"g":"Q","en":"Log Level","cn":"日志级别","p":"日志按严重程度分级，生产环境别全打出来。","q":"AI 生产环境全用 console.log，出事时几千行噪声里找不到那条错的。","f":{"t":"variants","a":{"items":[["debug","开发时看细节"],["info","关键流程节点"],["warn","还能跑，但要管"],["error","出错了，要人看"],["fatal","整个服务挂了"]]}},"_no":56,"_id":"t-log-level-56"},{"g":"R","en":"Viewport","cn":"视口声明","p":"告诉浏览器「按屏幕真实宽度排版」，手机才能正常看。","q":"AI 只写了自适应样式，漏了一行 viewport，手机上还是缩小版。","f":{"t":"compare","a":{"l":{"t":"不写声明","a":["按 980px 缩放","字小得像蚂蚁","要手动放大"]},"r":{"t":"device-width","a":["按屏幕宽度排","一行就治好"]}}},"_no":57,"_id":"t-viewport-57"},{"g":"R","en":"Safe Area","cn":"安全区","p":"屏幕有刘海、有手势条，重要内容别贴边。","q":"AI 把底部按钮贴死屏底，iPhone 上正好被手势条盖住。","f":{"t":"layers","a":["状态栏与刘海","安全区内可摆放","底部手势条"]},"_no":58,"_id":"t-safe-area-58"},{"g":"R","en":"Touch Target","cn":"点击区域","p":"手指点不准，可点区域至少 44 像素。","q":"AI 做了个 18px 的小图标当删除按钮，用户天天点错。","f":{"t":"variants","a":{"title":"手指比光标粗得多","items":[["\u003c 30px","总点不到旁边"],["40px","勉强够"],["44 – 48px","推荐的舒适区"],["整行可点","列表里最省事"]]}},"_no":59,"_id":"t-touch-target-59"},{"g":"R","en":"Virtual Keyboard","cn":"键盘遮挡","p":"键盘一弹起来，屏幕能用的高度就少了一半。","q":"AI 用 100vh 撑满，键盘一弹，输入框和按钮全被顶出去。","f":{"t":"timeline","a":[{"t":"点输入框"},{"t":"键盘弹起"},{"t":"可视区变矮","s":"别用 100vh"},{"t":"布局要重算"}]},"_no":60,"_id":"t-virtual-keyboard-60"},{"g":"R","en":"App / Web / 小程序","cn":"三端形态","p":"同一份东西做成网页、小程序还是原生，能力与成本差很远。","q":"AI 说「打包一下就有 App 了」，其实壳里还是网页，推送和相册都不能用。","f":{"t":"compare3","a":[{"t":"Web","a":["发一次全平台","能力受限"]},{"t":"小程序","a":["平台内运行","规则多"]},{"t":"原生 App","a":["能力最全","要过审"]}],"hot":0},"_no":61,"_id":"t-app-web-61"},{"g":"R","en":"PWA","cn":"可安装网页","p":"网页也能「装」到桌面、离线打开。","q":"AI 说做了 PWA，manifest 里连图标都没给，装上是个白块。","f":{"t":"flow","a":["加个 manifest","装到桌面","离线缓存","用起来像个 App"]},"_no":62,"_id":"t-pwa-62"},{"g":"R","en":"WebView","cn":"内嵌浏览器","p":"App 里嵌的那个浏览器，能调原生能力但得走桥。","q":"AI 在 WebView 里直接用浏览器 API，用户上传照片时没反应。","f":{"t":"gate","a":{"left":"网页","gate":"WebView 容器","right":"原生能力","ok":"要什么得桥接什么"}},"_no":63,"_id":"t-webview-63"},{"g":"R","en":"1px 边框","cn":"细边框","p":"设备像素比高时，CSS 的 1px 会被画粗。","q":"AI 说「我写了 1px」，高分辨率屏上肉眼可见比设计稿粗一圈。","f":{"t":"compare","a":{"l":{"t":"直接写 1px","a":["高分屏上变粗","看着像 2px"]},"r":{"t":"transform 缩一半","a":["真的细","要多包一层"]}}},"_no":64,"_id":"t-1px-64"},{"g":"R","en":"DPR","cn":"设备像素比","p":"一个 CSS 像素，实际占几个真实像素。","q":"AI 按 1 倍图导出图标，Retina 屏上糊成一片。","f":{"t":"store","a":{"a":["CSS 像素","物理像素","DPR"],"sub":"1 CSS 像素可能等于 2 或 3 个物理像素"}},"_no":65,"_id":"t-dpr-65"},{"g":"R","en":"Gesture","cn":"手势冲突","p":"横滑的卡片、竖向的滚动，谁先接管要提前定。","q":"AI 给整页加了横向滑动，上下滚动从此失灵。","f":{"t":"compare","a":{"l":{"t":"自己拦","a":["可控","容易把滚动搞没"]},"r":{"t":"交给浏览器","a":["原生气质","难改细节"]}}},"_no":66,"_id":"t-gesture-66"},{"g":"R","en":"Pull to Refresh","cn":"下拉刷新","p":"往下拉一点，出现「松手刷新」，这是移动端的老习惯。","q":"AI 做了个刷新按钮放右上角，用户还是习惯往下拉，结果什么都没有。","f":{"t":"flow","a":["拉到头","出现转圈","松手请求","插到列表最前"]},"_no":67,"_id":"t-pull-to-refresh-67"},{"g":"R","en":"Push","cn":"推送","p":"就算 App 没开着，也能弹一条消息把人叫回来。","q":"AI 说做了推送，其实是打开 App 后才拉到的消息，人走了收不到。","f":{"t":"flow","a":["服务器触发","推到平台服务","到达设备","唤醒 App"]},"_no":68,"_id":"t-push-68"},{"g":"R","en":"Scroll Lock","cn":"滚动锁","p":"弹窗打开时，别让底下的页面跟着滚。","q":"AI 没锁滚动，用户在弹层上滑，背景列表一路滚到底。","f":{"t":"compare","a":{"l":{"t":"弹层锁背景","a":["不锁就穿透","底下跟着滚"]},"r":{"t":"不锁","a":["简单","手感脏"]}}},"_no":69,"_id":"t-scroll-lock-69"},{"g":"R","en":"Orientation","cn":"横竖屏","p":"转屏后布局要么跟着变，要么直接锁死。","q":"AI 没测横屏，用户一转屏，底部按钮飞到半空。","f":{"t":"compare","a":{"l":{"t":"跟随系统旋转","a":["平板最自然","表单会错位"]},"r":{"t":"锁死竖屏","a":["稳","横屏时留黑边"]}}},"_no":70,"_id":"t-orientation-70"}];
+window.BOOKS = [{"k":"ui","name":"界面与图形","sub":"渲染 · 样式 · 控件 · 交互 · 图形","file":"dev-terms-ui.html","desc":"浏览器怎么画页面，样式怎么写不打架，控件该选哪个，交互状态怎么补，图形与媒体怎么做。","count":70,"groups":[{"k":"A","name":"浏览器与渲染"},{"k":"M","name":"样式与布局"},{"k":"G","name":"UI 控件与选型"},{"k":"H","name":"交互与状态"},{"k":"S","name":"图形与媒体"}]},{"k":"code","name":"语言与工程","sub":"语言 · 工程化 · 测试 · 性能 · 移动端","file":"dev-terms-code.html","desc":"语言与类型、打包与本地开发、测试怎么写、性能怎么量、跨端怎么不翻车。","count":70,"groups":[{"k":"L","name":"语言与框架"},{"k":"B","name":"前端工程化与网络"},{"k":"I","name":"测试与质量"},{"k":"Q","name":"性能与调试"},{"k":"R","name":"移动端与跨端"}]},{"k":"backend","name":"后端与数据","sub":"协议 · 存储 · 建模 · 并发 · 安全","file":"dev-terms-backend.html","desc":"接口长什么样、数据怎么存怎么查、并发与一致性怎么权衡、身份与权限怎么不出事。","count":70,"groups":[{"k":"C","name":"接口与协议"},{"k":"D","name":"数据与存储"},{"k":"P","name":"数据建模"},{"k":"E","name":"并发与异步"},{"k":"J","name":"安全与身份"}]},{"k":"ai","name":"AI 与基础设施","sub":"LLM · 检索 · 部署 · 云 · 协作","file":"dev-terms-ai.html","desc":"大模型应用的基本零件、上线与回滚、云上的名词，以及团队协作与发布流程。","count":70,"groups":[{"k":"K","name":"LLM 基础"},{"k":"T","name":"RAG 与工具调用"},{"k":"F","name":"部署与可观测"},{"k":"O","name":"云与基础设施"},{"k":"N","name":"协作与发布"}]}];
+window.CUR_BOOK = "code";</script>
+<script>
+(function () {
+  var terms = window.TERMS, groups = window.GROUPS;
+  var doc = document.querySelector('#doc');
+  var toc = document.querySelector('#toc');
+  var count = document.querySelector('#count');
+  var input = document.querySelector('#q');
+  var chips = document.querySelector('#chips');
+
+  function frag(html) { return document.createRange().createContextualFragment(html); }
+  function h(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  var state = { g: 'all', q: '' };
+  var html = '', tocHtml = '', no = 0, lastG = null, refs = [];
+
+  groups.forEach(function (grp) {
+    var items = terms.filter(function (t) { return t.g === grp.k; });
+    tocHtml += '<p class="toc-g">' + grp.k + ' · ' + grp.name + '</p>';
+    items.forEach(function (t) {
+      no += 1;
+      t._no = no;
+      t._id = 't-' + t.en.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + no;
+      tocHtml += '<a href="#' + t._id + '" data-id="' + t._id + '">' + h(t.en) + ' <span style="opacity:.6">' + h(t.cn) + '</span></a>';
+    });
+    html += '<section class="grp" data-g="' + grp.k + '" id="g-' + grp.k + '">' +
+      '<span class="grp-k">' + grp.k + '</span><h2 class="grp-n serif">' + h(grp.name) + '</h2>' +
+      '<span class="grp-c">' + items.length + ' 条 · ' + grp.tag + '</span><span class="grp-line"></span></section>';
+    items.forEach(function (t) {
+      var pad = t._no < 10 ? '0' + t._no : '' + t._no;
+      html += '<article class="t" id="' + t._id + '" data-g="' + t.g + '">' +
+        '<div class="t-meta">' +
+          '<div class="t-no">' + pad + '</div>' +
+          '<h3 class="t-h"><span class="t-en">' + h(t.en) + '</span><span class="t-cn">' + h(t.cn) + '</span></h3>' +
+          '<p class="t-p">' + h(t.p) + '</p>' +
+        '</div>' +
+        '<div class="t-fig"><div class="fwrap">' + window.FIGS.render(t.f) + '</div></div>' +
+        '<p class="t-q"><b>AI 常怎么糊弄你</b><span>' + h(t.q) + '</span></p>' +
+      '</article>';
+    });
+  });
+  html += '<p class="empty" id="empty">没有匹配的条目。换个词，或者按 Esc 清空。</p>';
+  doc.replaceChildren(frag(html));
+  toc.replaceChildren(frag(tocHtml));
+
+  var rows = Array.prototype.slice.call(doc.querySelectorAll('.t'));
+  var heads = Array.prototype.slice.call(doc.querySelectorAll('.grp'));
+  var links = Array.prototype.slice.call(toc.querySelectorAll('a'));
+  var empty = document.querySelector('#empty');
+  var linkMap = {};
+  links.forEach(function (a) { linkMap[a.dataset.id] = a; });
+
+  function apply() {
+    var q = state.q.trim().toLowerCase();
+    var shown = 0, gcount = {};
+    rows.forEach(function (r) {
+      var okG = state.g === 'all' || r.dataset.g === state.g;
+      var okQ = !q || r.textContent.toLowerCase().includes(q);
+      var ok = okG && okQ;
+      r.hidden = !ok;
+      if (ok) { shown += 1; gcount[r.dataset.g] = (gcount[r.dataset.g] || 0) + 1; }
+    });
+    heads.forEach(function (h) { h.hidden = !gcount[h.dataset.g]; });
+    empty.classList.toggle('on', shown === 0);
+    count.textContent = shown === rows.length ? rows.length + ' 条' : shown + ' / ' + rows.length + ' 条';
+    links.forEach(function (a) {
+      var id = a.dataset.id, el = doc.querySelector('#' + id);
+      a.style.display = el && el.hidden ? 'none' : '';
+    });
+  }
+
+  chips.addEventListener('click', function (e) {
+    var b = e.target.closest('.chip');
+    if (!b) return;
+    state.g = b.dataset.g;
+    Array.prototype.forEach.call(chips.children, function (c) {
+      c.setAttribute('aria-pressed', String(c === b));
+    });
+    apply();
+  });
+
+  input.addEventListener('input', function () { state.q = input.value; apply(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === '/' && document.activeElement !== input) { e.preventDefault(); input.focus(); input.select(); }
+    if (e.key === 'Escape') { input.value = ''; state.q = ''; apply(); input.blur(); }
+  });
+
+  /* 册切换 */
+  var booksEl = document.querySelector('#books');
+  var bookHtml = '<a href="dev-terms.html">目录</a>';
+  (window.BOOKS || []).forEach(function (b) {
+    var cur = b.k === window.CUR_BOOK;
+    bookHtml += '<a href="' + b.file + '"' + (cur ? ' aria-current="page"' : '') + '>' + b.name + '</a>';
+  });
+  booksEl.replaceChildren(frag(bookHtml));
+
+  /* 分组 chips */
+  var chipHtml = '<button class="chip" data-g="all" aria-pressed="true">全部</button>';
+  groups.forEach(function (g) {
+    chipHtml += '<button class="chip" data-g="' + g.k + '" aria-pressed="false">' + g.name + '</button>';
+  });
+  chips.replaceChildren(frag(chipHtml));
+
+  /* 目录高亮 */
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        var a = linkMap[en.target.id];
+        if (!a) return;
+        if (en.isIntersecting) {
+          links.forEach(function (l) { l.classList.remove('on'); });
+          a.classList.add('on');
+          var box = toc.getBoundingClientRect(), ab = a.getBoundingClientRect();
+          if (ab.top < box.top + 40 || ab.bottom > box.bottom - 40) a.scrollIntoView({ block: 'center' });
+        }
+      });
+    }, { rootMargin: '-8% 0px -82% 0px' });
+    rows.forEach(function (r) { io.observe(r); });
+  }
+
+  apply();
+})();
+</script>
+</body>
+</html>
