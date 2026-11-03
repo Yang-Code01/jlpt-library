@@ -898,7 +898,7 @@ test_memory.js  #k-sound 那条反向断言改成只验形状
 **Blast Radius:** &lt;one-word description&gt;</pre>
       </div>
 
-      <p>三段里最容易被写坏的是第一段。<code>Summary</code> 不是「改了哪些文件」的清单，而是<strong>一张能让人一眼看懂形状的图</strong>：改逻辑就给伪代码，改控制流就给调用树，改文件归属就给浅树，改界面就给组件树或 diff。本案例的改动正好是「多了一整块目录 + 一行脚本顺序」，所以用树 + 一段状态机伪代码，比三段文字都清楚。</p>
+      <p>三段里最容易被写坏的是第一段。<code>Summary</code> 不是「改了哪些文件」的清单，而是<strong>一张能让人一眼看懂形状的图</strong>：改逻辑就给伪代码，改控制流就给调用树，改文件归属就给浅树，改界面就给组件树或 diff。本案例的改动正好是「多了一整块目录 + 门户上多一张卡」，所以用<em>浅文件树</em> + <em>一段 diff</em>：树说清新模块由谁负责，diff 说清既有结构里多了什么——两样都比三段文字快。</p>
 
       <p>第三段是最少人写、最该写的一段。「单向门还是双向门」这个问题逼你想一件事：<strong>合下去之后好不好退</strong>。新目录 + 一张门户卡 + 四处断言数字，一个 revert 就回去了，是双向门；但「三处断言与新卡是同批改的」这条要写出来——只回退一半，门户测试会红。</p>
 
@@ -921,6 +921,52 @@ https://github.com/Yang-Code01/jlpt-library/pull/40</pre>
       <figure>
         <img src="mattpocock-shots/pr-draft.jpg" alt="GitHub 上的 draft PR 页面：标题、五张票的勾选清单、Draft 标记">
         <figcaption><b>draft PR #40。</b>这是第一次合并之后立刻开的那一版：只回答三个问题——这是什么、票到哪、怎么验。模板里最难写的两段（前后证据、合并风险）故意留空，它们要等评审跑完才有内容。</figcaption>
+      </figure>
+
+      <p>评审跑完、修补提交之后，这一版被整篇覆盖掉。定稿的第一段不再是一段话，而是一棵树加一段 diff：</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>PR #40 定稿 · Summary</b></span><span>树 + diff</span></div>
+        <pre>kana-memory/
+├── index.html      <span class="dim"># 页面骨架：牌墙 / 四项计量 / 结算条 三个插槽区</span>
+├── kana.css        <span class="dim"># 独立样式（不引 assets/style.css，不引 theme.js / progress.js）</span>
+├── game.js         <span class="dim"># KanaCore：洗牌、发牌、翻牌判定、一局结算</span>
+├── tiers.js        <span class="dim"># 入门档 假名↔罗马音 · 进阶档 汉字词↔读音</span>
+├── score.js        <span class="dim"># 高手档 日语词↔中文释义 · 每档最高分 · 结算条</span>
+├── feel.js         <span class="dim"># 合成音效（无音频文件）· 键盘 · 减少动效</span>
+└── page.js         <span class="dim"># KanaApp：渲染、计时、播报、事件</span>
+
+<span class="u">index.html · 语言学习区「日本語」分组</span>
+   &lt;article class="card" data-tags="词汇 练习"&gt;
+<span class="add">+    &lt;span class="pill"&gt;音效&lt;/span&gt;</span>
+<span class="add">+    &lt;h3&gt;&lt;a href="kana-memory/index.html"&gt;假名翻牌&lt;/a&gt;&lt;/h3&gt;</span>
+<span class="add">+    &lt;div class="chips"&gt;3 档难度 · 10 对牌&lt;/div&gt;</span>
+<span class="add">+    &lt;span class="badge"&gt;3 档&lt;/span&gt;</span>
+   &lt;/article&gt;</pre>
+      </div>
+
+      <p>第二段用 before/after 成对给：票 01 的牌墙（牌背与纸底同色、<code>かな</code> 1.9:1）对票 04 之后的牌墙（暖纸色 + 内衬线、7.3:1），375px 的溢出数字对 375px 的截图，最后贴四个套件的通过行和全仓 <code>34 通过 · 2 失败</code>——<strong>把两个红也贴上去</strong>，并写清它们是环境既有（未跟踪的第三方插件、三个英语页漂移），不是这次改出来的。</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>PR #40 定稿 · Merge Danger</b></span><span>两行就够</span></div>
+        <pre><span class="u">Door</span>          two-way —— 新目录 + 一张卡 + 三处断言数字，revert 一条命令回去；
+              唯一要当心的是三处断言与新卡同批改，只退一半门户测试会红。
+
+<span class="u">Blast Radius</span>  portal-only —— 只碰门户卡片清单与「12 张卡」那三处断言；
+              data-en-key 一项没动（全页仍恰好 107 项），既有模块运行时一行没碰。</pre>
+      </div>
+
+      <p>「单向门还是双向门」这个问题逼你想一件事：<strong>合下去之后好不好退</strong>。新目录 + 一张门户卡 + 四处断言数字，一个 revert 就回去了，是双向门；但「三处断言与新卡是同批改的」这条要写出来——只回退一半，门户测试会红。</p>
+
+      <div class="art">
+        <div class="art-bar"><span><b>终端</b></span><span>覆盖 draft 正文</span></div>
+        <pre><span class="dim">$</span> HTTPS_PROXY=$PROXY gh pr edit 40 --body-file .scratch/kana-memory/pr-body.md
+https://github.com/Yang-Code01/jlpt-library/pull/40</pre>
+      </div>
+
+      <figure>
+        <img src="mattpocock-shots/pr-final.jpg" alt="GitHub 上 PR #40 定稿正文：Summary 是文件树与门户卡片 diff，下面是 Evidence 的 before/after 与测试输出">
+        <figcaption><b>定稿后的 PR #40。</b>同一个链接、同一份 draft，正文被整篇换掉：Summary 变成树 + diff，Evidence 成对给前后与测试输出（<strong>两个红也照贴</strong>），Merge Danger 只剩 <code>Door</code> 与 <code>Blast Radius</code> 两行。</figcaption>
       </figure>
     </section>
 
