@@ -149,6 +149,7 @@
 .q-num { font-size: 13px; font-weight: 700; color: var(--accent-ink); margin-bottom: 8px; }
 .q-prompt-text { font-size: 14px; color: var(--muted); margin-bottom: 6px; line-height: 1.6; }
 .q-question { font-size: 15px; line-height: 1.8; margin-bottom: 14px; font-weight: 500; }
+.q-note { font-size: 12px; line-height: 1.7; color: var(--muted); margin: -8px 0 14px; }
 
 .opt-list { display: grid; gap: 8px; }
 .opt-item {
