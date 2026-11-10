@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const LEVEL = 'N2';
-const EXAMS = ['2021-07', '2023-07'];  // 已出讲义的卷；新增卷时在这里加
+const EXAMS = ['2021-07', '2025-07', '2023-07'];  // 已出讲义的卷；新增卷时在这里加
 const MIN_BYTES = 50 * 1024;        // 缺字体的空壳 PDF 通常远小于此
 const TARGET_PAGES = [5, 8];        // 期望页数区间（无 PDF 解析库，只能靠体量间接判断）
 
